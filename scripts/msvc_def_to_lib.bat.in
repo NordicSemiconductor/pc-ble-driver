@@ -1,0 +1,6 @@
+@echo off
+rem Change directory to the location of the script.
+chdir %~dp0
+
+call "@VS_DIR@"
+"@VS_LIB_PATH@" /machine:i386 /def:@s130_target_def_file@ /out:@s130_target_lib_file@

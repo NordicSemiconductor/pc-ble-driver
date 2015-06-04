@@ -1,0 +1,26 @@
+--- components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ components/serialization/common/transport/ser_phy/ser_phy_hci.c
+@@ -1133,10 +1133,22 @@ static void hci_rx_fsm_event_process(hci_evt_t * p_event)
+                 }
+                 m_hci_rx_fsm_state = HCI_RX_STATE_RECEIVE;
+             }
++            else
++            {
++                ser_phy_hci_slip_rx_buf_free(p_event->evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer);
++            }
+             break;
+
+         case HCI_RX_STATE_WAIT_FOR_SLIP_NACK_END:
+-            m_hci_rx_fsm_state = HCI_RX_STATE_RECEIVE;
++            if ((p_event->evt_source == HCI_SLIP_EVT) &&
++                (p_event->evt.ser_phy_slip_evt.evt_type == SER_PHY_HCI_SLIP_EVT_ACK_SENT))
++            {
++                m_hci_rx_fsm_state = HCI_RX_STATE_RECEIVE;
++            }
++            else
++            {
++                ser_phy_hci_slip_rx_buf_free(p_event->evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer);
++            }
+             break;
+
+ #ifdef HCI_LINK_CONTROL

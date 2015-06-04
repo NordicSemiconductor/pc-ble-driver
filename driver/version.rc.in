@@ -1,0 +1,55 @@
+#define VS_VERSION_INFO             1
+
+#define VER_FILEVERSION             @SERIALIZATION_VERSION_WIN32@,@SERIALIZATION_REVISION@
+#define VER_FILEVERSION_STR        "@SERIALIZATION_VERSION@.@SERIALIZATION_REVISION@\0"
+
+#define VER_PRODUCTVERSION          @SERIALIZATION_VERSION_WIN32@,@SERIALIZATION_REVISION@
+#define VER_PRODUCTVERSION_STR     "@SERIALIZATION_VERSION@.@SERIALIZATION_REVISION@\0"
+
+#ifndef DEBUG
+#define VER_DEBUG                   0
+#else
+#define VER_DEBUG                   VS_FF_DEBUG
+#endif
+
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+
+FILEVERSION    	VER_FILEVERSION
+PRODUCTVERSION 	VER_PRODUCTVERSION
+
+FILEFLAGSMASK  	VS_FFI_FILEFLAGSMASK
+FILEFLAGS      	(VER_DEBUG)
+
+FILEOS         	VOS__WINDOWS32
+FILETYPE       	VFT_DLL
+FILESUBTYPE    	VFT2_UNKNOWN
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",      "Nordic Semiconductor"
+            VALUE "FileVersion",      VER_FILEVERSION_STR
+            VALUE "LegalCopyright",   "2014 Nordic Semiconductor"
+            VALUE "ProductName",      "nRF51 Bluetooth Smart GATT/GAP Driver"
+            VALUE "ProductVersion",   VER_PRODUCTVERSION_STR
+            VALUE "FileDescription",  "nRF51 Bluetooth Smart GATT/GAP Driver"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        /* The following line should only be modified for localized versions.     */
+        /* It consists of any number of WORD,WORD pairs, with each pair           */
+        /* describing a language,codepage combination supported by the file.      */
+        /*                                                                        */
+        /* For example, a file might have values "0x409,1252" indicating that it  */
+        /* supports English language (0x409) in the Windows ANSI codepage (1252). */
+
+        VALUE "Translation", 0x409, 1252
+
+    END
+END

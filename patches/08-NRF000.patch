@@ -1,0 +1,16 @@
+--- components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
++++ components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
+@@ -337,7 +337,12 @@ uint32_t ser_phy_hci_slip_tx_pkt_send(const ser_phy_hci_pkt_params_t * p_header,
+     if (!m_tx_busy)
+     {
+         m_tx_busy = true;
+-        (void)ser_phy_hci_tx_byte();
++
++        // We know that the layer beneath queues the bytes so we can give it the whole packet.
++        while (m_tx_busy)
++        {
++            ser_phy_hci_tx_byte();
++        }
+     }
+
+     /* Enable TXRDY interrupts at this point*/

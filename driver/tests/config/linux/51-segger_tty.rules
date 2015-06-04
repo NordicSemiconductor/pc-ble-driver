@@ -1,0 +1,14 @@
+ACTION=="remove", GOTO="segger_tty_end"
+SUBSYSTEM!="tty", GOTO="segger_tty_end"
+KERNEL!="ttyACM[0-9]*", GOTO="segger_tty_end"
+
+DRIVERS=="usb", ATTRS{serial}=="000681284634", ENV{NAME}="segger_681284634"
+DRIVERS=="usb", ATTRS{serial}=="000681764213", ENV{NAME}="segger_681764213"
+
+KERNEL!="ttyACM[0-9]*", GOTO="segger_tty_end"
+
+#If we have picked up a name (defined above) then use it
+ENV{NAME}!="", SYMLINK+="tty_%E{NAME}"
+
+# Exit
+LABEL="segger_tty_end"
