@@ -47,6 +47,7 @@ The source code is available from GitHub at the following URL:
 
 
     bootstrap
+    
     b2 toolset=gcc link=static runtime-link=shared threading=multi
 
 ### Ubuntu Linux
@@ -70,7 +71,9 @@ You will be asked for root password during this process.
 
 
     mkdir build
+    
     mkdir deps
+    
     cd build
 
     python ..\pc-ble-driver\scripts\build.py -srp <ROOT>\my_deps_directory -d -b (for Unix systems, replace \ with /)
