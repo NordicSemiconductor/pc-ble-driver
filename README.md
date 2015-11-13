@@ -76,17 +76,17 @@ You will be asked for root password during this process.
     
     cd build
 
-    python ..\pc-ble-driver\scripts\build.py -srp <ROOT>\my_deps_directory -d -b (for Unix systems, replace \ with /)
+    python ..\pc-ble-driver\scripts\build.py -srp \absolute_path\my_deps_directory -d -b (for Unix systems, replace \ with /)
 
 - To package the release into a zip file, run the following command:
 
 
-    python ..\pc-ble-driver\scripts\build.py -srp <ROOT>\my_deps_directory -p (for Unix systems, replace \ with /)
+    python ..\pc-ble-driver\scripts\build.py -srp \absolute_path\my_deps_directory -p (for Unix systems, replace \ with /)
 
 - If you later want to run the Behave tests you will need to compile all the examples, to do this run this command:
 
 
-    python ..\pc-ble-driver\scripts\build.py -srp <ROOT>\my_deps_directory -e (for Unix systems, replace \ with /)
+    python ..\pc-ble-driver\scripts\build.py -srp \absolute_path\my_deps_directory -e (for Unix systems, replace \ with /)
 
 ## Running of tests
 We have different types of tests:
