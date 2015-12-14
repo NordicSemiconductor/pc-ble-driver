@@ -9,7 +9,7 @@ git --version # This triggers install of xcode if not already installed. If anot
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew install cmake
 brew install homebrew/versions/swig2
-CFLAGS=-fPIC brew install --verbose  --env=std --build-from-source boost
+CFLAGS=-fPIC brew install --verbose  --env=std --build-from-source --universal boost
 
 # Setup environment variables
 export NORDICSEMI_NRF51_BLE_DRIVER_ROOT_PATH=$HOME/nordicsemi/driver
