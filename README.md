@@ -26,6 +26,7 @@ The source code is available from GitHub at the following URL:
 
 - Install cmake according to the [installation instructions for Windows](http://www.cmake.org/install/).
 - Download and extract boost. We assume Boost is extracted into `c:\boost\boost_1_xx_y`.
+- Set the environment variable `BOOST_ROOT` to the path of your boost library location above.
 
 #### Using MinGW
 - Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
@@ -54,6 +55,8 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands i
 
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the boost documentation 
 to find the version of the MSVC that you need to provide using the `toolset=` option.
+
+#### Building the driver
 
 
 ### Ubuntu Linux
