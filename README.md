@@ -27,7 +27,7 @@ The source code is available from GitHub at the following URL:
 - Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
 - Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
 - Install cmake according to the [installation instructions for Windows](http://www.cmake.org/install/).
-- Extract, compile and install Boost. We assume Boost is extracted into c:\boost\boost_1_xx_y.
+- Extract, compile and install Boost. We assume Boost is extracted into `c:\boost\boost_1_xx_y`.
 
 #### Building boost with MinGW
 
@@ -48,6 +48,7 @@ Open a command prompt and issue the following commands in the directory:
     > b2 toolset=msvc-VV.V address-model=[32,64] link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 **Note**: Select 32 or 64-bit with the `address-model=` option.
+
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the boost documentation 
 to find the version of the MSVC that you need to provide using the `toolset=` option.
 
