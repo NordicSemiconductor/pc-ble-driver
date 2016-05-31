@@ -1,0 +1,150 @@
+--- components/serialization/common/ser_config.h
++++ components/serialization/common/ser_config.h
+@@ -66,8 +66,8 @@
+ 
+ /** UART transmission parameters */
+ #define SER_PHY_UART_FLOW_CTRL          APP_UART_FLOW_CONTROL_ENABLED
+-#define SER_PHY_UART_PARITY             true
+-#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
++#define SER_PHY_UART_PARITY             false
++#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud115200
+ 
+ /** Find UART baudrate value based on chosen register setting. */
+ #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
+--- components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
++++ components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
+@@ -34,9 +34,9 @@
+ /* UART configuration */
+ #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOW
+ 
+-#define SER_PHY_UART_RX                         SER_CON_RX_PIN
+-#define SER_PHY_UART_TX                         SER_CON_TX_PIN
+-#define SER_PHY_UART_CTS                        SER_CON_CTS_PIN
+-#define SER_PHY_UART_RTS                        SER_CON_RTS_PIN
++#define SER_PHY_UART_RX                         RX_PIN_NUMBER
++#define SER_PHY_UART_TX                         TX_PIN_NUMBER
++#define SER_PHY_UART_CTS                        CTS_PIN_NUMBER
++#define SER_PHY_UART_RTS                        RTS_PIN_NUMBER
+ 
+ #endif //SER_PHY_CONFIG_CONN_NRF51_H__
+--- components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ components/serialization/common/transport/ser_phy/ser_phy_hci.c
+@@ -37,6 +37,8 @@
+                                  (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
+ #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
+ 
++#define PKT_TYPE_RESET 5
++
+ #define TX_EVT_QUEUE_SIZE            16
+ #define RX_EVT_QUEUE_SIZE            16
+ #define PKT_TYPE_VENDOR_SPECIFIC     14                                                /**< Packet type vendor specific. */
+@@ -756,6 +758,11 @@
+             event.evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer,
+             event.evt.ser_phy_slip_evt.evt_params.received_pkt.num_of_bytes);
+ 
++        if (packet_type == PKT_TYPE_RESET)
++        {
++            NVIC_SystemReset();
++        }
++
+         if (packet_type == PKT_TYPE_ACK )
+         {
+             DEBUG_EVT_SLIP_ACK_RXED(0);
+--- components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
++++ components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
+@@ -80,4 +80,5 @@
+     {SD_BLE_GATTS_RW_AUTHORIZE_REPLY, conn_mw_ble_gatts_rw_authorize_reply},
+     {SD_BLE_GATTS_SYS_ATTR_SET, conn_mw_ble_gatts_sys_attr_set},
+     {SD_BLE_GATTS_SYS_ATTR_GET, conn_mw_ble_gatts_sys_attr_get},
++    {SD_BLE_USER_MEM_REPLY, conn_mw_ble_user_mem_reply},
+ };
+--- components/serialization/connectivity/ser_conn_error_handling.c
++++ components/serialization/connectivity/ser_conn_error_handling.c
+@@ -74,7 +74,7 @@
+ 
+         /* ble_debug_assert_handler(error_code, line_num, p_file_name); */
+ 
+-#if 0
++#if 1
+         /* Reset the chip. Should be used in the release version. */
+         NVIC_SystemReset();
+ #else   /* Debug version. */
+--- components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
++++ components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
+@@ -620,6 +620,12 @@
+                                                 &p_sec_params,
+                                                 &p_sec_keyset);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
++
++    if (p_sec_keyset == NULL)
++    {
++        //If no keyset was sent destroy the context.
++        conn_ble_gap_sec_context_destroy(*p_conn_handle);
++    }
+ 
+     sd_err_code = sd_ble_gap_sec_params_reply(*p_conn_handle, sec_status, p_sec_params, p_sec_keyset);
+ 
+--- components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
++++ components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
+@@ -46,18 +46,17 @@
+     err_code = ble_gap_evt_auth_status_t_enc(&(p_event->evt.gap_evt.params.auth_status), p_buf, total_len, &index);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+-   if (p_event->evt.gap_evt.params.auth_status.bonded)
+-   {
+        // keyset is an extension of standard event data - used to synchronize keys at application
+        err_code = conn_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
+-       SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+-
++   if (err_code == NRF_SUCCESS)
++   {
+        err_code = ble_gap_sec_keyset_t_enc(&(m_conn_keys_table[conn_index].keyset), p_buf, total_len, &index);
+        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+        err_code = conn_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
+        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+    }
++
+     *p_buf_len = index;
+     return err_code;
+ }
+--- components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
++++ components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
+@@ -15,6 +15,7 @@
+ #include "app_util.h"
+ #include "ble.h"
+ #include "ble_gap_struct_serialization.h"
++#include "conn_ble_gap_sec_keys.h"
+ #include "ble_gap_evt_conn.h"
+ 
+ uint32_t ble_gap_evt_disconnected_enc(ble_evt_t const * const p_event,
+@@ -45,5 +46,14 @@
+ 
+     *p_buf_len = index;
+ 
+-    return err_code;
++    // If disconnected and context is not yet destroyed, destroy it now
++    uint32_t conn_index;
++    err_code = conn_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
++    if (err_code == NRF_SUCCESS)
++    {
++        err_code = conn_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
++        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
++    }
++
++    return NRF_SUCCESS;
+ }
+--- components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
++++ components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
+@@ -62,6 +62,10 @@ uint32_t ble_gap_evt_auth_status_dec(
+         err_code = app_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
+         SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+     }
++    else
++    {
++        err_code = NRF_SUCCESS;
++    }
+ 
+     SER_ASSERT_LENGTH_EQ(index, packet_len);
+     *p_event_len = event_len;
+ 
