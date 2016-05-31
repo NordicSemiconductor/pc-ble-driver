@@ -24,10 +24,15 @@ The source code is available from GitHub at the following URL:
 
 ### Windows 
 
+- Install cmake according to the [installation instructions for Windows](http://www.cmake.org/install/).
+- Download and extract boost. We assume Boost is extracted into `c:\boost\boost_1_xx_y`.
+
+#### Using MinGW
 - Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
 - Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
-- Install cmake according to the [installation instructions for Windows](http://www.cmake.org/install/).
-- Extract, compile and install Boost. We assume Boost is extracted into `c:\boost\boost_1_xx_y`.
+
+#### Using Microsoft Visual Studio
+- Install the Microsoft Visual Studio version of your choice.
 
 #### Building boost with MinGW
 
@@ -35,13 +40,11 @@ Open a MinGW terminal and issue the following commands in the directory:
 
     $ cd c/boost/boost_1_xx_y
     $ ./bootstrap.sh
-    $ ./b2 toolset=gcc address-model=[32,64] link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
-
-**Note**: Select 32 or 64-bit with the `address-model=` option.
+    $ ./b2 toolset=gcc address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 #### Building boost with Visual Studio
 
-Open a command prompt and issue the following commands in the directory:
+Open a Microsoft Visual Studio Command Prompt and issue the following commands in the directory:
 
     > cd c:\boost\boost_1_xx_y
     > bootstrap.bat
@@ -51,4 +54,19 @@ Open a command prompt and issue the following commands in the directory:
 
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the boost documentation 
 to find the version of the MSVC that you need to provide using the `toolset=` option.
+
+
+### Ubuntu Linux
+Run the following command to install compiler, dependencies and tools:
+
+    curl -L https://raw.githubusercontent.com/NordicSemiconductor/pc-ble-driver/master/scripts/setup-ubuntu-linux.sh | sh
+    
+You will be asked for root password during this process.
+
+### OS X
+Run the following command to install compiler, dependencies and tools:
+
+    curl -L https://raw.githubusercontent.com/NordicSemiconductor/pc-ble-driver/master/scripts/setup-osx.sh | sh
+
+You will be asked for root password during this process.
 
