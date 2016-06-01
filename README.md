@@ -14,6 +14,8 @@ The boost static libraries required by this drivers must be build before you can
 
 ## Obtain the boost source code
 
+Use the following link to download the boost source code:
+
 * [Boost](http://www.boost.org/users/download) (>=1.54.0)
 
 ### Windows 
@@ -25,7 +27,8 @@ The boost static libraries required by this drivers must be build before you can
 
 - Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
 - Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
-- Open a MinGW terminal and issue the following commands in the directory:
+
+Open a MinGW terminal and issue the following commands in the directory:
 
     $ cd c/boost/boost_1_xx_y
     $ ./bootstrap.sh
@@ -38,7 +41,7 @@ The boost static libraries required by this drivers must be build before you can
 * Visual Studio 2013 (MSVC 12.0)
 * Visual Studio 2015 (MSVC 14.0)
 
-- Open a Microsoft Visual Studio Command Prompt and issue the following commands in the directory:
+Open a Microsoft Visual Studio Command Prompt and issue the following commands in the directory:
 
     > cd c:\boost\boost_1_xx_y
     > bootstrap.bat
