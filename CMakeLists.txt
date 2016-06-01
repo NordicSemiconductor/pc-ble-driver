@@ -53,8 +53,5 @@ add_library(pc-ble-driver STATIC ${LIB_C_SOURCES} ${LIB_CPP_SOURCES})
 # Specify libraries to link serialization library with
 target_link_libraries (pc-ble-driver PUBLIC ${Boost_LIBRARIES})
 
-add_custom_target(combined ALL
-   COMMAND ${CMAKE_CXX_ARCHIVE_CREATE} pc-ble-driver-all pc-ble-driver ${Boost_LIBRARIES})
-
 add_executable(test_uart test/test_uart.cpp)
 target_link_libraries(test_uart PRIVATE ${Boost_LIBRARIES})
