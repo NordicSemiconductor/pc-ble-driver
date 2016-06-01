@@ -4,40 +4,28 @@
 pc-ble-driver is a serialization library over serial port required by the following repos:
 
 * [pc-ble-driver-js  library](https://github.com/NordicSemiconductor/pc-ble-driver-js)
+* [pc-ble-driver-py  library](https://github.com/NordicSemiconductor/pc-ble-driver-py)
 
-The library is included as a submodule by the repositories above, but it can be built as standalone.
+The library is included as a submodule by the repositories above, and it should be built as part of them.
 
-# Building from source
+# Building boost
 
-## Dependencies
-The following dependencies are required for building the Driver:
+The boost static libraries required by this drivers must be build before you can use 
 
-* [cmake](http://www.cmake.org/cmake/resources/software.html) (>=2.8.X)
-* [Boost](http://www.boost.org/users/download) (>=1.56.0)
+## Obtain the boost source code
 
-## Get the source code
-The source code is available from GitHub at the following URL:
-<https://github.com/NordicSemiconductor/pc-ble-driver.git>
-
-
-## Build environment
+* [Boost](http://www.boost.org/users/download) (>=1.54.0)
 
 ### Windows 
 
-- Install cmake according to the [installation instructions for Windows](http://www.cmake.org/install/).
 - Download and extract boost. We assume Boost is extracted into `c:\boost\boost_1_xx_y`.
 - Set the environment variable `BOOST_ROOT` to the path of your boost library location above.
 
-#### Using MinGW
-- Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
-- Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
-
-#### Using Microsoft Visual Studio
-- Install the Microsoft Visual Studio version of your choice.
-
 #### Building boost with MinGW
 
-Open a MinGW terminal and issue the following commands in the directory:
+- Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
+- Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
+- Open a MinGW terminal and issue the following commands in the directory:
 
     $ cd c/boost/boost_1_xx_y
     $ ./bootstrap.sh
@@ -45,7 +33,12 @@ Open a MinGW terminal and issue the following commands in the directory:
 
 #### Building boost with Visual Studio
 
-Open a Microsoft Visual Studio Command Prompt and issue the following commands in the directory:
+- Install Microsoft Visual Studio. The following versions supported are:
+
+* Visual Studio 2013 (MSVC 12.0)
+* Visual Studio 2015 (MSVC 14.0)
+
+- Open a Microsoft Visual Studio Command Prompt and issue the following commands in the directory:
 
     > cd c:\boost\boost_1_xx_y
     > bootstrap.bat
@@ -56,20 +49,9 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands i
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the boost documentation 
 to find the version of the MSVC that you need to provide using the `toolset=` option.
 
-#### Building the driver
-
-
 ### Ubuntu Linux
-Run the following command to install compiler, dependencies and tools:
-
-    curl -L https://raw.githubusercontent.com/NordicSemiconductor/pc-ble-driver/master/scripts/setup-ubuntu-linux.sh | sh
-    
-You will be asked for root password during this process.
+TBD
 
 ### OS X
-Run the following command to install compiler, dependencies and tools:
-
-    curl -L https://raw.githubusercontent.com/NordicSemiconductor/pc-ble-driver/master/scripts/setup-osx.sh | sh
-
-You will be asked for root password during this process.
+TBD
 
