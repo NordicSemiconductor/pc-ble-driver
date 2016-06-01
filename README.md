@@ -36,7 +36,7 @@ Open a MinGW terminal and issue the following commands in the directory:
 
 #### Building boost with Visual Studio
 
-- Install Microsoft Visual Studio. The following versions supported are:
+Install Microsoft Visual Studio. The following versions supported are:
 
 * Visual Studio 2013 (MSVC 12.0)
 * Visual Studio 2015 (MSVC 14.0)
