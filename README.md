@@ -10,7 +10,8 @@ The library is included as a submodule by the repositories above, and it should 
 
 # Building boost
 
-The boost static libraries required by this drivers must be build before you can use 
+The boost static libraries required by this drivers must be built before you can build any of the
+repositories above that depend on pc-ble-driver.
 
 ## Obtain the boost source code
 
