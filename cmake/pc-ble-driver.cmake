@@ -7,4 +7,4 @@ else()
     include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 endif()
 
-set(PC_BLE_DRIVER_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}../include)
+set(PC_BLE_DRIVER_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include)
