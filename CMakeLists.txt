@@ -1,3 +1,8 @@
+cmake_minimum_required(VERSION 3.0)
+
+include (cmake/pc-ble-driver.cmake)
+
+set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
 
 # Find the necessary boost components on system
@@ -46,7 +51,10 @@ set_source_files_properties(
 add_library(pc-ble-driver STATIC ${LIB_C_SOURCES} ${LIB_CPP_SOURCES})
 
 # Specify libraries to link serialization library with
-target_link_libraries (pc-ble-driver PRIVATE ${Boost_LIBRARIES})
+target_link_libraries (pc-ble-driver PUBLIC ${Boost_LIBRARIES})
+
+add_custom_target(combined ALL
+   COMMAND ${CMAKE_CXX_ARCHIVE_CREATE} pc-ble-driver-all pc-ble-driver ${Boost_LIBRARIES})
 
 add_executable(test_uart test/test_uart.cpp)
 target_link_libraries(test_uart PRIVATE ${Boost_LIBRARIES})
