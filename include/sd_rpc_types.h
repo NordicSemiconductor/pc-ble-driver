@@ -15,6 +15,19 @@
 
 #include <stdint.h>
 
+#define SD_RPC_MAXPATHLEN 512
+
+/**@brief Error codes that an error callback can be associated with. */
+typedef struct {
+    char port[SD_RPC_MAXPATHLEN];
+    char manufacturer[SD_RPC_MAXPATHLEN];
+    char serialNumber[SD_RPC_MAXPATHLEN];
+    char pnpId[SD_RPC_MAXPATHLEN];
+    char locationId[SD_RPC_MAXPATHLEN];
+    char vendorId[SD_RPC_MAXPATHLEN];
+    char productId[SD_RPC_MAXPATHLEN];
+} sdp_rpc_serial_port_desc_t;
+
 /**@brief Error codes that an error callback can be associated with. */
 typedef enum
 {

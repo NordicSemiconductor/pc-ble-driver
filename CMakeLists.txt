@@ -22,6 +22,15 @@ include_directories (
 file(GLOB_RECURSE LIB_C_SOURCES src/*.c)
 file(GLOB_RECURSE LIB_CPP_SOURCES src/*.cpp)
 
+if(WIN32)
+    file(GLOB PLATFORM_SOURCE_FILES "src/platform/win/*.c" "src/platform/win/*.cpp")
+elseif(APPLE)
+    file(GLOB PLATFORM_SOURCE_FILES "src/platform/osx/*.c" "src/platform/osx/*.cpp")
+else()
+    # Assume Linux
+    file(GLOB PLATFORM_SOURCE_FILES "src/platform/linux/*.c" "src/platform/linux/*.cpp")
+endif()
+
 # Determine if we must add -fPIC since it is required for x64 architectures
 if(UNIX AND NOT WIN32 AND NOT APPLE)
     find_program(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin)
