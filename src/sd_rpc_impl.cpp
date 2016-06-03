@@ -21,10 +21,15 @@
 
 #include <stdlib.h>
 
-uint32_t sd_rpc_serial_port_enum(sdp_rpc_serial_port_desc_t serial_port_descs[], uint32_t size)
+uint32_t sd_rpc_serial_port_enum(sdp_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size)
 {
     std::list<SerialPortDesc*> descs;
     uint32_t ret;
+
+    if(!size)
+    {
+        return NRF_ERROR_NULL;
+    }
 
     ret = EnumSerialPorts(descs);
 
@@ -33,7 +38,36 @@ uint32_t sd_rpc_serial_port_enum(sdp_rpc_serial_port_desc_t serial_port_descs[],
         return ret; 
     }
 
-    return NRF_SUCCESS;
+	*size = descs.size();
+
+    if(descs.size() > *size)
+    {
+        ret = NRF_ERROR_DATA_SIZE; 
+    }
+
+    if(ret == NRF_SUCCESS)
+    {
+        int i = 0;
+        for(auto it = descs.begin(); it != descs.end(); ++it) 
+        {
+			strcpy_s(serial_port_descs[i].port, SD_RPC_MAXPATHLEN, (*it)->comName.c_str());
+			strcpy_s(serial_port_descs[i].manufacturer, SD_RPC_MAXPATHLEN, (*it)->manufacturer.c_str());
+			strcpy_s(serial_port_descs[i].serialNumber, SD_RPC_MAXPATHLEN, (*it)->serialNumber.c_str());
+			strcpy_s(serial_port_descs[i].pnpId, SD_RPC_MAXPATHLEN, (*it)->pnpId.c_str());
+			strcpy_s(serial_port_descs[i].locationId, SD_RPC_MAXPATHLEN, (*it)->locationId.c_str());
+			strcpy_s(serial_port_descs[i].vendorId, SD_RPC_MAXPATHLEN, (*it)->vendorId.c_str());
+			strcpy_s(serial_port_descs[i].productId, SD_RPC_MAXPATHLEN, (*it)->productId.c_str());
+
+            ++i;
+        }
+    }
+    
+    for(auto it = descs.begin(); it != descs.end(); ++it) 
+    {
+       delete *it;
+    }
+
+    return ret;
 }
 
 physical_layer_t *sd_rpc_physical_layer_create_uart(const char * port_name, uint32_t baud_rate, sd_rpc_flow_control_t flow_control, sd_rpc_parity_t parity)
