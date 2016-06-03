@@ -27,7 +27,6 @@
  *
  */
 
-#include "serial_port_enum.h"
 
 #include <list>
 #include <string>
@@ -36,6 +35,8 @@
 #include "stdafx.h"
 #include "enumser.h"
 #include "jlinkid_reg_lookup.h"
+
+#include "serial_port_enum.h"
 
 #define MAX_BUFFER_SIZE 1000
 
