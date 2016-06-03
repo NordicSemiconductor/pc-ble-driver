@@ -25,8 +25,8 @@ file(GLOB LIB_BASE_CPP_SRC_FILES "src/*.cpp")
 file(GLOB_RECURSE LIB_SDK_C_SRC_FILES "src/sdk/*.c")
 file(GLOB_RECURSE LIB_SDK_CPP_SRC_FILES "src/sdk/*.cpp")
 
-file(GLOB LIB_TRANSPORT_C_SRC_FILES "src/*.c")
-file(GLOB LIB_TRANSPORT_CPP_SRC_FILES "src/*.cpp")
+file(GLOB LIB_TRANSPORT_C_SRC_FILES "src/transport/*.c")
+file(GLOB LIB_TRANSPORT_CPP_SRC_FILES "src/transport/*.cpp")
 
 if(WIN32)
     file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/win/*.c")
