@@ -148,3 +148,191 @@
      SER_ASSERT_LENGTH_EQ(index, packet_len);
      *p_event_len = event_len;
  
+--- components/libraries/scheduler/app_scheduler.h
++++ components/libraries/scheduler/app_scheduler.h
+@@ -140,6 +140,12 @@ uint32_t app_sched_event_put(void *                    p_event_data,
+  * @return Maximum number of events in queue observed so far.
+  */
+ uint16_t app_sched_queue_utilization_get(void);
++
++/**@brief Function for getting the current amount of free space in the queue.
++ *
++ * @return Number of events that can be stored in the queue.
++ */
++uint16_t app_sched_queue_space_get(void);
+ #endif
+ 
+ #ifdef APP_SCHEDULER_WITH_PAUSE
+--- components/libraries/scheduler/app_scheduler_serconn.c
++++ components/libraries/scheduler/app_scheduler_serconn.c
+@@ -99,7 +99,16 @@ uint32_t app_sched_init(uint16_t event_size, uint16_t queue_size, void * p_event
+ 
+ 
+ #ifdef APP_SCHEDULER_WITH_PROFILER
+-static void check_queue_utilization(void)
++uint16_t app_sched_queue_space_get()
++{
++    uint16_t start = m_queue_start_index;
++    uint16_t end   = m_queue_end_index;
++    uint16_t free_space = m_queue_size - ((end >= start) ?
++                           (end - start) : (m_queue_size + 1 - start + end));
++    return free_space;
++}
++
++static __INLINE void check_queue_utilization(void)
+ {
+     uint16_t start = m_queue_start_index;
+     uint16_t end   = m_queue_end_index;
+--- components/serialization/connectivity/ser_conn_handlers.c
++++ components/serialization/connectivity/ser_conn_handlers.c
+@@ -124,6 +124,12 @@ void ser_conn_ble_event_handle(ble_evt_t * p_ble_evt)
+     err_code = app_sched_event_put(p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len,
+                                    ser_conn_ble_event_encoder);
+     APP_ERROR_CHECK(err_code);
++    uint16_t free_space = app_sched_queue_space_get();
++    if (!free_space)
++    {
++        // Queue is full. Do not pull new events.
++        softdevice_handler_suspend();
++    }
+ }
+ 
+ /** @} */
+--- components/softdevice/common/softdevice_handler/softdevice_handler.c
++++ components/softdevice/common/softdevice_handler/softdevice_handler.c
+@@ -70,6 +70,7 @@ nrf_nvic_state_t nrf_nvic_state;
+ static softdevice_evt_schedule_func_t m_evt_schedule_func;              /**< Pointer to function for propagating SoftDevice events to the scheduler. */
+ 
+ static volatile bool                  m_softdevice_enabled = false;     /**< Variable to indicate whether the SoftDevice is enabled. */
++static volatile bool                  m_suspended;                      /**< Current state of the event handler. */
+ 
+ #ifdef BLE_STACK_SUPPORT_REQD
+ // The following three definitions is needed only if BLE events are needed to be pulled from the stack.
+@@ -133,6 +134,11 @@ void intern_softdevice_events_execute(void)
+ 
+         if (!no_more_soc_evts)
+         {
++            if (m_suspended)
++            {
++                // Cancel pulling next event if event handler was suspended by user.
++                return;
++            }
+             uint32_t evt_id;
+ 
+             // Pull event from SOC.
+@@ -165,6 +171,12 @@ void intern_softdevice_events_execute(void)
+         // Fetch BLE Events.
+         if (!no_more_ble_evts)
+         {
++            if (m_suspended)
++            {
++                // Cancel pulling next event if event handler was suspended by user.
++                return;
++            }
++
+             // Pull event from stack
+             uint16_t evt_len = m_ble_evt_buffer_size;
+ 
+@@ -189,6 +201,12 @@ void intern_softdevice_events_execute(void)
+         // Fetch ANT Events.
+         if (!no_more_ant_evts)
+         {
++            if (m_suspended)
++            {
++                // Cancel pulling next event if event handler was suspended by user.
++                return;
++            }
++
+             // Pull event from stack
+             err_code = sd_ant_event_get(&m_ant_evt_buffer.channel,
+                                         &m_ant_evt_buffer.event,
+@@ -363,6 +381,45 @@ void SOFTDEVICE_EVT_IRQHandler(void)
+     }
+ }
+ 
++void softdevice_handler_suspend()
++{
++#ifdef SOFTDEVICE_PRESENT
++    ret_code_t err_code = sd_nvic_DisableIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    APP_ERROR_CHECK(err_code);
++#else
++    NVIC_DisableIRQ(SOFTDEVICE_EVT_IRQ);
++#endif
++    m_suspended = true;
++    return;
++}
++
++void softdevice_handler_resume()
++{
++    if (!m_suspended) return;
++    m_suspended = false;
++
++#ifdef SOFTDEVICE_PRESENT
++    ret_code_t err_code;
++
++    // Force calling ISR again to make sure that events not pulled previously
++    // has been processed.
++    err_code = sd_nvic_SetPendingIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    APP_ERROR_CHECK(err_code);
++    err_code = sd_nvic_EnableIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    APP_ERROR_CHECK(err_code);
++#else
++    NVIC_SetPendingIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    NVIC_EnableIRQ(SOFTDEVICE_EVT_IRQ);
++#endif
++
++    return;
++}
++
++bool softdevice_handler_is_suspended()
++{
++    return m_suspended;
++}
++
+ #if defined(BLE_STACK_SUPPORT_REQD)
+ uint32_t softdevice_enable_get_default_config(uint8_t central_links_count,
+                                               uint8_t periph_links_count,
+--- components/softdevice/common/softdevice_handler/softdevice_handler.h
++++ components/softdevice/common/softdevice_handler/softdevice_handler.h
+@@ -150,6 +150,23 @@ uint32_t softdevice_handler_init(nrf_clock_lf_cfg_t *              p_clock_lf_cf
+  */
+ uint32_t softdevice_handler_sd_disable(void);
+ 
++/**@brief     Function for suspending the event handler.
++ *
++ * @details   When event handler is disabled, no new events are pulled from SoftDevice.
++ *            Application can suspend pulling incoming events when its event queue is full.
++ */
++void softdevice_handler_suspend(void);
++
++/**@brief     Function for re-enabling the event handler after suspending.
++ */
++void softdevice_handler_resume(void);
++
++/**@brief Function for retrieving the information about the event handler state
++ *
++ * @retval false Event handler is active.
++ * @retval true  Event handler is suspended and events from SD will not be pulled.
++ */
++bool softdevice_handler_is_suspended(void);
+ 
+ /**@brief     Function for registering for System (SOC) events.
+  *
+--- examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ examples/ble_central_and_peripheral/ble_connectivity/main.c
+@@ -65,6 +65,15 @@ int main(void)
+     {   
+         /* Process SoftDevice events. */
+         app_sched_execute();
++        if (softdevice_handler_is_suspended())
++        {
++            // Resume pulling new events if queue utilization drops below 50%.
++            if (app_sched_queue_space_get() > (SER_CONN_SCHED_QUEUE_SIZE >> 1))
++            {
++                softdevice_handler_resume();
++                app_sched_execute();
++            }
++        }
+ 
+         /* Process received packets.
+          * We can NOT add received packets as events to the application scheduler queue because
