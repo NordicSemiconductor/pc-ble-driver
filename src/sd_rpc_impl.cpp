@@ -38,12 +38,12 @@ uint32_t sd_rpc_serial_port_enum(sdp_rpc_serial_port_desc_t serial_port_descs[],
         return ret; 
     }
 
-	*size = descs.size();
-
     if(descs.size() > *size)
     {
         ret = NRF_ERROR_DATA_SIZE; 
     }
+
+	*size = descs.size();
 
     if(ret == NRF_SUCCESS)
     {
