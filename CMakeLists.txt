@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.3)
 
 include (cmake/pc-ble-driver.cmake)
 
@@ -19,17 +19,38 @@ include_directories (
     SYSTEM ${Boost_INCLUDE_DIRS}
 )
 
-file(GLOB_RECURSE LIB_C_SOURCES src/*.c)
-file(GLOB_RECURSE LIB_CPP_SOURCES src/*.cpp)
+file(GLOB LIB_BASE_C_SRC_FILES "src/*.c")
+file(GLOB LIB_BASE_CPP_SRC_FILES "src/*.cpp")
+
+file(GLOB_RECURSE LIB_SDK_C_SRC_FILES "src/sdk/*.c")
+file(GLOB_RECURSE LIB_SDK_CPP_SRC_FILES "src/sdk/*.cpp")
+
+file(GLOB LIB_TRANSPORT_C_SRC_FILES "src/*.c")
+file(GLOB LIB_TRANSPORT_CPP_SRC_FILES "src/*.cpp")
 
 if(WIN32)
-    file(GLOB PLATFORM_SOURCE_FILES "src/platform/win/*.c" "src/platform/win/*.cpp")
+    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/win/*.c")
+    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/platform/win/*.cpp")
 elseif(APPLE)
-    file(GLOB PLATFORM_SOURCE_FILES "src/platform/osx/*.c" "src/platform/osx/*.cpp")
+    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/osx/*.c")
+    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/platform/osx/*.cpp")
 else()
     # Assume Linux
-    file(GLOB PLATFORM_SOURCE_FILES "src/platform/linux/*.c" "src/platform/linux/*.cpp")
+    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/linux/*.c")
+    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/platform/linux/*.cpp")
 endif()
+
+set(LIB_C_SRC_FILES ${LIB_BASE_C_SRC_FILES}
+                    ${LIB_SDK_C_SRC_FILES}
+                    ${LIB_TRANSPORT_C_SRC_FILES}
+)
+
+set(LIB_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
+                      ${LIB_SDK_CPP_SRC_FILES}
+                      ${LIB_TRANSPORT_CPP_SRC_FILES}
+)
+
+set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
 
 # Determine if we must add -fPIC since it is required for x64 architectures
 if(UNIX AND NOT WIN32 AND NOT APPLE)
@@ -52,12 +73,12 @@ add_definitions(
 
 # Force .c files to be compiled with the C++ compiler
 set_source_files_properties(
-    ${LIB_C_SOURCES}
+    ${LIB_C_SRC_FILES}
     PROPERTIES
     LANGUAGE CXX
 )
 
-add_library(pc-ble-driver STATIC ${LIB_C_SOURCES} ${LIB_CPP_SOURCES})
+add_library(pc-ble-driver STATIC ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
 # Specify libraries to link serialization library with
 target_link_libraries (pc-ble-driver PRIVATE ${Boost_LIBRARIES})

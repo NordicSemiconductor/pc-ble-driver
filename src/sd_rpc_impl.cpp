@@ -17,6 +17,7 @@
 #include "h5_transport.h"
 #include "uart_boost.h"
 #include "uart_settings_boost.h"
+#include "serial_port_enum.h"
 
 #include <stdlib.h>
 

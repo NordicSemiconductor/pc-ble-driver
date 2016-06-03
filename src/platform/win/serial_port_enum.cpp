@@ -55,7 +55,7 @@
  * VID 0403 / PID 6001 - Arduino Diecimila
  *
  */
-uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs);
+uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
 {
     DISPATCH_OBJ(wmiSvc);
     DISPATCH_OBJ(colDevices);
@@ -88,7 +88,7 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs);
                 resultItem->comName = comname;
                 resultItem->manufacturer = manu;
                 resultItem->pnpId = pnpid;
-                data->results.push_back(resultItem);
+                descs.push_back(resultItem);
 
                 string jlinkId = portNameToJlinkId(string(comname));
                 if (jlinkId != "") {
@@ -107,4 +107,6 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs);
     SAFE_RELEASE(wmiSvc);
 
     dhUninitialize(TRUE);
+
+    return 0;
 }
