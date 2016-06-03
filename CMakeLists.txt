@@ -50,6 +50,7 @@ set(LIB_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
                       ${LIB_TRANSPORT_CPP_SRC_FILES}
 )
 
+
 set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
 
 # Determine if we must add -fPIC since it is required for x64 architectures
@@ -77,6 +78,20 @@ set_source_files_properties(
     PROPERTIES
     LANGUAGE CXX
 )
+
+if(WIN32)
+# Disable CRT Warnings with Visual Studio
+set_source_files_properties(
+    ${LIB_PLATFORM_C_SRC_FILES}
+    PROPERTIES
+    COMPILE_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
+)
+set_source_files_properties(
+    ${LIB_PLATFORM_CPP_SRC_FILES}
+    PROPERTIES
+    COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
+)
+endif()
 
 add_library(pc-ble-driver STATIC ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 

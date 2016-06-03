@@ -83,7 +83,8 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
                 || (_stricmp("arm", manu) == 0)
                 || (_stricmp("mbed", manu) == 0))
             {
-                auto comname = strtok( match, "()");
+				char *next_token = NULL;
+                auto comname = strtok_s( match, "()", &next_token);
                 auto resultItem = new SerialPortDesc();
                 resultItem->comName = comname;
                 resultItem->manufacturer = manu;
