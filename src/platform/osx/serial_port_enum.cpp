@@ -48,8 +48,7 @@
 
 #include "serial_port_enum.h"
 
-pthread_mutex_t list_mutex;
-Boolean lockInitialised = FALSE;
+pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
 const char* TTY_PATH_PREFIX = "/dev/tty.";
 
 #if defined(MAC_OS_X_VERSION_10_4) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_4)
@@ -355,12 +354,6 @@ static adapter_list_t* GetAdapters()
 
 uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
 {
-    if(!lockInitialised)
-    {
-        pthread_mutex_init(&list_mutex, NULL);
-        lockInitialised = TRUE;
-    }
-
     adapter_list_t* devices = GetAdapters();
 
     for(auto device : *devices)
