@@ -21,6 +21,11 @@
 
 #include <stdlib.h>
 
+#ifndef _WIN32
+#define strcpy_s(a,b,c) strcpy(a,c)
+#endif
+
+
 uint32_t sd_rpc_serial_port_enum(sdp_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size)
 {
     std::list<SerialPortDesc*> descs;

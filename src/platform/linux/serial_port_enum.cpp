@@ -137,4 +137,6 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
 
     devices->clear();
     delete devices;
+    
+    return 0;
 }
