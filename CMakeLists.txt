@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 
 include (cmake/pc-ble-driver.cmake)
 
-set(Boost_USE_STATIC_LIBS   ON)
-set(Boost_USE_MULTITHREADED ON)
-
-# Find the necessary boost components on system
-find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
-
 # Include boost as a system include so that the compiler do not nag about issues in boost header files
 include_directories (
     src/serialization
@@ -66,6 +60,11 @@ if(UNIX AND NOT WIN32 AND NOT APPLE)
     endif()
 endif()
 
+# Link with pthreads on OS X
+if (APPLE)
+    add_compile_options(-pthread)
+endif(APPLE)
+
 # Add definitions used by compiler when compiling source files
 add_definitions(
     -DSD_RPC_EXPORTS
@@ -94,6 +93,7 @@ set_source_files_properties(
 endif()
 
 add_library(pc-ble-driver STATIC ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
+add_library(pc-ble-driver-obj OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
 # Specify libraries to link serialization library with
 target_link_libraries (pc-ble-driver PRIVATE ${Boost_LIBRARIES})
