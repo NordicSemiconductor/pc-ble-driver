@@ -15,15 +15,12 @@ else()
     include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 endif()
 
+# Use multithreaded Boost libraries
 set(Boost_USE_MULTITHREADED ON)
 
-if(UNIX AND NOT WIN32 AND NOT APPLE)
-    # Use dynamic boost libraries on Linux
-    set(Boost_USE_STATIC_LIBS   OFF)
-else()
-    # Use static boost libraries on Windows and OS X
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
+# Use static boost libraries so the dynamic library 
+# can run anywhere
+set(Boost_USE_STATIC_LIBS   ON)
 
 # Find the necessary boost components on the system.
 # Minimum version required is 1.54.0
