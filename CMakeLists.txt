@@ -60,11 +60,6 @@ if(UNIX AND NOT WIN32 AND NOT APPLE)
     endif()
 endif()
 
-# Link with pthreads on OS X
-if (APPLE)
-    add_compile_options(-pthread)
-endif(APPLE)
-
 # Add definitions used by compiler when compiling source files
 add_definitions(
     -DSD_RPC_EXPORTS

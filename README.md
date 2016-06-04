@@ -54,7 +54,10 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands i
 to find the version of the MSVC that you need to provide using the `toolset=` option.
 
 ### Ubuntu Linux
-TBD
+
+There is no need to build the Boost libraries on Ubuntu. Simply install them by running:
+
+    sudo apt-get install libboost-all-dev
 
 ### OS X
 TBD
