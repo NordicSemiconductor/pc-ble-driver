@@ -19,19 +19,23 @@ Use the following link to download the Boost source code:
 
 * [Boost](http://www.boost.org/users/download) (>=1.54.0)
 
-### Windows 
+- Download and extract Boost. We assume Boost is extracted into .
+- Set the environment variable `BOOST_ROOT` to the path where you have extracted Boost.
+  For example on Windows:
+        BOOST_ROOT = "c:\boost\boost_1_xx_y"
+  And on Linux or OS X:
+        BOOST_ROOT = "~/boost/boost_1_xx_y"
 
-- Download and extract Boost. We assume Boost is extracted into `c:\boost\boost_1_xx_y`.
-- Set the environment variable `BOOST_ROOT` to the path of your Boost library location above.
+### Windows 
 
 #### Building Boost with MinGW
 
 - Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
 - Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
 
-Open a MinGW terminal and issue the following commands in the directory:
+Open a MinGW terminal and issue the following commands:
 
-    $ cd c/boost/boost_1_xx_y
+    $ cd $BOOST_ROOT
     $ ./bootstrap.sh
     $ ./b2 toolset=gcc address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
@@ -42,9 +46,9 @@ Install Microsoft Visual Studio. The following versions supported are:
 * Visual Studio 2013 (MSVC 12.0)
 * Visual Studio 2015 (MSVC 14.0)
 
-Open a Microsoft Visual Studio Command Prompt and issue the following commands in the directory:
+Open a Microsoft Visual Studio Command Prompt and issue the following commands:
 
-    > cd c:\boost\boost_1_xx_y
+    > cd %BOOST_ROOT%
     > bootstrap.bat
     > b2 toolset=msvc-VV.V address-model=[32,64] link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
@@ -55,9 +59,17 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 
 ### Ubuntu Linux
 
-There is no need to build the Boost libraries on Ubuntu. Simply install them by running:
+Install the required packages to build Boost:
 
-    sudo apt-get install libboost-all-dev
+    sudo apt-get install git make gcc g++
+
+Open a terminal window and issue the following commands:
+
+    $ cd $BOOST_ROOT
+    $ ./bootstrap.sh
+    $ ./b2 toolset=gcc cxxflags=-fPIC cflags=-fPIC address-model=[32,64] link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
+
+**Note**: Select 32 or 64-bit with the `address-model=` option.
 
 ### OS X
 TBD
