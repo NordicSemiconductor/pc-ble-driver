@@ -15,6 +15,8 @@ repositories above that depend on pc-ble-driver.
 
 ## Obtain the Boost source code
 
+Note: This step is not required for OS X.
+
 Use the following link to download the Boost source code:
 
 * [Boost](http://www.boost.org/users/download) (>=1.54.0)
@@ -75,6 +77,20 @@ Open a terminal window and issue the following commands:
 
 **Note**: Select 32 or 64-bit with the `address-model=` option.
 
-### OS X
-TBD
+### OS X 10.11 and later
+
+Install Xcode from the App Store.
+
+The simplest way to install Boost is to use Homebrew. If you don't have Homebrew installed simply run on a terminal:
+
+    $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+If you already have Homebrew installed, make sure it's up to date with:
+  
+    $ brew update
+    $ brew upgrade
+
+Once Homebrew is installed you can use the `brew` command on a terminal to install
+
+    $ brew install boost
 
