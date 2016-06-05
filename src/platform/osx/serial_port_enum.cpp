@@ -365,26 +365,11 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
             SerialPortDesc* resultItem = new SerialPortDesc();
 
             resultItem->comName = device->port;
-
-            if (device->locationId != NULL) {
-                resultItem->locationId = device->locationId;
-            }
-
-            if (device->vendorId != NULL) {
-                resultItem->vendorId = device->vendorId;
-            }
-
-            if (device->productId != NULL) {
-                resultItem->productId = device->productId;
-            }
-
-            if (device->manufacturer != NULL) {
-                resultItem->manufacturer = device->manufacturer;
-            }
-
-            if (device->serialNumber != NULL) {
-                resultItem->serialNumber = device->serialNumber;
-            }
+            resultItem->locationId = device->locationId;
+            resultItem->vendorId = device->vendorId;
+            resultItem->productId = device->productId;
+            resultItem->manufacturer = device->manufacturer;
+            resultItem->serialNumber = device->serialNumber;
 
             descs.push_back(resultItem);
         }
