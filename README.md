@@ -23,9 +23,11 @@ Use the following link to download the Boost source code:
 - Set the environment variable `BOOST_ROOT` to the path where you have extracted Boost.
 
 For example on Windows assuming you've unpacked Boost in `c:\boost\boost_1_xx_y`:
+
     BOOST_ROOT = "c:\boost\boost_1_xx_y"
 
 And on Linux or OS X assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
+
     BOOST_ROOT = "~/boost/boost_1_xx_y"
 
 ### Windows 
