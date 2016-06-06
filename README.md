@@ -21,7 +21,7 @@ Use the following link to download the Boost source code:
 
 * [Boost](http://www.boost.org/users/download) (>=1.54.0)
 
-- Download and extract Boost. We assume Boost is extracted into .
+- Download and extract Boost to a folder of your choice.
 - Set the environment variable `BOOST_ROOT` to the path where you have extracted Boost.
 
 For example on Windows assuming you've unpacked Boost in `c:\boost\boost_1_xx_y`:
