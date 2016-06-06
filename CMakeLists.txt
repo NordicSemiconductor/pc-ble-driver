@@ -47,19 +47,6 @@ set(LIB_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
 
 set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
 
-# Determine if we must add -fPIC since it is required for x64 architectures
-if(UNIX AND NOT WIN32 AND NOT APPLE)
-    find_program(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin)
-    if(CMAKE_UNAME)
-        exec_program(uname ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR)
-        set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} CACHE INTERNAL "processor type (i386 and x86_64")
-        
-        if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-            add_definitions(-fPIC)
-        endif()
-    endif()
-endif()
-
 # Add definitions used by compiler when compiling source files
 add_definitions(
     -DSD_RPC_EXPORTS
@@ -92,6 +79,7 @@ add_library(${PC_BLE_DRIVER_OBJ_LIB} OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FIL
 
 # shared libraries need PIC
 set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
+
 # actual shared and static libraries built from the same object files
 add_library(${PC_BLE_DRIVER_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
 add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
