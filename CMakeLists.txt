@@ -77,7 +77,14 @@ endif()
 # Object library, from which both shared and static will be built
 add_library(${PC_BLE_DRIVER_OBJ_LIB} OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
-# Additional special 
+# shared libraries need PIC
+set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+# actual shared and static libraries built from the same object files
+add_library(${PC_BLE_DRIVER_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
+add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
+
+# Additional special linkage libraries
 if(WIN32)
 elseif(APPLE)
     target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} PRIVATE "-framework CoreFoundation")
@@ -85,15 +92,10 @@ elseif(APPLE)
     set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY MACOSX_RPATH ON)
 else()
     # Assume Linux
-    target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} "udev")
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev")
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev")
 endif()
 
-# shared libraries need PIC
-set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-# actual shared and static libraries built from the same object files
-add_library(${PC_BLE_DRIVER_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
-add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
 
 # Specify libraries to link serialization library with
 target_link_libraries (${PC_BLE_DRIVER_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
