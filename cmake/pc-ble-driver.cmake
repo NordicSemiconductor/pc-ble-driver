@@ -29,7 +29,7 @@ find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time ch
 set(PC_BLE_DRIVER_PROJECT_NAME "pc_ble_driver")
 set(PC_BLE_DRIVER_OBJ_LIB "pc_ble_driver_obj")
 set(PC_BLE_DRIVER_STATIC_LIB "pc_ble_driver_static")
-set(PC_BLE_DRIVER_SHARED_LIB ${PC_BLE_DRIVER_PROJECT_NAME})
+set(PC_BLE_DRIVER_SHARED_LIB "pc_ble_driver_shared")
 
 # pc-ble-driver include paths
 set(PC_BLE_DRIVER_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include ${CMAKE_CURRENT_LIST_DIR}/../include/internal/transport)
