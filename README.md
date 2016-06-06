@@ -34,8 +34,6 @@ And on Linux or OS X assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
 ### Windows 
 
-#### Building Boost with Visual Studio
-
 Install Microsoft Visual Studio. The following versions supported are:
 
 * Visual Studio 2013 (MSVC 12.0)
