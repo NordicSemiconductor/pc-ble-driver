@@ -87,17 +87,18 @@ set_source_files_properties(
 )
 endif()
 
-add_library(pc-ble-driver-obj OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
+# Object library, from which both shared and static will be built
+add_library(${PC_BLE_DRIVER_OBJ_LIB} OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
 # shared libraries need PIC
-set_property(TARGET ${pc-ble-driver-obj} PROPERTY POSITION_INDEPENDENT_CODE 1)
+set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
 # actual shared and static libraries built from the same object files
-add_library(pc-ble-driver-shared SHARED $<TARGET_OBJECTS:pc-ble-driver-obj>)
-add_library(pc-ble-driver-static STATIC $<TARGET_OBJECTS:pc-ble-driver-obj>)
+add_library(${PC_BLE_DRIVER_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
+add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
 
 # Specify libraries to link serialization library with
-target_link_libraries (pc-ble-driver-shared PRIVATE ${Boost_LIBRARIES})
-target_link_libraries (pc-ble-driver-static PRIVATE ${Boost_LIBRARIES})
+target_link_libraries (${PC_BLE_DRIVER_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
+target_link_libraries (${PC_BLE_DRIVER_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
 
 add_executable(test_uart test/test_uart.cpp)
 target_link_libraries(test_uart PRIVATE ${Boost_LIBRARIES})
