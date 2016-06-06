@@ -87,9 +87,9 @@ add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_
 # Additional special linkage libraries
 if(WIN32)
 elseif(APPLE)
-    target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} PRIVATE "-framework CoreFoundation")
-    target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} PRIVATE "-framework IOKit")
-    set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY MACOSX_RPATH ON)
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework CoreFoundation")
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework IOKit")
+    set_property(TARGET ${PC_BLE_DRIVER_STATIC_LIB} PROPERTY MACOSX_RPATH ON)
 else()
     # Assume Linux
     target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev")
