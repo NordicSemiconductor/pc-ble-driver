@@ -26,5 +26,6 @@ set(Boost_USE_STATIC_LIBS   ON)
 # Minimum version required is 1.54.0
 find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
 
+set(PC_BLE_DRIVER_PROJECT_NAME "pc_ble_driver")
 # pc-ble-driver include paths
 set(PC_BLE_DRIVER_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include ${CMAKE_CURRENT_LIST_DIR}/../include/internal/transport)
