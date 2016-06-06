@@ -77,11 +77,15 @@ endif()
 # Object library, from which both shared and static will be built
 add_library(${PC_BLE_DRIVER_OBJ_LIB} OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
-# Additional 
-if(APPLE)
+# Additional special 
+if(WIN32)
+elseif(APPLE)
     target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} PRIVATE "-framework CoreFoundation")
     target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} PRIVATE "-framework IOKit")
     set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY MACOSX_RPATH ON)
+else()
+    # Assume Linux
+    target_link_libraries(${PC_BLE_DRIVER_OBJ_LIB} "udev")
 endif()
 
 # shared libraries need PIC
