@@ -34,17 +34,6 @@ And on Linux or OS X assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
 ### Windows 
 
-#### Building Boost with MinGW
-
-- Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
-- Install the MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
-
-Open a MinGW terminal and issue the following commands:
-
-    $ cd $BOOST_ROOT
-    $ ./bootstrap.sh
-    $ ./b2 toolset=gcc address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
-
 #### Building Boost with Visual Studio
 
 Install Microsoft Visual Studio. The following versions supported are:
