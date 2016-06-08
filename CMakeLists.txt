@@ -84,16 +84,20 @@ set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 
 add_library(${PC_BLE_DRIVER_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
 add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
 
+# build test_uart executable
+add_executable(test_uart test/test_uart.cpp)
+
 # Additional special linkage libraries
 if(WIN32)
 elseif(APPLE)
-    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework CoreFoundation")
-    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework IOKit")
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
+    target_link_libraries(${PC_BLE_DRIVER_SHARED_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
     set_property(TARGET ${PC_BLE_DRIVER_STATIC_LIB} PROPERTY MACOSX_RPATH ON)
 else()
     # Assume Linux
-    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev")
-    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev")
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev" "pthread")
+    target_link_libraries(${PC_BLE_DRIVER_SHARED_LIB} PRIVATE "udev" "pthread")
+    target_link_libraries(test_uart PRIVATE "pthread")
 endif()
 
 
@@ -101,5 +105,5 @@ endif()
 target_link_libraries (${PC_BLE_DRIVER_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
 target_link_libraries (${PC_BLE_DRIVER_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
 
-add_executable(test_uart test/test_uart.cpp)
+
 target_link_libraries(test_uart PRIVATE ${Boost_LIBRARIES})
