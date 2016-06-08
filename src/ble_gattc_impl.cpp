@@ -140,3 +140,17 @@ uint32_t sd_ble_gattc_hv_confirm(adapter_t *adapter, uint16_t conn_handle, uint1
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+
+uint32_t sd_ble_gattc_attr_info_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const * p_handle_range)
+{
+    encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_attr_info_discover_req_enc(conn_handle, p_handle_range, buffer, length);
+    };
+
+    decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gattc_attr_info_discover_rsp_dec(buffer, length, result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+
