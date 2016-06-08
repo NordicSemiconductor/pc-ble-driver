@@ -168,3 +168,29 @@ uint32_t sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uin
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+
+uint32_t sd_ble_gatts_initial_user_handle_get(adapter_t *adapter, uint16_t *p_handle)
+{
+    encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gatts_initial_user_handle_get_req_enc(p_handle, buffer, length);
+    };
+
+    decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gatts_initial_user_handle_get_rsp_dec(buffer, length, &p_handle, result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+
+uint32_t sd_ble_gatts_attr_get(adapter_t *adapter, uint16_t handle, ble_uuid_t * p_uuid, ble_gatts_attr_md_t * p_md)
+{
+    encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gatts_attr_get_req_enc(handle, p_uuid, p_md, buffer, length);
+    };
+
+    decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gatts_attr_get_rsp_dec(buffer, length, /* &p_uuid, */ &p_md, result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}     

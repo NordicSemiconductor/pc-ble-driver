@@ -153,3 +153,10 @@ uint32_t sd_rpc_close(adapter_t *adapter)
     auto adapterLayer = static_cast<AdapterInternal*>(adapter->internal);
     return adapterLayer->close();
 }
+
+uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_severity_t severity_filter)
+{
+    auto adapterLayer = static_cast<AdapterInternal*>(adapter->internal);
+    return adapterLayer->logSeverityFilterSet(severity_filter);
+}
+

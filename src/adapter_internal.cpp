@@ -21,7 +21,8 @@
 AdapterInternal::AdapterInternal(SerializationTransport *_transport): 
     eventCallback(nullptr),
     statusCallback(nullptr),
-    logCallback(nullptr)
+    logCallback(nullptr),
+    logSeverityFilter(SD_RPC_LOG_TRACE)
 {
     this->transport = _transport;
 }
@@ -67,7 +68,11 @@ void AdapterInternal::logHandler(sd_rpc_log_severity_t severity, std::string log
 {
     adapter_t adapter;
     adapter.internal = static_cast<void *>(this);
-    logCallback(&adapter, severity, log_message.c_str());
+
+    if((uint32_t) severity >= (uint32_t) logSeverityFilter)
+    {
+        logCallback(&adapter, severity, log_message.c_str());
+    }
 }
 
 bool AdapterInternal::isInternalError(const uint32_t error_code) {
@@ -79,3 +84,10 @@ bool AdapterInternal::isInternalError(const uint32_t error_code) {
         return false;
     }
 }
+
+uint32_t AdapterInternal::logSeverityFilterSet(sd_rpc_log_severity_t severity_filter)
+{
+    logSeverityFilter = severity_filter;
+    return NRF_SUCCESS;
+}
+

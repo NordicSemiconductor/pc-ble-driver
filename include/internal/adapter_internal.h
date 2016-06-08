@@ -23,6 +23,7 @@ class AdapterInternal {
         ~AdapterInternal();
         uint32_t open(const sd_rpc_status_handler_t status_callback, const sd_rpc_evt_handler_t event_callback, const sd_rpc_log_handler_t log_callback);
         uint32_t close() const;
+        uint32_t logSeverityFilterSet(sd_rpc_log_severity_t severity_filter);
         static bool isInternalError(const uint32_t error_code);
 
         void statusHandler(sd_rpc_app_status_t code, const char * error);
@@ -35,6 +36,7 @@ class AdapterInternal {
         sd_rpc_evt_handler_t eventCallback;
         sd_rpc_status_handler_t statusCallback;
         sd_rpc_log_handler_t logCallback;
+        sd_rpc_log_severity_t logSeverityFilter;
 };
 
 #endif // ADAPTER_INTERNAL_H__
