@@ -93,6 +93,7 @@ elseif(APPLE)
     target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
     target_link_libraries(${PC_BLE_DRIVER_SHARED_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
     set_property(TARGET ${PC_BLE_DRIVER_STATIC_LIB} PROPERTY MACOSX_RPATH ON)
+    set_property(TARGET ${PC_BLE_DRIVER_SHARED_LIB} PROPERTY MACOSX_RPATH ON)
 else()
     # Assume Linux
     target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev" "pthread")
