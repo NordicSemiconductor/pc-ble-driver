@@ -43,12 +43,13 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands:
 
     > cd %BOOST_ROOT%
     > bootstrap.bat
-    > b2 toolset=msvc-VV.V address-model=[32,64] link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
-
-**Note**: Select 32 or 64-bit with the `address-model=` option.
+    > b2 toolset=msvc-<VV.V> address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the Boost documentation 
 to find the version of the MSVC that you need to provide using the `toolset=` option.
+
+**Note**: Select 32 or 64-bit with the `address-model=` option.
+
 
 ### Ubuntu Linux
 
@@ -60,7 +61,7 @@ Open a terminal window and issue the following commands:
 
     $ cd $BOOST_ROOT
     $ ./bootstrap.sh
-    $ ./b2 toolset=gcc cxxflags=-fPIC cflags=-fPIC address-model=[32,64] link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
+    $ ./b2 toolset=gcc cxxflags=-fPIC cflags=-fPIC address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 **Note**: Select 32 or 64-bit with the `address-model=` option.
 
