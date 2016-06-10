@@ -4,14 +4,29 @@ if(PC_BLE_DRIVER_CMAKE_INCLUDED)
 endif(PC_BLE_DRIVER_CMAKE_INCLUDED)
 set(PC_BLE_DRIVER_CMAKE_INCLUDED true)
   
-math(EXPR ARCH_BITS "8*${CMAKE_SIZEOF_VOID_P}")
+math(EXPR COMPILER_ARCH_BITS "8*${CMAKE_SIZEOF_VOID_P}")
+# Default to compiler architecture
+set(ARCH_BITS ${COMPILER_ARCH_BITS})
 
 SET(ARCH not_set CACHE STRING "Architecture (x86_32 or x86_64)")
 string(TOLOWER "${ARCH}" ARCH)
 
 if(${ARCH} STREQUAL not_set)
     message(STATUS "Architecture not set, using native ${ARCH_BITS}-bit toolchain.")
+else()
+    if(MSVC)
+        message(FATAL_ERROR "ARCH not available with MSVC. Use  -G \"Visual Studio XX <Win64>\" instead.")
+    endif()
+    if(${ARCH} STREQUAL x86_32)
+        set(ARCH_BITS 32)
+    elseif(${ARCH} STREQUAL x86_64)
+        set(ARCH_BITS 64)
+    else()
+        message(FATAL_ERROR "Invalid architecture: ARCH=${ARCH}.")
+    endif()
+    message(STATUS "Building ${ARCH_BITS}-bit targets with ${COMPILER_ARCH_BITS}-bit toolchain.")
 endif()
+
 
 #set(CMAKE_EXE_LINKER_FLAGS "/machine:x64")
 #set(CMAKE_EXE_LINKER_FLAGS "/machine:x86")

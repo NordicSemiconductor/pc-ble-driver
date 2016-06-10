@@ -13,3 +13,9 @@ add_compile_options(
     -std=c++11
     -Wlogical-op
 )
+
+if(NOT ${ARCH} STREQUAL not_set)
+    add_compile_options(
+        -m${ARCH_BITS}
+    )
+endif()

@@ -50,12 +50,22 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 
 **Note**: Select 32 or 64-bit with the `address-model=` option.
 
+#### Examples
+
+Build 32-bit Boost with Visual Studio 15
+    > b2 toolset=msvc-14.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
+Build 64-bit Boost with Visual Studio 15
+    > b2 toolset=msvc-14.0 address-model=64 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 ### Ubuntu Linux
 
 Install the required packages to build Boost:
 
     sudo apt-get install git make gcc g++
+
+Additionally if you want to build non-native binaries (for example 32-bit binaries on a 64-bit Ubuntu installation):
+
+    sudo apt-get install gcc-multilib
 
 Open a terminal window and issue the following commands:
 
