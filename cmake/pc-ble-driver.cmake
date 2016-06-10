@@ -4,6 +4,21 @@ if(PC_BLE_DRIVER_CMAKE_INCLUDED)
 endif(PC_BLE_DRIVER_CMAKE_INCLUDED)
 set(PC_BLE_DRIVER_CMAKE_INCLUDED true)
   
+math(EXPR ARCH_BITS "8*${CMAKE_SIZEOF_VOID_P}")
+
+SET(ARCH not_set CACHE STRING "Architecture (x86_32 or x86_64)")
+string(TOLOWER "${ARCH}" ARCH)
+
+if(${ARCH} STREQUAL not_set)
+    message(STATUS "Architecture not set, using native ${ARCH_BITS}-bit toolchain.")
+endif()
+
+#set(CMAKE_EXE_LINKER_FLAGS "/machine:x64")
+#set(CMAKE_EXE_LINKER_FLAGS "/machine:x86")
+#set(CMAKE_EXE_LINKER_FLAGS "-m32")
+#set(CMAKE_EXE_LINKER_FLAGS "-m64")
+
+
 
 # Compiler specific
 if(MSVC)
