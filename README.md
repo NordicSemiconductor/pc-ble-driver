@@ -53,8 +53,10 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 #### Examples
 
 Build 32-bit Boost with Visual Studio 15
+
     > b2 toolset=msvc-14.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 Build 64-bit Boost with Visual Studio 15
+
     > b2 toolset=msvc-14.0 address-model=64 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 ### Ubuntu Linux
