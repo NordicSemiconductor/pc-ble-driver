@@ -45,6 +45,9 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands:
     > bootstrap.bat
     > b2 toolset=msvc-<VV.V> address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
+**Note**: If you intend to build a 64-bit version of Boost, and depending on the version of Visual Studio you use, you might need to open a 64-bit command prompt such as
+"Visual Studio 2015 x86 x64 Cross Tools Command Prompt" or similar, or run `vcvarsall.bat x86_amd64` or `setenv.cmd" /Release /x64`.
+
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the Boost documentation 
 to find the version of the MSVC that you need to provide using the `toolset=` option.
 
@@ -52,10 +55,11 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 
 #### Examples
 
-Build 32-bit Boost with Visual Studio 15
+Build 32-bit Boost with Visual Studio 2013:
 
-    > b2 toolset=msvc-14.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
-Build 64-bit Boost with Visual Studio 15
+    > b2 toolset=msvc-12.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
+
+Build 64-bit Boost with Visual Studio 2015:
 
     > b2 toolset=msvc-14.0 address-model=64 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
