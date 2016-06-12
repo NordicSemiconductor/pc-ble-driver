@@ -63,6 +63,10 @@ Build 64-bit Boost with Visual Studio 2015:
 
     > b2 toolset=msvc-14.0 address-model=64 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
+#### Side-by-side 32 and 64-bit versions
+
+If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86` when building the 32-bit version and `--stagedir=./stage/x64` when building the 64-bit one, and they will be placed in `stage/x86` and `stage/x64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR:STRING="c:\boost\boost_1_61_0\stage\x<XX>\lib`.
+
 ### Ubuntu Linux
 
 Install the required packages to build Boost:
