@@ -53,6 +53,8 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 
 **Note**: Select 32 or 64-bit with the `address-model=` option.
 
+**Note**: Use `dumpbin /headers <file>` to check whether a particular object file is 32 or 64-bit.
+
 #### Examples
 
 Build 32-bit Boost with Visual Studio 2013:
@@ -65,7 +67,7 @@ Build 64-bit Boost with Visual Studio 2015:
 
 #### Side-by-side 32 and 64-bit versions
 
-If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86` when building the 32-bit version and `--stagedir=./stage/x64` when building the 64-bit one, and they will be placed in `stage/x86` and `stage/x64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR:STRING="c:\boost\boost_1_61_0\stage\x<XX>\lib`.
+If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86` when building the 32-bit version and `--stagedir=./stage/x64` when building the 64-bit one, and they will be placed in `stage/x86` and `stage/x64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR:STRING="c:\boost\boost_1_xx_y\stage\x<XX>\lib`.
 
 ### Ubuntu Linux
 
@@ -84,6 +86,12 @@ Open a terminal window and issue the following commands:
     $ ./b2 toolset=gcc cxxflags=-fPIC cflags=-fPIC address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 **Note**: Select 32 or 64-bit with the `address-model=` option.
+
+**Note**: Use `objdump -f <file>` to check whether a particular object file is 32 or 64-bit.
+
+#### Side-by-side 32 and 64-bit versions
+
+If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86` when building the 32-bit version and `--stagedir=./stage/x64` when building the 64-bit one, and they will be placed in `stage/x86` and `stage/x64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR:STRING="~/boost/boost_1_xx_y/stage/x<XX>/lib`.
 
 ### OS X 10.11 and later
 
