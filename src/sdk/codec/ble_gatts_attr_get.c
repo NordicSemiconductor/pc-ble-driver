@@ -38,7 +38,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
     err_code = uint16_t_enc(&handle, p_buf, total_len, &index);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
-    err_code = cond_field_enc(p_uuid, p_buf, total_len, &index, ble_uuid_t_enc);
+    err_code = cond_field_enc(p_uuid, p_buf, total_len, &index, NULL);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
     err_code = cond_field_enc(p_md, p_buf, total_len, &index, NULL);
@@ -52,6 +52,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
 
 uint32_t ble_gatts_attr_get_rsp_dec(uint8_t const * const  p_buf,
                                     uint32_t               packet_len,
+                                    ble_uuid_t          ** pp_uuid,
                                     ble_gatts_attr_md_t ** pp_md,
                                     uint32_t * const       p_result_code)
 {
@@ -76,6 +77,8 @@ uint32_t ble_gatts_attr_get_rsp_dec(uint8_t const * const  p_buf,
         return NRF_SUCCESS;
     }
 
+    err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_uuid,
+            ble_uuid_t_dec);
     err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_md,
             ble_gatts_attr_md_dec);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);

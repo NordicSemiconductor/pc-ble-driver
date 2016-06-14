@@ -575,6 +575,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
  *
  * @param[in] p_buf                  Pointer to beginning of command response packet.
  * @param[in] packet_len             Length (in bytes) of response packet.
+ * @param[out] pp_uuid               Pointer to address where to put UUID.
  * @param[out] pp_md                 Pointer to address where to put output data.
  * @param[out] p_result_code         Command result code.
  *
@@ -586,6 +587,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
  */
 uint32_t ble_gatts_attr_get_rsp_dec(uint8_t const * const  p_buf,
                                     uint32_t               packet_len,
+                                    ble_uuid_t          ** pp_uuid,
                                     ble_gatts_attr_md_t ** pp_md,
                                     uint32_t * const       p_result_code);
 
