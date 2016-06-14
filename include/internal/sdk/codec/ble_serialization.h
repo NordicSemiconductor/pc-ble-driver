@@ -18,7 +18,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 /**@brief The types of serialization packets. */
 typedef enum
@@ -578,7 +580,9 @@ uint32_t uint8_vector_dec(uint8_t const * const p_buf,
                  uint16_t              dlen);
 
 
+#ifdef __cplusplus
 } // extern "C"
+#endif
 
 #endif
 

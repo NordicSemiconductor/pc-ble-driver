@@ -56,7 +56,7 @@ uint32_t ble_gap_evt_auth_status_dec(
 
     if (err_code == NRF_SUCCESS)
     {
-        err_code = ble_gap_sec_keyset_t_dec(p_buf, packet_len, &index, static_cast<void*>(&keyset->keyset));
+        err_code = ble_gap_sec_keyset_t_dec(p_buf, packet_len, &index, (void*) (&keyset->keyset));
         SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
         err_code = app_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
