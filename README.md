@@ -1,19 +1,75 @@
 # nRF5 Bluetooth Low Energy GAP/GATT driver
 
 ## Introduction
-pc-ble-driver is a serialization library over serial port required by the following repos:
+pc-ble-driver is a static and shared library that provides serial port communication (using SoftDevice API serialization) to an nRF5x IC running the connectivity firmware included.
+It is a C/C++ library that can be interfaced directly but it is more often used by higher level bindings:
 
-* [pc-ble-driver-js  library](https://github.com/NordicSemiconductor/pc-ble-driver-js)
-* [pc-ble-driver-py  library](https://github.com/NordicSemiconductor/pc-ble-driver-py)
+* [pc-ble-driver-js  JavaScript bindings](https://github.com/NordicSemiconductor/pc-ble-driver-js)
+* [pc-ble-driver-py  Python bindings](https://github.com/NordicSemiconductor/pc-ble-driver-py)
 
 The library is included as a submodule by the repositories above, and it should be built as part of them.
 
-# Installing and building Boost
+## SoftDevice and IC Support
+
+The library is compatible with the following SoftDevice API version and nRF5x ICs:
+
+* s130_nrf51_2.x.x (nRF51 series)
+* s132_nrf52_2.x.x (nRF52 series)
+
+The .hex files included in the `hex/` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
+
+## Operating system support
+
+* Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
+* GNU/Linux (Ubuntu tested) 32 and 64-bit
+* macOS (OS X) 32 and 64-bit
+
+## Installing drivers and tools
+
+This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
+To set up the required J-Link drivers simply download and install the version matching you operating system:
+
+* [Segger J-Link Downloads](https://www.segger.com/jlink-software.html)  
+
+Additionally to flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
+
+* [nRF5x Command-Line Tools for Windows](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Win32/33444)
+* [nRF5x Command-Line Tools for Linux 32-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux32/52615)
+* [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
+* [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
+
+## Flashing the connectivity firmware
+
+To use this library you will need to flash the connectivity firmware on a nRF5x IC
+
+Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
+
+    $ nrfjprog -f NRF5<x> -e
+    $ nrfjprog -f NRF5<x> --program hex/connectivity_115k2_with_s13x_2.<x>.<x>.hex
+
+## J-Link USB CDC serial ports
+
+After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically
+
+### Windows
+
+The serial port will appear as `COMxx`. Simply check the "Ports (COM & LPT)" section in the Device Manager.
+
+### Ubuntu Linux
+
+The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users, type this command to add your user to the `dialout` group to give it acces to the serial port:
+
+    sudo usermod -G dialout <username>
+
+### OS X
+
+
+## Installing and building Boost
 
 The Boost static libraries required by this drivers must be built before you can build any of the
 repositories above that depend on pc-ble-driver.
 
-## Obtain the Boost source code
+### Obtain the Boost source code
 
 Note: This step is not required for OS X.
 
@@ -32,7 +88,7 @@ And on Linux or OS X assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
     BOOST_ROOT = "~/boost/boost_1_xx_y"
 
-### Windows 
+#### Windows 
 
 Install Microsoft Visual Studio. The following versions supported are:
 
@@ -55,7 +111,7 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 
 **Note**: Use `dumpbin /headers <file>` to check whether a particular object file is 32 or 64-bit.
 
-#### Examples
+##### Examples
 
 Build 32-bit Boost with Visual Studio 2013:
 
@@ -65,11 +121,11 @@ Build 64-bit Boost with Visual Studio 2015:
 
     > b2 toolset=msvc-14.0 address-model=64 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
-#### Side-by-side 32 and 64-bit versions
+##### Side-by-side 32 and 64-bit versions
 
 If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86_32` when building the 32-bit version and `--stagedir=./stage/x86_64` when building the 64-bit one, and they will be placed in `stage\x86_32\lib` and `stage\x86_64\lib` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR:STRING="c:\boost\boost_1_xx_y\stage\x86_XX\lib`.
 
-### Ubuntu Linux
+#### Ubuntu Linux
 
 Install the required packages to build Boost:
 
@@ -89,11 +145,11 @@ Open a terminal window and issue the following commands:
 
 **Note**: Use `objdump -f <file>` to check whether a particular object file is 32 or 64-bit.
 
-#### Side-by-side 32 and 64-bit versions
+##### Side-by-side 32 and 64-bit versions
 
 If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86_32` when building the 32-bit version and `--stagedir=./stage/x86_64` when building the 64-bit one, and they will be placed in `stage/x86_32` and `stage/x86_64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR:STRING="~/boost/boost_1_xx_y/stage/x86_XX/lib`.
 
-### OS X 10.11 and later
+#### OS X 10.11 and later
 
 Install Xcode from the App Store.
 
