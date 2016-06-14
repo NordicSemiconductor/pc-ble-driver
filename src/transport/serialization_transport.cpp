@@ -190,7 +190,7 @@ void SerializationTransport::readHandler(uint8_t *data, size_t length)
 
     if (eventType == SERIALIZATION_RESPONSE) {
         memcpy(responseBuffer, data, length);
-        *responseLength = length;
+        *responseLength = (uint32_t) length;
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
         rspReceived = true;
@@ -201,7 +201,7 @@ void SerializationTransport::readHandler(uint8_t *data, size_t length)
         eventData_t eventData;
         eventData.data = static_cast<uint8_t *>(malloc(length));
         memcpy(eventData.data, data, length);
-        eventData.dataLength = length;
+        eventData.dataLength = (uint32_t) length;
 
         std::lock_guard<std::mutex> eventLock(eventMutex);
         eventQueue.push(eventData);
