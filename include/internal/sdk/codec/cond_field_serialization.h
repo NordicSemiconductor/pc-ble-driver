@@ -11,6 +11,10 @@
  */
 #include "stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint32_t (*field_encoder_handler_t)(void const * const p_field,
                                             uint8_t * const    p_buf,
                                             uint32_t           buf_len,
@@ -62,3 +66,7 @@ uint32_t cond_field_dec(uint8_t const * const   p_buf,
                         uint32_t * const        p_index,
                         void * * const          pp_field,
                         field_decoder_handler_t field_parser);
+
+#ifdef __cplusplus
+}
+#endif

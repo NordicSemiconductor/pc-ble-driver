@@ -12,6 +12,10 @@
 
 #include "ble_gap.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint32_t ble_gap_irk_enc(void const * const p_data,
                          uint8_t * const    p_buf,
                          uint32_t           buf_len,
@@ -381,3 +385,7 @@ uint32_t ble_gap_lesc_oob_data_t_dec(uint8_t const * const p_buf,
                                uint32_t              buf_len,
                                uint32_t * const      p_index,
                                void * const          p_void_oob_data);
+
+#ifdef __cplusplus
+}
+#endif

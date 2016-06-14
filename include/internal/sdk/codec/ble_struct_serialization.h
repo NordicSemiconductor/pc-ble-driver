@@ -13,6 +13,10 @@
 #include "ble_types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint32_t ble_uuid_t_enc(void const * const p_void_uuid,
                         uint8_t * const    p_buf,
                         uint32_t           buf_len,
@@ -133,3 +137,7 @@ uint32_t ble_pa_lna_cfg_t_dec(uint8_t const * const p_buf,
                                       uint32_t              buf_len,
                                       uint32_t * const      p_index,
                                       void * const          p_void_cfg);
+
+#ifdef __cplusplus
+}
+#endif

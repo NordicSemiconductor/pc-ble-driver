@@ -33,6 +33,10 @@
 #include "ble_gattc.h"
 #include "ble.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Encodes @ref sd_ble_gattc_primary_services_discover command request.
  *
  * @sa @ref nrf51_sd_ble_gattc_primary_services_discover_encoding for packet format,
@@ -438,6 +442,9 @@ uint32_t ble_gattc_attr_info_discover_rsp_dec(uint8_t const * const p_buf,
                                               uint32_t              packet_len,
                                               uint32_t * const      p_result_code);
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 

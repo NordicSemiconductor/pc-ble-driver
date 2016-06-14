@@ -32,6 +32,10 @@
  */
 #include "ble.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Decodes ble_gattc_evt_char_disc_rsp event.
  *
@@ -308,4 +312,7 @@ uint32_t ble_gattc_evt_attr_info_disc_rsp_dec(uint8_t const * const p_buf,
                                               uint32_t * const      p_event_len);
 
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif

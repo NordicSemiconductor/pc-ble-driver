@@ -35,6 +35,10 @@
 #include "ser_config.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Connection - user memory mapping structure.
  *
  * @note  This structure is used to map user memory to connection instances, and will be stored in a static table.
@@ -78,4 +82,7 @@ uint32_t app_ble_user_mem_context_destroy(uint16_t conn_handle);
 uint32_t app_ble_user_mem_context_find(uint16_t conn_handle, uint32_t *p_index);
 /** @} */
 
+#ifdef __cplusplus
+}
+#endif
 #endif //_APP_BLE_USER_MEM_H

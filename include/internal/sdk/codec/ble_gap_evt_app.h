@@ -32,6 +32,10 @@
  */
 #include "ble.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Decodes ble_gap_evt_auth_key_request event.
  *
@@ -455,4 +459,7 @@ uint32_t ble_gap_evt_lesc_dhkey_request_dec(uint8_t const * const p_buf,
                                             ble_evt_t * const     p_event,
                                             uint32_t * const      p_event_len);
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif

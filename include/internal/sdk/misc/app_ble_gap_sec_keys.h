@@ -34,6 +34,10 @@
 #include "ble_gap.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief GAP connection - keyset mapping structure.
  *
  * @note  This structure is used to map keysets to connection instances, and will be stored in a static table.
@@ -92,4 +96,7 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle);
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, ser_ble_gap_app_keyset_t **pp_gap_app_keyset);
 /** @} */
 
+#ifdef __cplusplus
+}
+#endif
 #endif //_APP_BLE_GAP_SEC_KEYS_H

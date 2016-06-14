@@ -43,6 +43,7 @@
 #ifndef BLE_HCI_H__
 #define BLE_HCI_H__ 
 #ifdef __cplusplus
+
 extern "C" {
 #endif
 

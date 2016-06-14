@@ -15,6 +15,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***********************************************************************************************//**
  * General parameters configuration.
  **************************************************************************************************/
@@ -106,4 +110,7 @@
 
 #define SER_MAX_CONNECTIONS 1
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* SER_CONFIG_H__ */

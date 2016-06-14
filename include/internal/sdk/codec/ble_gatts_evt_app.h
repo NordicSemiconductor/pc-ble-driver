@@ -32,6 +32,10 @@
  */
 #include "ble.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Decodes ble_gatts_evt_hvc event.
  *
@@ -183,4 +187,7 @@ uint32_t ble_gatts_evt_write_dec(uint8_t const * const p_buf,
                                  uint32_t * const      p_event_len);
 
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif
