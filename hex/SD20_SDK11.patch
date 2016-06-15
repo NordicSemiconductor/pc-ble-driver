@@ -470,7 +470,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +        uint32_t    revision_hash;       /* Unique revision identifier */
 +        uint8_t     version_major;       /* Major version number */
 +        uint8_t     version_minor;       /* Minor version number */
-+        uint8_t     version_debug;       /* Debug version number */
++        uint8_t     version_patch;       /* Patch version number */
 +        uint8_t     description_length;  /* Length of the description field */
 +        uint8_t *   description;         /* Utf-8 string description of the release */
 +} version_info_t;
