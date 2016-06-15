@@ -437,3 +437,22 @@ diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.
  
  /**@brief     Function for registering for System (SOC) events.
   *
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+--- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+@@ -65,6 +65,15 @@ int main(void)
+     {   
+         /* Process SoftDevice events. */
+         app_sched_execute();
++        if (softdevice_handler_is_suspended())
++        {
++            // Resume pulling new events if queue utilization drops below 50%.
++            if (app_sched_queue_space_get() > (SER_CONN_SCHED_QUEUE_SIZE >> 1))
++            {
++                softdevice_handler_resume();
++                app_sched_execute();
++            }
++        }
+ 
+         /* Process received packets.
+          * We can NOT add received packets as events to the application scheduler queue because
