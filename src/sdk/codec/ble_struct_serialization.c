@@ -174,8 +174,8 @@ uint32_t ble_l2cap_evt_rx_t_dec(uint8_t const * const p_buf,
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
     /* Update struct length */
-    *p_struct_len = offsetof(ble_l2cap_evt_rx_t, data[0]);
-    *p_struct_len += (uint8_t*)&p_evt_rx->data[len] - (uint8_t*)&p_evt_rx->data[0];
+    *p_struct_len = (uint32_t) offsetof(ble_l2cap_evt_rx_t, data[0]);
+    *p_struct_len += (uint32_t) ((uint8_t*)&p_evt_rx->data[len] - (uint8_t*)&p_evt_rx->data[0]);
 
     /* Decode header and copy data */
     if (p_void_evt_rx != NULL)

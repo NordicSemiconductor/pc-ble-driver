@@ -189,7 +189,7 @@ uint32_t sd_ble_gatts_attr_get(adapter_t *adapter, uint16_t handle, ble_uuid_t *
     };
 
     decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
-        return ble_gatts_attr_get_rsp_dec(buffer, length, /* &p_uuid, */ &p_md, result);
+        return ble_gatts_attr_get_rsp_dec(buffer, length, &p_uuid, &p_md, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);

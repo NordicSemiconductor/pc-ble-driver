@@ -25,6 +25,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef __INLINE
 #define __INLINE inline
 #endif
@@ -393,6 +397,9 @@ static __INLINE bool is_word_aligned(void const* p)
     return (((uintptr_t)p & 0x03) == 0);
 }
 
+#ifdef __cplusplus
+}
+#endif
 #endif // APP_UTIL_H__
 
 /** @} */

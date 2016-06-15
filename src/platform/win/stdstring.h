@@ -2111,7 +2111,7 @@ class CStdStr : public std::basic_string<CT>
 	
 public:
 	// shorthand conversion from PCTSTR to string resource ID
-	#define SSRES(pctstr)  LOWORD(reinterpret_cast<unsigned long>(pctstr))	
+	#define SSRES(pctstr)  LOWORD(reinterpret_cast<UINT_PTR>(pctstr))	
 
 	bool TryLoad(const void* pT)
 	{
@@ -2120,7 +2120,7 @@ public:
 #if defined(SS_WIN32) && !defined(SS_ANSI)
 		if ( ( pT != NULL ) && SS_IS_INTRESOURCE(pT) )
 		{
-			UINT nId = LOWORD(reinterpret_cast<unsigned long>(pT));
+			UINT nId = LOWORD(reinterpret_cast<UINT_PTR>(pT));
 			if ( !LoadString(nId) )
 			{
 				TRACE(_T("Can't load string %u\n"), SSRES(pT));

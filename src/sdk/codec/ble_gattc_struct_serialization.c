@@ -70,7 +70,7 @@ uint32_t ble_gattc_evt_char_val_by_uuid_read_rsp_t_dec(uint8_t const * const p_b
     uint32_t total_struct_size = *p_struct_size;
 
     //calculate the size of the struct
-    *p_struct_size  = offsetof(ble_gattc_evt_char_val_by_uuid_read_rsp_t, handle_value[0]);
+    *p_struct_size  = (uint32_t) offsetof(ble_gattc_evt_char_val_by_uuid_read_rsp_t, handle_value[0]);
     *p_struct_size += sizeof(((ble_gattc_evt_char_val_by_uuid_read_rsp_t *)0)->handle_value[0]) * count;
     *p_struct_size += value_len * count;
 

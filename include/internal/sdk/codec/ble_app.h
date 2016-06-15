@@ -31,6 +31,11 @@
  * @brief    Application command request encoders and command response decoders.
  */
 #include "ble.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Encodes @ref sd_ble_tx_packet_count_get command request.
  *
@@ -444,4 +449,7 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
                        uint32_t * const      p_event_len);
 
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif

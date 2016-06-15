@@ -32,6 +32,10 @@
  */
 #include "ble.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Decodes ble_evt_tx_complete event.
  *
@@ -108,4 +112,7 @@ uint32_t ble_evt_tx_complete_dec(uint8_t const * const p_buf,
                                        uint32_t * const      p_event_len);
 
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif

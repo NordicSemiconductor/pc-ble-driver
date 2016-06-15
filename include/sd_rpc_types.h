@@ -15,6 +15,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SD_RPC_MAXPATHLEN 512
 
 /**@brief Error codes that an error callback can be associated with. */
@@ -72,4 +76,7 @@ typedef void(*sd_rpc_status_handler_t)(adapter_t *adapter, sd_rpc_app_status_t c
 typedef void(*sd_rpc_evt_handler_t)(adapter_t *adapter, ble_evt_t * p_ble_evt);
 typedef void(*sd_rpc_log_handler_t)(adapter_t *adapter, sd_rpc_log_severity_t severity, const char * log_message);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // SD_RPC_TYPES_H__

@@ -33,6 +33,10 @@
 #include "ble_gatts.h"
 #include "ble.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Encodes @ref sd_ble_gatts_value_get command request.
  *
  * @sa @ref nrf51_gatts_value_get_encoding for packet format,
@@ -628,6 +632,9 @@ uint32_t ble_gatts_initial_user_handle_get_rsp_dec(uint8_t const * const  p_buf,
                                                    uint16_t ** pp_handle,
                                                    uint32_t * const       p_result_code);
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif //BLE_GATTS_APP_H__
 
 

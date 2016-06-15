@@ -54,11 +54,13 @@ add_definitions(
 )
 
 # Force .c files to be compiled with the C++ compiler
-set_source_files_properties(
-    ${LIB_C_SRC_FILES}
-    PROPERTIES
-    LANGUAGE CXX
-)
+if(NOT APPLE)
+    set_source_files_properties(
+        ${LIB_C_SRC_FILES}
+        PROPERTIES
+        LANGUAGE CXX
+    )
+endif()
 
 if(WIN32)
 # Disable CRT Warnings with Visual Studio

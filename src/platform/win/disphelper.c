@@ -960,7 +960,7 @@ static DWORD f_TlsIdxStackCount, f_TlsIdxException;
 
 #define SetStackCount(nStackCount)   TlsSetValue(f_TlsIdxStackCount, (LPVOID) (nStackCount))
 #define SetExceptionPtr(pException)  TlsSetValue(f_TlsIdxException, pException);
-#define GetStackCount()       (UINT) TlsGetValue(f_TlsIdxStackCount)
+#define GetStackCount()       (UINT_PTR) TlsGetValue(f_TlsIdxStackCount)
 #define GetExceptionPtr()            TlsGetValue(f_TlsIdxException)
 #define CheckTlsInitialized()        if (f_lngTlsInitEnd != 0) InitializeTlsIndexes();
 
@@ -1000,7 +1000,7 @@ void dhEnter(void)
 HRESULT dhExitEx(HRESULT hr, BOOL bDispatchError, LPCWSTR szMember, LPCWSTR szCompleteMember,
                  EXCEPINFO * pExcepInfo, UINT iArgError, LPCWSTR szFunctionName)
 {
-	UINT nStackCount = GetStackCount();
+	UINT_PTR nStackCount = GetStackCount();
 
 	SetStackCount(nStackCount - 1);
 
@@ -1083,7 +1083,7 @@ HRESULT dhShowException(PDH_EXCEPTION pException)
 HRESULT dhFormatExceptionW(PDH_EXCEPTION pException, LPWSTR szBuffer, UINT cchBufferSize, BOOL bFixedFont)
 {
 	HRESULT hr;
-	UINT cch = 0;
+	UINT_PTR cch = 0;
 #	define DESCRIPTION_LENGTH 255
 
 	if (!szBuffer && cchBufferSize) return E_INVALIDARG;

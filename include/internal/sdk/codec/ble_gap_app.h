@@ -33,6 +33,10 @@
 #include "ble.h"
 #include "ble_gap.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
 * @brief Encodes @ref sd_ble_gap_address_get command request.
 *
@@ -1317,4 +1321,7 @@ uint32_t ble_gap_lesc_oob_data_get_rsp_dec(uint8_t const * const       p_buf,
     ble_gap_lesc_oob_data_t  * *pp_oobd_own,
     uint32_t * const            p_result_code);
 /** @} */
+#ifdef __cplusplus
+}
+#endif
 #endif

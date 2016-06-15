@@ -164,5 +164,7 @@ If you already have Homebrew installed, make sure it's up to date with:
 
 Once Homebrew is installed you can use the `brew` command on a terminal to install
 
-    $ brew install boost
+    $ brew install boost --universal
+
+This will download the boost source and compile it, so it might take a while.
 
