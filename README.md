@@ -63,7 +63,7 @@ The serial port will appear as `/dev/ttyACMx`. By default the port is not access
 
     sudo usermod -G dialout <username>
 
-#### OS X
+#### macOS (OS X)
 
 The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
@@ -74,7 +74,7 @@ repositories above that depend on pc-ble-driver.
 
 ### Obtain the Boost source code
 
-Note: This step is not required for OS X.
+Note: This step is not required for macOS (OS X).
 
 Use the following link to download the Boost source code:
 
@@ -87,7 +87,7 @@ For example on Windows assuming you've unpacked Boost in `c:\boost\boost_1_xx_y`
 
     BOOST_ROOT = "c:\boost\boost_1_xx_y"
 
-And on Linux or OS X assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
+And on Linux or macOS (OS X) assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
     BOOST_ROOT = "~/boost/boost_1_xx_y"
 
@@ -152,7 +152,7 @@ Open a terminal window and issue the following commands:
 
 If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86_32` when building the 32-bit version and `--stagedir=./stage/x86_64` when building the 64-bit one, and they will be placed in `stage/x86_32` and `stage/x86_64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR="~/boost/boost_1_xx_y/stage/x86_XX/lib`.
 
-#### OS X 10.11 and later
+#### macOS (OS X) 10.11 and later
 
 Install Xcode from the App Store.
 
