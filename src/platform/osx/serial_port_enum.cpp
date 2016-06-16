@@ -171,7 +171,7 @@ static void ExtractUsbInformation(serial_device_t *serialDevice, IOUSBDeviceInte
 
     if (KERN_SUCCESS == kernResult)
     {
-        snprintf(serialDevice->locationId, MAXPATHLEN, "0x%08x", locationID);
+        snprintf(serialDevice->locationId, MAXPATHLEN, "0x%08x", (unsigned int) locationID);
     }
 
     UInt16 vendorID;
