@@ -32,7 +32,7 @@ extern "C" {
  * @retval NRF_SUCCESS  The serial ports were enumerated successfully.
  * @retval NRF_ERROR    There was an error enumerating the serial ports.
  */
-SD_RPC_API uint32_t sd_rpc_serial_port_enum(sdp_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size);
+SD_RPC_API uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size);
 
 /**@brief Create a new serial physical layer.
  *
