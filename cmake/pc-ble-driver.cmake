@@ -61,5 +61,11 @@ set(PC_BLE_DRIVER_OBJ_LIB "pc_ble_driver_obj")
 set(PC_BLE_DRIVER_STATIC_LIB "pc_ble_driver_static")
 set(PC_BLE_DRIVER_SHARED_LIB "pc_ble_driver_shared")
 
+# pc-ble-driver root folder
+set(PC_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
+
+# pc-ble-driver hex folder
+set(PC_BLE_DRIVER_HEX_DIR ${PC_BLE_DRIVER_ROOT_DIR}/hex)
+
 # pc-ble-driver include paths
-set(PC_BLE_DRIVER_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include ${CMAKE_CURRENT_LIST_DIR}/../include/internal/transport)
+set(PC_BLE_DRIVER_INCLUDE_DIR ${PC_BLE_DRIVER_ROOT_DIR}/include ${PC_BLE_DRIVER_ROOT_DIR}/../include/internal/transport)
