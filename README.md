@@ -11,10 +11,10 @@ The library is included as a submodule by the repositories above, and it should 
 
 ## SoftDevice and IC Support
 
-The library is compatible with the following SoftDevice API version and nRF5x ICs:
+The library is compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* s130_nrf51_2.x.x (nRF51 series)
-* s132_nrf52_2.x.x (nRF52 series)
+* s130_nrf51_2.x.x (nRF51 series ICs)
+* s132_nrf52_2.x.x (nRF52 series ICs)
 
 The .hex files included in the `hex/` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
@@ -24,7 +24,9 @@ The .hex files included in the `hex/` folder include both the SoftDevice and the
 * GNU/Linux (Ubuntu tested) 32 and 64-bit
 * macOS (OS X) 32 and 64-bit
 
-## Installing drivers and tools
+## Hardware setup
+
+### Installing drivers and tools
 
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
@@ -38,7 +40,7 @@ Additionally to flash the connectivity firmware you will need `nrfjprog` which i
 * [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
 * [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
-## Flashing the connectivity firmware
+### Flashing the connectivity firmware
 
 To use this library you will need to flash the connectivity firmware on a nRF5x IC
 
@@ -47,24 +49,25 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
     $ nrfjprog -f NRF5<x> -e
     $ nrfjprog -f NRF5<x> --program hex/connectivity_115k2_with_s13x_2.<x>.<x>.hex
 
-## J-Link USB CDC serial ports
+### J-Link USB CDC serial ports
 
 After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically
 
-### Windows
+#### Windows
 
 The serial port will appear as `COMxx`. Simply check the "Ports (COM & LPT)" section in the Device Manager.
 
-### Ubuntu Linux
+#### Ubuntu Linux
 
 The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users, type this command to add your user to the `dialout` group to give it acces to the serial port:
 
     sudo usermod -G dialout <username>
 
-### OS X
+#### OS X
 
+The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
-## Installing and building Boost
+## Building Boost
 
 The Boost static libraries required by this drivers must be built before you can build any of the
 repositories above that depend on pc-ble-driver.
