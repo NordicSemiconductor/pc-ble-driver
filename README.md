@@ -9,6 +9,10 @@ It is a C/C++ library that can be interfaced directly but it is more often used 
 
 The library is included as a submodule by the repositories above, and it should be built as part of them.
 
+## License
+
+See the [license file](LICENSE) for details.
+
 ## SoftDevice and IC Support
 
 The library is compatible with the following SoftDevice API versions and nRF5x ICs:
