@@ -27,13 +27,7 @@ else()
     message(STATUS "Building ${ARCH_BITS}-bit targets with ${COMPILER_ARCH_BITS}-bit toolchain.")
 endif()
 
-
-#set(CMAKE_EXE_LINKER_FLAGS "/machine:x64")
-#set(CMAKE_EXE_LINKER_FLAGS "/machine:x86")
-#set(CMAKE_EXE_LINKER_FLAGS "-m32")
-#set(CMAKE_EXE_LINKER_FLAGS "-m64")
-
-
+message("Building with build type: ${CMAKE_BUILD_TYPE}.")
 
 # Compiler specific
 if(MSVC)
