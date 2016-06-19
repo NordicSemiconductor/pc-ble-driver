@@ -30,7 +30,7 @@ else()
 endif()
 
 if(NOT MSVC)
-    message("Building with build type: ${CMAKE_BUILD_TYPE}.")
+    message(STATUS "Building with build type: ${CMAKE_BUILD_TYPE}.")
 endif()
 
 # Compiler specific
