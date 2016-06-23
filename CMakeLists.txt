@@ -1,91 +1,112 @@
-# Copyright (c) 2015 Nordic Semiconductor. All Rights Reserved.
-#
-# The information contained herein is property of Nordic Semiconductor ASA.
-# Terms and conditions of usage are described in detail in NORDIC
-# SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
-# Licensees are granted free, non-transferable use of the information. NO
-# WARRANTY of ANY KIND is provided. This heading must NOT be removed from
-# the file.
+cmake_minimum_required(VERSION 2.8.12)
 
-cmake_minimum_required (VERSION 2.6)
+include (cmake/pc-ble-driver.cmake)
 
-# Do not allow in-source builds
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-    message(FATAL_ERROR "Prevented in-source build. Build out-of-source instead.")
-endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-
-# Environment settings (nrf51_sdk location)
-if("${NRF51_SDK_PATH}" STREQUAL "")
-    message(FATAL_ERROR "NRF51_SDK_PATH must be set to a valid SDK path.")
-endif()
-
-set (nrf51_sdk ${NRF51_SDK_PATH})
-
-# Project root path
-set (repo_root_path ${CMAKE_SOURCE_DIR})
-
-# Check if necessary parameters is passed to cmake
-if("${SERIALIZATION_VERSION}" STREQUAL "")
-    message(FATAL_ERROR "SERIALIZATION_VERSION not set. Not able to continue build. Please set with -DSERIALIZATION_VERSION=X.Y.Z invoking cmake.")
-endif()
-
-if("${SERIALIZATION_REVISION}" STREQUAL "")
-    message(FATAL_ERROR "SERIALIZATION_REVISION not set. Not able to continue build. Please set with -DSERIALIZATION_REVISION=X when invoking cmake.")
-endif()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options(
-        -g -O0
-    )
-
-    add_definitions(
-        -DDEBUG
-    )
-endif()
-
-
-# Remove nRF51 hardware specific files from the SDK that prevents compilation.
-# Since the C++ preprocessor will try to search the local directory first before searching
-# other directories the we have to remove the files below. That way the preprocessor will use
-# nrf_svc.h from override folder instead.
-file(REMOVE ${nrf51_sdk}/components/softdevice/s130/headers/nrf_svc.h) # included by ${nrf51_sdk_components}/softdevice/s130/headers/ble_gap.h
-
-# S130 specific include paths
-set (nrf51_sdk_components ${nrf51_sdk}/components)
-set (nrf51_sdk_codecs ${nrf51_sdk_components}/serialization/application/codecs)
-set (nrf51_sdk_codecs_s130 ${nrf51_sdk_codecs}/s130)
-
-set (s130_includes
-    ${repo_root_path}/driver/inc
-    ${repo_root_path}/driver/inc_override
-    ${nrf51_sdk}/framework/cunit/include_override
-    ${nrf51_sdk_components}/drivers_nrf/hal
-    ${nrf51_sdk_components}/drivers_nrf/uart
-    ${nrf51_sdk_components}/libraries/crc16
-    ${nrf51_sdk_components}/libraries/scheduler
-    ${nrf51_sdk_components}/libraries/timer
-    ${nrf51_sdk_components}/libraries/util
-    ${nrf51_sdk_components}/serialization/application/hal
-    ${nrf51_sdk_components}/serialization/application/transport
-    ${nrf51_sdk_components}/serialization/common
-    ${nrf51_sdk_components}/serialization/common/transport
-    ${nrf51_sdk_components}/serialization/common/transport/ser_phy
-    ${nrf51_sdk_components}/softdevice/common/softdevice_handler
-    ${nrf51_sdk_components}/toolchain/gcc
-    ${nrf51_sdk_components}/toolchain
-    ${nrf51_sdk_components}/device
-    ${nrf51_sdk_components}/drivers_nrf/hal
-    ${nrf51_sdk_codecs_s130}/serializers
-    ${nrf51_sdk_components}/serialization/common/struct_ser/s130
-    ${nrf51_sdk_components}/softdevice/s130 #needed for '#include "headers/nrf_soc.h"'
-    ${nrf51_sdk_components}/softdevice/s130/headers
+# Include boost as a system include so that the compiler do not nag about issues in boost header files
+include_directories (
+    src/serialization
+    include
+    include/internal
+    include/internal/transport
+    include/internal/sdk/codec
+    include/internal/sdk/misc
+    SYSTEM ${Boost_INCLUDE_DIRS}
 )
 
-# Add subdirectories
-if("${ARTIFACT}" STREQUAL "driver")
-    add_subdirectory(driver)
-elseif("${ARTIFACT}" STREQUAL "binding")
-    add_subdirectory(python)
+file(GLOB LIB_BASE_C_SRC_FILES "src/*.c")
+file(GLOB LIB_BASE_CPP_SRC_FILES "src/*.cpp")
+
+file(GLOB_RECURSE LIB_SDK_C_SRC_FILES "src/sdk/*.c")
+file(GLOB_RECURSE LIB_SDK_CPP_SRC_FILES "src/sdk/*.cpp")
+
+file(GLOB LIB_TRANSPORT_C_SRC_FILES "src/transport/*.c")
+file(GLOB LIB_TRANSPORT_CPP_SRC_FILES "src/transport/*.cpp")
+
+if(WIN32)
+    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/win/*.c")
+    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/platform/win/*.cpp")
+elseif(APPLE)
+    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/macos_osx/*.c")
+    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/platform/macos_osx/*.cpp")
 else()
-    message(FATAL_ERROR "ARTIFACT variable has to be specified, it can be driver or binding")
+    # Assume Linux
+    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/platform/linux/*.c")
+    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/platform/linux/*.cpp")
 endif()
+
+set(LIB_C_SRC_FILES ${LIB_BASE_C_SRC_FILES}
+                    ${LIB_SDK_C_SRC_FILES}
+                    ${LIB_TRANSPORT_C_SRC_FILES}
+)
+
+set(LIB_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
+                      ${LIB_SDK_CPP_SRC_FILES}
+                      ${LIB_TRANSPORT_CPP_SRC_FILES}
+)
+
+
+set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
+
+# Add definitions used by compiler when compiling source files
+add_definitions(
+    -DSD_RPC_EXPORTS
+    -DHCI_LINK_CONTROL # Adds support for Link Control packets according to the HCI standard
+)
+
+# Force .c files to be compiled with the C++ compiler
+if(NOT APPLE)
+    set_source_files_properties(
+        ${LIB_C_SRC_FILES}
+        PROPERTIES
+        LANGUAGE CXX
+    )
+endif()
+
+if(WIN32)
+# Disable CRT Warnings with Visual Studio
+set_source_files_properties(
+    ${LIB_PLATFORM_C_SRC_FILES}
+    PROPERTIES
+    COMPILE_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
+)
+set_source_files_properties(
+    ${LIB_PLATFORM_CPP_SRC_FILES}
+    PROPERTIES
+    COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
+)
+endif()
+
+# Object library, from which both shared and static will be built
+add_library(${PC_BLE_DRIVER_OBJ_LIB} OBJECT ${LIB_C_SRC_FILES} ${LIB_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
+
+# shared libraries need PIC
+set_property(TARGET ${PC_BLE_DRIVER_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+# actual shared and static libraries built from the same object files
+add_library(${PC_BLE_DRIVER_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
+add_library(${PC_BLE_DRIVER_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_OBJ_LIB}>)
+
+# build test_uart executable
+add_executable(test_uart test/test_uart.cpp)
+
+# Additional special linkage libraries
+if(WIN32)
+elseif(APPLE)
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
+    target_link_libraries(${PC_BLE_DRIVER_SHARED_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
+    set_property(TARGET ${PC_BLE_DRIVER_STATIC_LIB} PROPERTY MACOSX_RPATH ON)
+    set_property(TARGET ${PC_BLE_DRIVER_SHARED_LIB} PROPERTY MACOSX_RPATH ON)
+else()
+    # Assume Linux
+    target_link_libraries(${PC_BLE_DRIVER_STATIC_LIB} PRIVATE "udev" "pthread")
+    target_link_libraries(${PC_BLE_DRIVER_SHARED_LIB} PRIVATE "udev" "pthread")
+    target_link_libraries(test_uart PRIVATE "pthread")
+endif()
+
+
+# Specify libraries to link serialization library with
+target_link_libraries (${PC_BLE_DRIVER_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
+target_link_libraries (${PC_BLE_DRIVER_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
+
+
+target_link_libraries(test_uart PRIVATE ${Boost_LIBRARIES})

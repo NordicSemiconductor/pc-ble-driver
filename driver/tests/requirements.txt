@@ -1,2 +1,0 @@
-behave==1.2.5
-nrfutil == 0.2.2

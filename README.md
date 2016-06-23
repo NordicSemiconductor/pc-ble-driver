@@ -1,176 +1,177 @@
-# nRF51 Bluetooth Smart GATT/GAP Driver
+# nRF5 Bluetooth Low Energy GAP/GATT driver
 
 ## Introduction
-The nRF51 Bluetooth Smart GATT/GAP Driver (from now on called the Driver) consists of a standard C dynamic library that lets a PC application set up and interact with an nRF51 SoftDevice through API function calls. The library mirrors the nRF51 S130 SoftDevice API and makes it available to the PC application.
+pc-ble-driver is a static and shared library that provides serial port communication (using SoftDevice API serialization) to an nRF5x IC running the connectivity firmware included.
+It is a C/C++ library that can be interfaced directly but it is more often used by higher level bindings:
 
-Commands sent from the library are encoded and sent over UART to the nRF51 chip. The connectivity application running on the nRF51 chip decodes the commands and feeds them to the SoftDevice. Command responses and events are encoded and sent from the nRF51 chip to the PC library where they are decoded.
+* [pc-ble-driver-js  JavaScript bindings](https://github.com/NordicSemiconductor/pc-ble-driver-js)
+* [pc-ble-driver-py  Python bindings](https://github.com/NordicSemiconductor/pc-ble-driver-py)
 
-The library makes it possible to create applications on a PC that, in code, can be similar to applications that are running on the nRF51 chip.
+The library is included as a submodule by the repositories above, and it should be built as part of them.
 
-Having this kind of API gives the following benefits:
+## License
 
-* Setting up a peer device for a Device Under Test (DUT) using a test script.
-* Coherent BLE APIs on a PC and an nRF51 chip.
-* Creating prototype and test applications for an nRF51 chip on a PC.
-* Migrating code between an nRF51 chip and a PC.
+See the [license file](LICENSE) for details.
 
+## SoftDevice and IC Support
 
-## Disclaimer
-No guarantees are given regarding stability or backward compatibility. Interfaces are subject to change.
+The library is compatible with the following SoftDevice API versions and nRF5x ICs:
 
-# Building from source
+* s130_nrf51_2.x.x (nRF51 series ICs)
+* s132_nrf52_2.x.x (nRF52 series ICs)
 
-## Dependencies
-The following dependencies are required for building the Driver:
+The .hex files included in the `hex/` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
-* [Boost](http://www.boost.org/users/download) (=1.56.0)
-* [cmake](http://www.cmake.org/cmake/resources/software.html) (>=2.8.X)
-* [Python](http://www.python.org/download/) (>=2.7.6, <3.0.0)
-* [Swig](http://www.swig.org/download.html) (=2.0.12)
-* git client
+## Operating system support
 
-## Get the source code
-The source code is available from GitHub at the following URL:
-<https://github.com/NordicSemiconductor/pc-ble-driver.git>
+* Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
+* GNU/Linux (Ubuntu tested) 32 and 64-bit
+* macOS (OS X) 32 and 64-bit
 
+## Hardware setup
 
-## Setup of the build environment 
+### Installing drivers and tools
 
+This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
+To set up the required J-Link drivers simply download and install the version matching you operating system:
 
-### Windows
-- Download the [MinGW] (http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.8.2/threads-posix/dwarf/) Compiler Suite.
-- Install MinGW Compiler Suite according to the [instructions](http://www.mingw.org/wiki/InstallationHOWTOforMinGW).
-- Verify that gnu patch utility is available in PATH. (e.g. c:\program files(x86)\git\bin) 
-- Install cmake according to the [installation instructions for Windows](http://www.cmake.org/install/).
-- Install [Microsoft Visual C++ Compiler for Python](http://www.microsoft.com/en-us/download/confirmation.aspx?id=44266).
-- Extract, compile and install Boost. We assume Boost is extracted into c:\Boost\boost_1_56_0. Issue the following commands in the directory:
+* [Segger J-Link Downloads](https://www.segger.com/jlink-software.html)  
 
+Additionally to flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
-    bootstrap
-    
-    b2 toolset=gcc link=static runtime-link=shared threading=multi
+* [nRF5x Command-Line Tools for Windows](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Win32/33444)
+* [nRF5x Command-Line Tools for Linux 32-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux32/52615)
+* [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
+* [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
-### Ubuntu Linux
-Run the following command to install compiler, dependencies and tools:
+### Flashing the connectivity firmware
 
-    curl -L https://raw.githubusercontent.com/NordicSemiconductor/pc-ble-driver/master/scripts/setup-ubuntu-linux.sh | sh
-    
-You will be asked for root password during this process.
+To use this library you will need to flash the connectivity firmware on a nRF5x IC
 
-### OS X
-Run the following command to install compiler, dependencies and tools:
+Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
-    curl -L https://raw.githubusercontent.com/NordicSemiconductor/pc-ble-driver/master/scripts/setup-osx.sh | sh
+    $ nrfjprog -f NRF5<x> -e
+    $ nrfjprog -f NRF5<x> --program hex/connectivity_115k2_with_s13x_2.<x>.<x>.hex
 
-You will be asked for root password during this process.
+### J-Link USB CDC serial ports
 
-## Compilation and packaging of the Driver
-- Create a build directory outside the source directory.
-- Create a directory to store Nordic Semiconductor software that the Driver depends on.
-- Download the necessary Nordic Semiconductor dependencies and compile the Driver and Python binding with the command below.
+After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically
 
+#### Windows
 
-    mkdir build
-    
-    mkdir deps
-    
-    cd build
+The serial port will appear as `COMxx`. Simply check the "Ports (COM & LPT)" section in the Device Manager.
 
-    python ..\pc-ble-driver\scripts\build.py -srp \absolute_path\my_deps_directory -d -b (for Unix systems, replace \ with /)
+#### Ubuntu Linux
 
-- To package the release into a zip file, run the following command:
+The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users, type this command to add your user to the `dialout` group to give it acces to the serial port:
 
+    sudo usermod -G dialout <username>
 
-    python ..\pc-ble-driver\scripts\build.py -srp \absolute_path\my_deps_directory -p (for Unix systems, replace \ with /)
+#### macOS (OS X)
 
-- If you later want to run the Behave tests you will need to compile all the examples, to do this run this command:
+The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
+## Building Boost
 
-    python ..\pc-ble-driver\scripts\build.py -srp \absolute_path\my_deps_directory -e (for Unix systems, replace \ with /)
+The Boost static libraries required by this drivers must be built before you can build any of the
+repositories above that depend on pc-ble-driver.
 
-## Running of tests
-We have different types of tests:
+### Obtain the Boost source code
 
-- BDD tests
-- Packaging tests
-- Integration/unit tests (without hardware)
-- Integration tests (with hardware)
+Note: This step is not required for macOS (OS X).
 
+Use the following link to download the Boost source code:
 
-### Packaging and BDD tests
-Setup:
+* [Boost](http://www.boost.org/users/download) (>=1.54.0)
 
-- Set the environment variable PYTHONUNBUFFERED to something or else Python will buffer stdout, which will make the BDD tests fail.
-- Set the environment variable NORDICSEMI_NRF51_BLE_DRIVER_BUILD_PATH to the build directory of the Driver
-- Set the environment variable NORDICSEMI_TARGET_SETUP to the file name of the test targets configuration.
-The test targets configuration contains information about nRF5X DK UART port and the drive letter it has been assigned to. Below is an example of a test_targets.json file:
+- Download and extract Boost to a folder of your choice.
+- Set the environment variable `BOOST_ROOT` to the path where you have extracted Boost.
 
+For example on Windows assuming you've unpacked Boost in `c:\boost\boost_1_xx_y`:
 
-    {
-        "targets":
-        [
-            {
-                "id": 1,
-                "drive": "E:\\",
-                "serial_port": "COM8",
-                "pca": "PCA10028",
-                "segger_sn": "680595231"
-            },
-            {
-                "id": 2,
-                "drive": "D:\\",
-                "serial_port": "COM7",
-                "pca": "PCA10028",
-                "segger_sn": "681768567"
-            }
-        ]
-    }
+    BOOST_ROOT = "c:\boost\boost_1_xx_y"
 
-First, build and package the driver.
-Then, issue the following command to run the packaging tests:
+And on Linux or macOS (OS X) assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
-    cd <ROOT>\driver\tests
-    python setup.py test
+    BOOST_ROOT = "~/boost/boost_1_xx_y"
 
-There is a bug in Behave that prevents us from running the Behave tests from setup.py. A workaround is to run BDD tests from the bdd directory:
+#### Windows 
 
-    cd <ROOT>\driver\tests\bdd
-    behave
+Install Microsoft Visual Studio. The following versions supported are:
 
-The BDD tests require nRF51 hardware connected to the computer. A combination of two devices of the following is required, two of one kind or one of each:
+* Visual Studio 2013 (MSVC 12.0)
+* Visual Studio 2015 (MSVC 14.0)
 
-- nRF51 Development Kit (pca10028), or
-- nRF51 Development Dongle (pca10031)
+Open a Microsoft Visual Studio Command Prompt and issue the following commands:
 
+    > cd %BOOST_ROOT%
+    > bootstrap.bat
+    > b2 toolset=msvc-<VV.V> address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
-### Integration/unit tests
+**Note**: If you intend to build a 64-bit version of Boost, and depending on the version of Visual Studio you use, you might need to open a 64-bit command prompt such as
+"Visual Studio 2015 x86 x64 Cross Tools Command Prompt" or similar, or run `vcvarsall.bat x86_amd64` or `setenv.cmd" /Release /x64`.
 
-First, build the driver.
-Then, issue the following command to run the integration/unit tests:
+**Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the Boost documentation 
+to find the version of the MSVC that you need to provide using the `toolset=` option.
 
-    python ..\pc-ble-driver\scripts\build.py -srp <ROOT>\my_deps_directory -t (for Unix systems, replace \ with /)
+**Note**: Select 32 or 64-bit with the `address-model=` option.
 
-#### uart_cpp_test
-For the unit test uart_cpp_test, a set of loopback serial ports is required. You can achieve this by using:
+**Note**: Use `dumpbin /headers <file>` to check whether a particular object file is 32 or 64-bit.
 
-- a pair of usb-to-serial adapters interconnected with a null-modem cable
-- a pair of virtual serial ports (emulated serial ports) configured to be interconnected
+##### Examples
 
-uart_cpp_test also requires the environment variables TESTSERIALPORT1 and TESTSERIALPORT2 to be set to the serial port names:
+Build 32-bit Boost with Visual Studio 2013:
 
-    Example values:
-    TESTSERIALPORT1=COM20
-    TESTSERIALPORT2=COM21
+    > b2 toolset=msvc-12.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
-If you want to **disable uart_cpp_test**, comment out the test in the file *driver/tests/CMakeLists.txt*:
+Build 64-bit Boost with Visual Studio 2015:
 
-    #add_test(NAME uart_cpp_test COMMAND "uart_cpp_test" ${test_params})
+    > b2 toolset=msvc-14.0 address-model=64 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
+##### Side-by-side 32 and 64-bit versions
 
-## Platform specific notes
-- Linux:
-    - udev rules for tty symlink and usb mount points are found in folder tests/config/linux/. These rules must be put in /etc/udev/rules.d/
-    - Remember to set the environment variable LD_LIBRARY_PATH to directories containing the libs*_nrf51_ble_driver.so so that the tests find the libs*_nrf51_ble_driver.so
-- OSX:
-    - We have not discovered yet how to force the mount point for JLink devices on MacOSX, because of which the tty/mount point location will come out of sync
-    - Remember to set the environment variable DYLD_LIBRARY_PATH to directories containing the libs*_nrf51_ble_driver.dylib so that the tests find the libs*_nrf51_ble_driver.dylib
+If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86_32` when building the 32-bit version and `--stagedir=./stage/x86_64` when building the 64-bit one, and they will be placed in `stage\x86_32\lib` and `stage\x86_64\lib` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR="c:\boost\boost_1_xx_y\stage\x86_XX\lib`.
+
+#### Ubuntu Linux
+
+Install the required packages to build Boost:
+
+    sudo apt-get install git make gcc g++
+
+Additionally if you want to build non-native binaries (for example 32-bit binaries on a 64-bit Ubuntu installation):
+
+    sudo apt-get install gcc-multilib
+
+Open a terminal window and issue the following commands:
+
+    $ cd $BOOST_ROOT
+    $ ./bootstrap.sh
+    $ ./b2 toolset=gcc cxxflags=-fPIC cflags=-fPIC address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
+
+**Note**: Select 32 or 64-bit with the `address-model=` option.
+
+**Note**: Use `objdump -f <file>` to check whether a particular object file is 32 or 64-bit.
+
+##### Side-by-side 32 and 64-bit versions
+
+If you want to be able to have both the 32 and 64-bit versions of Boost available, add `--stagedir=./stage/x86_32` when building the 32-bit version and `--stagedir=./stage/x86_64` when building the 64-bit one, and they will be placed in `stage/x86_32` and `stage/x86_64` respectively. Later on you when building repositories that depend on this one, you will be able to point CMake the correct version of the libraries by using `-DBOOST_LIBRARYDIR="~/boost/boost_1_xx_y/stage/x86_XX/lib`.
+
+#### macOS (OS X) 10.11 and later
+
+Install Xcode from the App Store.
+
+The simplest way to install Boost is to use Homebrew. If you don't have Homebrew installed simply run on a terminal:
+
+    $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+If you already have Homebrew installed, make sure it's up to date with:
+  
+    $ brew update
+    $ brew upgrade
+
+Once Homebrew is installed you can use the `brew` command on a terminal to install
+
+    $ brew install boost --universal
+
+This will download the boost source and compile it, so it might take a while.
+

@@ -1,0 +1,482 @@
+diff --git a/components/libraries/scheduler/app_scheduler.h b/components/libraries/scheduler/app_scheduler.h
+--- a/components/libraries/scheduler/app_scheduler.h
++++ b/components/libraries/scheduler/app_scheduler.h
+@@ -140,6 +140,12 @@ uint32_t app_sched_event_put(void *                    p_event_data,
+  * @return Maximum number of events in queue observed so far.
+  */
+ uint16_t app_sched_queue_utilization_get(void);
++
++/**@brief Function for getting the current amount of free space in the queue.
++ *
++ * @return Number of events that can be stored in the queue.
++ */
++uint16_t app_sched_queue_space_get(void);
+ #endif
+ 
+ #ifdef APP_SCHEDULER_WITH_PAUSE
+diff --git a/components/libraries/scheduler/app_scheduler_serconn.c b/components/libraries/scheduler/app_scheduler_serconn.c
+--- a/components/libraries/scheduler/app_scheduler_serconn.c
++++ b/components/libraries/scheduler/app_scheduler_serconn.c
+@@ -99,7 +99,16 @@ uint32_t app_sched_init(uint16_t event_size, uint16_t queue_size, void * p_event
+ 
+ 
+ #ifdef APP_SCHEDULER_WITH_PROFILER
+-static void check_queue_utilization(void)
++uint16_t app_sched_queue_space_get()
++{
++    uint16_t start = m_queue_start_index;
++    uint16_t end   = m_queue_end_index;
++    uint16_t free_space = m_queue_size - ((end >= start) ?
++                           (end - start) : (m_queue_size + 1 - start + end));
++    return free_space;
++}
++
++static __INLINE void check_queue_utilization(void)
+ {
+     uint16_t start = m_queue_start_index;
+     uint16_t end   = m_queue_end_index;
+diff --git a/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c b/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
+--- a/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
++++ b/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
+@@ -586,7 +586,8 @@ static uint32_t gatts_attr_get_rsp_dec(const uint8_t * p_buffer, uint16_t length
+     const uint32_t err_code = ble_gatts_attr_get_rsp_dec(
+         p_buffer,
+         length,
+-        (ble_gatts_attr_md_t **)&mp_out_params[0],
++        (ble_uuid_t **)&mp_out_params[0],
++        (ble_gatts_attr_md_t **)&mp_out_params[1],
+         &result_code);
+ 
+     APP_ERROR_CHECK(err_code);
+@@ -603,7 +604,8 @@ uint32_t sd_ble_gatts_attr_get(uint16_t              handle,
+     uint32_t  buffer_length = 0;
+ 
+     tx_buf_alloc(&p_buffer, (uint16_t *)&buffer_length);
+-    mp_out_params[0] = p_md;
++    mp_out_params[0] = p_uuid;
++    mp_out_params[1] = p_md;
+ 
+     const uint32_t err_code = ble_gatts_attr_get_req_enc(handle,
+                                                          p_uuid,
+diff --git a/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c b/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
+--- a/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
++++ b/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
+@@ -38,7 +38,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
+     err_code = uint16_t_enc(&handle, p_buf, total_len, &index);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+-    err_code = cond_field_enc(p_uuid, p_buf, total_len, &index, ble_uuid_t_enc);
++    err_code = cond_field_enc(p_uuid, p_buf, total_len, &index, NULL);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+     err_code = cond_field_enc(p_md, p_buf, total_len, &index, NULL);
+@@ -52,6 +52,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
+ 
+ uint32_t ble_gatts_attr_get_rsp_dec(uint8_t const * const  p_buf,
+                                     uint32_t               packet_len,
++                                    ble_uuid_t          ** pp_uuid,
+                                     ble_gatts_attr_md_t ** pp_md,
+                                     uint32_t * const       p_result_code)
+ {
+@@ -76,6 +77,8 @@ uint32_t ble_gatts_attr_get_rsp_dec(uint8_t const * const  p_buf,
+         return NRF_SUCCESS;
+     }
+ 
++    err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_uuid,
++            ble_uuid_t_dec);
+     err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_md,
+             ble_gatts_attr_md_dec);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
+--- a/components/serialization/common/ser_config.h
++++ b/components/serialization/common/ser_config.h
+@@ -66,8 +66,8 @@
+ 
+ /** UART transmission parameters */
+ #define SER_PHY_UART_FLOW_CTRL          APP_UART_FLOW_CONTROL_ENABLED
+-#define SER_PHY_UART_PARITY             true
+-#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
++#define SER_PHY_UART_PARITY             false
++#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud115200
+ 
+ /** Find UART baudrate value based on chosen register setting. */
+ #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
+diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
+--- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
++++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
+@@ -34,9 +34,9 @@
+ /* UART configuration */
+ #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOW
+ 
+-#define SER_PHY_UART_RX                         SER_CON_RX_PIN
+-#define SER_PHY_UART_TX                         SER_CON_TX_PIN
+-#define SER_PHY_UART_CTS                        SER_CON_CTS_PIN
+-#define SER_PHY_UART_RTS                        SER_CON_RTS_PIN
++#define SER_PHY_UART_RX                         RX_PIN_NUMBER
++#define SER_PHY_UART_TX                         TX_PIN_NUMBER
++#define SER_PHY_UART_CTS                        CTS_PIN_NUMBER
++#define SER_PHY_UART_RTS                        RTS_PIN_NUMBER
+ 
+ #endif //SER_PHY_CONFIG_CONN_NRF51_H__
+diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+--- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+@@ -37,6 +37,8 @@
+                                  (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
+ #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
+ 
++#define PKT_TYPE_RESET 5
++
+ #define TX_EVT_QUEUE_SIZE            16
+ #define RX_EVT_QUEUE_SIZE            16
+ #define PKT_TYPE_VENDOR_SPECIFIC     14                                                /**< Packet type vendor specific. */
+@@ -756,6 +758,11 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
+             event.evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer,
+             event.evt.ser_phy_slip_evt.evt_params.received_pkt.num_of_bytes);
+ 
++        if (packet_type == PKT_TYPE_RESET)
++        {
++            NVIC_SystemReset();
++        }
++
+         if (packet_type == PKT_TYPE_ACK )
+         {
+             DEBUG_EVT_SLIP_ACK_RXED(0);
+diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
+--- a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
++++ b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
+@@ -621,6 +621,12 @@ uint32_t conn_mw_ble_gap_sec_params_reply(uint8_t const * const p_rx_buf,
+                                                 &p_sec_keyset);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
++    if (p_sec_keyset == NULL)
++    {
++        //If no keyset was sent destroy the context.
++        conn_ble_gap_sec_context_destroy(*p_conn_handle);
++    }
++
+     sd_err_code = sd_ble_gap_sec_params_reply(*p_conn_handle, sec_status, p_sec_params, p_sec_keyset);
+ 
+     err_code = ble_gap_sec_params_reply_rsp_enc(sd_err_code, p_tx_buf, p_tx_buf_len, p_sec_keyset);
+diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
+--- a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
++++ b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
+@@ -430,7 +430,7 @@ uint32_t conn_mw_ble_gatts_attr_get(uint8_t const * const p_rx_buf,
+ 
+     sd_err_code = sd_ble_gatts_attr_get(handle, p_uuid, p_md);
+ 
+-    err_code = ble_gatts_attr_get_rsp_enc(sd_err_code, p_tx_buf, p_tx_buf_len, p_md);
++    err_code = ble_gatts_attr_get_rsp_enc(sd_err_code, p_tx_buf, p_tx_buf_len, p_uuid, p_md);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+     return err_code;
+diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
+--- a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
++++ b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
+@@ -80,4 +80,5 @@ static const conn_mw_item_t conn_mw_item[] = {
+     {SD_BLE_GATTS_RW_AUTHORIZE_REPLY, conn_mw_ble_gatts_rw_authorize_reply},
+     {SD_BLE_GATTS_SYS_ATTR_SET, conn_mw_ble_gatts_sys_attr_set},
+     {SD_BLE_GATTS_SYS_ATTR_GET, conn_mw_ble_gatts_sys_attr_get},
++    {SD_BLE_USER_MEM_REPLY, conn_mw_ble_user_mem_reply},
+ };
+diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
+--- a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
++++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
+@@ -46,18 +46,23 @@ uint32_t ble_gap_evt_auth_status_enc(ble_evt_t const * const p_event,
+     err_code = ble_gap_evt_auth_status_t_enc(&(p_event->evt.gap_evt.params.auth_status), p_buf, total_len, &index);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+-	if (p_event->evt.gap_evt.params.auth_status.bonded)
+-	{
+ 		// keyset is an extension of standard event data - used to synchronize keys at application
+ 		err_code = conn_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
+ 		SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
++    if (err_code == NRF_SUCCESS)
++    {
+ 		err_code = ble_gap_sec_keyset_t_enc(&(m_conn_keys_table[conn_index].keyset), p_buf, total_len, &index);
+ 		SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+ 		err_code = conn_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
+ 		SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 	}
++    else
++    {
++        err_code = NRF_SUCCESS;
++    }
++
+     *p_buf_len = index;
+     return err_code;
+ }
+diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
+--- a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
++++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
+@@ -15,6 +15,7 @@
+ #include "app_util.h"
+ #include "ble.h"
+ #include "ble_gap_struct_serialization.h"
++#include "conn_ble_gap_sec_keys.h"
+ #include "ble_gap_evt_conn.h"
+ 
+ uint32_t ble_gap_evt_disconnected_enc(ble_evt_t const * const p_event,
+@@ -45,5 +46,14 @@ uint32_t ble_gap_evt_disconnected_enc(ble_evt_t const * const p_event,
+ 
+     *p_buf_len = index;
+ 
+-    return err_code;
++    // If disconnected and context is not yet destroyed, destroy it now
++    uint32_t conn_index;
++    err_code = conn_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
++    if (err_code == NRF_SUCCESS)
++    {
++        err_code = conn_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
++        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
++    }
++
++    return NRF_SUCCESS;
+ }
+diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
+--- a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
++++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
+@@ -41,7 +41,7 @@ uint32_t ble_gatts_attr_get_req_dec(uint8_t   const * const p_buf,
+     err_code = uint16_t_dec(p_buf, packet_len, &index, p_handle);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+-    err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_uuid, ble_uuid_t_dec);
++    err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_uuid, NULL);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+     err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_md, NULL);
+@@ -56,6 +56,7 @@ uint32_t ble_gatts_attr_get_req_dec(uint8_t   const * const p_buf,
+ uint32_t ble_gatts_attr_get_rsp_enc(uint32_t               return_code,
+                                     uint8_t * const        p_buf,
+                                     uint32_t * const       p_buf_len,
++                                    ble_uuid_t           * p_uuid,
+                                     ble_gatts_attr_md_t  * p_md)
+ {
+     SER_ASSERT_NOT_NULL(p_buf);
+@@ -71,6 +72,10 @@ uint32_t ble_gatts_attr_get_rsp_enc(uint32_t               return_code,
+         return NRF_SUCCESS;
+     }
+     uint32_t index = *p_buf_len;
++
++    err_code = cond_field_enc(p_uuid, p_buf, buflen, &index, ble_uuid_t_enc);
++    SER_ASSERT(err_code == NRF_SUCCESS, err_code);
++
+     err_code = cond_field_enc(p_md, p_buf, buflen, &index, ble_gatts_attr_md_enc);
+     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+ 
+diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
+--- a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
++++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
+@@ -539,7 +539,8 @@ uint32_t ble_gatts_attr_get_req_dec(uint8_t   const * const p_buf,
+  *                                returned.
+  * @param[in,out] p_buf_len       \c in: size of \p p_buf buffer.
+  *                                \c out: Length of encoded command response packet.
+- * @param[in] p_md                Pointer to structure to be encoded.
++ * @param[in] p_uuid              Pointer to UUID structure to be encoded.
++ * @param[in] p_md                Pointer to metadata structure to be encoded.
+  *
+  * @retval NRF_SUCCESS                Encoding success.
+  * @retval NRF_ERROR_NULL             Encoding failure. NULL pointer supplied.
+@@ -548,6 +549,7 @@ uint32_t ble_gatts_attr_get_req_dec(uint8_t   const * const p_buf,
+ uint32_t ble_gatts_attr_get_rsp_enc(uint32_t               return_code,
+                                     uint8_t * const        p_buf,
+                                     uint32_t * const       p_buf_len,
++                                    ble_uuid_t           * p_uuid,
+                                     ble_gatts_attr_md_t  * p_md);
+ 
+ /**@brief Decodes @ref ble_gatts_initial_user_handle_get_req_dec command request.
+diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/components/serialization/connectivity/ser_conn_error_handling.c
+--- a/components/serialization/connectivity/ser_conn_error_handling.c
++++ b/components/serialization/connectivity/ser_conn_error_handling.c
+@@ -74,7 +74,7 @@ void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
+ 
+         /* ble_debug_assert_handler(error_code, line_num, p_file_name); */
+ 
+-#if 0
++#if 1
+         /* Reset the chip. Should be used in the release version. */
+         NVIC_SystemReset();
+ #else   /* Debug version. */
+diff --git a/components/serialization/connectivity/ser_conn_handlers.c b/components/serialization/connectivity/ser_conn_handlers.c
+--- a/components/serialization/connectivity/ser_conn_handlers.c
++++ b/components/serialization/connectivity/ser_conn_handlers.c
+@@ -124,6 +124,12 @@ void ser_conn_ble_event_handle(ble_evt_t * p_ble_evt)
+     err_code = app_sched_event_put(p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len,
+                                    ser_conn_ble_event_encoder);
+     APP_ERROR_CHECK(err_code);
++    uint16_t free_space = app_sched_queue_space_get();
++    if (!free_space)
++    {
++        // Queue is full. Do not pull new events.
++        softdevice_handler_suspend();
++    }
+ }
+ 
+ /** @} */
+diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.c b/components/softdevice/common/softdevice_handler/softdevice_handler.c
+--- a/components/softdevice/common/softdevice_handler/softdevice_handler.c
++++ b/components/softdevice/common/softdevice_handler/softdevice_handler.c
+@@ -70,6 +70,7 @@ nrf_nvic_state_t nrf_nvic_state;
+ static softdevice_evt_schedule_func_t m_evt_schedule_func;              /**< Pointer to function for propagating SoftDevice events to the scheduler. */
+ 
+ static volatile bool                  m_softdevice_enabled = false;     /**< Variable to indicate whether the SoftDevice is enabled. */
++static volatile bool                  m_suspended;                      /**< Current state of the event handler. */
+ 
+ #ifdef BLE_STACK_SUPPORT_REQD
+ // The following three definitions is needed only if BLE events are needed to be pulled from the stack.
+@@ -133,6 +134,11 @@ void intern_softdevice_events_execute(void)
+ 
+         if (!no_more_soc_evts)
+         {
++            if (m_suspended)
++            {
++                // Cancel pulling next event if event handler was suspended by user.
++                return;
++            }
+             uint32_t evt_id;
+ 
+             // Pull event from SOC.
+@@ -165,6 +171,12 @@ void intern_softdevice_events_execute(void)
+         // Fetch BLE Events.
+         if (!no_more_ble_evts)
+         {
++            if (m_suspended)
++            {
++                // Cancel pulling next event if event handler was suspended by user.
++                return;
++            }
++
+             // Pull event from stack
+             uint16_t evt_len = m_ble_evt_buffer_size;
+ 
+@@ -189,6 +201,12 @@ void intern_softdevice_events_execute(void)
+         // Fetch ANT Events.
+         if (!no_more_ant_evts)
+         {
++            if (m_suspended)
++            {
++                // Cancel pulling next event if event handler was suspended by user.
++                return;
++            }
++
+             // Pull event from stack
+             err_code = sd_ant_event_get(&m_ant_evt_buffer.channel,
+                                         &m_ant_evt_buffer.event,
+@@ -363,6 +381,45 @@ void SOFTDEVICE_EVT_IRQHandler(void)
+     }
+ }
+ 
++void softdevice_handler_suspend()
++{
++#ifdef SOFTDEVICE_PRESENT
++    ret_code_t err_code = sd_nvic_DisableIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    APP_ERROR_CHECK(err_code);
++#else
++    NVIC_DisableIRQ(SOFTDEVICE_EVT_IRQ);
++#endif
++    m_suspended = true;
++    return;
++}
++
++void softdevice_handler_resume()
++{
++    if (!m_suspended) return;
++    m_suspended = false;
++
++#ifdef SOFTDEVICE_PRESENT
++    ret_code_t err_code;
++
++    // Force calling ISR again to make sure that events not pulled previously
++    // has been processed.
++    err_code = sd_nvic_SetPendingIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    APP_ERROR_CHECK(err_code);
++    err_code = sd_nvic_EnableIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    APP_ERROR_CHECK(err_code);
++#else
++    NVIC_SetPendingIRQ((IRQn_Type)SOFTDEVICE_EVT_IRQ);
++    NVIC_EnableIRQ(SOFTDEVICE_EVT_IRQ);
++#endif
++
++    return;
++}
++
++bool softdevice_handler_is_suspended()
++{
++    return m_suspended;
++}
++
+ #if defined(BLE_STACK_SUPPORT_REQD)
+ uint32_t softdevice_enable_get_default_config(uint8_t central_links_count,
+                                               uint8_t periph_links_count,
+diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.h b/components/softdevice/common/softdevice_handler/softdevice_handler.h
+--- a/components/softdevice/common/softdevice_handler/softdevice_handler.h
++++ b/components/softdevice/common/softdevice_handler/softdevice_handler.h
+@@ -150,6 +150,23 @@ uint32_t softdevice_handler_init(nrf_clock_lf_cfg_t *              p_clock_lf_cf
+  */
+ uint32_t softdevice_handler_sd_disable(void);
+ 
++/**@brief     Function for suspending the event handler.
++ *
++ * @details   When event handler is disabled, no new events are pulled from SoftDevice.
++ *            Application can suspend pulling incoming events when its event queue is full.
++ */
++void softdevice_handler_suspend(void);
++
++/**@brief     Function for re-enabling the event handler after suspending.
++ */
++void softdevice_handler_resume(void);
++
++/**@brief Function for retrieving the information about the event handler state
++ *
++ * @retval false Event handler is active.
++ * @retval true  Event handler is suspended and events from SD will not be pulled.
++ */
++bool softdevice_handler_is_suspended(void);
+ 
+ /**@brief     Function for registering for System (SOC) events.
+  *
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+--- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+@@ -65,6 +65,15 @@ int main(void)
+     {   
+         /* Process SoftDevice events. */
+         app_sched_execute();
++        if (softdevice_handler_is_suspended())
++        {
++            // Resume pulling new events if queue utilization drops below 50%.
++            if (app_sched_queue_space_get() > (SER_CONN_SCHED_QUEUE_SIZE >> 1))
++            {
++                softdevice_handler_resume();
++                app_sched_execute();
++            }
++        }
+ 
+         /* Process received packets.
+          * We can NOT add received packets as events to the application scheduler queue because
+--- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+@@ -31,6 +31,21 @@
+ 
+ #include "ser_phy_debug_comm.h"
+ 
++typedef struct __attribute__((packed))
++{
++        uint32_t    magic_number;        /* Magic number to verify the presence of this structure in memory */
++        uint32_t    firmware_id    : 8;  /* Firmware id to differentiate variants of the software */
++        uint32_t    rfu0           : 24; /* Reserved for future use (shall remain 0xFFFFFF) */
++        uint32_t    revision_hash;       /* Unique revision identifier */
++        uint8_t     version_major;       /* Major version number */
++        uint8_t     version_minor;       /* Minor version number */
++        uint8_t     version_patch;       /* Patch version number */
++        uint8_t     description_length;  /* Length of the description field */
++        uint8_t *   description;         /* Utf-8 string description of the release */
++} version_info_t;
++
++static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 0, 0, 0, NULL};
++
+ /**@brief Main function of the connectivity application. */
+ int main(void)
+ {
