@@ -122,7 +122,36 @@ map<string, vector<string>> findSeggerSubEntries()
     return seggerSubEntries;
 }
 
-string findJlinkId(string parentIdPrefix)
+bool isValidJlinkId(string jlinkId)
+{
+    regex jlinkIdRegex("^[0-9]+$");
+    smatch match;
+    regex_match(jlinkId, match, jlinkIdRegex);
+
+    if (match.size() < 1)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool matchParentIdPrefix(string value, vector<string> parentIdPrefixCandidates)
+{
+    for (string parentIdPrefixCandidate : parentIdPrefixCandidates)
+    {
+        if (parentIdPrefixCandidate.find(value) == string::npos)
+        {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+string findJlinkId(vector<string> parentIdPrefixCandidates)
 {
     // Example keypath HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USB\VID_1366&PID_1015\000682944700, ParentIdPrefix
 
@@ -140,7 +169,12 @@ string findJlinkId(string parentIdPrefix)
                 continue;
             }
 
-            if (parentIdPrefix.find(value) == string::npos)
+            if (!isValidJlinkId(jlinkIdCandidate))
+            {
+                continue;
+            }
+
+            if (!matchParentIdPrefix(value, parentIdPrefixCandidates))
             {
                 continue;
             }
@@ -150,14 +184,15 @@ string findJlinkId(string parentIdPrefix)
     }
 
     return "";
-
 }
 
-string findParentIdPrefix(string portName)
+vector<string> findParentIdPrefixCandidates(string portName)
 {
     // Example keypath HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USB\VID_1366&PID_1015&MI_00\7&2f8ac9e0&0&0000\Device Parameters, PortName
 
     map<string, vector<string>> seggerSubEntries = findSeggerSubEntries();
+
+    vector<string> parentIdPrefixCandidates;
 
     for (auto& kv : seggerSubEntries)
     {
@@ -168,12 +203,12 @@ string findParentIdPrefix(string portName)
 
             if (value == portName)
             {
-                return parentIdPrefixCandidate;
+                parentIdPrefixCandidates.push_back(parentIdPrefixCandidate);
             }       
         }
     }
 
-    return "";
+    return parentIdPrefixCandidates;
 }
 
 string removeLeadingZeros(string jlinkId)
@@ -192,14 +227,14 @@ string removeLeadingZeros(string jlinkId)
 }
 
 string portNameToJlinkId(string port) {
-    string parentIdPrefix = findParentIdPrefix(port);
+    vector<string> parentIdPrefixCandidates = findParentIdPrefixCandidates(port);
 
-    if (parentIdPrefix == "")
+    if (parentIdPrefixCandidates.size() == 0)
     {
         return "";
     }
 
-    string jlinkId = findJlinkId(parentIdPrefix);
+    string jlinkId = findJlinkId(parentIdPrefixCandidates);
 
     if (jlinkId == "")
     {
