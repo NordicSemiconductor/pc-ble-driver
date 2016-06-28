@@ -65,7 +65,7 @@ The serial port will appear as `COMxx`. Simply check the "Ports (COM & LPT)" sec
 
 The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users, type this command to add your user to the `dialout` group to give it acces to the serial port:
 
-    sudo usermod -G dialout <username>
+    sudo usermod -a -G dialout <username>
 
 #### macOS (OS X)
 
