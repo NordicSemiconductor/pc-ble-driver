@@ -84,6 +84,15 @@ There are two ways to solve this issue:
 
 If you want to revert back to the Segger firmware you will have to download the it from [this location](http://www.nordicsemi.com/eng/nordic/Products/nRF51-DK/nRF5x-OB-JLink-IF/52276)
 
+## Compiling the connectivity .hex files
+
+* Download and unzip `nRF5_SDK_11.0.0_89a8197.zip`
+* Apply patch `hex/SD20_SDK11.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/SD20_SDK11.patch`)
+* Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100XX/ser_s13X_hci` project in the compiler of choice
+* Add defines `APP_SCHEDULER_WITH_PROFILER` and `HCI_LINK_CONTROL`
+* Compile
+* Merge the built connectivity hex file with corresponding SoftDevice hex file (e.g. `mergehex -m connecitivy.hex softdevice.hex -o connectivity_with_softdevice.hex`)
+
 ## Building Boost
 
 The Boost static libraries required by this drivers must be built before you can build any of the
