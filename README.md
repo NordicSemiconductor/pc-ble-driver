@@ -86,6 +86,8 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 ## Compiling the connectivity .hex files
 
+The .hex files that contain both the SoftDevice and the connectivity application only need to be recompiled if you want to run them on a custom board. For standard Nordic Development Kits the supplied .hex files can be used directly.
+
 * Download and unzip `nRF5_SDK_11.0.0_89a8197.zip`
 * Apply patch `hex/SD20_SDK11.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/SD20_SDK11.patch`)
 * Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100XX/ser_s13X_hci` project in the compiler of choice
