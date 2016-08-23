@@ -182,7 +182,7 @@ diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_m
 diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
 --- a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
 +++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
-@@ -46,18 +46,23 @@ uint32_t ble_gap_evt_auth_status_enc(ble_evt_t const * const p_event,
+@@ -46,18 +46,22 @@ uint32_t ble_gap_evt_auth_status_enc(ble_evt_t const * const p_event,
      err_code = ble_gap_evt_auth_status_t_enc(&(p_event->evt.gap_evt.params.auth_status), p_buf, total_len, &index);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
  
@@ -190,7 +190,7 @@ diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_g
 -	{
  		// keyset is an extension of standard event data - used to synchronize keys at application
  		err_code = conn_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
- 		SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+-		SER_ASSERT(err_code == NRF_SUCCESS, err_code);
  
 +    if (err_code == NRF_SUCCESS)
 +    {
@@ -475,7 +475,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +        uint8_t *   description;         /* Utf-8 string description of the release */
 +} version_info_t;
 +
-+static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 0, 0, 0, NULL};
++static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 0, 1, 0, NULL};
 +
  /**@brief Main function of the connectivity application. */
  int main(void)
