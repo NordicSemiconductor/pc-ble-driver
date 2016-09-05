@@ -113,11 +113,11 @@ Use the following link to download the Boost source code:
 
 For example on Windows assuming you've unpacked Boost in `c:\boost\boost_1_xx_y`:
 
-    BOOST_ROOT = "c:\boost\boost_1_xx_y"
+    setx BOOST_ROOT "c:\boost\boost_1_xx_y"
 
 And on Linux or macOS (OS X) assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
-    BOOST_ROOT = "~/boost/boost_1_xx_y"
+    export BOOST_ROOT="~/boost/boost_1_xx_y"
 
 #### Windows 
 
