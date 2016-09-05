@@ -63,7 +63,7 @@ The serial port will appear as `COMxx`. Simply check the "Ports (COM & LPT)" sec
 
 #### Ubuntu Linux
 
-The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users, type this command to add your user to the `dialout` group to give it acces to the serial port:
+The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users. Type the command below to add your user to the `dialout` group to give it access to the serial port. Note that re-login is required for this to take effect.
 
     sudo usermod -a -G dialout <username>
 
@@ -113,11 +113,11 @@ Use the following link to download the Boost source code:
 
 For example on Windows assuming you've unpacked Boost in `c:\boost\boost_1_xx_y`:
 
-    BOOST_ROOT = "c:\boost\boost_1_xx_y"
+    setx BOOST_ROOT "c:\boost\boost_1_xx_y"
 
 And on Linux or macOS (OS X) assuming you've unpacked Boost in `~/boost/boost_1_xx_y`:
 
-    BOOST_ROOT = "~/boost/boost_1_xx_y"
+    export BOOST_ROOT="~/boost/boost_1_xx_y"
 
 #### Windows 
 
