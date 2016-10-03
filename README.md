@@ -199,3 +199,74 @@ Once Homebrew is installed you can use the `brew` command on a terminal to insta
 
 This will download the boost source and compile it, so it might take a while.
 
+## Compiling pc-ble-driver from source
+
+Assuming that you have built the Boost libraries and installed the tools required to do so [as described above](#building-boost), you can now build the shared library.
+
+### Dependencies
+
+To build this project you will need the following tools:
+
+* [CMake](https://cmake.org/) (>=3.3)
+* A C/C++ toolchain (should already have been installed to build Boost)
+
+See the following sections for platform-specific instructions on the installation of the dependencies.
+
+#### Windows 
+
+* Install the latest CMake stable release by downloading the Windows Installer from:
+
+[CMake Downloads](https://cmake.org/download/)
+
+Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
+
+    > cd build
+    > cmake -B. -H.. -G "Visual Studio XX <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>"
+    > msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
+
+**Note**: Select Visual Studio 12 or 14 `-G "Visual Studio XX"` option.
+
+**Note**: Add `Win64` to the `-G` option to build a 64-bit version of the driver.
+
+**Note**: Optionally select the location of the Boost libraries with the `-DBOOST_LIBRARYDIR` option.
+
+**Note**: Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
+##### Examples
+
+Building for with 64-bit Visual Studio 15:
+
+    > cmake -B. -H.. -G "Visual Studio 14" ..
+
+#### Ubuntu Linux
+
+Install cmake:
+
+    $ sudo apt-get install cmake
+
+Then change to the root folder of the repository and issue the following commands:
+
+    $ cd build
+    > cmake -B. -H.. -G "Unix Makefiles" <-DCMAKE_BUILD_TYPE=<build_type>> <-DARCH=<x86_32,x86_64>> <-DBOOST_LIBRARYDIR="<Boost libs path>>" ..
+    $ make
+
+**Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
+**Note**: Optionally select the target architecture (32 or 64-bit) using the `-DARCH` option.
+
+**Note**: Optionally select the location of the Boost libraries with the `-DBOOST_LIBRARYDIR` option.
+
+#### macOS (OS X) 10.11 and later
+
+Install cmake and swig with Homebrew with the `brew` command on a terminal:
+
+    $ brew install cmake
+
+Then change to the root folder of the repository and issue the following commands:
+
+    $ cd build
+    $ cmake -B. -H.. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE= <build_type> ..
+    $ make
+
+**Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
