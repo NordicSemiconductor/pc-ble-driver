@@ -53,17 +53,17 @@ endforeach(SD_API_VER)
 set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
 
 if(WIN32)
-# Disable CRT Warnings with Visual Studio
-set_source_files_properties(
-    ${LIB_PLATFORM_C_SRC_FILES}
-    PROPERTIES
-    COMPILE_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
-)
-set_source_files_properties(
-    ${LIB_PLATFORM_CPP_SRC_FILES}
-    PROPERTIES
-    COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
-)
+    # Disable CRT Warnings with Visual Studio
+    set_source_files_properties(
+        ${LIB_PLATFORM_C_SRC_FILES}
+        PROPERTIES
+        COMPILE_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
+    )
+    set_source_files_properties(
+        ${LIB_PLATFORM_CPP_SRC_FILES}
+        PROPERTIES
+        COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
+    )
 endif()
 # Add common compiler definitions
 add_definitions(
@@ -96,14 +96,19 @@ include_directories(
         SYSTEM ${Boost_INCLUDE_DIRS}
 )
 
-# Set per-SD API version include directories
+# Set per-SD API version include directories and compiler definitions
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    target_include_directories ( ${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
+    target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
         include/${SD_API_VER_L}
         include/${SD_API_VER_L}/internal/sdk/codec
         include/${SD_API_VER_L}/internal/sdk/misc
     )
+    # Provide the NRF_SD_BLE_API_VERSION macro to each variant
+    string(REGEX MATCH "[0-9]+$" _SD_API_VER_NUM "${SD_API_VER}")
+    set(SD_API_VER_COMPILER_DEF_NUM "-D${SD_API_VER_COMPILER_DEF}=${_SD_API_VER_NUM}")
+    #MESSAGE( STATUS "compiler def: " "${SD_API_VER_COMPILER_DEF_NUM}" )
+    target_compile_definitions(${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE "${SD_API_VER_COMPILER_DEF_NUM}")
 endforeach(SD_API_VER)
 
 # Additional special linkage libraries
