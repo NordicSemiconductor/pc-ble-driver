@@ -55,8 +55,7 @@ set(Boost_USE_STATIC_LIBS   ON)
 find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
 
 # Add or remove SD API versions here
-set(SD_API_VER_NUMS 2)
-#set(SD_API_VER_NUMS 2 3)
+set(SD_API_VER_NUMS 2 3)
 set(SD_API_VER_PREFIX "SD_API_V")
 set(SD_API_VERS )
 
