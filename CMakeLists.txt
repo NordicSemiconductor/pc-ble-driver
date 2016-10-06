@@ -90,6 +90,7 @@ add_executable(test_uart test/test_uart.cpp)
 # Set common include directories
 include_directories(
         include/common
+        include/common/sdk_compat
         include/common/internal
         include/common/internal/transport
         # Include boost as a system include so that the compiler doesn't nag about issues in boost header files
@@ -100,14 +101,13 @@ include_directories(
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
-        #include/${SD_API_VER_L}
-        #include/${SD_API_VER_L}/internal/sdk/codec
-        #include/${SD_API_VER_L}/internal/sdk/misc
         src/${SD_API_VER_L}/sdk/components/libraries/util
         src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
         src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
+        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
         src/${SD_API_VER_L}/sdk/components/serialization/common
         src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
+        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s132
         src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
     )
     # Provide the NRF_SD_BLE_API_VERSION macro to each variant
