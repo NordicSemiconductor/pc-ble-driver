@@ -100,9 +100,16 @@ include_directories(
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
-        include/${SD_API_VER_L}
-        include/${SD_API_VER_L}/internal/sdk/codec
-        include/${SD_API_VER_L}/internal/sdk/misc
+        #include/${SD_API_VER_L}
+        #include/${SD_API_VER_L}/internal/sdk/codec
+        #include/${SD_API_VER_L}/internal/sdk/misc
+        src/${SD_API_VER_L}/sdk/components/libraries/util
+        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
+        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
+        src/${SD_API_VER_L}/sdk/components/serialization/common
+        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
+        src/${SD_API_VER_L}/sdk/components/serialization/connectivity/codecs/s130/serializers
+        src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
     )
     # Provide the NRF_SD_BLE_API_VERSION macro to each variant
     string(REGEX MATCH "[0-9]+$" _SD_API_VER_NUM "${SD_API_VER}")
