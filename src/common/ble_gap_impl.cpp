@@ -272,7 +272,7 @@ uint32_t sd_ble_gap_ppcp_get(adapter_t *adapter, ble_gap_conn_params_t * const p
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-#if NRF_SD_BLE_API_VERSION == 2
+#if NRF_SD_BLE_API_VERSION <= 2
 uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t * const p_addr)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
@@ -312,7 +312,128 @@ uint32_t sd_ble_gap_address_set(adapter_t *adapter, uint8_t addr_cycle_mode, ble
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+#endif
 
+#if NRF_SD_BLE_API_VERSION >= 3
+uint32_t sd_ble_gap_addr_get(adapter_t *adapter, ble_gap_addr_t * const p_addr)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_addr_get_req_enc(
+            p_addr,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_addr_get_rsp_dec(
+            buffer,
+            length,
+            (ble_gap_addr_t *)p_addr,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+
+uint32_t sd_ble_gap_addr_set(adapter_t *adapter, ble_gap_addr_t const * const p_addr)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_addr_set_req_enc(
+            p_addr,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_addr_set_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+
+uint32_t sd_ble_gap_whitelist_set(adapter_t *adapter, ble_gap_addr_t const * const * pp_wl_addrs, uint8_t len)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_whitelist_set_req_enc(
+            pp_wl_addrs,
+            len,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_whitelist_set_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+
+uint32_t sd_ble_gap_device_identities_set(adapter_t *adapter, ble_gap_id_key_t const * const * pp_id_keys, ble_gap_irk_t const * const * pp_local_irks, uint8_t len)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_device_identities_set_req_enc(
+            pp_id_keys,
+            pp_local_irks,
+            len,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_device_identities_set_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+
+uint32_t sd_ble_gap_privacy_set(adapter_t *adapter, ble_gap_privacy_params_t const *p_privacy_params)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_privacy_set_req_enc(
+            p_privacy_params,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_privacy_set_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+
+}
+
+uint32_t sd_ble_gap_privacy_get(adapter_t *adapter, ble_gap_privacy_params_t *p_privacy_params)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_privacy_get_req_enc(
+            p_privacy_params,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_privacy_get_rsp_dec(
+            buffer,
+            length,
+            p_privacy_params,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
 #endif
 
 uint32_t sd_ble_gap_adv_stop(adapter_t *adapter)

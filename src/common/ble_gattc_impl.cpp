@@ -179,3 +179,17 @@ uint32_t sd_ble_gattc_attr_info_discover(adapter_t *adapter, uint16_t conn_handl
     return encode_decode(adapter, encode_function, decode_function);
 }
 
+#if NRF_SD_BLE_API_VERSION >= 3
+uint32_t sd_ble_gattc_exchange_mtu_request(adapter_t *adapter, uint16_t conn_handle, uint16_t client_rx_mtu)
+{
+    encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_exchange_mtu_request_req_enc(conn_handle, client_rx_mtu, buffer, length);
+    };
+
+    decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gattc_exchange_mtu_request_rsp_dec(buffer, length, result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+#endif
