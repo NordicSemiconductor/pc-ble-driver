@@ -112,7 +112,7 @@ extern "C" {
 #define CONN_CHIP_RESET_TIME            50      /**< Time to keep the reset line to the connectivity chip low (in milliseconds). */
 #define CONN_CHIP_WAKEUP_TIME           500     /**< Time for the connectivity chip to reset and become ready to receive serialized commands (in milliseconds). */
 
-#define SER_MAX_CONNECTIONS 8
+#define SER_MAX_CONNECTIONS 1
 
 
 #ifdef __cplusplus

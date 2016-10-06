@@ -143,7 +143,7 @@ typedef struct
  * @retval ::BLE_ERROR_L2CAP_CID_IN_USE L2CAP CID already in use.
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  */
-SVCALL(SD_BLE_L2CAP_CID_REGISTER, uint32_t, sd_ble_l2cap_cid_register(uint16_t cid));
+SVCALL(SD_BLE_L2CAP_CID_REGISTER, uint32_t, sd_ble_l2cap_cid_register(adapter_t *adapter, uint16_t cid));
 
 /**@brief Unregister a CID with L2CAP.
  *
@@ -159,7 +159,7 @@ SVCALL(SD_BLE_L2CAP_CID_REGISTER, uint32_t, sd_ble_l2cap_cid_register(uint16_t c
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
  * @retval ::NRF_ERROR_NOT_FOUND CID not previously registered.
  */
-SVCALL(SD_BLE_L2CAP_CID_UNREGISTER, uint32_t, sd_ble_l2cap_cid_unregister(uint16_t cid));
+SVCALL(SD_BLE_L2CAP_CID_UNREGISTER, uint32_t, sd_ble_l2cap_cid_unregister(adapter_t *adapter, uint16_t cid));
 
 /**@brief Transmit an L2CAP packet.
  *
@@ -188,7 +188,7 @@ SVCALL(SD_BLE_L2CAP_CID_UNREGISTER, uint32_t, sd_ble_l2cap_cid_unregister(uint16
  * @retval ::BLE_ERROR_NO_TX_PACKETS Not enough application packets available.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, see @ref BLE_L2CAP_MTU_DEF.
  */
-SVCALL(SD_BLE_L2CAP_TX, uint32_t, sd_ble_l2cap_tx(uint16_t conn_handle, ble_l2cap_header_t const *p_header, uint8_t const *p_data));
+SVCALL(SD_BLE_L2CAP_TX, uint32_t, sd_ble_l2cap_tx(adapter_t *adapter, uint16_t conn_handle, ble_l2cap_header_t const *p_header, uint8_t const *p_data));
 
 /** @} */
 

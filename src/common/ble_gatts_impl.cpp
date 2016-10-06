@@ -188,7 +188,11 @@ uint32_t sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uin
     };
 
     decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+#if NRF_SD_BLE_API_VERSION == 2
         return ble_gatts_sys_attr_get_rsp_dec(buffer, length, p_sys_attr_data, p_len, result);
+#else
+        return ble_gatts_sys_attr_get_rsp_dec(buffer, length, &p_sys_attr_data, &p_len, result);
+#endif
     };
 
     return encode_decode(adapter, encode_function, decode_function);

@@ -272,6 +272,7 @@ uint32_t sd_ble_gap_ppcp_get(adapter_t *adapter, ble_gap_conn_params_t * const p
     return encode_decode(adapter, encode_function, decode_function);
 }
 
+#if NRF_SD_BLE_API_VERSION == 2
 uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t * const p_addr)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
@@ -311,6 +312,8 @@ uint32_t sd_ble_gap_address_set(adapter_t *adapter, uint8_t addr_cycle_mode, ble
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+
+#endif
 
 uint32_t sd_ble_gap_adv_stop(adapter_t *adapter)
 {
