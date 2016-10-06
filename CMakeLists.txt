@@ -108,7 +108,6 @@ foreach(SD_API_VER ${SD_API_VERS})
         src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
         src/${SD_API_VER_L}/sdk/components/serialization/common
         src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
-        src/${SD_API_VER_L}/sdk/components/serialization/connectivity/codecs/s130/serializers
         src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
     )
     # Provide the NRF_SD_BLE_API_VERSION macro to each variant
