@@ -85,8 +85,17 @@ set(PC_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 # pc-ble-driver hex folder
 set(PC_BLE_DRIVER_HEX_DIR ${PC_BLE_DRIVER_ROOT_DIR}/hex)
 
-# pc-ble-driver include paths
+# pc-ble-driver include path
 set(PC_BLE_DRIVER_INCLUDE_DIR ${PC_BLE_DRIVER_ROOT_DIR}/include)
+
+# Set public include folders
+foreach(SD_API_VER ${SD_API_VERS})
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+    set(PC_BLE_DRIVER_${SD_API_VER}_PUBLIC_INCLUDE_DIRS ${PC_BLE_DRIVER_ROOT_DIR}/include
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/include/common
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/include/common/sdk_compat
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers)
+endforeach(SD_API_VER)
 
 find_package(Git REQUIRED)
 
