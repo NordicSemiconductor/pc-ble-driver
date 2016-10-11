@@ -1,16 +1,20 @@
 #!/bin/bash
 # 
 # Download an patch the nRF5 SDK to compile the connectivity application.
-# Run this script from the `hex` folder. Download and install the SDK in a tmp folder.
+#
+# The SDK is downloaded in a temporary folder. The destination folder can be
+# configured using the $DL_LOCATION variable (should be an absolute path).
 #
 # Adapted from 'https://github.com/NordicSemiconductor/nrf5-sdk-for-eddystone'.
-# Version 0.2
+# Version 0.3
+
+ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
+
+# SDK destination folder (no trailing slash, relative from the script location)
+DL_LOCATION=$ABS_PATH../tmp
 
 # SDK download link (as zip file, full URL with extension)
 SDK_LINK='https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip'
-
-# Configuration of the destination folder (no trailing slash)
-DL_LOCATION=../tmp
 
 SDK_FILE=${SDK_LINK##*/}  # SDK file name with extension
 SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
@@ -56,8 +60,7 @@ function sdk_patch () {
 
     # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
     # FIXME: check if the patch has been already applied
-    local C_DIR=$(pwd)
-    patch -d $DL_LOCATION/$SDK_NAME/ -p1 -s --ignore-whitespace -i $C_DIR/SD20_SDK11.patch
+    patch -d $DL_LOCATION/$SDK_NAME/ -p1 -s --ignore-whitespace -i $ABS_PATH/SD20_SDK11.patch
 
     err_code=$?
     if [ "$err_code" != "0" ]; then

@@ -3,6 +3,7 @@ _build
 **/CMakeFiles
 **/CMakeCache.txt
 *.pyc
+tmp/
 
 # Object files
 *.o
