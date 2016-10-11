@@ -1,10 +1,17 @@
 #!/bin/bash
 # 
 # Download an patch the nRF5 SDK to compile the connectivity application.
-# Run this script from the `hex` folder. Download and install the SDK in a tmp folder.
+#
+# The SDK is downloaded in a temporary folder. The destination folder can be
+# configured using the $DL_LOCATION variable (should be an absolute path).
 #
 # Adapted from 'https://github.com/NordicSemiconductor/nrf5-sdk-for-eddystone'.
 # Version 0.3
+
+ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
+
+# SDK destination folder (no trailing slash, relative from the script location)
+DL_LOCATION=$ABS_PATH../tmp
 
 # SDK download link (as zip file, full URL with extension)
 function set_sdk_link () {
@@ -74,6 +81,21 @@ function sdk_exists () {
     return 1
 }
 
+# Patch the downloaded SDK in order to compile the connectivity application
+function sdk_patch () {
+    echo "> Applying patch..."
+
+    # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
+    # FIXME: check if the patch has been already applied
+    patch -d $DL_LOCATION/$SDK_NAME/ -p1 -s --ignore-whitespace -i $ABS_PATH/SD20_SDK11.patch
+
+    err_code=$?
+    if [ "$err_code" != "0" ]; then
+        # The patch has been probably already applied
+        fatal "> Patch does not apply"
+    fi
+}
+
 # Download and patch the SDK. Check if it is already available
 function sdk_download () {
     # First check if the SDK already exist
@@ -117,22 +139,6 @@ function sdk_download () {
 
     # FIXME: unused files from the modified SDK should be deleted
     # Keep only the components and the connectivity application ?
-}
-
-# Patch the downloaded SDK in order to compile the connectivity application
-function sdk_patch () {
-    echo "> Applying patch..."
-
-    # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
-    # FIXME: check if the patch has been already applied
-    local C_DIR=$(pwd)
-    patch -d $DL_LOCATION/$SDK_NAME/ -p1 -s --ignore-whitespace -i $C_DIR/$PATCH_FILE
-
-    err_code=$?
-    if [ "$err_code" != "0" ]; then
-        # The patch has been probably already applied
-        fatal "> Patch does not apply"
-    fi
 }
 
 function run() {
