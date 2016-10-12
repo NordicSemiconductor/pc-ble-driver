@@ -4,16 +4,25 @@
 # Run this script from the `hex` folder. Download and install the SDK in a tmp folder.
 #
 # Adapted from 'https://github.com/NordicSemiconductor/nrf5-sdk-for-eddystone'.
-# Version 0.2
+# Version 0.3
 
 # SDK download link (as zip file, full URL with extension)
-SDK_LINK='https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip'
+function set_sdk_link () {
+    SDK_LINK=$1
+
+    SDK_FILE=${SDK_LINK##*/}  # SDK file name with extension
+    SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
+}
 
 # Configuration of the destination folder (no trailing slash)
-DL_LOCATION=../tmp
+function set_dl_location () {
+    DL_LOCATION=$1
+}
 
-SDK_FILE=${SDK_LINK##*/}  # SDK file name with extension
-SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
+# Configuration of the patch file name
+function set_patch_file () {
+    PATCH_FILE=$1
+}
 
 # Display a fatal error and exit
 function fatal () {
@@ -29,6 +38,22 @@ function check_requirements () {
     command -v git >/dev/null 2>&1 || { fatal "Git is not available"; }
     command -v patch >/dev/null 2>&1 || { fatal "Patch is not available"; }
 }
+
+# Check if the required parameters have been configured
+function check_config () {
+    if [[ -z "${DL_LOCATION}" ]]; then
+        fatal "Download location has not been set"
+    fi
+
+    if [[ -z "${SDK_LINK}" ]]; then
+        fatal "SDK link has not been set"
+    fi
+
+    if [[ -z "${PATCH_FILE}" ]]; then
+        fatal "Patch file has not been set"
+    fi
+}
+
 
 # Check if the SDK folder already exist
 function sdk_exists () {
@@ -48,22 +73,6 @@ function sdk_exists () {
 
     # No SDK folder available
     return 1
-}
-
-# Patch the downloaded SDK in order to compile the connectivity application
-function sdk_patch () {
-    echo "> Applying patch..."
-
-    # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
-    # FIXME: check if the patch has been already applied
-    local C_DIR=$(pwd)
-    patch -d $DL_LOCATION/$SDK_NAME/ -p1 -s --ignore-whitespace -i $C_DIR/SD20_SDK11.patch
-
-    err_code=$?
-    if [ "$err_code" != "0" ]; then
-        # The patch has been probably already applied
-        fatal "> Patch does not apply"
-    fi
 }
 
 # Download and patch the SDK. Check if it is already available
@@ -107,19 +116,36 @@ function sdk_download () {
         fatal "Could not remove the SDK zip file"
     fi
 
-    # Apply the connectivity patch
-    sdk_patch
-
     # FIXME: unused files from the modified SDK should be deleted
     # Keep only the components and the connectivity application ?
 }
 
-clear
-printf "Starting SDK bootstrap script\r\n\r\n"
+# Patch the downloaded SDK in order to compile the connectivity application
+function sdk_patch () {
+    echo "> Applying patch..."
 
-check_requirements
-sdk_download
+    # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
+    # FIXME: check if the patch has been already applied
+    local C_DIR=$(pwd)
+    patch -d $DL_LOCATION/$SDK_NAME/ -p1 -s --ignore-whitespace -i $C_DIR/$PATCH_FILE
 
-echo "> SDK ready to use. Exit."
+    err_code=$?
+    if [ "$err_code" != "0" ]; then
+        # The patch has been probably already applied
+        fatal "> Patch does not apply"
+    fi
+}
 
-exit 0
+function run() {
+    clear
+    printf "Starting SDK bootstrap script\r\n\r\n"
+
+    check_requirements
+    check_config
+    sdk_download
+    sdk_patch
+
+    echo "> SDK ready to use. Exit."
+
+    exit 0    
+}
