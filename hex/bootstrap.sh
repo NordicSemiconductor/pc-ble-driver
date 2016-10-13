@@ -26,8 +26,7 @@ function set_patch_file () {
 
 # Display a fatal error and exit
 function fatal () {
-    printf "\e[1;31m[ERROR] $1\r\n[ERROR] Press Enter to exit...\e[0;0m"
-    read
+    printf "\e[1;31m[ERROR] $1\r\n[ERROR]\e[0;0m"
     exit 1
 }
 
