@@ -56,6 +56,8 @@ find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time ch
 
 # Add or remove SD API versions here
 set(SD_API_VER_NUMS 2 3)
+list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
+
 set(SD_API_VER_PREFIX "SD_API_V")
 set(SD_API_VERS )
 
@@ -149,7 +151,11 @@ function(build_metadata dir dst)
     string(CONCAT str ${str} "* CMake version: " ${CMAKE_VERSION} "\n") 
     string(CONCAT str ${str} "* Boost version: " ${Boost_MAJOR_VERSION} "." ${Boost_MINOR_VERSION} "." ${Boost_SUBMINOR_VERSION} "\n") 
     string(CONCAT str ${str} "* Boost libs: " ${Boost_LIBRARY_DIRS} "\n") 
-    string(CONCAT str ${str} "* SD API Versions: " "${SD_API_STRS}" "\n") 
+    string(CONCAT str ${str} "* SD API Versions:") 
+    foreach(SD_API_VER ${SD_API_VERS})
+        string(CONCAT str ${str} " <${SD_API_VER}>") 
+    endforeach()
+    string(CONCAT str ${str} "\n") 
      
     set(${dst} ${str} PARENT_SCOPE)
  
