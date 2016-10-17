@@ -1,7 +1,16 @@
 diff --git a/components/libraries/scheduler/app_scheduler.h b/components/libraries/scheduler/app_scheduler.h
 --- a/components/libraries/scheduler/app_scheduler.h
 +++ b/components/libraries/scheduler/app_scheduler.h
-@@ -140,6 +140,12 @@ uint32_t app_sched_event_put(void *                    p_event_data,
+@@ -54,6 +54,8 @@
+ #include "app_error.h"
+ #include "app_util.h"
+
++#define APP_SCHEDULER_WITH_PROFILER
++
+ #define APP_SCHED_EVENT_HEADER_SIZE 8       /**< Size of app_scheduler.event_header_t (only for use inside APP_SCHED_BUF_SIZE()). */
+
+ /**@brief Compute number of bytes required to hold the scheduler buffer.
+@@ -142,6 +142,12 @@ uint32_t app_sched_event_put(void *                    p_event_data,
   * @return Maximum number of events in queue observed so far.
   */
  uint16_t app_sched_queue_utilization_get(void);
@@ -101,6 +110,13 @@ diff --git a/components/serialization/common/ser_config.h b/components/serializa
  
  /** Find UART baudrate value based on chosen register setting. */
  #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
+@@ -110,4 +110,6 @@
+
+ #define SER_MAX_CONNECTIONS 8
+
++#define HCI_LINK_CONTROL
++
+ #endif /* SER_CONFIG_H__ */
 diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
 --- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
 +++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h

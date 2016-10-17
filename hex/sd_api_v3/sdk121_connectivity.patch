@@ -1,7 +1,19 @@
-diff --git a/components/serialization/common/ser_config.h b/DK_12.1.0_0d23e2a/components/serialization/common/ser_config.h
+diff --git a/components/libraries/scheduler/app_scheduler.h b/components/libraries/scheduler/app_scheduler.h
+--- a/components/libraries/scheduler/app_scheduler.h
++++ b/components/libraries/scheduler/app_scheduler.h
+@@ -59,6 +59,8 @@
+ extern "C" {
+ #endif
+
++#define APP_SCHEDULER_WITH_PROFILER
++
+ #define APP_SCHED_EVENT_HEADER_SIZE 8       /**< Size of app_scheduler.event_header_t (only for use inside APP_SCHED_BUF_SIZE()). */
+
+ /**@brief Compute number of bytes required to hold the scheduler buffer.
+diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
 index 1b31fcb..9cc334e 100644
 --- a/components/serialization/common/ser_config.h
-+++ b/DK_12.1.0_0d23e2a/components/serialization/common/ser_config.h
++++ b/components/serialization/common/ser_config.h
 @@ -70,8 +70,8 @@ extern "C" {
  
  /** UART transmission parameters */
@@ -13,10 +25,19 @@ index 1b31fcb..9cc334e 100644
  
  /** Find UART baud rate value based on the chosen register setting. */
  #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
-diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/DK_12.1.0_0d23e2a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+@@ -114,6 +114,8 @@ extern "C" {
+
+ #define SER_MAX_CONNECTIONS 8
+
++#define HCI_LINK_CONTROL
++
+
+ #ifdef __cplusplus
+ }
+diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
 index 5d413ce..2517c43 100644
 --- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
-+++ b/DK_12.1.0_0d23e2a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
++++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
 @@ -38,10 +38,10 @@ extern "C" {
  /* UART configuration */
  #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOW
@@ -32,10 +53,10 @@ index 5d413ce..2517c43 100644
  
  
  #ifdef __cplusplus
-diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/DK_12.1.0_0d23e2a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 index 216ed97..147d7d5 100644
 --- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
-+++ b/DK_12.1.0_0d23e2a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 @@ -39,6 +39,8 @@
                                   (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
  #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
@@ -56,10 +77,10 @@ index 216ed97..147d7d5 100644
  
          if (packet_type == PKT_TYPE_ACK )
          {
-diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/DK_12.1.0_0d23e2a/components/serialization/connectivity/ser_conn_error_handling.c
+diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/components/serialization/connectivity/ser_conn_error_handling.c
 index 2fdd1e6..adb53cc 100644
 --- a/components/serialization/connectivity/ser_conn_error_handling.c
-+++ b/DK_12.1.0_0d23e2a/components/serialization/connectivity/ser_conn_error_handling.c
++++ b/components/serialization/connectivity/ser_conn_error_handling.c
 @@ -74,7 +74,7 @@ void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
  
          /* ble_debug_assert_handler(error_code, line_num, p_file_name); */
@@ -69,10 +90,10 @@ index 2fdd1e6..adb53cc 100644
          /* Reset the chip. Should be used in the release version. */
          NVIC_SystemReset();
  #else   /* Debug version. */
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/DK_12.1.0_0d23e2a/examples/ble_central_and_peripheral/ble_connectivity/main.c
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
 index d4a4883..346093a 100644
 --- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
-+++ b/DK_12.1.0_0d23e2a/examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
 @@ -35,6 +35,21 @@
  
  #include "ser_phy_debug_comm.h"
