@@ -1,15 +1,16 @@
-diff --git a/components/libraries/scheduler/app_scheduler.h b/components/libraries/scheduler/app_scheduler.h
---- a/components/libraries/scheduler/app_scheduler.h
-+++ b/components/libraries/scheduler/app_scheduler.h
-@@ -59,6 +59,8 @@
- extern "C" {
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+index 3bb176a..e420377 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+@@ -191,7 +191,7 @@
+ 
+ 
+ #ifndef APP_SCHEDULER_WITH_PROFILER
+-#define APP_SCHEDULER_WITH_PROFILER 0
++#define APP_SCHEDULER_WITH_PROFILER 1
  #endif
 
-+#define APP_SCHEDULER_WITH_PROFILER
-+
- #define APP_SCHED_EVENT_HEADER_SIZE 8       /**< Size of app_scheduler.event_header_t (only for use inside APP_SCHED_BUF_SIZE()). */
-
- /**@brief Compute number of bytes required to hold the scheduler buffer.
+ #endif //APP_SCHEDULER_ENABLED
 diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
 index 1b31fcb..9cc334e 100644
 --- a/components/serialization/common/ser_config.h
