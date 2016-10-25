@@ -258,7 +258,7 @@ Then change to the root folder of the repository and issue the following command
 
 #### macOS (OS X) 10.11 and later
 
-Install cmake and swig with Homebrew with the `brew` command on a terminal:
+Install cmake with Homebrew with the `brew` command on a terminal:
 
     $ brew install cmake
 
