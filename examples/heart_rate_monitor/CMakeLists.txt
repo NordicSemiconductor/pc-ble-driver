@@ -21,18 +21,28 @@ include_directories (
     ../../include/common/internal/transport
 )
 
-add_definitions(-DPC_BLE_DRIVER_STATIC)
+if(MSVC)
+    add_definitions(-DPC_BLE_DRIVER_STATIC)
+endif()
 
 # Build executable
 add_executable(hrm_v2 main.c)
 add_executable(hrm_v3 main.c)
 
+target_compile_definitions(hrm_v2 PRIVATE -DSD_API_V2)
+target_compile_definitions(hrm_v3 PRIVATE -DSD_API_V3)
+
 target_include_directories(hrm_v2 PRIVATE ../../src/sd_api_v2/sdk/components/softdevice/s132/headers)
 target_include_directories(hrm_v3 PRIVATE ../../src/sd_api_v3/sdk/components/softdevice/s132/headers)
 
 # Specify libraries to link with
-target_link_libraries(hrm_v2 PRIVATE pc_ble_driver_static_sd_api_v2)
-target_link_libraries(hrm_v2 PRIVATE ${Boost_LIBRARIES})
+if (MSVC)
+    target_link_libraries(hrm_v3 PRIVATE pc_ble_driver_static_sd_api_v3)
+    target_link_libraries(hrm_v2 PRIVATE pc_ble_driver_static_sd_api_v2)
+else()
+    target_link_libraries(hrm_v2 PRIVATE pc_ble_driver_shared_sd_api_v2)
+    target_link_libraries(hrm_v3 PRIVATE pc_ble_driver_shared_sd_api_v3)
 
-target_link_libraries(hrm_v3 PRIVATE pc_ble_driver_static_sd_api_v3)
+
+target_link_libraries(hrm_v2 PRIVATE ${Boost_LIBRARIES})
 target_link_libraries(hrm_v3 PRIVATE ${Boost_LIBRARIES})

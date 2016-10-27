@@ -145,7 +145,7 @@ static uint32_t ble_stack_init()
 {
     uint32_t err_code;
     ble_enable_params_t ble_enable_params;
-    uint32_t app_ram_base = NULL;
+    uint32_t * app_ram_base = NULL;
 
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 
@@ -157,7 +157,7 @@ static uint32_t ble_stack_init()
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
     ble_enable_params.common_enable_params.vs_uuid_count = 5;
 
-    err_code = sd_ble_enable(m_adapter, &ble_enable_params, &app_ram_base);
+    err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
 
     if (err_code == NRF_SUCCESS)
     {
@@ -218,6 +218,9 @@ static uint32_t advertising_start()
     adv_params.fp          = BLE_GAP_ADV_FP_ANY;
     adv_params.interval    = ADVERTISING_INTERVAL_40_MS;
     adv_params.timeout     = ADVERTISING_TIMEOUT_3_MIN;
+#ifdef SD_API_V2
+    adv_params.p_whitelist = NULL;
+#endif
 
     error_code = sd_ble_gap_adv_start(m_adapter, &adv_params);
 
