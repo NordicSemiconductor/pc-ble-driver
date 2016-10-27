@@ -123,7 +123,6 @@ And on Linux or macOS (OS X) assuming you've unpacked Boost in `~/boost/boost_1_
 
 Install Microsoft Visual Studio. The following versions supported are:
 
-* Visual Studio 2013 (MSVC 12.0)
 * Visual Studio 2015 (MSVC 14.0)
 
 Open a Microsoft Visual Studio Command Prompt and issue the following commands:
@@ -132,7 +131,7 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands:
     > bootstrap.bat
     > b2 toolset=msvc-<VV.V> address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
-**Note**: If you intend to build a 64-bit version of Boost, and depending on the version of Visual Studio you use, you might need to open a 64-bit command prompt such as
+**Note**: If you intend to build a 64-bit version of Boost, you might need to open a 64-bit command prompt such as
 "Visual Studio 2015 x86 x64 Cross Tools Command Prompt" or similar, or run `vcvarsall.bat x86_amd64` or `setenv.cmd" /Release /x64`.
 
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the Boost documentation 
@@ -143,10 +142,6 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 **Note**: Use `dumpbin /headers <file>` to check whether a particular object file is 32 or 64-bit.
 
 ##### Examples
-
-Build 32-bit Boost with Visual Studio 2013:
-
-    > b2 toolset=msvc-12.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 Build 64-bit Boost with Visual Studio 2015:
 
@@ -221,10 +216,8 @@ See the following sections for platform-specific instructions on the installatio
 Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
 
     > cd build
-    > cmake -B. -H.. -G "Visual Studio XX <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>"
+    > cmake -B. -H.. -G "Visual Studio 14 <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>"
     > msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
-
-**Note**: Select Visual Studio 12 or 14 `-G "Visual Studio XX"` option.
 
 **Note**: Add `Win64` to the `-G` option to build a 64-bit version of the driver.
 
@@ -234,7 +227,7 @@ Open a Microsoft Visual Studio Command Prompt and issue the following from the r
 
 ##### Examples
 
-Building for with 64-bit Visual Studio 15:
+Building for with 64-bit Visual Studio 2015:
 
     > cmake -B. -H.. -G "Visual Studio 14" ..
 
