@@ -42,7 +42,7 @@ if (MSVC)
 else()
     target_link_libraries(hrm_v2 PRIVATE pc_ble_driver_shared_sd_api_v2)
     target_link_libraries(hrm_v3 PRIVATE pc_ble_driver_shared_sd_api_v3)
-
+endif()
 
 target_link_libraries(hrm_v2 PRIVATE ${Boost_LIBRARIES})
 target_link_libraries(hrm_v3 PRIVATE ${Boost_LIBRARIES})
