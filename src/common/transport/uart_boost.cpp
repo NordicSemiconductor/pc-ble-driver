@@ -208,7 +208,7 @@ uint32_t UartBoost::send(std::vector<uint8_t> &data)
 
 void UartBoost::readHandler(const boost::system::error_code& errorCode, const size_t bytesTransferred)
 {
-    if (errorCode == boost::system::errc::success)
+    if (!errorCode)
     {
         auto readBufferData = readBuffer.data();
         dataCallback(readBufferData, bytesTransferred);
