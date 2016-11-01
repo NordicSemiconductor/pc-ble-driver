@@ -13,6 +13,7 @@
 #include "ble.h"
 #include "ble_gap.h"
 #include "ble_gattc.h"
+#include "ble_gatts.h"
 #include "ble_types.h"
 #include "nrf_error.h"
 
@@ -157,6 +158,9 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
     m_connected_devices++;
     m_connection_handle = p_ble_gap_evt->conn_handle;
     m_connection_is_in_progress = false;
+#if NRF_SD_BLE_API >= 3
+    sd_ble_gattc_exchange_mtu_request(m_adapter, p_ble_gap_evt->conn_handle, 158);
+#endif
     service_discovery_start();
 }
 
@@ -426,6 +430,9 @@ static uint32_t ble_stack_init()
 
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 
+#if NRF_SD_BLE_API >= 3
+    ble_enable_params.gatt_enable_params.att_mtu = 158;
+#endif
     ble_enable_params.gatts_enable_params.attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed = false;
     ble_enable_params.gap_enable_params.periph_conn_count = 1;
@@ -597,6 +604,17 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
     case BLE_GATTC_EVT_HVX:
         on_hvx(&(p_ble_evt->evt.gattc_evt));
         break;
+
+#if NRF_SD_BLE_API >= 3
+    case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
+        sd_ble_gatts_exchange_mtu_reply(m_adapter, p_ble_evt->evt.gatts_evt.conn_handle, GATT_MTU_SIZE_DEFAULT);
+        break;
+
+    case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
+        uint16_t server_rx_mtu = p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu;
+        printf("MTU response received. New ATT_MTU is %d\n", server_rx_mtu);
+        break;
+#endif
 
     default:
         printf("Unhandled event with ID: %d\n", p_ble_evt->header.evt_id); fflush(stdout);
