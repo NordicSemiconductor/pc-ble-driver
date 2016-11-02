@@ -51,7 +51,7 @@ To use this library you will need to flash the connectivity firmware on a nRF5x 
 Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
-    $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s13x_<a>.<b>.<c>.hex
+    $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s13<v>_<a>.<b>.<c>.hex
 
 ### J-Link USB CDC serial ports
 
@@ -88,8 +88,8 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 The .hex files that contain both the SoftDevice and the connectivity application only need to be recompiled if you want to run them on a custom board. For standard Nordic Development Kits the supplied .hex files can be used directly.
 
-* Download and unzip `nRF5_SDK_<ver>.0.0_<sha>.zip`
-* Apply patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sdk110_connectivity.patch`)
+* Download and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
+* Apply patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
 * Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci` project in the compiler of choice
 * Add defines `APP_SCHEDULER_WITH_PROFILER` and `HCI_LINK_CONTROL`
 * Compile
