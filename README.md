@@ -1,13 +1,13 @@
 # nRF5 Bluetooth Low Energy GAP/GATT driver
 
 ## Introduction
-pc-ble-driver is a static and shared library that provides serial port communication (using SoftDevice API serialization) to an nRF5x IC running the connectivity firmware included.
-It is a C/C++ library that can be interfaced directly but it is more often used by higher level bindings:
+pc-ble-driver consists of a set of static and shared libraries that provide serial port communication (using SoftDevice API serialization) to an nRF5x IC running the connectivity firmware included.
+The C/C++ libraries that can be interfaced directly but are more often used by higher level bindings:
 
 * [pc-ble-driver-js  JavaScript bindings](https://github.com/NordicSemiconductor/pc-ble-driver-js)
 * [pc-ble-driver-py  Python bindings](https://github.com/NordicSemiconductor/pc-ble-driver-py)
 
-The library is included as a submodule by the repositories above, and it should be built as part of them.
+The libraries are included as a submodule by the repositories above, and they should be built as part of them.
 
 ## License
 
@@ -15,10 +15,10 @@ See the [license file](LICENSE) for details.
 
 ## SoftDevice and IC Support
 
-The library is compatible with the following SoftDevice API versions and nRF5x ICs:
+The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* s130_nrf51_2.x.x (nRF51 series ICs)
-* s132_nrf52_2.x.x (nRF52 series ICs)
+* sd_api_v2: s130_nrf51_2.x.x (nRF51 and nRF52 series ICs)
+* sd_api_v3: s132_nrf52_3.x.x (nRF52 series ICs)
 
 The .hex files included in the `hex/` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
@@ -51,7 +51,7 @@ To use this library you will need to flash the connectivity firmware on a nRF5x 
 Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
-    $ nrfjprog -f NRF5<x> --program hex/connectivity_115k2_with_s13x_2.<x>.<x>.hex
+    $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s13x_<a>.<b>.<c>.hex
 
 ### J-Link USB CDC serial ports
 
@@ -88,12 +88,12 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 The .hex files that contain both the SoftDevice and the connectivity application only need to be recompiled if you want to run them on a custom board. For standard Nordic Development Kits the supplied .hex files can be used directly.
 
-* Download and unzip `nRF5_SDK_11.0.0_89a8197.zip`
-* Apply patch `hex/SD20_SDK11.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/SD20_SDK11.patch`)
-* Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100XX/ser_s13X_hci` project in the compiler of choice
+* Download and unzip `nRF5_SDK_<ver>.0.0_<sha>.zip`
+* Apply patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sdk110_connectivity.patch`)
+* Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci` project in the compiler of choice
 * Add defines `APP_SCHEDULER_WITH_PROFILER` and `HCI_LINK_CONTROL`
 * Compile
-* Merge the built connectivity hex file with corresponding SoftDevice hex file (e.g. `mergehex -m connecitivy.hex softdevice.hex -o connectivity_with_softdevice.hex`)
+* Merge the built connectivity hex file with corresponding SoftDevice hex file (e.g. `mergehex -m connectivity.hex softdevice.hex -o connectivity_with_softdevice.hex`)
 
 ## Building Boost
 
