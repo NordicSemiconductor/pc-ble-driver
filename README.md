@@ -1,13 +1,13 @@
 # nRF5 Bluetooth Low Energy GAP/GATT driver
 
 ## Introduction
-pc-ble-driver is a static and shared library that provides serial port communication (using SoftDevice API serialization) to an nRF5x IC running the connectivity firmware included.
-It is a C/C++ library that can be interfaced directly but it is more often used by higher level bindings:
+pc-ble-driver consists of a set of static and shared libraries that provide serial port communication (using SoftDevice API serialization) to an nRF5x IC running the connectivity firmware included.
+The C/C++ libraries that can be interfaced directly but are more often used by higher level bindings:
 
 * [pc-ble-driver-js  JavaScript bindings](https://github.com/NordicSemiconductor/pc-ble-driver-js)
 * [pc-ble-driver-py  Python bindings](https://github.com/NordicSemiconductor/pc-ble-driver-py)
 
-The library is included as a submodule by the repositories above, and it should be built as part of them.
+The libraries are included as a submodule by the repositories above, and they should be built as part of them.
 
 ## License
 
@@ -15,10 +15,10 @@ See the [license file](LICENSE) for details.
 
 ## SoftDevice and IC Support
 
-The library is compatible with the following SoftDevice API versions and nRF5x ICs:
+The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* s130_nrf51_2.x.x (nRF51 series ICs)
-* s132_nrf52_2.x.x (nRF52 series ICs)
+* sd_api_v2: s130_nrf51_2.x.x (nRF51 and nRF52 series ICs)
+* sd_api_v3: s132_nrf52_3.x.x (nRF52 series ICs)
 
 The .hex files included in the `hex/` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
@@ -51,7 +51,7 @@ To use this library you will need to flash the connectivity firmware on a nRF5x 
 Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
-    $ nrfjprog -f NRF5<x> --program hex/connectivity_115k2_with_s13x_2.<x>.<x>.hex
+    $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s13<v>_<a>.<b>.<c>.hex
 
 ### J-Link USB CDC serial ports
 
@@ -88,12 +88,12 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 The .hex files that contain both the SoftDevice and the connectivity application only need to be recompiled if you want to run them on a custom board. For standard Nordic Development Kits the supplied .hex files can be used directly.
 
-* Download and unzip `nRF5_SDK_11.0.0_89a8197.zip`
-* Apply patch `hex/SD20_SDK11.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/SD20_SDK11.patch`)
-* Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100XX/ser_s13X_hci` project in the compiler of choice
+* Download and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
+* Apply patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
+* Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci` project in the compiler of choice
 * Add defines `APP_SCHEDULER_WITH_PROFILER` and `HCI_LINK_CONTROL`
 * Compile
-* Merge the built connectivity hex file with corresponding SoftDevice hex file (e.g. `mergehex -m connecitivy.hex softdevice.hex -o connectivity_with_softdevice.hex`)
+* Merge the built connectivity hex file with corresponding SoftDevice hex file (e.g. `mergehex -m connectivity.hex softdevice.hex -o connectivity_with_softdevice.hex`)
 
 ## Building Boost
 
@@ -123,7 +123,6 @@ And on Linux or macOS (OS X) assuming you've unpacked Boost in `~/boost/boost_1_
 
 Install Microsoft Visual Studio. The following versions supported are:
 
-* Visual Studio 2013 (MSVC 12.0)
 * Visual Studio 2015 (MSVC 14.0)
 
 Open a Microsoft Visual Studio Command Prompt and issue the following commands:
@@ -132,7 +131,7 @@ Open a Microsoft Visual Studio Command Prompt and issue the following commands:
     > bootstrap.bat
     > b2 toolset=msvc-<VV.V> address-model=<32,64> link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
-**Note**: If you intend to build a 64-bit version of Boost, and depending on the version of Visual Studio you use, you might need to open a 64-bit command prompt such as
+**Note**: If you intend to build a 64-bit version of Boost, you might need to open a 64-bit command prompt such as
 "Visual Studio 2015 x86 x64 Cross Tools Command Prompt" or similar, or run `vcvarsall.bat x86_amd64` or `setenv.cmd" /Release /x64`.
 
 **Note**: Refer to the [compiler list](http://www.boost.org/build/doc/html/bbv2/reference/tools.html#bbv2.reference.tools.compilers) of the Boost documentation 
@@ -143,10 +142,6 @@ to find the version of the MSVC that you need to provide using the `toolset=` op
 **Note**: Use `dumpbin /headers <file>` to check whether a particular object file is 32 or 64-bit.
 
 ##### Examples
-
-Build 32-bit Boost with Visual Studio 2013:
-
-    > b2 toolset=msvc-12.0 address-model=32 link=static --with-thread --with-system --with-regex --with-date_time --with-chrono
 
 Build 64-bit Boost with Visual Studio 2015:
 
@@ -221,10 +216,8 @@ See the following sections for platform-specific instructions on the installatio
 Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
 
     > cd build
-    > cmake -B. -H.. -G "Visual Studio XX <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>"
+    > cmake -B. -H.. -G "Visual Studio 14 <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>"
     > msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
-
-**Note**: Select Visual Studio 12 or 14 `-G "Visual Studio XX"` option.
 
 **Note**: Add `Win64` to the `-G` option to build a 64-bit version of the driver.
 
@@ -234,7 +227,7 @@ Open a Microsoft Visual Studio Command Prompt and issue the following from the r
 
 ##### Examples
 
-Building for with 64-bit Visual Studio 15:
+Building for with 64-bit Visual Studio 2015:
 
     > cmake -B. -H.. -G "Visual Studio 14" ..
 
