@@ -20,7 +20,6 @@
 #include "sd_rpc.h"
 #include "sd_rpc_types.h"
 
-#include <windows.h>
 #include <time.h>
 #include <string.h>
 #include <stdbool.h>
@@ -110,13 +109,6 @@ static const ble_gap_conn_params_t m_connection_param =
 static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, const char * message);
 static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message);
 static uint32_t ble_stack_init();
-static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt);
-static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt);
-static void on_timeout(const ble_gap_evt_t * const p_ble_gap_evt);
-static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_gattc_evt);
-static void on_characteristic_discover_response(const ble_gattc_evt_t * const p_ble_gattc_evt);
-static void on_descriptor_discover_response(const ble_gattc_evt_t * const p_ble_gattc_evt);
-static void on_write_response(const ble_gattc_evt_t * const p_ble_gattc_evt);
 static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata);
 static uint32_t scan_start();
 static uint32_t service_discovery_start();
@@ -391,6 +383,25 @@ static void on_conn_params_update_request(const ble_gap_evt_t * const p_ble_gap_
 
 }
 
+#if NRF_SD_BLE_API >= 3
+static void on_exchange_mtu_request(const ble_gatts_evt_t * const p_ble_gatts_evt)
+{
+    uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(m_adapter, m_connection_handle,
+        GATT_MTU_SIZE_DEFAULT);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        printf("MTU exchange request failed, err_code %d", err_code);
+    }
+}
+
+static void on_exchange_mtu_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
+{
+    uint16_t server_rx_mtu = p_ble_gattc_evt->params.exchange_mtu_rsp.server_rx_mtu;
+    printf("MTU response received. New ATT_MTU is %d\n", server_rx_mtu);
+}
+#endif
+
 static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer)
 {
     const int address_length = 6;
@@ -631,12 +642,11 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 
 #if NRF_SD_BLE_API >= 3
     case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-        sd_ble_gatts_exchange_mtu_reply(m_adapter, p_ble_evt->evt.gatts_evt.conn_handle, GATT_MTU_SIZE_DEFAULT);
+        on_exchange_mtu_request(&(p_ble_evt->evt.gatts_evt));
         break;
 
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
-        uint16_t server_rx_mtu = p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu;
-        printf("MTU response received. New ATT_MTU is %d\n", server_rx_mtu);
+        on_exchange_mtu_response(&(p_ble_evt->evt.gattc_evt));
         break;
 #endif
 
