@@ -88,7 +88,7 @@ static const ble_gap_scan_params_t m_scan_param =
      1,                       // Active scanning set.
      0,                       // Selective scanning not set.
 #if NRF_SD_BLE_API >= 2
-	 0,
+     0,
 #else
      NULL,                    // White-list not set.
 #endif
@@ -149,7 +149,7 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
 
 static void status_handler(adapter_t *adapter, sd_rpc_app_status_t code, const char * message)
 {
-    printf("Status: %d, message: %s", (uint32_t)code, message);
+    printf("Status: %d, message: %s\n", (uint32_t)code, message);
 }
 
 static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
@@ -374,15 +374,21 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
 
     float pkt_per_sec = m_hvx_count / seconds;
 
-    if (m_hvx_count % 10 == 0) {
-        printf("pkts: %06d, pkt/s: %f\n", m_hvx_count, pkt_per_sec);
-    }
-
-    if (length < 4) {
-        return;
-    }
+    printf("pkts: %06d, pkt/s: %f\n", m_hvx_count, pkt_per_sec);
 
     fflush(stdout);
+}
+
+static void on_conn_params_update_request(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    uint32_t err_code;
+    err_code = sd_ble_gap_conn_param_update(m_adapter, m_connection_handle,
+                                            &(p_ble_gap_evt->params.conn_param_update_request.conn_params));
+    if (err_code != NRF_SUCCESS)
+    {
+        printf("Conn params update failed, err_code %d", err_code);
+    }
+
 }
 
 static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer)
@@ -436,7 +442,7 @@ static uint32_t ble_stack_init()
     ble_enable_params.gatts_enable_params.attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed = false;
     ble_enable_params.gap_enable_params.periph_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_conn_count = 5;
+    ble_enable_params.gap_enable_params.central_conn_count = 1;
     ble_enable_params.gap_enable_params.central_sec_count = 1;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
     ble_enable_params.common_enable_params.vs_uuid_count = 5;
@@ -455,6 +461,20 @@ static uint32_t ble_stack_init()
     }
 
     printf("Failed to enable BLE stack.\n"); fflush(stdout);
+    return err_code;
+}
+
+static uint32_t ble_options_set()
+{
+    ble_opt_t opt;
+    ble_common_opt_t common_opt;
+    common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
+    common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
+    common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
+    opt.common_opt = common_opt;
+
+    uint32_t err_code = sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
+
     return err_code;
 }
 
@@ -605,6 +625,10 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         on_hvx(&(p_ble_evt->evt.gattc_evt));
         break;
 
+    case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
+        on_conn_params_update_request(&(p_ble_evt->evt.gap_evt));
+        break;
+
 #if NRF_SD_BLE_API >= 3
     case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
         sd_ble_gatts_exchange_mtu_reply(m_adapter, p_ble_evt->evt.gatts_evt.conn_handle, GATT_MTU_SIZE_DEFAULT);
@@ -670,6 +694,13 @@ int main(int argc, char *argv[])
         return error_code;
     }
 
+    error_code = ble_options_set();
+
+    if (error_code != NRF_SUCCESS)
+    {
+        return error_code;
+    }
+    
     scan_start();
 
     while (true)
