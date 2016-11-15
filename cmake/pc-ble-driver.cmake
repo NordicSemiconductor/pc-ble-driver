@@ -54,10 +54,32 @@ set(Boost_USE_STATIC_LIBS   ON)
 # Minimum version required is 1.54.0
 find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
 
-set(PC_BLE_DRIVER_PROJECT_NAME "pc_ble_driver")
-set(PC_BLE_DRIVER_OBJ_LIB "pc_ble_driver_obj")
-set(PC_BLE_DRIVER_STATIC_LIB "pc_ble_driver_static")
-set(PC_BLE_DRIVER_SHARED_LIB "pc_ble_driver_shared")
+# Add or remove SD API versions here
+set(SD_API_VER_NUMS 2 3)
+list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
+
+set(SD_API_VER_PREFIX "SD_API_V")
+set(SD_API_VERS )
+
+foreach(SD_API_VER_NUM ${SD_API_VER_NUMS})
+    # Set internal variable names based on the list of version numbers
+    set(_SD_API_VER "${SD_API_VER_PREFIX}${SD_API_VER_NUM}")
+    string(TOLOWER ${_SD_API_VER} _SD_API_VER_L)
+    # Append it to the list
+    list(APPEND SD_API_VERS ${_SD_API_VER})
+    # Set project and variable names
+    set(PC_BLE_DRIVER_${_SD_API_VER}_PROJECT_NAME "pc_ble_driver_${_SD_API_VER_L}")
+    set(PC_BLE_DRIVER_${_SD_API_VER}_OBJ_LIB "pc_ble_driver_obj_${_SD_API_VER_L}")
+    set(PC_BLE_DRIVER_${_SD_API_VER}_STATIC_LIB "pc_ble_driver_static_${_SD_API_VER_L}")
+    set(PC_BLE_DRIVER_${_SD_API_VER}_SHARED_LIB "pc_ble_driver_shared_${_SD_API_VER_L}")
+endforeach(SD_API_VER_NUM)
+
+set(SD_API_VER_COMPILER_DEF "NRF_SD_BLE_API_VERSION")
+
+#MESSAGE( STATUS "list1: " "${SD_API_VER_NUMS}" )
+#MESSAGE( STATUS "list2: " "${SD_API_VERS}" )
+#MESSAGE( STATUS "proj2: " "${PC_BLE_DRIVER_SD_API_V2_PROJECT_NAME}" )
+#MESSAGE( STATUS "proj3: " "${PC_BLE_DRIVER_SD_API_V3_PROJECT_NAME}" )
 
 # pc-ble-driver root folder
 set(PC_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
@@ -65,8 +87,17 @@ set(PC_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 # pc-ble-driver hex folder
 set(PC_BLE_DRIVER_HEX_DIR ${PC_BLE_DRIVER_ROOT_DIR}/hex)
 
-# pc-ble-driver include paths
-set(PC_BLE_DRIVER_INCLUDE_DIR ${PC_BLE_DRIVER_ROOT_DIR}/include ${PC_BLE_DRIVER_ROOT_DIR}/../include/internal/transport)
+# pc-ble-driver include path
+set(PC_BLE_DRIVER_INCLUDE_DIR ${PC_BLE_DRIVER_ROOT_DIR}/include)
+
+# Set public include folders
+foreach(SD_API_VER ${SD_API_VERS})
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+    set(PC_BLE_DRIVER_${SD_API_VER}_PUBLIC_INCLUDE_DIRS ${PC_BLE_DRIVER_ROOT_DIR}/include
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/include/common
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/include/common/sdk_compat
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers)
+endforeach(SD_API_VER)
 
 find_package(Git REQUIRED)
 
@@ -120,6 +151,11 @@ function(build_metadata dir dst)
     string(CONCAT str ${str} "* CMake version: " ${CMAKE_VERSION} "\n") 
     string(CONCAT str ${str} "* Boost version: " ${Boost_MAJOR_VERSION} "." ${Boost_MINOR_VERSION} "." ${Boost_SUBMINOR_VERSION} "\n") 
     string(CONCAT str ${str} "* Boost libs: " ${Boost_LIBRARY_DIRS} "\n") 
+    string(CONCAT str ${str} "* SD API Versions:") 
+    foreach(SD_API_VER ${SD_API_VERS})
+        string(CONCAT str ${str} " <${SD_API_VER}>") 
+    endforeach()
+    string(CONCAT str ${str} "\n") 
      
     set(${dst} ${str} PARENT_SCOPE)
  

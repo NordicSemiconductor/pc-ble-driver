@@ -14,15 +14,26 @@ ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
 DL_LOCATION=$ABS_PATH../tmp
 
 # SDK download link (as zip file, full URL with extension)
-SDK_LINK='https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip'
+function set_sdk_link () {
+    SDK_LINK=$1
 
-SDK_FILE=${SDK_LINK##*/}  # SDK file name with extension
-SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
+    SDK_FILE=${SDK_LINK##*/}  # SDK file name with extension
+    SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
+}
+
+# Configuration of the destination folder (no trailing slash)
+function set_dl_location () {
+    DL_LOCATION=$1
+}
+
+# Configuration of the patch file name
+function set_patch_file () {
+    PATCH_FILE=$1
+}
 
 # Display a fatal error and exit
 function fatal () {
-    printf "\e[1;31m[ERROR] $1\r\n[ERROR] Press Enter to exit...\e[0;0m"
-    read
+    printf "\e[1;31m[ERROR] $1\r\n[ERROR]\e[0;0m"
     exit 1
 }
 
@@ -33,6 +44,22 @@ function check_requirements () {
     command -v git >/dev/null 2>&1 || { fatal "Git is not available"; }
     command -v patch >/dev/null 2>&1 || { fatal "Patch is not available"; }
 }
+
+# Check if the required parameters have been configured
+function check_config () {
+    if [[ -z "${DL_LOCATION}" ]]; then
+        fatal "Download location has not been set"
+    fi
+
+    if [[ -z "${SDK_LINK}" ]]; then
+        fatal "SDK link has not been set"
+    fi
+
+    if [[ -z "${PATCH_FILE}" ]]; then
+        fatal "Patch file has not been set"
+    fi
+}
+
 
 # Check if the SDK folder already exist
 function sdk_exists () {
@@ -110,19 +137,20 @@ function sdk_download () {
         fatal "Could not remove the SDK zip file"
     fi
 
-    # Apply the connectivity patch
-    sdk_patch
-
     # FIXME: unused files from the modified SDK should be deleted
     # Keep only the components and the connectivity application ?
 }
 
-clear
-printf "Starting SDK bootstrap script\r\n\r\n"
+function run() {
+    clear
+    printf "Starting SDK bootstrap script\r\n\r\n"
 
-check_requirements
-sdk_download
+    check_requirements
+    check_config
+    sdk_download
+    sdk_patch
 
-echo "> SDK ready to use. Exit."
+    echo "> SDK ready to use. Exit."
 
-exit 0
+    exit 0
+}
