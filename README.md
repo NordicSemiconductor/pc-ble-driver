@@ -13,14 +13,14 @@ The libraries are included as a submodule by the repositories above, and they sh
 
 See the [license file](LICENSE) for details.
 
-## SoftDevice and IC Support
+## SoftDevice and IC support
 
 The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* sd_api_v2: s130_nrf51_2.x.x (nRF51 and nRF52 series ICs)
-* sd_api_v3: s132_nrf52_3.x.x (nRF52 series ICs)
+* SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
+* SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
 
-The .hex files included in the `hex/` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
+The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
 ## Operating system support
 
@@ -86,14 +86,15 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 ## Compiling the connectivity .hex files
 
-The .hex files that contain both the SoftDevice and the connectivity application only need to be recompiled if you want to run them on a custom board. For standard Nordic Development Kits the supplied .hex files can be used directly.
+Precompiled connectivity firmware are provided and can be used with standard Nordic Development Kits. The .hex files are available in the `hex/sd_api_v<x>` folder. They include the SoftDevice and the connectivity application.
 
-* Download and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
-* Apply patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
-* Open `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci` project in the compiler of choice
-* Add defines `APP_SCHEDULER_WITH_PROFILER` and `HCI_LINK_CONTROL`
-* Compile
-* Merge the built connectivity hex file with corresponding SoftDevice hex file (e.g. `mergehex -m connectivity.hex softdevice.hex -o connectivity_with_softdevice.hex`)
+You only need to recompile the connectivity application if you want to run it on a custom board. You can use the `hex/sd_api_v<x>/bootstrap_sd_api_v<X>.sh` script to download and patch the nRF SDK and the application with ease. Using this scripts, the steps 1 and 2 below are done automatically:
+
+1. [Download the nRF SDK 11 or 12](https://developer.nordicsemi.com/nRF5_SDK/) (depending on the SoftDevice API you want to use) and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
+2. Apply the patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
+3. Open the connectivity project `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci`
+4. Compile it using the the compiler of your choice
+5. Merge the built connectivity hex file with the corresponding SoftDevice hex file (e.g. `mergehex -m connectivity.hex softdevice.hex -o connectivity_with_softdevice.hex`)
 
 ## Building Boost
 
