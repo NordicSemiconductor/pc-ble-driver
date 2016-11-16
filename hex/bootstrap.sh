@@ -1,12 +1,12 @@
 #!/bin/bash
 # 
-# Download an patch the nRF5 SDK to compile the connectivity application.
+# Download an patch the nRF5 SDK in order to compile the connectivity application.
 #
-# The link of the SDK to download can be configured. It will be downloaded and
-# extracted to the configured folder. A custom patch file can be applied.
+# The SDK download link can be configured. The SDK is downloaded and extracted to 
+# the configured folder. A custom patch file is then be applied.
 #
 # All the paths provided as arguments are relative to the location of this script.
-# Usage: bootstrap -l SDK link -d destination folder -p patch file
+# Usage: Usage: bootstrap -l link -d destination -p patch [-h]
 # 
 # Adapted from 'https://github.com/NordicSemiconductor/nrf5-sdk-for-eddystone'.
 # Version 0.5
@@ -32,13 +32,23 @@ function set_patch_file () {
 }
 
 function usage () {
-    printf "Usage: bootstrap [[-l SDK link -d destination folder -p patch file ] | [-h]]\r\n"
+    echo "Usage: bootstrap -l link -d destination -p patch [-h]"
+    echo
+    echo " -l, --link   SDK download link"
+    echo " -d, --dest   Destination folder of the downloaded SDK"
+    echo " -p, --patch  Patch file to apply to the downloaded SDK"
+    echo
+    echo " -h, --help   Show this help message"
+}
+
+# Display an error message
+function error () {
+    printf "\e[1;31m[ERROR] $1\e[0;0m\r\n"
 }
 
 # Display a fatal error and exit
 function fatal () {
-    printf "\e[1;31m[ERROR] $1\e[0;0m"
-    echo
+    error "$@"
     exit
 }
 
@@ -50,29 +60,34 @@ function check_requirements () {
     command -v patch >/dev/null 2>&1 || { fatal "Patch is not available"; }
 }
 
-# Check if the required parameters have been configured
+# Check if the required parameters have been set
 function check_config () {
     if [[ -z "${SDK_LINK}" ]]; then
-        fatal "Download SDK link has not been set"
+        error "Download SDK link has not been set"
+        usage
+        exit
     fi
 
     if [[ -z "${DL_LOCATION}" ]]; then
-        fatal "Download location has not been set"
+        error "Download location folder has not been set"
+        usage
+        exit
     fi
 
     if [[ -z "${PATCH_FILE}" ]]; then
-        fatal "Patch file has not been set"
+        error "Patch file has not been set"
+        usage
+        exit
     fi
 }
-
 
 # Check if the SDK folder already exist
 function sdk_exists () {
     if [[ -d $DL_LOCATION && -d $DL_LOCATION/$SDK_NAME ]]; then
         # Erase the existing SDK folder if needed
-        echo "> SDK folder already available"
+        echo "> SDK folder '${SDK_NAME}' already available"
         read -p "> Do you want to erase the existing SDK folder [Y/n]? " -n 1 -r
-        echo ""
+        echo
 
         if [[ $REPLY =~ ^[Y]$ ]]; then
             echo "> Deleting existing SDK folder..."
@@ -88,7 +103,7 @@ function sdk_exists () {
 
 # Patch the downloaded SDK in order to compile the connectivity application
 function sdk_patch () {
-    echo "> Applying SDK patch..."
+    echo "> Applying SDK patch '${PATCH_FILE}'..."
 
     # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
     # FIXME: check if the patch has been already applied
@@ -97,7 +112,7 @@ function sdk_patch () {
     err_code=$?
     if [ "$err_code" != "0" ]; then
         # The patch has been probably already applied
-        fatal "> Patch does not apply"
+        fatal "Patch does not apply"
     fi
 }
 
@@ -114,7 +129,7 @@ function sdk_download () {
     fi
 
     # Create the destination folder and download the SDK
-    echo "> Downloading nRF SDK..."
+    echo "> Downloading nRF SDK '${SDK_NAME}'..."
 
     mkdir -p $DL_LOCATION
 
