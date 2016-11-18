@@ -217,7 +217,7 @@ See the following sections for platform-specific instructions on the installatio
 Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
 
     > cd build
-    > cmake -B. -H.. -G "Visual Studio 14 <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>"
+    > cmake -G "Visual Studio 14 <Win64>" <-DBOOST_LIBRARYDIR="<Boost libs path>>" ..
     > msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
 
 **Note**: Add `Win64` to the `-G` option to build a 64-bit version of the driver.
@@ -230,7 +230,7 @@ Open a Microsoft Visual Studio Command Prompt and issue the following from the r
 
 Building for with 64-bit Visual Studio 2015:
 
-    > cmake -B. -H.. -G "Visual Studio 14" ..
+    > cmake -G "Visual Studio 14" ..
 
 #### Ubuntu Linux
 
@@ -241,7 +241,7 @@ Install cmake:
 Then change to the root folder of the repository and issue the following commands:
 
     $ cd build
-    > cmake -B. -H.. -G "Unix Makefiles" <-DCMAKE_BUILD_TYPE=<build_type>> <-DARCH=<x86_32,x86_64>> <-DBOOST_LIBRARYDIR="<Boost libs path>>" ..
+    > cmake -G "Unix Makefiles" <-DCMAKE_BUILD_TYPE=<build_type>> <-DARCH=<x86_32,x86_64>> <-DBOOST_LIBRARYDIR="<Boost libs path>>" ..
     $ make
 
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
@@ -259,7 +259,7 @@ Install cmake with Homebrew with the `brew` command on a terminal:
 Then change to the root folder of the repository and issue the following commands:
 
     $ cd build
-    $ cmake -B. -H.. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE= <build_type> ..
+    $ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE= <build_type> ..
     $ make
 
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
