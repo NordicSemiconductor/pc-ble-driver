@@ -351,9 +351,6 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
                 }
                 else
                 {
-                    std::stringstream logLine;
-                    logLine << "Note: Expected seq nr " << seq_num << "received " << ackNum << std::endl;
-                    log(logLine.str());
                     sendControlPacket(CONTROL_PKT_ACK);
                 }
             }
