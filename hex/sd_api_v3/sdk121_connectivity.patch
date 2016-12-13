@@ -95,24 +95,45 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 index d4a4883..346093a 100644
 --- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -35,6 +35,21 @@
- 
+@@ -28,6 +28,7 @@
+ #include "ser_hal_transport.h"
+ #include "ser_conn_handlers.h"
+ #include "boards.h"
++#include "ser_config.h"
+
+ #define NRF_LOG_MODULE_NAME "CONN"
+ #include "nrf_log.h"
+@@ -35,6 +36,34 @@
+
  #include "ser_phy_debug_comm.h"
- 
+
++#if defined ( __CC_ARM )
 +typedef struct __attribute__((packed))
 +{
-+        uint32_t    magic_number;        /* Magic number to verify the presence of this structure in memory */
-+        uint32_t    firmware_id    : 8;  /* Firmware id to differentiate variants of the software */
-+        uint32_t    rfu0           : 24; /* Reserved for future use (shall remain 0xFFFFFF) */
-+        uint32_t    revision_hash;       /* Unique revision identifier */
-+        uint8_t     version_major;       /* Major version number */
-+        uint8_t     version_minor;       /* Minor version number */
-+        uint8_t     version_patch;       /* Patch version number */
-+        uint8_t     description_length;  /* Length of the description field */
-+        uint8_t *   description;         /* Utf-8 string description of the release */
++        uint32_t    magic_number;           /* Magic number to verify the presence of this structure in memory */
++        uint32_t    struct_version : 8;     /* Version of this struct format */
++        uint32_t    rfu0           : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    revision_hash;          /* Unique revision identifier */
++        uint8_t     version_major;          /* Major version number */
++        uint8_t     version_minor;          /* Minor version number */
++        uint8_t     version_patch;          /* Patch version number */
++        uint32_t    sd_ble_api_version;     /* SoftDevice BLE API version number */
++        uint32_t    transport_type;         /* Connectivity transport type, 1 = UART HCI */
++        uint32_t    baud_rate;              /* UART transport baud rate */
 +} version_info_t;
 +
-+static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 1, 0, 0, NULL};
++static const version_info_t version_info __attribute__((at(0x20000))) = {
++    .magic_number       = 0x46D8A517,
++    .struct_version     = 2,
++    .revision_hash      = 0,
++    .version_major      = 1,
++    .version_minor      = 0,
++    .version_patch      = 1,
++    .sd_ble_api_version = 3,
++    .transport_type     = 1,
++    .baud_rate          = SER_PHY_UART_BAUDRATE,
++ };
++#endif
 +
  /**@brief Main function of the connectivity application. */
  int main(void)
