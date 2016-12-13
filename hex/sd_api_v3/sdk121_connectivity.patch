@@ -112,8 +112,36 @@ index d4a4883..346093a 100644
 +        uint8_t *   description;         /* Utf-8 string description of the release */
 +} version_info_t;
 +
-+static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 0, 1, 0, NULL};
++static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 1, 0, 0, NULL};
 +
  /**@brief Main function of the connectivity application. */
  int main(void)
  {
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx b//examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
+index 0f597ba..2f6bfb4 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
+@@ -334,8 +334,8 @@
+               </OCR_RVCT8>
+               <OCR_RVCT9>
+                 <Type>0</Type>
+-                <StartAddress>0x20004300</StartAddress>
+-                <Size>0xbd00</Size>
++                <StartAddress>0x2000bcc0</StartAddress>
++                <Size>0x4340</Size>
+               </OCR_RVCT9>
+               <OCR_RVCT10>
+                 <Type>0</Type>
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+index 7121bc0..ba41a73 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+@@ -6,7 +6,7 @@ GROUP(-lgcc -lc -lnosys)
+ MEMORY
+ {
+   FLASH (rx) : ORIGIN = 0x1f000, LENGTH = 0x61000
+-  RAM (rwx) :  ORIGIN = 0x20004300, LENGTH = 0xbd00
++  RAM (rwx) :  ORIGIN = 0x2000bcc0, LENGTH = 0x4340
+ }
+
+ SECTIONS
