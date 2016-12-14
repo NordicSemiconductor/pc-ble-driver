@@ -129,7 +129,7 @@ index d4a4883..346093a 100644
 +    .version_major      = 1,
 +    .version_minor      = 0,
 +    .version_patch      = 1,
-+    .sd_ble_api_version = 3,
++    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
 +    .transport_type     = 1,
 +    .baud_rate          = SER_PHY_UART_BAUDRATE,
 + };
