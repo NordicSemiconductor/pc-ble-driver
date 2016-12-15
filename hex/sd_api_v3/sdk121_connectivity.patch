@@ -166,3 +166,16 @@ index 7121bc0..ba41a73 100644
  }
 
  SECTIONS
+diff --git a/components/serialization/common/ble_serialization.h b/components/serialization/common/ble_serialization.h
+index a339754..8fb049b 100644
+--- a/components/serialization/common/ble_serialization.h
++++ b/components/serialization/common/ble_serialization.h
+@@ -122,7 +122,7 @@ typedef enum
+ 
+ /** Maximum length of p_value in \ref ble_gattc_write_params_t. See Bluetooth 4.0 spec: 3.4.5.1 and
+  *  3.4.5.3. */
+-#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (GATT_MTU_SIZE_DEFAULT - 3)
++#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (247 - 3)
+ 
+ /** See Bluetooth 4.0 spec: 3.4.4.7. */
+ #define BLE_GATTC_HANDLE_COUNT_LEN_MAX     ((GATT_MTU_SIZE_DEFAULT - 1) / 2)
