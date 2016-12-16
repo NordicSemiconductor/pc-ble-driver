@@ -456,7 +456,7 @@ diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.
 diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
 --- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -28,9 +28,39 @@
+@@ -28,9 +28,43 @@
  #include "ser_hal_transport.h"
  #include "ser_conn_handlers.h"
  #include "boards.h"
@@ -467,29 +467,33 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +#if defined ( __CC_ARM )
 +typedef struct __attribute__((packed))
 +{
-+        uint32_t    magic_number;           /* Magic number to verify the presence of this structure in memory */
-+        uint32_t    struct_version : 8;     /* Version of this struct format */
-+        uint32_t    rfu0           : 24;    /* Reserved for future use */
-+        uint32_t    revision_hash;          /* Unique revision identifier */
-+        uint32_t    version_major  : 8;     /* Major version number */
-+        uint32_t    version_minor  : 8;     /* Minor version number */
-+        uint32_t    version_patch  : 8;     /* Patch version number */
-+        uint32_t    rfu1           : 8;     /* Reserverd for future use */
-+        uint32_t    sd_ble_api_version;     /* SoftDevice BLE API version number */
-+        uint32_t    transport_type;         /* Connectivity transport type, 1 = UART HCI */
-+        uint32_t    baud_rate;              /* UART transport baud rate */
++        uint32_t    magic_number;               /* Magic number to verify the presence of this structure in memory */
++        uint32_t    struct_version     : 8;     /* Version of this struct format */
++        uint32_t    rfu0               : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    revision_hash;              /* Unique revision identifier */
++        uint32_t    version_major      : 8;     /* Major version number */
++        uint32_t    version_minor      : 8;     /* Minor version number */
++        uint32_t    version_patch      : 8;     /* Patch version number */
++        uint32_t    rfu1               : 8;     /* Reserved for future use, shall be 0xFF */
++        uint32_t    sd_ble_api_version : 8;     /* SoftDevice BLE API version number */
++        uint32_t    transport_type     : 8;     /* Connectivity transport type, 1 = UART HCI */
++        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
++        uint32_t    baud_rate;                  /* UART transport baud rate */
 +} version_info_t;
 +
 +static const version_info_t version_info __attribute__((at(0x20000))) = {
 +    .magic_number       = 0x46D8A517,
 +    .struct_version     = 2,
++    .rfu0               = 0xFFFFFF,
 +    .revision_hash      = 0,
 +    .version_major      = 1,
 +    .version_minor      = 1,
 +    .version_patch      = 0,
++    .rfu1               = 0xFF,
 +    .sd_ble_api_version = 2,
 +    .transport_type     = 1,
-+    .baud_rate          = SER_PHY_UART_BAUDRATE,
++    .rfu2               = 0xFFFF,
++    .baud_rate          = SER_PHY_UART_BAUDRATE_VAL,
 +};
 +#endif
 +
