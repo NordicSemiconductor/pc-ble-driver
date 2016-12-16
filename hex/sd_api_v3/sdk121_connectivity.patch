@@ -95,25 +95,92 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 index d4a4883..346093a 100644
 --- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -35,6 +35,21 @@
- 
+@@ -28,6 +28,7 @@
+ #include "ser_hal_transport.h"
+ #include "ser_conn_handlers.h"
+ #include "boards.h"
++#include "ser_config.h"
+
+ #define NRF_LOG_MODULE_NAME "CONN"
+ #include "nrf_log.h"
+@@ -35,6 +36,39 @@
+
  #include "ser_phy_debug_comm.h"
- 
+
++#if defined ( __CC_ARM )
 +typedef struct __attribute__((packed))
 +{
-+        uint32_t    magic_number;        /* Magic number to verify the presence of this structure in memory */
-+        uint32_t    firmware_id    : 8;  /* Firmware id to differentiate variants of the software */
-+        uint32_t    rfu0           : 24; /* Reserved for future use (shall remain 0xFFFFFF) */
-+        uint32_t    revision_hash;       /* Unique revision identifier */
-+        uint8_t     version_major;       /* Major version number */
-+        uint8_t     version_minor;       /* Minor version number */
-+        uint8_t     version_patch;       /* Patch version number */
-+        uint8_t     description_length;  /* Length of the description field */
-+        uint8_t *   description;         /* Utf-8 string description of the release */
++        uint32_t    magic_number;               /* Magic number to verify the presence of this structure in memory */
++        uint32_t    struct_version     : 8;     /* Version of this struct format */
++        uint32_t    rfu0               : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    revision_hash;              /* Unique revision identifier */
++        uint32_t    version_major      : 8;     /* Major version number */
++        uint32_t    version_minor      : 8;     /* Minor version number */
++        uint32_t    version_patch      : 8;     /* Patch version number */
++        uint32_t    rfu1               : 8;     /* Reserved for future use, shall be 0xFF */
++        uint32_t    sd_ble_api_version : 8;     /* SoftDevice BLE API version number */
++        uint32_t    transport_type     : 8;     /* Connectivity transport type, 1 = UART HCI */
++        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
++        uint32_t    baud_rate;                  /* UART transport baud rate */
 +} version_info_t;
 +
-+static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 0, 1, 0, NULL};
++static const version_info_t version_info __attribute__((at(0x20000))) = {
++    .magic_number       = 0x46D8A517,
++    .struct_version     = 2,
++    .rfu0               = 0xFFFFFF,
++    .revision_hash      = 0,
++    .version_major      = 1,
++    .version_minor      = 1,
++    .version_patch      = 0,
++    .rfu1               = 0xFF,
++    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
++    .transport_type     = 1,
++    .rfu2               = 0xFFFF,
++    .baud_rate          = SER_PHY_UART_BAUDRATE_VAL,
++};
++#endif
 +
  /**@brief Main function of the connectivity application. */
  int main(void)
  {
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx b//examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
+index 0f597ba..2f6bfb4 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
+@@ -334,8 +334,8 @@
+               </OCR_RVCT8>
+               <OCR_RVCT9>
+                 <Type>0</Type>
+-                <StartAddress>0x20004300</StartAddress>
+-                <Size>0xbd00</Size>
++                <StartAddress>0x2000bcc0</StartAddress>
++                <Size>0x4340</Size>
+               </OCR_RVCT9>
+               <OCR_RVCT10>
+                 <Type>0</Type>
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+index 7121bc0..ba41a73 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+@@ -6,7 +6,7 @@ GROUP(-lgcc -lc -lnosys)
+ MEMORY
+ {
+   FLASH (rx) : ORIGIN = 0x1f000, LENGTH = 0x61000
+-  RAM (rwx) :  ORIGIN = 0x20004300, LENGTH = 0xbd00
++  RAM (rwx) :  ORIGIN = 0x2000bcc0, LENGTH = 0x4340
+ }
+
+ SECTIONS
+diff --git a/components/serialization/common/ble_serialization.h b/components/serialization/common/ble_serialization.h
+index a339754..8fb049b 100644
+--- a/components/serialization/common/ble_serialization.h
++++ b/components/serialization/common/ble_serialization.h
+@@ -122,7 +122,7 @@ typedef enum
+ 
+ /** Maximum length of p_value in \ref ble_gattc_write_params_t. See Bluetooth 4.0 spec: 3.4.5.1 and
+  *  3.4.5.3. */
+-#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (GATT_MTU_SIZE_DEFAULT - 3)
++#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (247 - 3)
+ 
+ /** See Bluetooth 4.0 spec: 3.4.4.7. */
+ #define BLE_GATTC_HANDLE_COUNT_LEN_MAX     ((GATT_MTU_SIZE_DEFAULT - 1) / 2)

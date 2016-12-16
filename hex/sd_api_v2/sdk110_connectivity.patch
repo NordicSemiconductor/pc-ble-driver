@@ -456,8 +456,52 @@ diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.
 diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
 --- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -65,6 +65,15 @@ int main(void)
-     {   
+@@ -28,9 +28,43 @@
+ #include "ser_hal_transport.h"
+ #include "ser_conn_handlers.h"
+ #include "boards.h"
++#include "ser_config.h"
+
+ #include "ser_phy_debug_comm.h"
+
++#if defined ( __CC_ARM )
++typedef struct __attribute__((packed))
++{
++        uint32_t    magic_number;               /* Magic number to verify the presence of this structure in memory */
++        uint32_t    struct_version     : 8;     /* Version of this struct format */
++        uint32_t    rfu0               : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    revision_hash;              /* Unique revision identifier */
++        uint32_t    version_major      : 8;     /* Major version number */
++        uint32_t    version_minor      : 8;     /* Minor version number */
++        uint32_t    version_patch      : 8;     /* Patch version number */
++        uint32_t    rfu1               : 8;     /* Reserved for future use, shall be 0xFF */
++        uint32_t    sd_ble_api_version : 8;     /* SoftDevice BLE API version number */
++        uint32_t    transport_type     : 8;     /* Connectivity transport type, 1 = UART HCI */
++        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
++        uint32_t    baud_rate;                  /* UART transport baud rate */
++} version_info_t;
++
++static const version_info_t version_info __attribute__((at(0x20000))) = {
++    .magic_number       = 0x46D8A517,
++    .struct_version     = 2,
++    .rfu0               = 0xFFFFFF,
++    .revision_hash      = 0,
++    .version_major      = 1,
++    .version_minor      = 1,
++    .version_patch      = 0,
++    .rfu1               = 0xFF,
++    .sd_ble_api_version = 2,
++    .transport_type     = 1,
++    .rfu2               = 0xFFFF,
++    .baud_rate          = SER_PHY_UART_BAUDRATE_VAL,
++};
++#endif
++
+ /**@brief Main function of the connectivity application. */
+ int main(void)
+ {
+@@ -65,6 +94,15 @@ int main(void)
+     {
          /* Process SoftDevice events. */
          app_sched_execute();
 +        if (softdevice_handler_is_suspended())
@@ -469,30 +513,6 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +                app_sched_execute();
 +            }
 +        }
- 
+
          /* Process received packets.
           * We can NOT add received packets as events to the application scheduler queue because
---- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -31,6 +31,21 @@
- 
- #include "ser_phy_debug_comm.h"
- 
-+typedef struct __attribute__((packed))
-+{
-+        uint32_t    magic_number;        /* Magic number to verify the presence of this structure in memory */
-+        uint32_t    firmware_id    : 8;  /* Firmware id to differentiate variants of the software */
-+        uint32_t    rfu0           : 24; /* Reserved for future use (shall remain 0xFFFFFF) */
-+        uint32_t    revision_hash;       /* Unique revision identifier */
-+        uint8_t     version_major;       /* Major version number */
-+        uint8_t     version_minor;       /* Minor version number */
-+        uint8_t     version_patch;       /* Patch version number */
-+        uint8_t     description_length;  /* Length of the description field */
-+        uint8_t *   description;         /* Utf-8 string description of the release */
-+} version_info_t;
-+
-+static const version_info_t version_info __attribute__((at(0x20000))) = {0x46D8A517, 1, 0xFFFFFF, 0x12345678, 1, 0, 1, 0, NULL};
-+
- /**@brief Main function of the connectivity application. */
- int main(void)
- {
