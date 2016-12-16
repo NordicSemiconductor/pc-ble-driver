@@ -456,7 +456,7 @@ diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.
 diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
 --- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -28,9 +28,38 @@
+@@ -28,9 +28,39 @@
  #include "ser_hal_transport.h"
  #include "ser_conn_handlers.h"
  #include "boards.h"
@@ -469,11 +469,12 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +{
 +        uint32_t    magic_number;           /* Magic number to verify the presence of this structure in memory */
 +        uint32_t    struct_version : 8;     /* Version of this struct format */
-+        uint32_t    rfu0           : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    rfu0           : 24;    /* Reserved for future use */
 +        uint32_t    revision_hash;          /* Unique revision identifier */
-+        uint8_t     version_major;          /* Major version number */
-+        uint8_t     version_minor;          /* Minor version number */
-+        uint8_t     version_patch;          /* Patch version number */
++        uint32_t    version_major  : 8;     /* Major version number */
++        uint32_t    version_minor  : 8;     /* Minor version number */
++        uint32_t    version_patch  : 8;     /* Patch version number */
++        uint32_t    rfu1           : 8;     /* Reserverd for future use */
 +        uint32_t    sd_ble_api_version;     /* SoftDevice BLE API version number */
 +        uint32_t    transport_type;         /* Connectivity transport type, 1 = UART HCI */
 +        uint32_t    baud_rate;              /* UART transport baud rate */
@@ -489,7 +490,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +    .sd_ble_api_version = 2,
 +    .transport_type     = 1,
 +    .baud_rate          = SER_PHY_UART_BAUDRATE,
-+ };
++};
 +#endif
 +
  /**@brief Main function of the connectivity application. */

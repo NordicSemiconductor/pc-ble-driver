@@ -103,7 +103,7 @@ index d4a4883..346093a 100644
 
  #define NRF_LOG_MODULE_NAME "CONN"
  #include "nrf_log.h"
-@@ -35,6 +36,34 @@
+@@ -35,6 +36,35 @@
 
  #include "ser_phy_debug_comm.h"
 
@@ -112,11 +112,12 @@ index d4a4883..346093a 100644
 +{
 +        uint32_t    magic_number;           /* Magic number to verify the presence of this structure in memory */
 +        uint32_t    struct_version : 8;     /* Version of this struct format */
-+        uint32_t    rfu0           : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    rfu0           : 24;    /* Reserved for future use */
 +        uint32_t    revision_hash;          /* Unique revision identifier */
-+        uint8_t     version_major;          /* Major version number */
-+        uint8_t     version_minor;          /* Minor version number */
-+        uint8_t     version_patch;          /* Patch version number */
++        uint32_t    version_major  : 8;     /* Major version number */
++        uint32_t    version_minor  : 8;     /* Minor version number */
++        uint32_t    version_patch  : 8;     /* Patch version number */
++        uint32_t    rfu1           : 8;     /* Reserverd for future use */
 +        uint32_t    sd_ble_api_version;     /* SoftDevice BLE API version number */
 +        uint32_t    transport_type;         /* Connectivity transport type, 1 = UART HCI */
 +        uint32_t    baud_rate;              /* UART transport baud rate */
@@ -127,12 +128,12 @@ index d4a4883..346093a 100644
 +    .struct_version     = 2,
 +    .revision_hash      = 0,
 +    .version_major      = 1,
-+    .version_minor      = 0,
-+    .version_patch      = 1,
++    .version_minor      = 1,
++    .version_patch      = 0,
 +    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
 +    .transport_type     = 1,
 +    .baud_rate          = SER_PHY_UART_BAUDRATE,
-+ };
++};
 +#endif
 +
  /**@brief Main function of the connectivity application. */
