@@ -174,16 +174,20 @@ uint32_t UartBoost::close()
 {
     try
     {
-        std::stringstream message;
         serialPort.close();
+        ioService.stop();
+        ioWorkThread.join();
+
+        std::stringstream message;
         message << "UART port " << uartSettingsBoost.getPortName().c_str() << " closed.";
         logCallback(SD_RPC_LOG_INFO, message.str());
+
     }
     catch (std::exception& ex)
     {
         std::stringstream message;
         message << "Exception thrown on " << ex.what() << " on UART port "  << uartSettingsBoost.getPortName().c_str() << ".";
-        statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        logCallback(SD_RPC_LOG_ERROR, message.str());
     }
 
     asyncWriteInProgress = false;
@@ -217,10 +221,8 @@ void UartBoost::readHandler(const boost::system::error_code& errorCode, const si
     else if (errorCode == boost::asio::error::operation_aborted)
     {
         std::stringstream message;
-        message << "UART read from UART port " << uartSettingsBoost.getPortName().c_str() << " aborted.";
-        statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
-
-        // In case of an aborted connection, suppress notifications and return early
+        message << "UART read operation on port " << uartSettingsBoost.getPortName().c_str() << " aborted.";
+        logCallback(SD_RPC_LOG_DEBUG, message.str());
         return;
     }
     else
@@ -237,8 +239,8 @@ void UartBoost::writeHandler (const boost::system::error_code& errorCode, const 
     if (errorCode == boost::asio::error::operation_aborted)
     {
         std::stringstream message;
-        message << "UART write from UART port " << uartSettingsBoost.getPortName().c_str() << " aborted.";
-        statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        message << "UART write operation on port " << uartSettingsBoost.getPortName().c_str() << " aborted.";
+        logCallback(SD_RPC_LOG_DEBUG, message.str());
 
         // In case of an aborted connection, suppress notifications and return (i.e. no asyncWrite)
         queueMutex.lock();
