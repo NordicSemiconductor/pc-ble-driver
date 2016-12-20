@@ -67,6 +67,10 @@ The serial port will appear as `/dev/ttyACMx`. By default the port is not access
 
     sudo usermod -a -G dialout <username>
 
+To prevent the modemmanager service from trying to connect to the CDC ACM serial port:
+
+    systemctl disable ModemManager.service
+
 #### macOS (OS X)
 
 The serial port will appear as `/dev/tty.usbmodemXXXX`.
