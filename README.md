@@ -69,6 +69,7 @@ The serial port will appear as `/dev/ttyACMx`. By default the port is not access
 
 To prevent the modemmanager service from trying to connect to the CDC ACM serial port:
 
+    systemctl stop ModemManager.service
     systemctl disable ModemManager.service
 
 #### macOS (OS X)
