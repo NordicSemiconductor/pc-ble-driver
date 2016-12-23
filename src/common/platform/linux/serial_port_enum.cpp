@@ -78,22 +78,22 @@ static adapter_list_t* GetAdapters()
 
     struct udev_list_entry *udev_devices = udev_enumerate_get_list_entry(udev_enum);
     struct udev_list_entry *udev_entry;
-    struct udev_device *udev_dev;
+    struct udev_device *udev_tty_dev, *udev_usb_dev;
 
     udev_list_entry_foreach(udev_entry, udev_devices)
     {
         const char *path = udev_list_entry_get_name(udev_entry);
 
-        udev_dev = udev_device_new_from_syspath(udev_ctx, path);
-        const char *devname = udev_device_get_devnode(udev_dev);
+        udev_tty_dev = udev_device_new_from_syspath(udev_ctx, path);
+        const char *devname = udev_device_get_devnode(udev_tty_dev);
 
-        udev_dev = udev_device_get_parent_with_subsystem_devtype(
-            udev_dev,
+        udev_usb_dev = udev_device_get_parent_with_subsystem_devtype(
+            udev_tty_dev,
             "usb",
             "usb_device"
         );
 
-        const char *idVendor = udev_device_get_sysattr_value(udev_dev, "idVendor");
+        const char *idVendor = udev_device_get_sysattr_value(udev_usb_dev, "idVendor");
 
         // Only add SEGGER and ARM (even though VENDOR_ID is NXPs...) devices to list
         if(idVendor != NULL && ((strcmp(idVendor, SEGGER_VENDOR_ID) == 0) || (strcmp(idVendor, NXP_VENDOR_ID) == 0)))
@@ -104,14 +104,14 @@ static adapter_list_t* GetAdapters()
             strcpy(serial_device->vendorId, idVendor);
             strcpy(serial_device->port, devname);
             strcpy(serial_device->locationId, path);
-            strcpy(serial_device->productId, udev_device_get_sysattr_value(udev_dev, "idProduct"));
-            strcpy(serial_device->manufacturer, udev_device_get_sysattr_value(udev_dev,"manufacturer"));
-            strcpy(serial_device->serialNumber, udev_device_get_sysattr_value(udev_dev, "serial"));
+            strcpy(serial_device->productId, udev_device_get_sysattr_value(udev_usb_dev, "idProduct"));
+            strcpy(serial_device->manufacturer, udev_device_get_sysattr_value(udev_usb_dev,"manufacturer"));
+            strcpy(serial_device->serialNumber, udev_device_get_sysattr_value(udev_usb_dev, "serial"));
 
             devices->push_back(serial_device);
         }
 
-        udev_device_unref(udev_dev);
+        udev_device_unref(udev_tty_dev);
     }
 
     udev_enumerate_unref(udev_enum);
