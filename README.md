@@ -196,7 +196,9 @@ If you already have Homebrew installed, make sure it's up to date with:
 
 Once Homebrew is installed you can use the `brew` command on a terminal to install
 
-    $ brew install boost --universal
+    $ brew install homebrew/versions/boost155 --universal
+
+Note that `$ brew install boost --universal` will no longer work since `--universal` was [dropped for boost](https://github.com/Homebrew/homebrew-core/issues/7852) in `v1.62.0` meaning boost no longer supports the i386 architecture. If you install a version of boost >= `v1.62.0` you will get this type of error when building `pc-ble-driver`: `ld: warning: ignoring file /usr/local/lib/libboost_system-mt.a, file was built for archive which is not the architecture being linked (i386)`.
 
 This will download the boost source and compile it, so it might take a while.
 
