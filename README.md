@@ -272,3 +272,13 @@ Then change to the root folder of the repository and issue the following command
 
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
 
+#### Running the examples
+
+Now that you have successfully built `pc-ble-driver`, you are ready to run the examples in `pc-ble-driver/examples`. Verify that the static and shared libraries exist in the directory the examples expect them to be in.
+
+    $ cd pc-ble-driver/
+    $ ls build/
+    > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v3.a  libpc_ble_driver_shared_sd_api_v3.dylib test_uart ...
+
+To quickly get the examples up and running, see [examples/README.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/README.md).
+
