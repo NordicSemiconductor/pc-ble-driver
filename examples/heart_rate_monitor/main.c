@@ -376,15 +376,6 @@ static uint32_t heart_rate_measurement_send()
 
     error_code = sd_ble_gatts_hvx(m_adapter, m_connection_handle, &hvx_params);
 
-    if (error_code == NRF_SUCCESS && (hvx_length != length))
-    {
-        error_code = NRF_ERROR_DATA_SIZE;
-        printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-        return error_code;
-    }
-
-
     if (error_code != NRF_SUCCESS)
     {
         printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code);
