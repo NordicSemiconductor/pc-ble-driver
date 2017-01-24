@@ -166,6 +166,10 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         break;
 #endif
 
+    case BLE_EVT_TX_COMPLETE:
+        // printf("Successfully transmitted a heart rate reading."); fflush(stdout);
+        break;
+
     default:
         printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id); fflush(stdout);
         break;
@@ -197,7 +201,6 @@ static uint32_t ble_stack_init()
     ble_enable_params.gap_enable_params.periph_conn_count = 1;
     ble_enable_params.gap_enable_params.central_conn_count = 0;
     ble_enable_params.gap_enable_params.central_sec_count = 0;
-    // TODO: set device name in gap_enable_params
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
     ble_enable_params.common_enable_params.vs_uuid_count = 1;
 
@@ -220,25 +223,31 @@ static uint32_t ble_stack_init()
 static uint32_t advertisement_data_set()
 {
     uint32_t error_code;
-    uint32_t index;
-    uint8_t  data_buffer[BUFFER_SIZE]; //Sufficiently large buffer for the advertising data
+    uint8_t index = 0;
+    uint8_t  data_buffer[BUFFER_SIZE]; // Sufficiently large buffer for the advertising data
 
     const char  * device_name = "HRM Example";
     const uint8_t name_length = strlen(device_name);
-    const uint8_t data_length = name_length + 1; //Device name + data type
     const uint8_t data_type   = BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME;
 
+    // Set the device name.
+    data_buffer[index++] = name_length + 1; // Device name + data type
+    data_buffer[index++] = data_type;
+    memcpy((char *)&data_buffer[index], device_name, name_length);
+    index += name_length;
+
+    // Advertise the device's available services.
+    data_buffer[index++] = 3;
+    data_buffer[index++] = BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE;
+    // BLE_UUID_HEART_RATE_SERVICE == 0x180D. Stored in advertisement data buffer in little-endian.
+    data_buffer[index++] = 0x0D;
+    data_buffer[index++] = 0x18;
+
+    // No scan response.
     const uint8_t * sr_data = NULL;
     const uint8_t   sr_data_length = 0;
 
-    index = 0;
-    data_buffer[index] = data_length;
-    index++;
-    data_buffer[index] = data_type;
-    index++;
-    memcpy((char *)&data_buffer[index], device_name, name_length);
-
-    error_code = sd_ble_gap_adv_data_set(m_adapter, data_buffer, data_length + 1, sr_data, sr_data_length);
+    error_code = sd_ble_gap_adv_data_set(m_adapter, data_buffer, index, sr_data, sr_data_length);
 
     if (error_code != NRF_SUCCESS)
     {
@@ -247,7 +256,6 @@ static uint32_t advertisement_data_set()
     }
 
     printf("Advertising data set\n"); fflush(stdout);
-
     return NRF_SUCCESS;
 }
 
@@ -490,7 +498,7 @@ int main(int argc, char *argv[])
             heart_rate_measurement_send();
         }
 
-		Sleep(100);
+		Sleep(1000);
 	}
 
     error_code = sd_rpc_close(m_adapter);
