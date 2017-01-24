@@ -73,9 +73,9 @@ static adapter_t * m_adapter = NULL;
 
 static uint32_t advertising_start();
 
-static void status_handler(adapter_t *adapter, sd_rpc_app_status_t code, const char * message)
+static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message)
 {
-    printf("Status: %d, message: %s\n", (uint32_t)code, message);
+    printf("Status: %d, message: %s\n", (uint32_t) code, message);
 }
 
 static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, const char * message)
@@ -91,7 +91,7 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
         break;
 
     case SD_RPC_LOG_INFO:
-        printf("Warning: %s\n", message); fflush(stdout);
+        printf("Info: %s\n", message); fflush(stdout);
         break;
 
     default:
@@ -102,6 +102,8 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
 
 static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 {
+    uint32_t err_code;
+
     if (p_ble_evt == NULL)
     {
         return;
@@ -127,12 +129,22 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         break;
 
     case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-        sd_ble_gap_sec_params_reply(adapter, m_connection_handle,
-                                    BLE_GAP_SEC_STATUS_SUCCESS, NULL, NULL);
+        err_code = sd_ble_gap_sec_params_reply(adapter, m_connection_handle,
+                                               BLE_GAP_SEC_STATUS_SUCCESS, NULL, NULL);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code); fflush(stdout);
+        }
         break;
 
     case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-        sd_ble_gatts_sys_attr_set(adapter, m_connection_handle, NULL, 0, 0);
+        err_code = sd_ble_gatts_sys_attr_set(adapter, m_connection_handle, NULL, 0, 0);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Failed updating persistent sys attr info. Error code: 0x%02X\n", err_code); fflush(stdout);
+        }
         break;
 
     case BLE_GATTS_EVT_WRITE:
@@ -144,7 +156,7 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         break;
 
     default:
-        //printf("Received event with ID: %d\n", p_ble_evt->header.evt_id); fflush(stdout);
+        printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id); fflush(stdout);
         break;
     }
 }
