@@ -78,7 +78,8 @@ The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
 **IMPORTANT NOTE**
 
-On macOS (OS X) there is a known issue with the Segger J-Link firmware (that runs on the Debug probe on the board) related to USB packet sizes.
+On macOS (OS X) there is a known issue with the Segger J-Link firmware (that runs on the Debug probe on the board) related to USB packet sizes. This results in the timeout error `Failed to open nRF BLE Driver. Error code: 0x0D` when the serial port is attempted to be opened.
+
 There are two ways to solve this issue:
 
 1. Use the Segger firmware, but disable the Mass Storage Device (MSD) feature. Instructions are available [here](https://wiki.segger.com/index.php?title=J-Link-OB_SAM3U).
@@ -270,4 +271,14 @@ Then change to the root folder of the repository and issue the following command
     $ make
 
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
+#### Running the examples
+
+Now that you have successfully built `pc-ble-driver`, you are ready to run the examples in `pc-ble-driver/examples`. Verify that the static and shared libraries exist in the directory the examples expect them to be in.
+
+    $ cd pc-ble-driver/
+    $ ls build/
+    > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v3.a  libpc_ble_driver_shared_sd_api_v3.dylib test_uart ...
+
+To quickly get the examples up and running, see [examples/README.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/README.md).
 
