@@ -19,11 +19,7 @@
  */
 
 #include "ble.h"
-#include "ble_types.h"
-#include "ble_l2cap.h"
-#include "ble_gatts.h"
 #include "sd_rpc.h"
-#include "nrf_error.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -351,13 +347,11 @@ static uint32_t characteristic_init()
 
     if (error_code != NRF_SUCCESS)
     {
-        printf("Failed to initialize characteristics. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
+        printf("Failed to initialize characteristics. Error code: 0x%02X\n", error_code); fflush(stdout);
         return error_code;
     }
 
     printf("Characteristics initiated\n"); fflush(stdout);
-
     return NRF_SUCCESS;
 }
 
