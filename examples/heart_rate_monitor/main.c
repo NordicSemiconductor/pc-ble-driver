@@ -9,6 +9,14 @@
  * the file.
  *
  */
+/** @example examples/heart_rate_monitor
+ *
+ * @brief Heart Rate Service Sample Application main file.
+ *
+ * This file contains the source code for a sample application using the Heart Rate service.
+ * This service exposes heart rate data from a Heart Rate Sensor intended for fitness applications.
+ * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
+ */
 
 #include "ble.h"
 #include "ble_types.h"
