@@ -184,25 +184,25 @@ static uint32_t ble_stack_init()
     ble_enable_params.gatts_enable_params.attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed = false;
     ble_enable_params.gap_enable_params.periph_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_conn_count = 5;
-    ble_enable_params.gap_enable_params.central_sec_count = 1;
+    ble_enable_params.gap_enable_params.central_conn_count = 0;
+    ble_enable_params.gap_enable_params.central_sec_count = 0;
+    // TODO: set device name in gap_enable_params
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count = 5;
+    ble_enable_params.common_enable_params.vs_uuid_count = 1;
 
     err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
 
-    if (err_code == NRF_SUCCESS)
-    {
-        return err_code;
+    switch(err_code) {
+        case NRF_SUCCESS:
+            break;
+        case NRF_ERROR_INVALID_STATE:
+            printf("BLE stack already enabled\n"); fflush(stdout);
+            break;
+        default:
+            printf("Failed to enable BLE stack. Error code: %d\n", err_code); fflush(stdout);
+            break;
     }
 
-    if (err_code == NRF_ERROR_INVALID_STATE)
-    {
-        printf("BLE stack already enabled\n"); fflush(stdout);
-        return NRF_SUCCESS;
-    }
-
-    printf("Failed to enable BLE stack. Error code: %d\n", err_code); fflush(stdout);
     return err_code;
 }
 
