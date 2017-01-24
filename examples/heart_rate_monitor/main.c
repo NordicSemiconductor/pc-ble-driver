@@ -265,7 +265,7 @@ static uint32_t advertising_start()
     ble_gap_adv_params_t adv_params;
 
     adv_params.type        = BLE_GAP_ADV_TYPE_ADV_IND;
-    adv_params.p_peer_addr = NULL;                           // Undirected advertisement.
+    adv_params.p_peer_addr = NULL;                        // Undirected advertisement.
     adv_params.fp          = BLE_GAP_ADV_FP_ANY;
     adv_params.interval    = ADVERTISING_INTERVAL_40_MS;
     adv_params.timeout     = ADVERTISING_TIMEOUT_3_MIN;
@@ -288,15 +288,12 @@ static uint32_t advertising_start()
 static uint8_t heart_rate_measurement_encode(uint8_t * encoded_hrm, uint8_t heart_rate)
 {
     uint8_t flags = 0;
-    uint8_t length = 1;
 
-    // Very simple encoding
-    encoded_hrm[length++] = heart_rate;
-
-    // Add flags
+    // Very simple encoding.
     encoded_hrm[0] = flags;
+    encoded_hrm[1] = heart_rate;
 
-    return length;
+    return 2; // Return length of encoded_hrm
 }
 
 static uint32_t characteristic_init()
@@ -470,14 +467,14 @@ int main(int argc, char *argv[])
         return error_code;
     }
 
-    error_code = services_init();
+    error_code = advertisement_data_set();
 
     if (error_code != NRF_SUCCESS)
     {
         return error_code;
     }
 
-    error_code = advertisement_data_set();
+    error_code = services_init();
 
     if (error_code != NRF_SUCCESS)
     {
