@@ -141,6 +141,18 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
     }
 }
 
+static adapter_t * adapter_init(char * serial_port)
+{
+    physical_layer_t * phy;
+    data_link_layer_t * data_link_layer;
+    transport_layer_t * transport_layer;
+
+    phy = sd_rpc_physical_layer_create_uart(serial_port, 115200, SD_RPC_FLOW_CONTROL_NONE, SD_RPC_PARITY_NONE);
+    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
+    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
+    return sd_rpc_adapter_create(transport_layer);
+}
+
 static uint32_t ble_stack_init()
 {
     uint32_t err_code;
@@ -389,13 +401,7 @@ static uint32_t heart_rate_measurement_send()
 int main(int argc, char *argv[])
 {
     uint32_t error_code;
-    uint8_t cccd_value;
-    char* serial_port;
-    physical_layer_t * phy;
-    data_link_layer_t * data_link_layer;
-    transport_layer_t * transport_layer;
-
-    cccd_value = 0;
+    char * serial_port;
 
     if (argc > 1)
     {
@@ -408,22 +414,13 @@ int main(int argc, char *argv[])
 
     printf("Serial port used: %s\n", serial_port); fflush(stdout);
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, 115200, SD_RPC_FLOW_CONTROL_NONE, SD_RPC_PARITY_NONE);
-
-    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
-
-    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
-
-    m_adapter = sd_rpc_adapter_create(transport_layer);
-
+    m_adapter = adapter_init(serial_port);
     sd_rpc_log_handler_severity_filter_set(m_adapter, SD_RPC_LOG_INFO);
-
     error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler);
 
     if (error_code != NRF_SUCCESS)
     {
-        printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
+        printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code); fflush(stdout);
         return error_code;
     }
 
@@ -469,7 +466,7 @@ int main(int argc, char *argv[])
 
     if (error_code != NRF_SUCCESS)
     {
-        printf("Failed to close the nRF51 ble driver\n"); fflush(stdout);
+        printf("Failed to close nRF BLE Driver. Error code: 0x%02X\n", error_code); fflush(stdout);
         return error_code;
     }
 
