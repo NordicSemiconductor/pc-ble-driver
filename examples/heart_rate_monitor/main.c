@@ -155,6 +155,17 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         }
         break;
 
+#ifdef SD_API_V3
+    case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
+        err_code = sd_ble_gatts_exchange_mtu_reply(adapter, m_connection_handle, GATT_MTU_SIZE_DEFAULT);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Failed updating persistent sys attr info. Error code: 0x%02X\n", err_code); fflush(stdout);
+        }
+        break;
+#endif
+
     default:
         printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id); fflush(stdout);
         break;
