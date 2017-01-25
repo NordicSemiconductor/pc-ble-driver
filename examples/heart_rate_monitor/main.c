@@ -9,7 +9,7 @@
  * the file.
  *
  */
-/** @example examples/heart_rate_monitor
+/**@example examples/heart_rate_monitor
  *
  * @brief Heart Rate Service Sample Application main file.
  *
@@ -21,9 +21,9 @@
 #include "ble.h"
 #include "sd_rpc.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -43,21 +43,23 @@
 #define UART_PORT_NAME "/dev/ttyACM0"
 #endif
 
-#define ADVERTISING_INTERVAL_40_MS  64 // * 0.625 ms = 40 ms
-#define ADVERTISING_TIMEOUT_3_MIN   180 // * 1 sec = 3 min
+#define BAUD_RATE 115200
 
-#define OPCODE_LENGTH  1                                                    /**< Length of opcode inside Heart Rate Measurement packet. */
-#define HANDLE_LENGTH  2                                                    /**< Length of handle inside Heart Rate Measurement packet. */
-#define MAX_HRM_LEN    (BLE_L2CAP_MTU_DEF - OPCODE_LENGTH - HANDLE_LENGTH)  /**< Maximum size of a transmitted Heart Rate Measurement. */
+#define ADVERTISING_INTERVAL_40_MS 64  // * 0.625 ms = 40 ms
+#define ADVERTISING_TIMEOUT_3_MIN  180 // * 1 sec = 3 min
 
-#define BLE_UUID_HEART_RATE_SERVICE                              0x180D     /**< Heart Rate service UUID. */
-#define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR                     0x2A37     /**< Heart Rate Measurement characteristic UUID. */
+#define OPCODE_LENGTH 1                                                 /**< Length of opcode inside Heart Rate Measurement packet. */
+#define HANDLE_LENGTH 2                                                 /**< Length of handle inside Heart Rate Measurement packet. */
+#define MAX_HRM_LEN (BLE_L2CAP_MTU_DEF - OPCODE_LENGTH - HANDLE_LENGTH) /**< Maximum size of a transmitted Heart Rate Measurement. */
+
+#define BLE_UUID_HEART_RATE_SERVICE 0x180D          /**< Heart Rate service UUID. */
+#define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR 0x2A37 /**< Heart Rate Measurement characteristic UUID. */
 
 #define HEART_RATE_BASE     65
 #define HEART_RATE_INCREASE 3
 #define HEART_RATE_LIMIT    190
 
-#define BUFFER_SIZE    30
+#define BUFFER_SIZE 30
 
 static uint16_t                 m_connection_handle             = BLE_CONN_HANDLE_INVALID;
 static uint16_t                 m_heart_rate_service_handle     = 0;
@@ -65,7 +67,7 @@ static ble_gatts_char_handles_t m_heart_rate_measurement_handle;
 static uint8_t                  m_heart_rate                    = HEART_RATE_BASE;
 static bool                     m_send_notifications            = false;
 static bool                     m_advertisement_timed_out       = false;
-static adapter_t * m_adapter = NULL;
+static adapter_t *              m_adapter                       = NULL;
 
 static uint32_t advertising_start();
 
@@ -96,6 +98,10 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
     }
 }
 
+/**@brief Function for handling the Application's BLE Stack events.
+ *
+ * @param[in] p_ble_evt Bluetooth stack event.
+ */
 static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 {
     uint32_t err_code;
@@ -172,18 +178,28 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
     }
 }
 
+/**@brief Function for initializing communication with the target nRF5 serial controlled Bluetooth slave.
+ *
+ * @param[in] serial_port The serial port the target nRF5 device is connected to.
+ *
+ * @return The new transport adapter.
+ */
 static adapter_t * adapter_init(char * serial_port)
 {
     physical_layer_t * phy;
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, 115200, SD_RPC_FLOW_CONTROL_NONE, SD_RPC_PARITY_NONE);
+    phy = sd_rpc_physical_layer_create_uart(serial_port, BAUD_RATE, SD_RPC_FLOW_CONTROL_NONE, SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
     return sd_rpc_adapter_create(transport_layer);
 }
 
+/**@brief Function for initializing the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t ble_stack_init()
 {
     uint32_t err_code;
@@ -216,6 +232,12 @@ static uint32_t ble_stack_init()
     return err_code;
 }
 
+/**@brief Function for setting the advertisement data.
+ *
+ * @details Sets the full device name and its available BLE services in the advertisement data.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t advertisement_data_set()
 {
     uint32_t error_code;
@@ -232,7 +254,7 @@ static uint32_t advertisement_data_set()
     memcpy((char *)&data_buffer[index], device_name, name_length);
     index += name_length;
 
-    // Advertise the device's available services.
+    // Set the device's available services.
     data_buffer[index++] = 3;
     data_buffer[index++] = BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE;
     // BLE_UUID_HEART_RATE_SERVICE == 0x180D. Stored in advertisement data buffer in little-endian.
@@ -255,6 +277,10 @@ static uint32_t advertisement_data_set()
     return NRF_SUCCESS;
 }
 
+/**@brief Function for initializing the Advertising functionality and starting advertising.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t advertising_start()
 {
     uint32_t             error_code;
@@ -281,17 +307,27 @@ static uint32_t advertising_start()
     return NRF_SUCCESS;
 }
 
+/**@brief Function for encoding a Heart Rate Measurement.
+ *
+ * @param[in]   heart_rate    Measurement to be encoded.
+ * @param[out]  encoded_hrm   Buffer where the encoded data will be written.
+ *
+ * @return      Size of encoded data.
+ */
 static uint8_t heart_rate_measurement_encode(uint8_t * encoded_hrm, uint8_t heart_rate)
 {
     uint8_t flags = 0;
 
-    // Very simple encoding.
     encoded_hrm[0] = flags;
     encoded_hrm[1] = heart_rate;
 
-    return 2; // Return length of encoded_hrm
+    return 2;
 }
 
+/**@brief Function for adding the Heart Rate Measurement characteristic.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t characteristic_init()
 {
     uint32_t            error_code;
@@ -355,6 +391,12 @@ static uint32_t characteristic_init()
     return NRF_SUCCESS;
 }
 
+/**@brief Function for initializing services that will be used by the application.
+ *
+ * @details Initialize the Heart Rate service and it's characteristics and add to GATT.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t services_init()
 {
     uint32_t    error_code;
@@ -386,6 +428,10 @@ static uint32_t services_init()
     return NRF_SUCCESS;
 }
 
+/**@brief Function for simulating a heart rate sensor reading.
+ *
+ * @details This modifies a global variable `m_heart_rate`.
+ */
 static void heart_rate_generate()
 {
     m_heart_rate += HEART_RATE_INCREASE;
@@ -396,6 +442,10 @@ static void heart_rate_generate()
     }
 }
 
+/**@brief Function for sending the heart rate measurement over Bluetooth.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t heart_rate_measurement_send()
 {
     uint32_t               error_code;
@@ -420,14 +470,18 @@ static uint32_t heart_rate_measurement_send()
 
     if (error_code != NRF_SUCCESS)
     {
-        printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
+        printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code); fflush(stdout);
         return error_code;
     }
 
     return NRF_SUCCESS;
 }
 
+/**@brief Function for application main entry.
+ *
+ * @param[in]   argc    Number of arguments (program expects 0 or 1 arguments).
+ * @param[in]   argv    The serial port of the target nRF5 device (Optional).
+ */
 int main(int argc, char *argv[])
 {
     uint32_t error_code;
@@ -502,5 +556,5 @@ int main(int argc, char *argv[])
 
     printf("Closed\n"); fflush(stdout);
 
-    return 0;
+    return NRF_SUCCESS;
 }
