@@ -15,7 +15,7 @@
  *
  * This file contains the source code for a sample application using the Heart Rate service.
  * This service exposes heart rate data from a Heart Rate Sensor intended for fitness applications.
- * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
+ * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=horg.bluetooth.service.heart_rate.xml
  */
 
 #include "ble.h"
@@ -157,7 +157,7 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         }
         break;
 
-#ifdef SD_API_V3
+#if NRF_SD_BLE_API >= 3
     case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
         err_code = sd_ble_gatts_exchange_mtu_reply(adapter, m_connection_handle, GATT_MTU_SIZE_DEFAULT);
 
@@ -291,7 +291,7 @@ static uint32_t advertising_start()
     adv_params.fp          = BLE_GAP_ADV_FP_ANY;
     adv_params.interval    = ADVERTISING_INTERVAL_40_MS;
     adv_params.timeout     = ADVERTISING_TIMEOUT_3_MIN;
-#ifdef SD_API_V2
+#if NRF_SD_BLE_API == 2
     adv_params.p_whitelist = NULL;
 #endif
 
