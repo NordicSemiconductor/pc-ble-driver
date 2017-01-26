@@ -29,8 +29,8 @@ endif()
 add_executable(hrm_v2 main.c)
 add_executable(hrm_v3 main.c)
 
-target_compile_definitions(hrm_v2 PRIVATE -DSD_API_V2)
-target_compile_definitions(hrm_v3 PRIVATE -DSD_API_V3)
+target_compile_definitions(hrm_v2 PRIVATE -DNRF_SD_BLE_API=2)
+target_compile_definitions(hrm_v3 PRIVATE -DNRF_SD_BLE_API=3)
 
 target_include_directories(hrm_v2 PRIVATE ../../src/sd_api_v2/sdk/components/softdevice/s132/headers)
 target_include_directories(hrm_v3 PRIVATE ../../src/sd_api_v3/sdk/components/softdevice/s132/headers)
