@@ -59,7 +59,8 @@
 #define HEART_RATE_INCREASE 3
 #define HEART_RATE_LIMIT    190
 
-#define BUFFER_SIZE 30 /**< Sufficiently large buffer for the advertising data.  */
+#define BUFFER_SIZE 30           /**< Sufficiently large buffer for the advertising data.  */
+#define DEVICE_NAME "Nordic_HRM" /**< Name device advertises as over Bluetooth. */
 
 static uint16_t                 m_connection_handle             = BLE_CONN_HANDLE_INVALID;
 static uint16_t                 m_heart_rate_service_handle     = 0;
@@ -80,6 +81,7 @@ static uint32_t advertising_start();
 static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message)
 {
     printf("Status: %d, message: %s\n", (uint32_t)code, message);
+    fflush(stdout);
 }
 
 /**@brief Function for handling the log message events from sd_rpc.
@@ -116,6 +118,7 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
 
 /**@brief Function for handling the Application's BLE Stack events.
  *
+ * @param[in] adapter The transport adapter.
  * @param[in] p_ble_evt Bluetooth stack event.
  */
 static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
@@ -124,6 +127,8 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 
     if (p_ble_evt == NULL)
     {
+        printf("Received an empty BLE event\n");
+        fflush(stdout);
         return;
     }
 
@@ -275,7 +280,7 @@ static uint32_t advertisement_data_set()
     uint8_t  index = 0;
     uint8_t  data_buffer[BUFFER_SIZE];
 
-    const char  * device_name = "HRM Example";
+    const char  * device_name = DEVICE_NAME;
     const uint8_t name_length = strlen(device_name);
     const uint8_t data_type   = BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME;
 
