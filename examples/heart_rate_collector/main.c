@@ -104,9 +104,9 @@ static const ble_gap_conn_params_t m_connection_param =
 static uint32_t ble_stack_init();
 static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata);
 static uint32_t scan_start();
-static uint32_t service_discovery_start(); // y
-static uint32_t char_discovery_start(); // y
-static uint32_t descr_discovery_start(); // y
+static uint32_t service_discovery_start();
+static uint32_t char_discovery_start();
+static uint32_t descr_discovery_start();
 static uint32_t hrm_cccd_set(uint8_t value);
 static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer);
 
@@ -176,22 +176,32 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
     service_discovery_start();
 }
 
+/**@brief Function called on BLE_GAP_EVT_ADV_REPORT event.
+ *
+ * @details Create a connection if received advertising packet corresponds to desired BLE device.
+ *
+ * @param[in] p_ble_gap_evt Advertising Report Event.
+ */
 static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 {
-    uint32_t    err_code;
-    data_t      adv_data;
-    data_t      type_data;
-    uint8_t     str[STRING_BUFFER_SIZE] = {0};
+    uint32_t err_code;
+    data_t   adv_data;
+    data_t   type_data;
+    uint8_t  str[STRING_BUFFER_SIZE] = {0};
 
+    // Log the Bluetooth device address of advertisement packet received.
     ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr, str);
-    printf("Received advertisement report, address: 0x%s\n", str); fflush(stdout);
+    printf("Received advertisement report with device address: 0x%s\n", str);
+    fflush(stdout);
 
-    adv_data.p_data     = (uint8_t *)(p_ble_gap_evt->params.adv_report.data);
-    adv_data.data_len   = p_ble_gap_evt->params.adv_report.dlen;
+    // Parse the parts of the advertisement packet we need and store them into our data type.
+    adv_data.data_len = p_ble_gap_evt->params.adv_report.dlen;
+    adv_data.p_data   = p_ble_gap_evt->params.adv_report.data;
 
     err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
                                 &adv_data,
                                 &type_data);
+
     if (err_code != NRF_SUCCESS)
     {
         // Compare short local name in case complete name does not match.
@@ -205,17 +215,13 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
         }
     }
 
+    // Create connection with device if it is the target device and application has correct state.
     adv_data.p_data[adv_data.data_len] = 0;
     printf("Name: %s\n", adv_data.p_data);
 
     if (0 == memcmp(TARGET_DEV_NAME, type_data.p_data, type_data.data_len))
     {
-        if (m_connected_devices >= MAX_PEER_COUNT)
-        {
-            return;
-        }
-
-        if (m_connection_is_in_progress)
+        if (m_connected_devices >= MAX_PEER_COUNT || m_connection_is_in_progress)
         {
             return;
         }
@@ -227,7 +233,8 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 
         if (err_code != NRF_SUCCESS)
         {
-            printf("Connection Request Failed, reason %d\n", err_code); fflush(stdout);
+            printf("Connection Request Failed, reason %d\n", err_code);
+            fflush(stdout);
             return;
         }
 
@@ -235,6 +242,10 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
     }
 }
 
+/**@brief Function called on BLE_GAP_EVT_TIMEOUT event.
+ *
+ * @param[in] ble_gap_evt_t Timeout Event.
+ */
 static void on_timeout(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     if (p_ble_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
@@ -312,8 +323,7 @@ static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_ga
  */
 static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
-    int count;
-    ble_gattc_char_t * p_characteristic;
+    int count = p_ble_gattc_evt->params.char_disc_rsp.count;
 
     if (p_ble_gattc_evt->gatt_status != NRF_SUCCESS)
     {
@@ -322,21 +332,20 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
         return;
     }
 
-    count = p_ble_gattc_evt->params.char_disc_rsp.count;
-
     printf("Received characteristic discovery response, characteristics count: %d\n", count);
     fflush(stdout);
 
     for (int i = 0; i < count; i++)
     {
-        p_characteristic = &(p_ble_gattc_evt->params.char_disc_rsp.chars[i]);
-        printf("Characteristic handle: 0x%04X, UUID: 0x%04X\n", p_characteristic->handle_decl,
-               p_characteristic->uuid.uuid);
+        printf("Characteristic handle: 0x%04X, UUID: 0x%04X\n",
+               p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl,
+               p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid);
         fflush(stdout);
 
-        if (p_characteristic->uuid.uuid == BLE_UUID_HEART_RATE_MEASUREMENT_CHAR)
+        if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
+            BLE_UUID_HEART_RATE_MEASUREMENT_CHAR)
         {
-            m_hrm_char_handle = p_characteristic->handle_decl;
+            m_hrm_char_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
         }
     }
 
@@ -351,8 +360,7 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
  */
 static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
-    int count;
-    ble_gattc_desc_t * p_descriptor;
+    int count = p_ble_gattc_evt->params.desc_disc_rsp.count;
 
     if (p_ble_gattc_evt->gatt_status != NRF_SUCCESS)
     {
@@ -361,21 +369,19 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
         return;
     }
 
-    count = p_ble_gattc_evt->params.desc_disc_rsp.count;
-
     printf("Received descriptor discovery response, descriptor count: %d\n", count);
     fflush(stdout);
 
     for (int i = 0; i < count; i++)
     {
-        p_descriptor = &(p_ble_gattc_evt->params.desc_disc_rsp.descs[i]);
-        printf("Descriptor handle: 0x%04X, UUID: 0x%04X\n", p_descriptor->handle,
-               p_descriptor->uuid.uuid);
+        printf("Descriptor handle: 0x%04X, UUID: 0x%04X\n",
+               p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle,
+               p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid);
         fflush(stdout);
 
-        if (p_descriptor->uuid.uuid == BLE_UUID_CCCD)
+        if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == BLE_UUID_CCCD)
         {
-            m_hrm_cccd_handle = p_descriptor->handle;
+            m_hrm_cccd_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
             printf("Press enter to toggle notifications on the HRM characteristic\n");
             fflush(stdout);
         }
@@ -420,35 +426,55 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
     fflush(stdout);
 }
 
+/**@brief Function called on BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST event.
+ *
+ * @details Update GAP connection parameters.
+ *
+ * @param[in] p_ble_gap_evt Connection Parameter Update Event.
+ */
 static void on_conn_params_update_request(const ble_gap_evt_t * const p_ble_gap_evt)
 {
-    uint32_t err_code;
-    err_code = sd_ble_gap_conn_param_update(m_adapter, m_connection_handle,
+    uint32_t err_code = sd_ble_gap_conn_param_update(m_adapter, m_connection_handle,
                                             &(p_ble_gap_evt->
                                                     params.conn_param_update_request.conn_params));
     if (err_code != NRF_SUCCESS)
     {
-        printf("Conn params update failed, err_code %d", err_code);
+        printf("Conn params update failed, err_code %d\n", err_code);
+        fflush(stdout);
     }
-
 }
 
 #if NRF_SD_BLE_API >= 3
+/**@brief Function called on BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event.
+ *
+ * @details Replies to an ATT_MTU exchange request by sending an Exchange MTU Response to the client.
+ *
+ * @param[in] p_ble_gatts_evt Exchange MTU Request Event.
+ */
 static void on_exchange_mtu_request(const ble_gatts_evt_t * const p_ble_gatts_evt)
 {
     uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(m_adapter, m_connection_handle,
-        GATT_MTU_SIZE_DEFAULT);
+        p_ble_gatts_evt->params.exchange_mtu_request.client_rx_mtu);
 
     if (err_code != NRF_SUCCESS)
     {
-        printf("MTU exchange request failed, err_code %d", err_code);
+        printf("MTU exchange request failed, err_code %d\n", err_code);
+        fflush(stdout);
     }
 }
 
+/**@brief Function called on BLE_GATTC_EVT_EXCHANGE_MTU_RSP event.
+ *
+ * @details Logs the new BLE server RX MTU size.
+ *
+ * @param[in] p_ble_gattc_evt Exchange MTU Response Event.
+ */
 static void on_exchange_mtu_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
     uint16_t server_rx_mtu = p_ble_gattc_evt->params.exchange_mtu_rsp.server_rx_mtu;
+
     printf("MTU response received. New ATT_MTU is %d\n", server_rx_mtu);
+    fflush(stdout);
 }
 #endif
 
@@ -471,13 +497,17 @@ static adapter_t * adapter_init(char * serial_port)
     return sd_rpc_adapter_create(transport_layer);
 }
 
+/**@brief Function for converting a BLE address to a string.
+ *
+ * @param[in] address       Bluetooth Low Energy address.
+ * @param[out] string_buffer The serial port the target nRF5 device is connected to.
+ */
 static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer)
 {
     const int address_length = 6;
-    char temp_str[3];
-    int i = 0;
+    char      temp_str[3];
 
-    for (i = address_length - 1; i >= 0; --i)
+    for (int i = address_length - 1; i >= 0; --i)
     {
         sprintf(temp_str, "%02X", address.addr[i]);
         strcat((char *)string_buffer, temp_str);
@@ -487,10 +517,9 @@ static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * stri
 static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
 {
     uint8_t * p_data;
-    uint32_t  index;
+    uint32_t  index = 0;
 
     p_data = p_advdata->p_data;
-    index = 0;
 
     while (index < p_advdata->data_len)
     {
@@ -508,56 +537,68 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
     return NRF_ERROR_NOT_FOUND;
 }
 
+/**@brief Function for initializing the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t ble_stack_init()
 {
-    uint32_t err_code;
+    uint32_t            err_code;
     ble_enable_params_t ble_enable_params;
-    uint32_t * app_ram_base = NULL;
+    uint32_t *          app_ram_base = NULL;
 
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 
 #if NRF_SD_BLE_API >= 3
-    ble_enable_params.gatt_enable_params.att_mtu = 158;
+    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
 #endif
-    ble_enable_params.gatts_enable_params.attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    ble_enable_params.gatts_enable_params.service_changed = false;
-    ble_enable_params.gap_enable_params.periph_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_sec_count = 1;
+    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+    ble_enable_params.gatts_enable_params.service_changed   = false;
+    ble_enable_params.gap_enable_params.periph_conn_count   = 1;  // TODO: why can't be 0?
+    ble_enable_params.gap_enable_params.central_conn_count  = 1;
+    ble_enable_params.gap_enable_params.central_sec_count   = 1;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count = 5;
+    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 
     err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
 
-    if (err_code == NRF_SUCCESS)
-    {
-        return err_code;
+    switch (err_code) {
+        case NRF_SUCCESS:
+            break;
+        case NRF_ERROR_INVALID_STATE:
+            printf("BLE stack already enabled\n");
+            fflush(stdout);
+            break;
+        default:
+            printf("Failed to enable BLE stack. Error code: %d\n", err_code);
+            fflush(stdout);
+            break;
     }
 
-    if (err_code == NRF_ERROR_INVALID_STATE)
-    {
-        printf("BLE stack already enabled\n"); fflush(stdout);
-        return NRF_SUCCESS;
-    }
-
-    printf("Failed to enable BLE stack.\n"); fflush(stdout);
     return err_code;
 }
 
+/**@brief Set BLE option for the BLE role and connection bandwidth.
+ *
+ * @return NRF_SUCCESS on option set successfully, otherwise an error code.
+ */
 static uint32_t ble_options_set()
 {
-    ble_opt_t opt;
+    ble_opt_t        opt;
     ble_common_opt_t common_opt;
+
     common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
     common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
     common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
     opt.common_opt = common_opt;
 
-    uint32_t err_code = sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
-
-    return err_code;
+    return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
 }
 
+/**@brief Start scanning (GAP Discovery procedure, Observer Procedure).
+ * *
+ * @return NRF_SUCCESS on successfully initiating scanning procedure, otherwise an error code.
+ */
 static uint32_t scan_start()
 {
     uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param);
@@ -566,13 +607,13 @@ static uint32_t scan_start()
     {
         printf("Scan start failed\n");
         fflush(stdout);
-        return error_code;
+    } else
+    {
+        printf("Scan started\n");
+        fflush(stdout);
     }
 
-    printf("Scan started\n");
-    fflush(stdout);
-
-    return NRF_SUCCESS;
+    return error_code;
 }
 
 /**@brief Function called upon connecting to BLE peripheral.
