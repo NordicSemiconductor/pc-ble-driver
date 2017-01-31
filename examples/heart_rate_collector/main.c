@@ -55,7 +55,7 @@ enum
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME "Nordic_HRM" /**< Target device name that application is looking for. */
+#define TARGET_DEV_NAME "Nordic_HRM" /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT 1            /**< Maximum number of peer's application intends to manage. */
 
 #define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
@@ -107,6 +107,7 @@ static const ble_gap_conn_params_t m_connection_param =
 /* Local function forward declarations */
 static uint32_t ble_stack_init();
 static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata);
+static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find);
 static uint32_t scan_start();
 static uint32_t service_discovery_start();
 static uint32_t char_discovery_start();
@@ -185,8 +186,6 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
 static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     uint32_t err_code;
-    data_t   adv_data;
-    data_t   type_data;
     uint8_t  str[STRING_BUFFER_SIZE] = {0};
 
     // Log the Bluetooth device address of advertisement packet received.
@@ -194,32 +193,7 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
     printf("Received advertisement report with device address: 0x%s\n", str);
     fflush(stdout);
 
-    // Parse the parts of the advertisement packet we need and store them into our data type.
-    adv_data.data_len = p_ble_gap_evt->params.adv_report.dlen;
-    adv_data.p_data   = &p_ble_gap_evt->params.adv_report.data[0];
-
-    err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
-                                &adv_data,
-                                &type_data);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        // Compare short local name in case complete name does not match.
-        err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
-                                    &adv_data,
-                                    &type_data);
-
-        if (err_code != NRF_SUCCESS)
-        {
-            return;
-        }
-    }
-
-    // Create connection with device if it is the target device and application has correct state.
-    adv_data.p_data[adv_data.data_len] = 0;
-    printf("Name: %s\n", adv_data.p_data);
-
-    if (0 == memcmp(TARGET_DEV_NAME, type_data.p_data, type_data.data_len))
+    if (find_adv_name(&p_ble_gap_evt->params.adv_report, TARGET_DEV_NAME))
     {
         if (m_connected_devices >= MAX_PEER_COUNT || m_connection_is_in_progress)
         {
@@ -514,18 +488,22 @@ static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * stri
     }
 }
 
-/**@brief Parse the received advertising report for data of desired type.
+/**
+ * @brief Parses advertisement data, providing length and location of the field in case
+ *        matching data is found.
  *
- * @param[in] type        Type of data to parse for.
- * @param[in] p_advdata   Advertising report data to parse.
- * @param[out] p_typedata Parsed data of desired type.
+ * @param[in]  Type of data to be looked for in advertisement data.
+ * @param[in]  Advertisement report length and pointer to report.
+ * @param[out] If data type requested is found in the data report, type data length and
+ *             pointer to data will be populated here.
  *
- * @return NRF_SUCCESS on success, otherwise an error code.
+ * @retval NRF_SUCCESS if the data type is found in the report.
+ * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
  */
 static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
 {
-    uint8_t * p_data;
     uint32_t  index = 0;
+    uint8_t * p_data;
 
     p_data = p_advdata->p_data;
 
@@ -543,6 +521,55 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
         index += field_length + 1;
     }
     return NRF_ERROR_NOT_FOUND;
+}
+
+/**@brief Function for searching a given name in the advertisement packets.
+ *
+ * @details Use this function to parse received advertising data and to find a given
+ * name in them either as 'complete_local_name' or as 'short_local_name'.
+ *
+ * @param[in]   p_adv_report   advertising data to parse.
+ * @param[in]   name_to_find   name to search.
+ * @return   true if the given name was found, false otherwise.
+ */
+static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find)
+{
+    uint32_t err_code;
+    data_t   adv_data;
+    data_t   dev_name;
+
+    // Initialize advertisement report for parsing
+    adv_data.p_data     = (uint8_t *)p_adv_report->data;
+    adv_data.data_len   = p_adv_report->dlen;
+
+
+    //search for advertising names
+    err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
+                                &adv_data,
+                                &dev_name);
+    if (err_code == NRF_SUCCESS)
+    {
+        if (memcmp(name_to_find, dev_name.p_data, dev_name.data_len )== 0)
+        {
+            return true;
+        }
+    }
+    else
+    {
+        // Look for the short local name if it was not found as complete
+        err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
+                                    &adv_data,
+                                    &dev_name);
+        if (err_code != NRF_SUCCESS)
+        {
+            return false;
+        }
+        if (memcmp(name_to_find, dev_name.p_data, dev_name.data_len )== 0)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**@brief Function for initializing the BLE stack.
