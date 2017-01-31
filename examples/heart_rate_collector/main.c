@@ -87,6 +87,10 @@ static const ble_gap_scan_params_t m_scan_param =
 #if NRF_SD_BLE_API == 2
      NULL,                    // White-list not set.
 #endif
+#if NRF_SD_BLE_API >= 3
+     0,                       // adv_dir_report not set.
+#endif
+
      (uint16_t)SCAN_INTERVAL,
      (uint16_t)SCAN_WINDOW,
      (uint16_t)SCAN_TIMEOUT
@@ -169,10 +173,6 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
     m_connection_handle = p_ble_gap_evt->conn_handle;
     m_connection_is_in_progress = false;
 
-#if NRF_SD_BLE_API >= 3
-    sd_ble_gattc_exchange_mtu_request(m_adapter, p_ble_gap_evt->conn_handle, GATT_MTU_SIZE_DEFAULT);
-#endif
-
     service_discovery_start();
 }
 
@@ -196,7 +196,7 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 
     // Parse the parts of the advertisement packet we need and store them into our data type.
     adv_data.data_len = p_ble_gap_evt->params.adv_report.dlen;
-    adv_data.p_data   = p_ble_gap_evt->params.adv_report.data;
+    adv_data.p_data   = &p_ble_gap_evt->params.adv_report.data[0];
 
     err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
                                 &adv_data,
@@ -454,11 +454,11 @@ static void on_conn_params_update_request(const ble_gap_evt_t * const p_ble_gap_
 static void on_exchange_mtu_request(const ble_gatts_evt_t * const p_ble_gatts_evt)
 {
     uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(m_adapter, m_connection_handle,
-        p_ble_gatts_evt->params.exchange_mtu_request.client_rx_mtu);
+                                                        GATT_MTU_SIZE_DEFAULT);
 
     if (err_code != NRF_SUCCESS)
     {
-        printf("MTU exchange request failed, err_code %d\n", err_code);
+        printf("MTU exchange request reply failed, err_code %d\n", err_code);
         fflush(stdout);
     }
 }
@@ -514,6 +514,14 @@ static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * stri
     }
 }
 
+/**@brief Parse the received advertising report for data of desired type.
+ *
+ * @param[in] type        Type of data to parse for.
+ * @param[in] p_advdata   Advertising report data to parse.
+ * @param[out] p_typedata Parsed data of desired type.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
 {
     uint8_t * p_data;
@@ -524,15 +532,15 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
     while (index < p_advdata->data_len)
     {
         uint8_t field_length = p_data[index];
-        uint8_t field_type   = p_data[index+1];
+        uint8_t field_type   = p_data[index + 1];
 
         if (field_type == type)
         {
-            p_typedata->p_data   = &p_data[index+2];
-            p_typedata->data_len = field_length-1;
+            p_typedata->p_data   = &p_data[index + 2];
+            p_typedata->data_len = field_length - 1;
             return NRF_SUCCESS;
         }
-        index += field_length+1;
+        index += field_length + 1;
     }
     return NRF_ERROR_NOT_FOUND;
 }
@@ -554,7 +562,7 @@ static uint32_t ble_stack_init()
 #endif
     ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed   = false;
-    ble_enable_params.gap_enable_params.periph_conn_count   = 1;  // TODO: why can't be 0?
+    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
     ble_enable_params.gap_enable_params.central_conn_count  = 1;
     ble_enable_params.gap_enable_params.central_sec_count   = 1;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
