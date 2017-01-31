@@ -191,7 +191,7 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 
             if (err_code != NRF_SUCCESS)
             {
-                printf("Failed updating persistent sys attr info. Error code: 0x%02X\n", err_code);
+                printf("MTU exchange request reply failed. Error code: 0x%02X\n", err_code);
                 fflush(stdout);
             }
             break;
