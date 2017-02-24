@@ -2,6 +2,14 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s
 index 3bb176a..e420377 100644
 --- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+@@ -8,6 +8,8 @@
+ #endif
+ // <h> nRF_BLE
+
++#define NRF_BLE_GATT_MAX_MTU_SIZE 515
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
 @@ -191,7 +191,7 @@
  
  
@@ -15,17 +23,6 @@ diff --git a/components/serialization/common/ser_config.h b/components/serializa
 index 1b31fcb..9cc334e 100644
 --- a/components/serialization/common/ser_config.h
 +++ b/components/serialization/common/ser_config.h
-@@ -70,8 +70,8 @@ extern "C" {
- 
- /** UART transmission parameters */
- #define SER_PHY_UART_FLOW_CTRL          APP_UART_FLOW_CONTROL_ENABLED
--#define SER_PHY_UART_PARITY             true
--#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
-+#define SER_PHY_UART_PARITY             false
-+#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud115200
- 
- /** Find UART baud rate value based on the chosen register setting. */
- #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
 @@ -114,6 +114,8 @@ extern "C" {
 
  #define SER_MAX_CONNECTIONS 8
@@ -130,7 +127,7 @@ index d4a4883..346093a 100644
 +    .rfu0               = 0xFFFFFF,
 +    .revision_hash      = 0,
 +    .version_major      = 1,
-+    .version_minor      = 1,
++    .version_minor      = 2,
 +    .version_patch      = 0,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
@@ -147,12 +144,12 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s
 index 0f597ba..2f6bfb4 100644
 --- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
-@@ -334,8 +334,8 @@
+@@ -329,8 +329,8 @@
                </OCR_RVCT8>
                <OCR_RVCT9>
                  <Type>0</Type>
--                <StartAddress>0x20004300</StartAddress>
--                <Size>0xbd00</Size>
+-                <StartAddress>0x20005cc0</StartAddress>
+-                <Size>0xa340</Size>
 +                <StartAddress>0x2000bcc0</StartAddress>
 +                <Size>0x4340</Size>
                </OCR_RVCT9>
@@ -166,21 +163,9 @@ index 7121bc0..ba41a73 100644
  MEMORY
  {
    FLASH (rx) : ORIGIN = 0x1f000, LENGTH = 0x61000
--  RAM (rwx) :  ORIGIN = 0x20004300, LENGTH = 0xbd00
+-  RAM (rwx) :  ORIGIN = 0x20005cc0, LENGTH = 0xa340
 +  RAM (rwx) :  ORIGIN = 0x2000bcc0, LENGTH = 0x4340
  }
 
  SECTIONS
-diff --git a/components/serialization/common/ble_serialization.h b/components/serialization/common/ble_serialization.h
-index a339754..8fb049b 100644
---- a/components/serialization/common/ble_serialization.h
-+++ b/components/serialization/common/ble_serialization.h
-@@ -122,7 +122,7 @@ typedef enum
- 
- /** Maximum length of p_value in \ref ble_gattc_write_params_t. See Bluetooth 4.0 spec: 3.4.5.1 and
-  *  3.4.5.3. */
--#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (GATT_MTU_SIZE_DEFAULT - 3)
-+#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (247 - 3)
- 
- /** See Bluetooth 4.0 spec: 3.4.4.7. */
- #define BLE_GATTC_HANDLE_COUNT_LEN_MAX     ((GATT_MTU_SIZE_DEFAULT - 1) / 2)
+

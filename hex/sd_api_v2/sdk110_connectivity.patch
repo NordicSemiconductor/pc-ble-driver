@@ -99,17 +99,6 @@ diff --git a/components/serialization/application/codecs/s130/serializers/ble_ga
 diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
 --- a/components/serialization/common/ser_config.h
 +++ b/components/serialization/common/ser_config.h
-@@ -66,8 +66,8 @@
- 
- /** UART transmission parameters */
- #define SER_PHY_UART_FLOW_CTRL          APP_UART_FLOW_CONTROL_ENABLED
--#define SER_PHY_UART_PARITY             true
--#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
-+#define SER_PHY_UART_PARITY             false
-+#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud115200
- 
- /** Find UART baudrate value based on chosen register setting. */
- #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
 @@ -110,4 +110,6 @@
 
  #define SER_MAX_CONNECTIONS 8
@@ -487,7 +476,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +    .rfu0               = 0xFFFFFF,
 +    .revision_hash      = 0,
 +    .version_major      = 1,
-+    .version_minor      = 1,
++    .version_minor      = 2,
 +    .version_patch      = 0,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = 2,
