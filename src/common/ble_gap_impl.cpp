@@ -512,7 +512,7 @@ uint32_t sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle, ble_g
         return ble_gap_conn_sec_get_rsp_dec(
             buffer,
             length,
-            (ble_gap_conn_sec_t * *)p_conn_sec,
+            (ble_gap_conn_sec_t * * const)&p_conn_sec,
             result);
     };
 
