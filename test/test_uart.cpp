@@ -49,7 +49,11 @@ using namespace boost::asio;
 
 void writeHandler(const boost::system::error_code& errorCode, const size_t bytesTransferred)
 {
-    std::cout << "errorCode       : " << errorCode << std::endl;
+    if (errorCode.value() != boost::system::errc::errc_t::success)
+    {
+        std::cout << "errorCode       : " << errorCode.value() << std::endl;
+    }
+
     std::cout << "bytesTransferred: " << bytesTransferred << std::endl;
 }
 
@@ -58,13 +62,19 @@ int main(int argc, char *argv[])
     boost::system::error_code ec;
     serial_port::baud_rate serial_port_option;
     io_service io_service;
+
+    if (argc <= 2)
+    {
+        std::cout << "Usage: " << argv[0] << " SERIALPORT COUNT_TO_NUMBER" << std::endl;
+        return -1;
+    }
     
     std::string serialPort(argv[1]);
     int count = atoi(argv[2]);
 
     auto segger = serial_port(io_service);
 
-    std::cout << "Opening port " << serialPort;
+    std::cout << "Opening port " << serialPort << std::endl;
 
     segger.open(serialPort, ec);
 
