@@ -666,13 +666,13 @@ SVCALL(SD_BLE_GATTC_EXCHANGE_MTU_REQUEST, uint32_t, sd_ble_gattc_exchange_mtu_re
  * @retval ::NRF_SUCCESS Successfully retrieved the next Handle-Value pair.
  * @retval ::NRF_ERROR_NOT_FOUND No more Handle-Value pairs available in the list.
  */
-__STATIC_INLINE uint32_t sd_ble_gattc_evt_char_val_by_uuid_read_rsp_iter(ble_gattc_evt_t *p_gattc_evt, ble_gattc_handle_value_t *p_iter);
+static inline uint32_t sd_ble_gattc_evt_char_val_by_uuid_read_rsp_iter(ble_gattc_evt_t *p_gattc_evt, ble_gattc_handle_value_t *p_iter);
 
 /** @} */
 
 #ifndef SUPPRESS_INLINE_IMPLEMENTATION
 
-__STATIC_INLINE uint32_t sd_ble_gattc_evt_char_val_by_uuid_read_rsp_iter(ble_gattc_evt_t *p_gattc_evt, ble_gattc_handle_value_t *p_iter)
+static inline uint32_t sd_ble_gattc_evt_char_val_by_uuid_read_rsp_iter(ble_gattc_evt_t *p_gattc_evt, ble_gattc_handle_value_t *p_iter)
 {
   uint32_t value_len = p_gattc_evt->params.char_val_by_uuid_read_rsp.value_len;
   uint8_t *p_first = p_gattc_evt->params.char_val_by_uuid_read_rsp.handle_value;

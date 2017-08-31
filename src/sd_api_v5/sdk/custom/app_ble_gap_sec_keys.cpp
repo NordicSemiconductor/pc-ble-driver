@@ -80,7 +80,7 @@ void app_ble_gap_sec_context_root_release()
     current_context_mutex.unlock();
 }
 
-uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, ser_ble_gap_app_keyset_t **pp_gap_app_keyset)
+uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index)
 {
     if (current_context == nullptr) return NRF_ERROR_INVALID_DATA;
 
@@ -112,8 +112,8 @@ uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, ser_ble_gap_app_ke
 
         connHandleMap->insert(std::make_pair(conn_handle, keyset));
     }
-
-    *pp_gap_app_keyset = keyset;
+    //TODO: insert real index
+    *p_index = 0;
     return NRF_SUCCESS;
 }
 
@@ -132,7 +132,7 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
     return NRF_SUCCESS;
 }
 
-uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, ser_ble_gap_app_keyset_t **pp_gap_app_keyset)
+uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
 {
     auto tempAdapter = m_app_keys_table.find(current_context);
     if (tempAdapter == m_app_keys_table.end()) return NRF_ERROR_NOT_FOUND;
@@ -141,6 +141,7 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, ser_ble_gap_app_keys
     auto connHandle = connHandleMap->find(conn_handle);
 
     if (connHandle == connHandleMap->end()) return NRF_ERROR_NOT_FOUND;
-    *pp_gap_app_keyset = connHandle->second;
+    //TODO: insert real index
+    *p_index = 0;
     return NRF_SUCCESS;
 }

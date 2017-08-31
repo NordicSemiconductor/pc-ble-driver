@@ -51,11 +51,20 @@
 
 #include <stdint.h>
 
-uint32_t sd_ble_gap_adv_start(adapter_t *adapter, ble_gap_adv_params_t const * const p_adv_params)
+uint32_t sd_ble_gap_adv_start(
+    adapter_t *adapter,
+    ble_gap_adv_params_t const * const p_adv_params
+#if NRF_SD_BLE_API_VERSION >= 4
+    , uint8_t conn_cfg_tag
+#endif
+    )
 {
     encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_start_req_enc(
             p_adv_params,
+#if NRF_SD_BLE_API_VERSION >= 4
+            conn_cfg_tag,
+#endif            
             buffer,
             length);
     };
@@ -599,13 +608,20 @@ uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
 uint32_t sd_ble_gap_connect(adapter_t *adapter,
     ble_gap_addr_t const * const        p_addr,
     ble_gap_scan_params_t const * const p_scan_params,
-    ble_gap_conn_params_t const * const p_conn_params)
+    ble_gap_conn_params_t const * const p_conn_params
+#if NRF_SD_BLE_API_VERSION >= 4
+    , uint8_t                             conn_cfg_tag
+#endif
+    )
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_connect_req_enc(
             p_addr,
             p_scan_params,
             p_conn_params,
+#if NRF_SD_BLE_API_VERSION >= 4
+            conn_cfg_tag,
+#endif
             buffer,
             length);
     };
