@@ -70,6 +70,18 @@ typedef struct
   ble_gap_sec_keyset_t   keyset;         /**< Keyset structure, see @ref ble_gap_sec_keyset_t.*/
 } ser_ble_gap_app_keyset_t;
 
+/**@brief Sets root context for calls to *_context_create, *_context_destroy, *_context_find
+*
+* @param[in]     context             root pointer to use as key for finding keysets
+*/
+void app_ble_gap_sec_context_root_set(void *context);
+
+
+/**@brief Release root context for calls to *_context_create, *_context_destroy, *_context_find
+*
+*/
+void app_ble_gap_sec_context_root_release();
+
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
  * @param[in]     conn_handle         conn_handle

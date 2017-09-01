@@ -748,7 +748,9 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
     };
 
     uint32_t err_code = NRF_SUCCESS;
+#if NRF_SD_BLE_API_VERSION < 4
     ser_ble_gap_app_keyset_t *keyset = nullptr;
+#endif
 
     // First allocate security context for serialization. We add the a security context for the 
     // connection even if the developer has not provided a p_sec_keyset since the same structure
@@ -756,7 +758,13 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
     auto adapterInternal = static_cast<AdapterInternal*>(adapter->internal);
     BLESecurityContext context(adapterInternal->transport);
 
+#if NRF_SD_BLE_API_VERSION < 4
     err_code = app_ble_gap_sec_context_create(conn_handle, &keyset);
+#else
+    //TODO: replace with proper index
+    uint32_t index = 0;
+    err_code = app_ble_gap_sec_context_create(conn_handle, &index);
+#endif
 
     if (err_code != NRF_SUCCESS)
     {
@@ -765,7 +773,12 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
     
     if (p_sec_keyset)
     {
+#if NRF_SD_BLE_API_VERSION < 4
         std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
+#else
+        //TODO: copy keyset properly
+        //std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
+#endif
     }
 
     return encode_decode(adapter, encode_function, decode_function);

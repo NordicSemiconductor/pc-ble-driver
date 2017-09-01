@@ -45,7 +45,7 @@
 #include "cond_field_serialization.h"
 #include <string.h>
 
-extern ser_ble_gap_app_keyset_t m_app_keys_table[];
+//extern ser_ble_gap_app_keyset_t m_app_keys_table[];
 
 
 uint32_t ble_gap_evt_adv_report_dec(uint8_t const * const p_buf,
@@ -75,7 +75,7 @@ uint32_t ble_gap_evt_auth_key_request_dec(uint8_t const * const p_buf,
 }
 
 
-extern ser_ble_gap_app_keyset_t m_app_keys_table[];
+//extern ser_ble_gap_app_keyset_t m_app_keys_table[];
 
 uint32_t ble_gap_evt_auth_status_dec(uint8_t const * const p_buf,
                                      uint32_t              packet_len,
@@ -88,14 +88,18 @@ uint32_t ble_gap_evt_auth_status_dec(uint8_t const * const p_buf,
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.auth_status, ble_gap_evt_auth_status_t_dec);
 
     // keyset is an extension of standard event data - used to synchronize keys at application
-    uint32_t conn_index;
-    err_code = app_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
+    ser_ble_gap_app_keyset_t *keyset;
+    err_code = app_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &keyset);
     if (err_code == NRF_SUCCESS)
     {
-        SER_PULL_FIELD(&(m_app_keys_table[conn_index].keyset), ble_gap_sec_keyset_t_dec);
+        SER_PULL_FIELD(&(keyset->keyset), ble_gap_sec_keyset_t_dec);
 
         err_code = app_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
         SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+    }
+    else
+    {
+        err_code = NRF_SUCCESS;
     }
 
     SER_EVT_DEC_END;
@@ -196,10 +200,10 @@ uint32_t ble_gap_evt_lesc_dhkey_request_dec(uint8_t const * const p_buf,
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
 
     // keyset is an extension of standard event data - used to synchronize keys at application
-    uint32_t conn_index;
-    err_code = app_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
+    ser_ble_gap_app_keyset_t *keyset;
+    err_code = app_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &keyset);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
-    p_event->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer = m_app_keys_table[conn_index].keyset.keys_peer.p_pk;
+    p_event->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer = keyset->keyset.keys_peer.p_pk;
     SER_PULL_COND(&p_event->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer, ble_gap_lesc_p256_pk_t_dec);
 
     SER_PULL_uint8(&ser_data);

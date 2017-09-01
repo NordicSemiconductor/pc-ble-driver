@@ -69,6 +69,7 @@ uint32_t sd_ble_uuid_encode(adapter_t* adapter, ble_uuid_t const * const p_uuid,
     return encode_decode(adapter, encode_function, decode_function);
 }
  // ble_tx_packet_count_get_req_enc
+#if NRF_SD_BLE_API_VERSION < 4
 uint32_t sd_ble_tx_packet_count_get(adapter_t *adapter, uint16_t conn_handle, uint8_t * p_count)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
@@ -89,6 +90,7 @@ uint32_t sd_ble_tx_packet_count_get(adapter_t *adapter, uint16_t conn_handle, ui
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+#endif
 
 uint32_t sd_ble_uuid_vs_add(adapter_t *adapter, ble_uuid128_t const * const p_vs_uuid, uint8_t * const p_uuid_type)
 {
@@ -195,13 +197,20 @@ uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_t const *p_
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_enable(adapter_t *adapter, ble_enable_params_t * p_params, uint32_t *p_app_ram_base)
+uint32_t sd_ble_enable(
+    adapter_t *adapter,
+#if NRF_SD_BLE_API_VERSION < 4
+    ble_enable_params_t * p_params,
+#endif
+    uint32_t *p_app_ram_base)
 {
     (void)p_app_ram_base;
 
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_enable_req_enc(
+#if NRF_SD_BLE_API_VERSION < 4
             p_params,
+#endif
             buffer,
             length);
     };
