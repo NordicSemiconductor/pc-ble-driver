@@ -136,7 +136,7 @@ index bcb67e3..516ccd7 100644
 +        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
 +        uint32_t    baud_rate;                  /* UART transport baud rate */
 +} version_info_t;
-+static const version_info_t version_info __attribute__((at(0x20000))) = {
++static const version_info_t version_info __attribute__((at(0x30000))) = {
 +    .magic_number       = 0x46D8A517,
 +    .struct_version     = 2,
 +    .rfu0               = 0xFFFFFF,
