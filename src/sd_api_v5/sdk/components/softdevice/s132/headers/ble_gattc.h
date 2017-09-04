@@ -373,7 +373,7 @@ typedef struct
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_PRIMARY_SERVICES_DISCOVER, uint32_t, sd_ble_gattc_primary_services_discover(uint16_t conn_handle, uint16_t start_handle, ble_uuid_t const *p_srvc_uuid));
+SVCALL(SD_BLE_GATTC_PRIMARY_SERVICES_DISCOVER, uint32_t, sd_ble_gattc_primary_services_discover(adapter_t *adapter, uint16_t conn_handle, uint16_t start_handle, ble_uuid_t const *p_srvc_uuid));
 
 
 /**@brief Initiate or continue a GATT Relationship Discovery procedure.
@@ -399,7 +399,7 @@ SVCALL(SD_BLE_GATTC_PRIMARY_SERVICES_DISCOVER, uint32_t, sd_ble_gattc_primary_se
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_RELATIONSHIPS_DISCOVER, uint32_t, sd_ble_gattc_relationships_discover(uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range));
+SVCALL(SD_BLE_GATTC_RELATIONSHIPS_DISCOVER, uint32_t, sd_ble_gattc_relationships_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range));
 
 
 /**@brief Initiate or continue a GATT Characteristic Discovery procedure.
@@ -427,7 +427,7 @@ SVCALL(SD_BLE_GATTC_RELATIONSHIPS_DISCOVER, uint32_t, sd_ble_gattc_relationships
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_CHARACTERISTICS_DISCOVER, uint32_t, sd_ble_gattc_characteristics_discover(uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range));
+SVCALL(SD_BLE_GATTC_CHARACTERISTICS_DISCOVER, uint32_t, sd_ble_gattc_characteristics_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range));
 
 
 /**@brief Initiate or continue a GATT Characteristic Descriptor Discovery procedure.
@@ -452,7 +452,7 @@ SVCALL(SD_BLE_GATTC_CHARACTERISTICS_DISCOVER, uint32_t, sd_ble_gattc_characteris
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_DESCRIPTORS_DISCOVER, uint32_t, sd_ble_gattc_descriptors_discover(uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range));
+SVCALL(SD_BLE_GATTC_DESCRIPTORS_DISCOVER, uint32_t, sd_ble_gattc_descriptors_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range));
 
 
 /**@brief Initiate or continue a GATT Read using Characteristic UUID procedure.
@@ -478,7 +478,7 @@ SVCALL(SD_BLE_GATTC_DESCRIPTORS_DISCOVER, uint32_t, sd_ble_gattc_descriptors_dis
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_CHAR_VALUE_BY_UUID_READ, uint32_t, sd_ble_gattc_char_value_by_uuid_read(uint16_t conn_handle, ble_uuid_t const *p_uuid, ble_gattc_handle_range_t const *p_handle_range));
+SVCALL(SD_BLE_GATTC_CHAR_VALUE_BY_UUID_READ, uint32_t, sd_ble_gattc_char_value_by_uuid_read(adapter_t *adapter, uint16_t conn_handle, ble_uuid_t const *p_uuid, ble_gattc_handle_range_t const *p_handle_range));
 
 
 /**@brief Initiate or continue a GATT Read (Long) Characteristic or Descriptor procedure.
@@ -504,7 +504,7 @@ SVCALL(SD_BLE_GATTC_CHAR_VALUE_BY_UUID_READ, uint32_t, sd_ble_gattc_char_value_b
  * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection State.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_READ, uint32_t, sd_ble_gattc_read(uint16_t conn_handle, uint16_t handle, uint16_t offset));
+SVCALL(SD_BLE_GATTC_READ, uint32_t, sd_ble_gattc_read(adapter_t *adapter, uint16_t conn_handle, uint16_t handle, uint16_t offset));
 
 
 /**@brief Initiate a GATT Read Multiple Characteristic Values procedure.
@@ -529,7 +529,7 @@ SVCALL(SD_BLE_GATTC_READ, uint32_t, sd_ble_gattc_read(uint16_t conn_handle, uint
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_CHAR_VALUES_READ, uint32_t, sd_ble_gattc_char_values_read(uint16_t conn_handle, uint16_t const *p_handles, uint16_t handle_count));
+SVCALL(SD_BLE_GATTC_CHAR_VALUES_READ, uint32_t, sd_ble_gattc_char_values_read(adapter_t *adapter, uint16_t conn_handle, uint16_t const *p_handles, uint16_t handle_count));
 
 
 /**@brief Perform a Write (Characteristic Value or Descriptor, with or without response, signed or not, long or reliable) procedure.
@@ -575,7 +575,7 @@ SVCALL(SD_BLE_GATTC_CHAR_VALUES_READ, uint32_t, sd_ble_gattc_char_values_read(ui
  * @retval ::NRF_ERROR_RESOURCES Too many writes without responses queued.
  *                               Wait for a @ref BLE_GATTC_EVT_WRITE_CMD_TX_COMPLETE event and retry.
  */
-SVCALL(SD_BLE_GATTC_WRITE, uint32_t, sd_ble_gattc_write(uint16_t conn_handle, ble_gattc_write_params_t const *p_write_params));
+SVCALL(SD_BLE_GATTC_WRITE, uint32_t, sd_ble_gattc_write(adapter_t *adapter, uint16_t conn_handle, ble_gattc_write_params_t const *p_write_params));
 
 
 /**@brief Send a Handle Value Confirmation to the GATT Server.
@@ -592,7 +592,7 @@ SVCALL(SD_BLE_GATTC_WRITE, uint32_t, sd_ble_gattc_write(uint16_t conn_handle, bl
  * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection State or no Indication pending to be confirmed.
  * @retval ::BLE_ERROR_INVALID_ATTR_HANDLE Invalid attribute handle.
  */
-SVCALL(SD_BLE_GATTC_HV_CONFIRM, uint32_t, sd_ble_gattc_hv_confirm(uint16_t conn_handle, uint16_t handle));
+SVCALL(SD_BLE_GATTC_HV_CONFIRM, uint32_t, sd_ble_gattc_hv_confirm(adapter_t *adapter, uint16_t conn_handle, uint16_t handle));
 
 /**@brief Discovers information about a range of attributes on a GATT server.
  *
@@ -609,7 +609,7 @@ SVCALL(SD_BLE_GATTC_HV_CONFIRM, uint32_t, sd_ble_gattc_hv_confirm(uint16_t conn_
  * @retval ::NRF_ERROR_INVALID_ADDR  Invalid pointer supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_ATTR_INFO_DISCOVER, uint32_t, sd_ble_gattc_attr_info_discover(uint16_t conn_handle, ble_gattc_handle_range_t const * p_handle_range));
+SVCALL(SD_BLE_GATTC_ATTR_INFO_DISCOVER, uint32_t, sd_ble_gattc_attr_info_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const * p_handle_range));
 
 /**@brief Start an ATT_MTU exchange by sending an Exchange MTU Request to the server.
  *
@@ -641,7 +641,7 @@ SVCALL(SD_BLE_GATTC_ATTR_INFO_DISCOVER, uint32_t, sd_ble_gattc_attr_info_discove
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid Client RX MTU size supplied.
  * @retval ::NRF_ERROR_BUSY Client procedure already in progress.
  */
-SVCALL(SD_BLE_GATTC_EXCHANGE_MTU_REQUEST, uint32_t, sd_ble_gattc_exchange_mtu_request(uint16_t conn_handle, uint16_t client_rx_mtu));
+SVCALL(SD_BLE_GATTC_EXCHANGE_MTU_REQUEST, uint32_t, sd_ble_gattc_exchange_mtu_request(adapter_t *adapter, uint16_t conn_handle, uint16_t client_rx_mtu));
 
 /**@brief Iterate through Handle-Value(s) list in @ref BLE_GATTC_EVT_CHAR_VAL_BY_UUID_READ_RSP event.
  *
