@@ -27,15 +27,17 @@
 
 #ifdef _WIN32
 #define UART_PORT_NAME "COM1"
+#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
 #define UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define BAUD_RATE 115200 /* 1M baud rate is not supported on MacOS */
 #endif
 #ifdef __linux__
 #define UART_PORT_NAME "/dev/ttyACM0"
+#define BAUD_RATE 1000000
 #endif
 
-#define BAUD_RATE 115200 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 enum
 {
@@ -57,6 +59,8 @@ enum
 
 #define TARGET_DEV_NAME "Nordic_HRM" /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT 1            /**< Maximum number of peer's application intends to manage. */
+
+#define CONN_CFG_TAG 1
 
 #define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
 #define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR 0x2A37 /**< Heart Rate Measurement characteristic UUID. */
@@ -203,8 +207,11 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
         err_code = sd_ble_gap_connect(m_adapter,
                                       &(p_ble_gap_evt->params.adv_report.peer_addr),
                                       &m_scan_param,
-                                      &m_connection_param);
-
+                                      &m_connection_param
+#if NRF_SD_BLE_API >= 5
+                                     , CONN_CFG_TAG
+#endif
+                                     );
         if (err_code != NRF_SUCCESS)
         {
             printf("Connection Request Failed, reason %d\n", err_code);
@@ -427,8 +434,14 @@ static void on_conn_params_update_request(const ble_gap_evt_t * const p_ble_gap_
  */
 static void on_exchange_mtu_request(const ble_gatts_evt_t * const p_ble_gatts_evt)
 {
-    uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(m_adapter, m_connection_handle,
-                                                        GATT_MTU_SIZE_DEFAULT);
+    uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(
+        m_adapter,
+        m_connection_handle,
+#if NRF_SD_BLE_API < 5
+        GATT_MTU_SIZE_DEFAULT);
+#else
+        BLE_GATT_ATT_MTU_DEFAULT);
+#endif
 
     if (err_code != NRF_SUCCESS)
     {
@@ -579,14 +592,16 @@ static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const ch
 static uint32_t ble_stack_init()
 {
     uint32_t            err_code;
-    ble_enable_params_t ble_enable_params;
     uint32_t *          app_ram_base = NULL;
 
+#if NRF_SD_BLE_API <= 3
+    ble_enable_params_t ble_enable_params;
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
-
-#if NRF_SD_BLE_API >= 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
 #endif
+
+#if NRF_SD_BLE_API == 3
+    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+#elif NRF_SD_BLE_API < 3
     ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed   = false;
     ble_enable_params.gap_enable_params.periph_conn_count   = 1;
@@ -594,8 +609,13 @@ static uint32_t ble_stack_init()
     ble_enable_params.gap_enable_params.central_sec_count   = 1;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
     ble_enable_params.common_enable_params.vs_uuid_count    = 1;
+#endif
 
+#if NRF_SD_BLE_API <= 3
     err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
+#else
+    err_code = sd_ble_enable(m_adapter, app_ram_base);
+#endif
 
     switch (err_code) {
         case NRF_SUCCESS:
@@ -619,6 +639,7 @@ static uint32_t ble_stack_init()
  */
 static uint32_t ble_options_set()
 {
+#if NRF_SD_BLE_API <= 3
     ble_opt_t        opt;
     ble_common_opt_t common_opt;
 
@@ -628,6 +649,9 @@ static uint32_t ble_options_set()
     opt.common_opt = common_opt;
 
     return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
+#else
+    return NRF_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 /**@brief Start scanning (GAP Discovery procedure, Observer Procedure).
@@ -873,12 +897,14 @@ int main(int argc, char * argv[])
         return error_code;
     }
 
+#if NRF_SD_BLE_API < 5
     error_code = ble_options_set();
 
     if (error_code != NRF_SUCCESS)
     {
         return error_code;
     }
+#endif
     
     error_code = scan_start();
 
