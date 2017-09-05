@@ -15,6 +15,15 @@ diff --git a/components/serialization/common/ser_config.h b/components/serializa
 index a4dfe24..5184dcd 100644
 --- a/components/serialization/common/ser_config.h
 +++ b/components/serialization/common/ser_config.h
+@@ -67,6 +67,6 @@  extern "C" { 
+ /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
+  *  packet length). */
+-#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (384UL)
+-#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (384UL)
++#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (700UL)
++#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (700UL)
+
+ #define SER_HAL_TRANSPORT_MAX_PKT_SIZE ((SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE) >= \
 @@ -99,8 +99,8 @@ extern "C" {
  
  /** UART transmission parameters */
