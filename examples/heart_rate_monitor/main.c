@@ -35,22 +35,27 @@
 
 #ifdef _WIN32
 #define UART_PORT_NAME "COM1"
+#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
 #define UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define BAUD_RATE 115200 /* 1M baud rate is not supported on MacOS */
 #endif
 #ifdef __linux__
 #define UART_PORT_NAME "/dev/ttyACM0"
+#define BAUD_RATE 1000000
 #endif
-
-#define BAUD_RATE 115200 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #define ADVERTISING_INTERVAL_40_MS 64  /**< 0.625 ms = 40 ms */
 #define ADVERTISING_TIMEOUT_3_MIN  180 /**< 1 sec = 3 min */
 
 #define OPCODE_LENGTH 1                                                 /**< Length of opcode inside Heart Rate Measurement packet. */
 #define HANDLE_LENGTH 2                                                 /**< Length of handle inside Heart Rate Measurement packet. */
+#if NRF_SD_BLE_API <= 3
 #define MAX_HRM_LEN (BLE_L2CAP_MTU_DEF - OPCODE_LENGTH - HANDLE_LENGTH) /**< Maximum size of a transmitted Heart Rate Measurement. */
+#else
+#define MAX_HRM_LEN (BLE_EVT_LEN_MAX(GATT_MTU_SIZE_DEFAULT) - OPCODE_LENGTH - HANDLE_LENGTH)
+#endif
 
 #define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
 #define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR 0x2A37 /**< Heart Rate Measurement characteristic UUID. */
@@ -61,6 +66,10 @@
 
 #define BUFFER_SIZE 30           /**< Sufficiently large buffer for the advertising data.  */
 #define DEVICE_NAME "Nordic_HRM" /**< Name device advertises as over Bluetooth. */
+
+#ifndef GATT_MTU_SIZE_DEFAULT
+#define GATT_MTU_SIZE_DEFAULT BLE_GATT_ATT_MTU_DEFAULT
+#endif
 
 static uint16_t                 m_connection_handle             = BLE_CONN_HANDLE_INVALID;
 static uint16_t                 m_heart_rate_service_handle     = 0;
@@ -197,7 +206,11 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             break;
 #endif
 
+#if NRF_SD_BLE_API <= 3
         case BLE_EVT_TX_COMPLETE:
+#else
+        case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+#endif
 #ifdef DEBUG
             printf("Successfully transmitted a heart rate reading.");
             fflush(stdout);
@@ -237,32 +250,42 @@ static adapter_t * adapter_init(char * serial_port)
 static uint32_t ble_stack_init()
 {
     uint32_t            err_code;
-    ble_enable_params_t ble_enable_params;
     uint32_t *          app_ram_base = NULL;
 
+#if NRF_SD_BLE_API <= 3
+    ble_enable_params_t ble_enable_params;
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
+#endif
 
-    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    ble_enable_params.gatts_enable_params.service_changed   = false;
-    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
-    ble_enable_params.gap_enable_params.central_conn_count  = 0;
-    ble_enable_params.gap_enable_params.central_sec_count   = 0;
+#if NRF_SD_BLE_API == 3
+    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+#elif NRF_SD_BLE_API < 3
+    ble_enable_params.gatts_enable_params.attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+    ble_enable_params.gatts_enable_params.service_changed = false;
+    ble_enable_params.gap_enable_params.periph_conn_count = 1;
+    ble_enable_params.gap_enable_params.central_conn_count = 0;
+    ble_enable_params.gap_enable_params.central_sec_count = 0;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
+    ble_enable_params.common_enable_params.vs_uuid_count = 1;
+#endif
 
+#if NRF_SD_BLE_API <= 3
     err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
+#else
+    err_code = sd_ble_enable(m_adapter, app_ram_base);
+#endif
 
     switch (err_code) {
-        case NRF_SUCCESS:
-            break;
-        case NRF_ERROR_INVALID_STATE:
-            printf("BLE stack already enabled\n");
-            fflush(stdout);
-            break;
-        default:
-            printf("Failed to enable BLE stack. Error code: %d\n", err_code);
-            fflush(stdout);
-            break;
+    case NRF_SUCCESS:
+        break;
+    case NRF_ERROR_INVALID_STATE:
+        printf("BLE stack already enabled\n");
+        fflush(stdout);
+        break;
+    default:
+        printf("Failed to enable BLE stack. Error code: %d\n", err_code);
+        fflush(stdout);
+        break;
     }
 
     return err_code;
@@ -333,7 +356,11 @@ static uint32_t advertising_start()
     adv_params.p_whitelist = NULL;
 #endif
 
+#if NRF_SD_BLE_API <= 3
     error_code = sd_ble_gap_adv_start(m_adapter, &adv_params);
+#else
+    error_code = sd_ble_gap_adv_start(m_adapter, &adv_params, BLE_CONN_CFG_TAG_DEFAULT);
+#endif
 
     if (error_code != NRF_SUCCESS)
     {
