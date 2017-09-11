@@ -197,6 +197,28 @@ uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_t const *p_
     return encode_decode(adapter, encode_function, decode_function);
 }
 
+#if NRF_SD_BLE_API_VERSION >= 5
+uint32_t sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const * p_cfg, uint32_t app_ram_base)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_cfg_set_req_enc(
+            cfg_id,
+            p_cfg,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_cfg_set_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+#endif
+
 uint32_t sd_ble_enable(
     adapter_t *adapter,
 #if NRF_SD_BLE_API_VERSION < 4
