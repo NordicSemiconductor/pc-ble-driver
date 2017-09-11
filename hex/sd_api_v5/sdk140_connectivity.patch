@@ -15,7 +15,8 @@ diff --git a/components/serialization/common/ser_config.h b/components/serializa
 index a4dfe24..5184dcd 100644
 --- a/components/serialization/common/ser_config.h
 +++ b/components/serialization/common/ser_config.h
-@@ -67,6 +67,6 @@  extern "C" { 
+@@ -66,8 +66,8 @@ extern "C" {
+
  /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
   *  packet length). */
 -#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (384UL)
@@ -24,22 +25,22 @@ index a4dfe24..5184dcd 100644
 +#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (700UL)
 
  #define SER_HAL_TRANSPORT_MAX_PKT_SIZE ((SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE) >= \
+                                         (SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE)    \
 @@ -99,7 +99,7 @@ extern "C" {
- 
+
  /** UART transmission parameters */
  #define SER_PHY_UART_FLOW_CTRL          NRF_UART_HWFC_ENABLED
 -#define SER_PHY_UART_PARITY             NRF_UART_PARITY_INCLUDED
 +#define SER_PHY_UART_PARITY             NRF_UART_PARITY_EXCLUDED
  #define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
- 
+
  /** Find UART baud rate value based on the chosen register setting. */
-@@ -145,6 +145,8 @@ extern "C" {
- 
+@@ -145,6 +145,7 @@ extern "C" {
+
  #define SER_MAX_CONNECTIONS 8
- 
+
 +#define HCI_LINK_CONTROL
-+
- 
+
  #ifdef __cplusplus
  }
 diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
