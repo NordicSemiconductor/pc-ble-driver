@@ -663,7 +663,7 @@ uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
     // Configure the connection roles.
     memset(&ble_cfg, 0, sizeof(ble_cfg));
     ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 8;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
     ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
 
     error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);

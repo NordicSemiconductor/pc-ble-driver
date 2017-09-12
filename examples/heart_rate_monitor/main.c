@@ -78,6 +78,7 @@ static uint8_t                  m_heart_rate                    = HEART_RATE_BAS
 static bool                     m_send_notifications            = false;
 static bool                     m_advertisement_timed_out       = false;
 static adapter_t *              m_adapter                       = NULL;
+static uint32_t                 m_config_id                     = 1;
 
 static uint32_t advertising_start();
 
@@ -291,6 +292,43 @@ static uint32_t ble_stack_init()
     return err_code;
 }
 
+#if NRF_SD_BLE_API >= 5
+uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
+{
+    const uint32_t ram_start = 0; // Value is not used by ble-driver
+    uint32_t error_code;
+    ble_cfg_t ble_cfg;
+
+    // Configure the connection roles.
+    memset(&ble_cfg, 0, sizeof(ble_cfg));
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
+
+    error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                 = conn_cfg_tag;
+    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = 150;
+
+    error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+    return NRF_SUCCESS;
+}
+#endif
+
 /**@brief Function for setting the advertisement data.
  *
  * @details Sets the full device name and its available BLE services in the advertisement data.
@@ -304,7 +342,7 @@ static uint32_t advertisement_data_set()
     uint8_t  data_buffer[BUFFER_SIZE];
 
     const char  * device_name = DEVICE_NAME;
-    const uint8_t name_length = strlen(device_name);
+    const uint8_t name_length = (uint8_t)strlen(device_name);
     const uint8_t data_type   = BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME;
 
     // Set the device name.
@@ -581,6 +619,10 @@ int main(int argc, char * argv[])
         return error_code;
     }
 
+#if NRF_SD_BLE_API >= 5
+    ble_cfg_set(m_config_id);
+#endif
+
     error_code = ble_stack_init();
 
     if (error_code != NRF_SUCCESS)
@@ -616,8 +658,8 @@ int main(int argc, char * argv[])
             heart_rate_measurement_send();
         }
 
-		Sleep(1000);
-	}
+        Sleep(1000);
+    }
 
     error_code = sd_rpc_close(m_adapter);
 
