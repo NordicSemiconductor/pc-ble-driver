@@ -60,8 +60,6 @@ enum
 #define TARGET_DEV_NAME "Nordic_HRM" /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT 1            /**< Maximum number of peer's application intends to manage. */
 
-#define CONN_CFG_TAG 1
-
 #define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
 #define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR 0x2A37 /**< Heart Rate Measurement characteristic UUID. */
 #define BLE_UUID_CCCD                        0x2902
@@ -83,6 +81,7 @@ static uint16_t    m_hrm_char_handle = 0;
 static uint16_t    m_hrm_cccd_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
+static uint32_t    m_config_id = 1;
 
 static const ble_gap_scan_params_t m_scan_param =
 {
@@ -209,7 +208,7 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
                                       &m_scan_param,
                                       &m_connection_param
 #if NRF_SD_BLE_API >= 5
-                                     , CONN_CFG_TAG
+                                     , m_config_id
 #endif
                                      );
         if (err_code != NRF_SUCCESS)
@@ -928,8 +927,7 @@ int main(int argc, char * argv[])
     }
 
 #if NRF_SD_BLE_API >= 5
-    uint32_t app_ram_start = 0x2000BCC0;
-    ble_cfg_set(CONN_CFG_TAG, &app_ram_start);
+    ble_cfg_set(m_config_id);
 #endif
 
     error_code = ble_stack_init();
@@ -947,10 +945,6 @@ int main(int argc, char * argv[])
         return error_code;
     }
 #endif
-    
-    printf("Press any key...\n");
-    fflush(stdout);
-    getchar();
 
     error_code = scan_start();
 
