@@ -654,40 +654,16 @@ static uint32_t ble_options_set()
 #endif
 }
 
-#define BLE_TOTAL_LINK_COUNT                8
-#define BLE_GAP_EVENT_LENGTH                3       // Default from sdk_config.h
-#define BLE_CENTRAL_LINK_COUNT              8
-#define BLE_PERIPHERAL_LINK_COUNT           1
-#define BLE_GATT_MAX_MTU_SIZE               150
-#define BLE_VS_UUID_COUNT                   1
-#define BLE_GATTS_ATTR_TAB_SIZE             1408    // Default from sdk_config.h
-#define BLE_SERVICE_CHANGED                 0
-
 #if NRF_SD_BLE_API >= 5
 uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 {
+    const uint32_t ram_start = 0; // Value is not used by ble-driver
     uint32_t error_code;
-    const uint32_t ram_start = 0; // Value is not used by ble-drvier
-
-    // Overwrite some of the default settings of the BLE stack.
     ble_cfg_t ble_cfg;
-
-    // Configure the connection count.
-    memset(&ble_cfg, 0, sizeof(ble_cfg));
-    ble_cfg.conn_cfg.conn_cfg_tag                     = conn_cfg_tag;
-    ble_cfg.conn_cfg.params.gap_conn_cfg.conn_count   = 8;
-    ble_cfg.conn_cfg.params.gap_conn_cfg.event_length = 3; // Default from sdk_config.h
-
-    error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GAP, &ble_cfg, ram_start);
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GAP. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-    }
 
     // Configure the connection roles.
     memset(&ble_cfg, 0, sizeof(ble_cfg));
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = BLE_PERIPHERAL_LINK_COUNT;
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
     ble_cfg.gap_cfg.role_count_cfg.central_role_count = 8;
     ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
 
@@ -696,58 +672,19 @@ uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
     {
         printf("sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT. Error code: 0x%02X\n", error_code);
         fflush(stdout);
+        return error_code;
     }
 
     memset(&ble_cfg, 0x00, sizeof(ble_cfg));
     ble_cfg.conn_cfg.conn_cfg_tag                 = conn_cfg_tag;
-    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = BLE_GATT_MAX_MTU_SIZE;
+    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = 150;
 
     error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
     if (error_code != NRF_SUCCESS)
     {
         printf("sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT. Error code: 0x%02X\n", error_code);
         fflush(stdout);
-    }
-
-    // Configure number of custom UUIDS.
-    memset(&ble_cfg, 0, sizeof(ble_cfg));
-    ble_cfg.common_cfg.vs_uuid_cfg.vs_uuid_count = BLE_VS_UUID_COUNT;
-
-    error_code = sd_ble_cfg_set(m_adapter, BLE_COMMON_CFG_VS_UUID, &ble_cfg, ram_start);
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("sd_ble_cfg_set() failed when attempting to set BLE_COMMON_CFG_VS_UUID. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-    }
-
-    // Configure the GATTS attribute table.
-    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
-    ble_gatts_cfg_attr_tab_size_t table =
-    {
-        .attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE
-    };
-    ble_cfg.gatts_cfg.attr_tab_size = table;
-
-    error_code = sd_ble_cfg_set(m_adapter, BLE_GATTS_CFG_ATTR_TAB_SIZE, &ble_cfg, ram_start);
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("sd_ble_cfg_set() failed when attempting to set BLE_GATTS_CFG_ATTR_TAB_SIZE. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-    }
-
-    // Configure Service Changed characteristic.
-    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
-    ble_gatts_cfg_service_changed_t sc =
-    {
-        .service_changed = BLE_SERVICE_CHANGED
-    };
-    ble_cfg.gatts_cfg.service_changed = sc;
-
-    error_code = sd_ble_cfg_set(m_adapter, BLE_GATTS_CFG_SERVICE_CHANGED, &ble_cfg, ram_start);
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("sd_ble_cfg_set() failed when attempting to set BLE_GATTS_CFG_SERVICE_CHANGED. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
+        return error_code;
     }
 
     return NRF_SUCCESS;
@@ -1011,6 +948,8 @@ int main(int argc, char * argv[])
     }
 #endif
     
+    printf("Press any key...\n");
+    fflush(stdout);
     getchar();
 
     error_code = scan_start();
