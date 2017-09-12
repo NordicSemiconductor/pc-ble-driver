@@ -5,7 +5,7 @@ set(Boost_USE_MULTITHREADED ON)
 
 # Use static boost libraries so the dynamic library 
 # can run anywhere
-set(Boost_USE_STATIC_LIBS   ON)
+set(Boost_USE_STATIC_LIBS ON)
 
 # Find the necessary boost components on the system.
 # Minimum version required is 1.54.0
@@ -23,6 +23,7 @@ include_directories (
 
 if(MSVC)
     add_definitions(-DPC_BLE_DRIVER_STATIC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Build executable

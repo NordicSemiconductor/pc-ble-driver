@@ -23,6 +23,7 @@ include_directories (
 
 if(MSVC)
     add_definitions(-DPC_BLE_DRIVER_STATIC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Build executable
@@ -46,7 +47,7 @@ if(MSVC)
 else()
     target_link_libraries(hrc_v2 PRIVATE pc_ble_driver_shared_sd_api_v2)
     target_link_libraries(hrc_v3 PRIVATE pc_ble_driver_shared_sd_api_v3)
-    target_link_libraries(hrc_v5 PRIVATE pc_ble_driver_static_sd_api_v5)
+    target_link_libraries(hrc_v5 PRIVATE pc_ble_driver_shared_sd_api_v5)
 endif()
 
 target_link_libraries(hrc_v2 PRIVATE ${Boost_LIBRARIES})
