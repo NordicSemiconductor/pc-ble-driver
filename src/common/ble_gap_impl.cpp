@@ -867,6 +867,28 @@ uint32_t sd_ble_gap_keypress_notify(adapter_t *adapter, uint16_t conn_handle, ui
     return encode_decode(adapter, encode_function, decode_function);
 }
 
+#if NRF_SD_BLE_API_VERSION >= 5
+uint32_t sd_ble_gap_phy_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_phys_t const *p_gap_phys)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_phy_update_req_enc(
+            conn_handle,
+            p_gap_phys,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_phy_update_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+#endif
+
 #if NRF_SD_BLE_API_VERSION >= 4
 uint32_t sd_ble_gap_data_length_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_data_length_params_t const *p_dl_params, ble_gap_data_length_limitation_t *p_dl_limitation)
 {
