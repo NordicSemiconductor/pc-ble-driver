@@ -270,9 +270,7 @@ static adapter_list_t* GetAdapters()
             serial_device_t *serial_device = (serial_device_t*)malloc(sizeof(serial_device_t));
             memset(serial_device, 0, sizeof(serial_device_t));
 
-            // Apparently the cu.X prefix is wrong, it should be tty.X. This is a hack to do that.
-            strcpy(serial_device->port, TTY_PATH_PREFIX);
-            strcpy(serial_device->port + strlen(TTY_PATH_PREFIX), bsdPath + strlen("/dev/cu."));
+            strncpy(serial_device->port, bsdPath, MAXPATHLEN);
 
             // Wait until this is fixed in OS X 10.11: https://forums.developer.apple.com/message/19670#19670
 #if EL_CAPITAN_ISSUE
