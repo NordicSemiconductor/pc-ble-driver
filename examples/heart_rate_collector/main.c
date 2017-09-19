@@ -598,9 +598,7 @@ static uint32_t ble_stack_init()
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 #endif
 
-#if NRF_SD_BLE_API == 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
-#elif NRF_SD_BLE_API < 3
+#if NRF_SD_BLE_API < 3
     ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed   = false;
     ble_enable_params.gap_enable_params.periph_conn_count   = 1;
