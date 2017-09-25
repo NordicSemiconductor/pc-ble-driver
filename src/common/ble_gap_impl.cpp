@@ -47,7 +47,7 @@
 #include "ble_gap_app.h" // Encoder/decoder functions
 
 //TODO: Find a way to support multiple adapters
-#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create 
+#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
 
 #include <stdint.h>
 
@@ -64,7 +64,7 @@ uint32_t sd_ble_gap_adv_start(
             p_adv_params,
 #if NRF_SD_BLE_API_VERSION >= 4
             conn_cfg_tag,
-#endif            
+#endif
             buffer,
             length);
     };
@@ -750,13 +750,14 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
     uint32_t err_code = NRF_SUCCESS;
 #if NRF_SD_BLE_API_VERSION < 4
     ser_ble_gap_app_keyset_t *keyset = nullptr;
-#endif
 
-    // First allocate security context for serialization. We add the a security context for the 
+    // First allocate security context for serialization. We add the a security context for the
     // connection even if the developer has not provided a p_sec_keyset since the same structure
     // will be used for storing keys received from the peer.
     auto adapterInternal = static_cast<AdapterInternal*>(adapter->internal);
     BLESecurityContext context(adapterInternal->transport);
+#endif
+
 
 #if NRF_SD_BLE_API_VERSION < 4
     err_code = app_ble_gap_sec_context_create(conn_handle, &keyset);
@@ -770,14 +771,14 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
     {
         return err_code;
     }
-    
+
     if (p_sec_keyset)
     {
 #if NRF_SD_BLE_API_VERSION < 4
         std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
 #else
         //TODO: copy keyset properly
-        //std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
+        std::memcpy(&(m_app_keys_table[index].keyset), p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
 #endif
     }
 

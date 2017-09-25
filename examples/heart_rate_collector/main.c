@@ -173,11 +173,46 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
     printf("Connection established\n");
     fflush(stdout);
 
+	// char c = (char)getchar();
     m_connected_devices++;
     m_connection_handle = p_ble_gap_evt->conn_handle;
     m_connection_is_in_progress = false;
 
-    service_discovery_start();
+    ble_gap_sec_params_t p_sec_params;
+    memset(&p_sec_params, 0, sizeof(p_sec_params));
+    p_sec_params.bond         = 1;
+    p_sec_params.mitm         = 0;
+    p_sec_params.lesc         = 0;
+    p_sec_params.keypress     = 0;
+    p_sec_params.io_caps      = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob          = 0;
+    p_sec_params.min_key_size = 7;
+    p_sec_params.max_key_size = 16;
+
+    ble_gap_sec_kdist_t kdist_own;
+    memset(&kdist_own, 0, sizeof(kdist_own));
+    kdist_own.enc   = 0;
+    kdist_own.id    = 0;
+    kdist_own.sign  = 0;
+    kdist_own.link  = 0;
+
+    ble_gap_sec_kdist_t kdist_peer;
+    memset(&kdist_peer, 0, sizeof(kdist_peer));
+    kdist_own.enc   = 0;
+    kdist_own.id    = 0;
+    kdist_own.sign  = 0;
+    kdist_own.link  = 0;
+
+    p_sec_params.kdist_own    = kdist_own;
+    p_sec_params.kdist_peer   = kdist_peer;
+
+    printf("Ready to authenticate\n");
+    printf("%d\n", BLE_GAP_EVT_SEC_PARAMS_REQUEST);
+    uint8_t err_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
+    printf("error_code: %d\n", err_code);
+
+
+    // service_discovery_start();
 }
 
 /**@brief Function called on BLE_GAP_EVT_ADV_REPORT event.
@@ -813,6 +848,133 @@ static uint32_t hrm_cccd_set(uint8_t value)
     return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
 }
 
+static uint8_t on_sec_params_request()
+{
+    ble_gap_sec_params_t p_sec_params;
+    memset(&p_sec_params, 0, sizeof(p_sec_params));
+    p_sec_params.bond         = 1;
+    p_sec_params.mitm         = 0;
+    p_sec_params.lesc         = 0;
+    p_sec_params.keypress     = 0;
+    p_sec_params.io_caps      = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob          = 0;
+    p_sec_params.min_key_size = 7;
+    p_sec_params.max_key_size = 16;
+
+    ble_gap_sec_kdist_t kdist_own;
+    memset(&kdist_own, 0, sizeof(kdist_own));
+    kdist_own.enc   = 0;
+    kdist_own.id    = 0;
+    kdist_own.sign  = 0;
+    kdist_own.link  = 0;
+
+    ble_gap_sec_kdist_t kdist_peer;
+    memset(&kdist_peer, 0, sizeof(kdist_peer));
+    kdist_own.enc   = 0;
+    kdist_own.id    = 0;
+    kdist_own.sign  = 0;
+    kdist_own.link  = 0;
+
+    p_sec_params.kdist_own    = kdist_own;
+    p_sec_params.kdist_peer   = kdist_peer;
+
+
+    ble_gap_sec_keyset_t p_sec_keyset;
+
+    ble_gap_sec_keys_t keys_own;
+    ble_gap_sec_keys_t keys_peer;
+
+    ble_gap_enc_key_t p_enc_key;
+    ble_gap_id_key_t p_id_key;
+    ble_gap_sign_info_t p_sign_key;
+    ble_gap_lesc_p256_pk_t p_pk;
+
+
+    ble_gap_enc_info_t enc_info;
+    memset(&enc_info, 0, sizeof(enc_info));
+    uint8_t  ltk[16];
+    *enc_info.ltk = ltk;
+    enc_info.lesc = 1;
+    enc_info.auth = 1;
+    enc_info.ltk_len = 6;
+
+    ble_gap_master_id_t master_id;
+    memset(&master_id, 0, sizeof(master_id));
+    master_id.ediv = 0;
+    uint8_t  master_id_rand[8];
+    *master_id.rand = master_id_rand;
+
+    memset(&p_enc_key, 0, sizeof(p_enc_key));
+    p_enc_key.enc_info = enc_info;
+    p_enc_key.master_id = master_id;
+
+    ble_gap_irk_t id_info;
+    memset(&id_info, 0, sizeof(id_info));
+    uint8_t  irk[16];
+    *id_info.irk = irk;
+
+    ble_gap_addr_t id_addr_info;
+    memset(&id_addr_info, 0, sizeof(id_addr_info));
+
+#if NRF_SD_BLE_API >= 5
+    id_addr_info.addr_id_peer = 1;
+#endif
+    id_addr_info.addr_type = 7;
+    uint8_t  addr[(6)];
+    *id_addr_info.addr = addr;
+
+    memset(&p_id_key, 0, sizeof(p_id_key));
+    p_id_key.id_info = id_info;
+    p_id_key.id_addr_info = id_addr_info;
+
+    uint8_t csrk[16];
+
+    memset(&p_sign_key, 0, sizeof(p_sign_key));
+    *p_sign_key.csrk = csrk;
+
+    uint8_t pk[64];
+
+    memset(&p_pk, 0, sizeof(p_pk));
+    *p_pk.pk = pk;
+
+
+    memset(&keys_own, 0, sizeof(keys_own));
+    // keys_own.p_enc_key  = &p_enc_key;
+    // keys_own.p_id_key   = &p_id_key;
+    // keys_own.p_pk       = &p_pk;
+    // keys_own.p_sign_key = &p_sign_key;
+    keys_own.p_enc_key  = NULL;
+    keys_own.p_id_key   = NULL;
+    keys_own.p_pk       = NULL;
+    keys_own.p_sign_key = NULL;
+
+    memset(&keys_peer, 0, sizeof(keys_peer));
+    // keys_peer.p_enc_key  = &p_enc_key;
+    // keys_peer.p_id_key   = &p_id_key;
+    // keys_peer.p_pk       = &p_pk;
+    // keys_peer.p_sign_key = &p_sign_key;
+    keys_peer.p_enc_key  = NULL;
+    keys_peer.p_id_key   = NULL;
+    keys_peer.p_pk       = NULL;
+    keys_peer.p_sign_key = NULL;
+
+    memset(&p_sec_keyset, 0, sizeof(p_sec_keyset));
+    p_sec_keyset.keys_own = keys_own;
+    p_sec_keyset.keys_peer = keys_peer;
+
+
+    printf("%d\n", BLE_GAP_EVT_SEC_PARAMS_REQUEST);
+    uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter,
+                                m_connection_handle,
+                                BLE_GAP_SEC_STATUS_SUCCESS,
+                                NULL,
+                                &p_sec_keyset);
+    printf("error_code: %d\n", err_code);
+
+    return 0;
+}
+
+
 /**@brief Function for handling the Application's BLE Stack events.
  *
  * @param[in] adapter The transport adapter.
@@ -847,6 +1009,38 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 
         case BLE_GAP_EVT_TIMEOUT:
             on_timeout(&(p_ble_evt->evt.gap_evt));
+            break;
+
+        case BLE_GAP_EVT_SEC_REQUEST:
+            printf("BLE_GAP_EVT_SEC_REQUEST\n");
+
+            // if (err_code != NRF_SUCCESS)
+            // {
+            //     printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
+            //     fflush(stdout);
+            // }
+            break;
+
+        case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+            printf("BLE_GAP_EVT_SEC_PARAMS_REQUEST\n");
+            on_sec_params_request();
+
+            // if (err_code != NRF_SUCCESS)
+            // {
+            //     printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
+            //     fflush(stdout);
+            // }
+            break;
+
+        case BLE_GAP_EVT_CONN_SEC_UPDATE:
+            printf("BLE_GAP_EVT_CONN_SEC_UPDATE\n");
+            printf("conn_sec_encr_key_size: %d\n",  p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
+            printf("Security Mode %d Level %d\n",  p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv);
+            break;
+
+        case BLE_GAP_EVT_AUTH_STATUS:
+            printf("BLE_GAP_EVT_AUTH_STATUS\n");
+            printf("BLE_GAP_EVT_AUTH_STATUS: %d\n",  p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
             break;
 
         case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP:
