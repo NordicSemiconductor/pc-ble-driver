@@ -171,7 +171,8 @@ void SerializationTransport::eventHandlingRunner()
             // Set security context
             BLESecurityContext context(this);
 
-            uint32_t possibleEventLength = 512;
+            // max event length selected freely to fit an event with max ATT MTU with good margin
+            uint32_t possibleEventLength = 700;
             std::unique_ptr<ble_evt_t> event(static_cast<ble_evt_t*>(std::malloc(possibleEventLength)));
             uint32_t errCode = ble_event_dec(eventData.data, eventData.dataLength, event.get(), &possibleEventLength);
 
