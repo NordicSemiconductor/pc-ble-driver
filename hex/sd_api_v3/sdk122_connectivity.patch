@@ -2,6 +2,15 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s
 index 3bb176a..e420377 100644
 --- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
 +++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+@@ -8,6 +8,8 @@
+ #endif
+ // <h> nRF_BLE
+
++#define NRF_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+ 
 @@ -191,7 +191,7 @@
  
  
@@ -15,17 +24,24 @@ diff --git a/components/serialization/common/ser_config.h b/components/serializa
 index 1b31fcb..9cc334e 100644
 --- a/components/serialization/common/ser_config.h
 +++ b/components/serialization/common/ser_config.h
-@@ -70,8 +70,8 @@ extern "C" {
+@@ -40,6 +40,6 @@ 
+ /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
+  *  packet length). */
+-#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (uint32_t)(384)
+-#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (uint32_t)(384)
++#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (uint32_t)(500)
++#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (uint32_t)(500)
+
+ #define SER_HAL_TRANSPORT_MAX_PKT_SIZE ((SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE) >= \
+@@ -70,7 +70,7 @@ extern "C" {
  
  /** UART transmission parameters */
  #define SER_PHY_UART_FLOW_CTRL          APP_UART_FLOW_CONTROL_ENABLED
 -#define SER_PHY_UART_PARITY             true
--#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
 +#define SER_PHY_UART_PARITY             false
-+#define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud115200
+ #define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
  
  /** Find UART baud rate value based on the chosen register setting. */
- #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
 @@ -114,6 +114,8 @@ extern "C" {
 
  #define SER_MAX_CONNECTIONS 8
@@ -130,7 +146,7 @@ index d4a4883..346093a 100644
 +    .rfu0               = 0xFFFFFF,
 +    .revision_hash      = 0,
 +    .version_major      = 1,
-+    .version_minor      = 1,
++    .version_minor      = 2,
 +    .version_patch      = 0,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
@@ -151,8 +167,8 @@ index 0f597ba..2f6bfb4 100644
                </OCR_RVCT8>
                <OCR_RVCT9>
                  <Type>0</Type>
--                <StartAddress>0x20004300</StartAddress>
--                <Size>0xbd00</Size>
+-                <StartAddress>0x20005cc0</StartAddress>
+-                <Size>0xa340</Size>
 +                <StartAddress>0x2000bcc0</StartAddress>
 +                <Size>0x4340</Size>
                </OCR_RVCT9>
@@ -163,32 +179,20 @@ index 0f597ba..2f6bfb4 100644
              <vShortWch>0</vShortWch>
              <VariousControls>
 -              <MiscControls></MiscControls>
-+              <MiscControls>--reduce_paths</MiscControls>
-               <Define> HCI_TIMER2 BLE_STACK_SUPPORT_REQD __STACK_SIZE=2048 __HEAP_SIZE=1024 BOARD_PCA10040 NRF52_PAN_12 NRF52_PAN_15 NRF52_PAN_20 NRF52_PAN_30 NRF52_PAN_31 NRF52_PAN_36 NRF52_PAN_51 NRF52_PAN_53 NRF52_PAN_54 NRF52_PAN_55 NRF52_PAN_58 NRF52_PAN_62 NRF52_PAN_63 NRF52_PAN_64 CONFIG_GPIO_AS_PINRESET S132 NRF_SD_BLE_API_VERSION=3 SER_CONNECTIVITY BSP_DEFINES_ONLY NRF52832 NRF52 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
++              <MiscControls>--reduce-paths</MiscControls>
+               <Define> HCI_TIMER2 BLE_STACK_SUPPORT_REQD __STACK_SIZE=2048 __HEAP_SIZE=1024 BOARD_PCA10040 NRF52_PAN_12 NRF52_PAN_15 NRF52_PAN_20 NRF52_PAN_31 CONFIG_GPIO_AS_PINRESET NRF52_PAN_36 NRF52_PAN_51 NRF52_PAN_54 NRF52_PAN_55 NRF52_PAN_58 NRF52_PAN_64 S132 NRF_SD_BLE_API_VERSION=3 SER_CONNECTIVITY BSP_DEFINES_ONLY NRF52832 NRF52 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
                <Undefine></Undefine>
-               <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\drivers_nrf\clock;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\components\libraries\mailbox;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\serialization\common;..\..\..\..\..\..\components\serialization\common\struct_ser\s132;..\..\..\..\..\..\components\serialization\common\transport;..\..\..\..\..\..\components\serialization\common\transport\ser_phy;..\..\..\..\..\..\components\serialization\common\transport\ser_phy\config;..\..\..\..\..\..\components\serialization\connectivity;..\..\..\..\..\..\components\serialization\connectivity\codecs\common;..\..\..\..\..\..\components\serialization\connectivity\codecs\s132\middleware;..\..\..\..\..\..\components\serialization\connectivity\codecs\s132\serializers;..\..\..\..\..\..\components\serialization\connectivity\hal;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s132\headers;..\..\..\..\..\..\components\softdevice\s132\headers\nrf52;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\bsp;..\..\..\..\..\..\external\segger_rtt;..\config</IncludePath>
-index 7121bc0..ba41a73 100644
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-@@ -6,7 +6,7 @@ GROUP(-lgcc -lc -lnosys)
- MEMORY
- {
-   FLASH (rx) : ORIGIN = 0x1f000, LENGTH = 0x61000
--  RAM (rwx) :  ORIGIN = 0x20004300, LENGTH = 0xbd00
-+  RAM (rwx) :  ORIGIN = 0x2000bcc0, LENGTH = 0x4340
- }
-
- SECTIONS
-diff --git a/components/serialization/common/ble_serialization.h b/components/serialization/common/ble_serialization.h
-index a339754..8fb049b 100644
---- a/components/serialization/common/ble_serialization.h
-+++ b/components/serialization/common/ble_serialization.h
-@@ -122,7 +122,7 @@ typedef enum
- 
- /** Maximum length of p_value in \ref ble_gattc_write_params_t. See Bluetooth 4.0 spec: 3.4.5.1 and
-  *  3.4.5.3. */
--#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (GATT_MTU_SIZE_DEFAULT - 3)
-+#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (247 - 3)
- 
- /** See Bluetooth 4.0 spec: 3.4.4.7. */
+               <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\boards;..\..\..\..\..\..\components\drivers_nrf\clock;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\serialization\common;..\..\..\..\..\..\components\serialization\common\struct_ser\s132;..\..\..\..\..\..\components\serialization\common\transport;..\..\..\..\..\..\components\serialization\common\transport\ser_phy;..\..\..\..\..\..\components\serialization\common\transport\ser_phy\config;..\..\..\..\..\..\components\serialization\connectivity;..\..\..\..\..\..\components\serialization\connectivity\codecs\common;..\..\..\..\..\..\components\serialization\connectivity\codecs\s132\middleware;..\..\..\..\..\..\components\serialization\connectivity\codecs\s132\serializers;..\..\..\..\..\..\components\serialization\connectivity\hal;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s132\headers;..\..\..\..\..\..\components\softdevice\s132\headers\nrf52;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\..\external\segger_rtt;..\config</IncludePath>
+diff --git a/components/serialization/common/ble_serialization.h b/components/serialization/common/ble_serialization.h    +
+index a339754..8fb049b 100644   
+--- a/components/serialization/common/ble_serialization.h   
++++ b/components/serialization/common/ble_serialization.h   
+@@ -122,7 +122,7 @@ typedef enum    
+    
+ /** Maximum length of p_value in \ref ble_gattc_write_params_t. See Bluetooth 4.0 spec: 3.4.5.1 and    
+  *  3.4.5.3. */    
+-#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (GATT_MTU_SIZE_DEFAULT - 3)   
++#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (247 - 3)   
+    
+ /** See Bluetooth 4.0 spec: 3.4.4.7. */    
  #define BLE_GATTC_HANDLE_COUNT_LEN_MAX     ((GATT_MTU_SIZE_DEFAULT - 1) / 2)
