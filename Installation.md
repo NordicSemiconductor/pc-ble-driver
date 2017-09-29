@@ -11,7 +11,7 @@ The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDev
 
 * Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
 * GNU/Linux (Ubuntu tested) 32 and 64-bit
-* macOS (OS X) 32 and 64-bit
+* macOS (OS X) 64-bit
 
 ## Hardware setup
 

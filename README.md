@@ -3,7 +3,7 @@
 `pc-ble-driver` provides C/C++ libraries for Bluetooth Low Energy nRF5 SoftDevice serialization.
 
 ## Overview
-`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.softdevices52/dita/nrf52/softdevices.html?cp=2_3) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v13.0.0/lib_serialization.html?cp=4_0_0_3_33).
+`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.softdevices52/dita/nrf52/softdevices.html?cp=2_3) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/lib_serialization.html?cp=4_0_0_3_33).
 
 The C/C++ libraries can be interfaced with directly, but are also provided as higher-level bindings that ease development at the cost of reduced control (acceptable in most cases):
 
@@ -22,13 +22,13 @@ Now that you have successfully built and installed `pc-ble-driver`, you are read
 
     $ cd pc-ble-driver/
     $ ls build/
-    > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v3.a  libpc_ble_driver_shared_sd_api_v3.dylib test_uart ...
+    > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v5.a  libpc_ble_driver_shared_sd_api_v5.dylib test_uart ...
 
 To quickly get the examples up and running, see [examples/README.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/README.md).
     
 ## Architecture
 
-![alt tag](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v13.0.0/architecture_overview_serialization.svg)
+![alt tag](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/architecture_overview_serialization.svg)
 
 Where the 'Application chip' is just generic hardware (i.e. a Windows, OS X or Linux device), although it could also be an Arduino or Raspberry Pi for example.
 

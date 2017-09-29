@@ -18,9 +18,9 @@ Note: this step depends on your operating system [as documented here](https://gi
 If everything went well, you should see:
 
     $ ls pc-ble-driver/examples/heart_rate_monitor/build/
-    > hrm_v2 hrm_v3 ...
+    > hrm_v2 hrm_v5 ...
 
-Where `hrm_v2` and `hrm_v3` are the executables you will run.
+Where `hrm_v2` and `hrm_v5` are the executables you will run.
 
 #### Running
 
