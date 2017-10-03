@@ -191,4 +191,6 @@ function main() {
     exit
 }
 
-main "$@"
+if [ "${1}" != "--source-only" ]; then
+   main "$@"
+fi
