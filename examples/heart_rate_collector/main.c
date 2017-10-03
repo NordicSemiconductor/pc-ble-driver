@@ -26,16 +26,16 @@
 #include <string.h>
 
 #ifdef _WIN32
-#define UART_PORT_NAME "COM1"
-#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
+#define DEFAULT_UART_PORT_NAME "COM1"
+#define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
-#define UART_PORT_NAME "/dev/tty.usbmodem00000"
-#define BAUD_RATE 115200 /* 1M baud rate is not supported on MacOS */
+#define DEFAULT_UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define DEFAULT_BAUD_RATE 115200 /* 1M baud rate is not supported on MacOS */
 #endif
 #ifdef __linux__
-#define UART_PORT_NAME "/dev/ttyACM0"
-#define BAUD_RATE 1000000
+#define DEFAULT_UART_PORT_NAME "/dev/ttyACM0"
+#define DEFAULT_BAUD_RATE 1000000
 #endif
 
 
@@ -470,13 +470,13 @@ static void on_exchange_mtu_response(const ble_gattc_evt_t * const p_ble_gattc_e
  *
  * @return The new transport adapter.
  */
-static adapter_t * adapter_init(char * serial_port)
+static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
 {
     physical_layer_t  * phy;
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, BAUD_RATE, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -895,13 +895,34 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 /**@brief Function for application main entry.
  *
  * @param[in] argc Number of arguments (program expects 0 or 1 arguments).
- * @param[in] argv The serial port of the target nRF5 device (Optional).
+ * @param[in] argv The serial port and baud rate of the target nRF5 device (Optional).
  */
 int main(int argc, char * argv[])
 {
     uint32_t error_code;
     char *   serial_port;
+    uint32_t baud_rate;
     uint8_t  cccd_value = 0;
+
+    if (argc > 2)
+    {
+        if (strcmp(argv[2], "1000000") == 0)
+        {
+            baud_rate = 1000000;
+        }
+        else if (strcmp(argv[2], "115200") == 0)
+        {
+            baud_rate = 115200;
+        }
+        else
+        {
+            baud_rate = DEFAULT_BAUD_RATE;
+        }
+    }
+    else
+    {
+        baud_rate = DEFAULT_BAUD_RATE;
+    }
 
     if (argc > 1)
     {
@@ -909,13 +930,14 @@ int main(int argc, char * argv[])
     }
     else
     {
-        serial_port = UART_PORT_NAME;
+        serial_port = DEFAULT_UART_PORT_NAME;
     }
 
     printf("Serial port used: %s\n", serial_port);
+    printf("Baud rate used: %d\n", baud_rate);
     fflush(stdout);
 
-    m_adapter =  adapter_init(serial_port);
+    m_adapter =  adapter_init(serial_port, baud_rate);
     sd_rpc_log_handler_severity_filter_set(m_adapter, SD_RPC_LOG_INFO);
     error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler);
 
