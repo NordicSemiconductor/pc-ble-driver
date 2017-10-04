@@ -900,8 +900,8 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 int main(int argc, char * argv[])
 {
     uint32_t error_code;
-    char *   serial_port;
-    uint32_t baud_rate;
+    char *   serial_port = DEFAULT_UART_PORT_NAME;
+    uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  cccd_value = 0;
 
     if (argc > 2)
@@ -916,21 +916,14 @@ int main(int argc, char * argv[])
         }
         else
         {
-            baud_rate = DEFAULT_BAUD_RATE;
+            printf("Supported baud rate values are: 115200, 1000000\n");
+            fflush(stdout);
         }
-    }
-    else
-    {
-        baud_rate = DEFAULT_BAUD_RATE;
     }
 
     if (argc > 1)
     {
         serial_port = argv[1];
-    }
-    else
-    {
-        serial_port = DEFAULT_UART_PORT_NAME;
     }
 
     printf("Serial port used: %s\n", serial_port);
