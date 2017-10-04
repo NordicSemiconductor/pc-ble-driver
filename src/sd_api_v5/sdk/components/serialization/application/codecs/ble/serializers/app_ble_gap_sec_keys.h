@@ -51,6 +51,8 @@
 
 #include "ble_gap.h"
 #include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,7 +77,7 @@ typedef struct
  *
  * @note  This array is used to store keys.
  */
-ser_ble_gap_app_keyset_t m_app_keys_table[];
+extern ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
 
 /**@brief Sets root context for calls to *_context_create, *_context_destroy, *_context_find
 *

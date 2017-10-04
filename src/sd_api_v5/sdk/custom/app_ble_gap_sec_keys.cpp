@@ -53,8 +53,6 @@
 
 #include <mutex>
 
-ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
-
 void *current_context = nullptr;
 std::mutex current_context_mutex;
 
