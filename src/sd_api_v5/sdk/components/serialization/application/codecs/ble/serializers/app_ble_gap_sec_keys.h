@@ -51,8 +51,6 @@
 
 #include "ble_gap.h"
 #include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #ifdef __cplusplus
 extern "C" {
