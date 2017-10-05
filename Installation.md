@@ -3,7 +3,7 @@
 The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
 * SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
-* SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
+* SoftDevice s132 API version 5: `s132_nrf52_5.x.x` (only for nRF52 series ICs)
 
 The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 

@@ -26,16 +26,18 @@
 #include <string.h>
 
 #ifdef _WIN32
-#define UART_PORT_NAME "COM1"
+#define DEFAULT_UART_PORT_NAME "COM1"
+#define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
-#define UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define DEFAULT_UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define DEFAULT_BAUD_RATE 115200 /* 1M baud rate is not supported on MacOS */
 #endif
 #ifdef __linux__
-#define UART_PORT_NAME "/dev/ttyACM0"
+#define DEFAULT_UART_PORT_NAME "/dev/ttyACM0"
+#define DEFAULT_BAUD_RATE 1000000
 #endif
 
-#define BAUD_RATE 115200 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 enum
 {
@@ -79,6 +81,7 @@ static uint16_t    m_hrm_char_handle = 0;
 static uint16_t    m_hrm_cccd_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
+static uint32_t    m_config_id = 1;
 
 static const ble_gap_scan_params_t m_scan_param =
 {
@@ -203,8 +206,11 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
         err_code = sd_ble_gap_connect(m_adapter,
                                       &(p_ble_gap_evt->params.adv_report.peer_addr),
                                       &m_scan_param,
-                                      &m_connection_param);
-
+                                      &m_connection_param
+#if NRF_SD_BLE_API >= 5
+                                     , m_config_id
+#endif
+                                     );
         if (err_code != NRF_SUCCESS)
         {
             printf("Connection Request Failed, reason %d\n", err_code);
@@ -427,8 +433,14 @@ static void on_conn_params_update_request(const ble_gap_evt_t * const p_ble_gap_
  */
 static void on_exchange_mtu_request(const ble_gatts_evt_t * const p_ble_gatts_evt)
 {
-    uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(m_adapter, m_connection_handle,
-                                                        GATT_MTU_SIZE_DEFAULT);
+    uint32_t err_code = sd_ble_gatts_exchange_mtu_reply(
+        m_adapter,
+        m_connection_handle,
+#if NRF_SD_BLE_API < 5
+        GATT_MTU_SIZE_DEFAULT);
+#else
+        BLE_GATT_ATT_MTU_DEFAULT);
+#endif
 
     if (err_code != NRF_SUCCESS)
     {
@@ -458,13 +470,13 @@ static void on_exchange_mtu_response(const ble_gattc_evt_t * const p_ble_gattc_e
  *
  * @return The new transport adapter.
  */
-static adapter_t * adapter_init(char * serial_port)
+static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
 {
     physical_layer_t  * phy;
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, BAUD_RATE, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -579,14 +591,16 @@ static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const ch
 static uint32_t ble_stack_init()
 {
     uint32_t            err_code;
-    ble_enable_params_t ble_enable_params;
     uint32_t *          app_ram_base = NULL;
 
+#if NRF_SD_BLE_API <= 3
+    ble_enable_params_t ble_enable_params;
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
-
-#if NRF_SD_BLE_API >= 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
 #endif
+
+#if NRF_SD_BLE_API == 3
+    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+#elif NRF_SD_BLE_API < 3
     ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed   = false;
     ble_enable_params.gap_enable_params.periph_conn_count   = 1;
@@ -594,8 +608,13 @@ static uint32_t ble_stack_init()
     ble_enable_params.gap_enable_params.central_sec_count   = 1;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
     ble_enable_params.common_enable_params.vs_uuid_count    = 1;
+#endif
 
+#if NRF_SD_BLE_API <= 3
     err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
+#else
+    err_code = sd_ble_enable(m_adapter, app_ram_base);
+#endif
 
     switch (err_code) {
         case NRF_SUCCESS:
@@ -619,6 +638,7 @@ static uint32_t ble_stack_init()
  */
 static uint32_t ble_options_set()
 {
+#if NRF_SD_BLE_API <= 3
     ble_opt_t        opt;
     ble_common_opt_t common_opt;
 
@@ -628,7 +648,47 @@ static uint32_t ble_options_set()
     opt.common_opt = common_opt;
 
     return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
+#else
+    return NRF_ERROR_NOT_SUPPORTED;
+#endif
 }
+
+#if NRF_SD_BLE_API >= 5
+uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
+{
+    const uint32_t ram_start = 0; // Value is not used by ble-driver
+    uint32_t error_code;
+    ble_cfg_t ble_cfg;
+
+    // Configure the connection roles.
+    memset(&ble_cfg, 0, sizeof(ble_cfg));
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
+
+    error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                 = conn_cfg_tag;
+    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = 150;
+
+    error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+    return NRF_SUCCESS;
+}
+#endif
 
 /**@brief Start scanning (GAP Discovery procedure, Observer Procedure).
  * *
@@ -835,27 +895,42 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 /**@brief Function for application main entry.
  *
  * @param[in] argc Number of arguments (program expects 0 or 1 arguments).
- * @param[in] argv The serial port of the target nRF5 device (Optional).
+ * @param[in] argv The serial port and baud rate of the target nRF5 device (Optional).
  */
 int main(int argc, char * argv[])
 {
     uint32_t error_code;
-    char *   serial_port;
+    char *   serial_port = DEFAULT_UART_PORT_NAME;
+    uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  cccd_value = 0;
+
+    if (argc > 2)
+    {
+        if (strcmp(argv[2], "1000000") == 0)
+        {
+            baud_rate = 1000000;
+        }
+        else if (strcmp(argv[2], "115200") == 0)
+        {
+            baud_rate = 115200;
+        }
+        else
+        {
+            printf("Supported baud rate values are: 115200, 1000000\n");
+            fflush(stdout);
+        }
+    }
 
     if (argc > 1)
     {
         serial_port = argv[1];
     }
-    else
-    {
-        serial_port = UART_PORT_NAME;
-    }
 
     printf("Serial port used: %s\n", serial_port);
+    printf("Baud rate used: %d\n", baud_rate);
     fflush(stdout);
 
-    m_adapter =  adapter_init(serial_port);
+    m_adapter =  adapter_init(serial_port, baud_rate);
     sd_rpc_log_handler_severity_filter_set(m_adapter, SD_RPC_LOG_INFO);
     error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler);
 
@@ -866,6 +941,10 @@ int main(int argc, char * argv[])
         return error_code;
     }
 
+#if NRF_SD_BLE_API >= 5
+    ble_cfg_set(m_config_id);
+#endif
+
     error_code = ble_stack_init();
 
     if (error_code != NRF_SUCCESS)
@@ -873,13 +952,15 @@ int main(int argc, char * argv[])
         return error_code;
     }
 
+#if NRF_SD_BLE_API < 5
     error_code = ble_options_set();
 
     if (error_code != NRF_SUCCESS)
     {
         return error_code;
     }
-    
+#endif
+
     error_code = scan_start();
 
     if (error_code != NRF_SUCCESS)

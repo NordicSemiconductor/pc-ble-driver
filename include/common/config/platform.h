@@ -39,9 +39,9 @@
 #define PLATFORM_H__
 
 #ifdef __cplusplus
-#define EXTERN_C extern "C"
+#define SD_RPC_EXTERN_C extern "C"
 #else
-#define EXTERN_C
+#define SD_RPC_EXTERN_C
 #endif
 
 #ifdef __cplusplus
@@ -53,9 +53,9 @@ extern "C" {
         #define SD_RPC_API
     #else
         #ifdef SD_RPC_EXPORTS
-            #define SD_RPC_API EXTERN_C __declspec(dllexport)
+            #define SD_RPC_API SD_RPC_EXTERN_C __declspec(dllexport)
         #else
-            #define SD_RPC_API EXTERN_C __declspec(dllimport)
+            #define SD_RPC_API SD_RPC_EXTERN_C __declspec(dllimport)
         #endif
     #endif // PC_BLE_DRIVER_STATIC
 #else
@@ -63,9 +63,9 @@ extern "C" {
         #define SD_RPC_API
     #else
         #ifdef SD_RPC_EXPORTS
-            #define SD_RPC_API EXTERN_C __attribute__((visibility("default")))
+            #define SD_RPC_API SD_RPC_EXTERN_C __attribute__((visibility("default")))
         #else
-            #define SD_RPC_API EXTERN_C
+            #define SD_RPC_API SD_RPC_EXTERN_C
         #endif
     #endif
 #endif
