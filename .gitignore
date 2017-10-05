@@ -4,6 +4,7 @@ _build
 **/CMakeCache.txt
 *.pyc
 **/build
+sdk/
 
 # Object files
 *.o
