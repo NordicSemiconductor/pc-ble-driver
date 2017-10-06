@@ -47,15 +47,24 @@
 #include "ble_gap_app.h" // Encoder/decoder functions
 
 //TODO: Find a way to support multiple adapters
-#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create 
+#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
 
 #include <stdint.h>
 
-uint32_t sd_ble_gap_adv_start(adapter_t *adapter, ble_gap_adv_params_t const * const p_adv_params)
+uint32_t sd_ble_gap_adv_start(
+    adapter_t *adapter,
+    ble_gap_adv_params_t const * const p_adv_params
+#if NRF_SD_BLE_API_VERSION >= 4
+    , uint8_t conn_cfg_tag
+#endif
+    )
 {
     encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_start_req_enc(
             p_adv_params,
+#if NRF_SD_BLE_API_VERSION >= 4
+            conn_cfg_tag,
+#endif
             buffer,
             length);
     };
@@ -599,13 +608,20 @@ uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
 uint32_t sd_ble_gap_connect(adapter_t *adapter,
     ble_gap_addr_t const * const        p_addr,
     ble_gap_scan_params_t const * const p_scan_params,
-    ble_gap_conn_params_t const * const p_conn_params)
+    ble_gap_conn_params_t const * const p_conn_params
+#if NRF_SD_BLE_API_VERSION >= 4
+    , uint8_t                             conn_cfg_tag
+#endif
+    )
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_connect_req_enc(
             p_addr,
             p_scan_params,
             p_conn_params,
+#if NRF_SD_BLE_API_VERSION >= 4
+            conn_cfg_tag,
+#endif
             buffer,
             length);
     };
@@ -732,24 +748,35 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
     };
 
     uint32_t err_code = NRF_SUCCESS;
+#if NRF_SD_BLE_API_VERSION < 4
     ser_ble_gap_app_keyset_t *keyset = nullptr;
 
-    // First allocate security context for serialization. We add the a security context for the 
+    // First allocate security context for serialization. We add the a security context for the
     // connection even if the developer has not provided a p_sec_keyset since the same structure
     // will be used for storing keys received from the peer.
     auto adapterInternal = static_cast<AdapterInternal*>(adapter->internal);
     BLESecurityContext context(adapterInternal->transport);
+#endif
 
+#if NRF_SD_BLE_API_VERSION < 4
     err_code = app_ble_gap_sec_context_create(conn_handle, &keyset);
+#else
+    uint32_t index = 0;
+    err_code = app_ble_gap_sec_context_create(conn_handle, &index);
+#endif
 
     if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
-    
+
     if (p_sec_keyset)
     {
+#if NRF_SD_BLE_API_VERSION < 4
         std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
+#else
+        std::memcpy(&(m_app_keys_table[index].keyset), p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
+#endif
     }
 
     return encode_decode(adapter, encode_function, decode_function);
@@ -837,3 +864,49 @@ uint32_t sd_ble_gap_keypress_notify(adapter_t *adapter, uint16_t conn_handle, ui
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+
+#if NRF_SD_BLE_API_VERSION >= 5
+uint32_t sd_ble_gap_phy_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_phys_t const *p_gap_phys)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_phy_update_req_enc(
+            conn_handle,
+            p_gap_phys,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_phy_update_rsp_dec(
+            buffer,
+            length,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+#endif
+
+#if NRF_SD_BLE_API_VERSION >= 4
+uint32_t sd_ble_gap_data_length_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_data_length_params_t const *p_dl_params, ble_gap_data_length_limitation_t *p_dl_limitation)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_data_length_update_req_enc(
+            conn_handle,
+            p_dl_params,
+            p_dl_limitation,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_data_length_update_rsp_dec(
+            buffer,
+            length,
+            p_dl_limitation,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+#endif

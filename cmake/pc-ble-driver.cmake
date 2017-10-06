@@ -55,7 +55,7 @@ set(Boost_USE_STATIC_LIBS   ON)
 find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
 
 # Add or remove SD API versions here
-set(SD_API_VER_NUMS 2 3)
+set(SD_API_VER_NUMS 2 5)
 list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
 
 set(SD_API_VER_PREFIX "SD_API_V")
@@ -79,7 +79,7 @@ set(SD_API_VER_COMPILER_DEF "NRF_SD_BLE_API_VERSION")
 #MESSAGE( STATUS "list1: " "${SD_API_VER_NUMS}" )
 #MESSAGE( STATUS "list2: " "${SD_API_VERS}" )
 #MESSAGE( STATUS "proj2: " "${PC_BLE_DRIVER_SD_API_V2_PROJECT_NAME}" )
-#MESSAGE( STATUS "proj3: " "${PC_BLE_DRIVER_SD_API_V3_PROJECT_NAME}" )
+#MESSAGE( STATUS "proj5: " "${PC_BLE_DRIVER_SD_API_V5_PROJECT_NAME}" )
 
 # pc-ble-driver root folder
 set(PC_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
