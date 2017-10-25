@@ -235,7 +235,8 @@ typedef struct
 {
   uint16_t                     count;            /**< Attribute count. */
   uint8_t                      format;           /**< Attribute information format, see @ref BLE_GATTC_ATTR_INFO_FORMAT. */
-  union ble_gattc_attr_info_union {
+  union ble_gattc_attr_info_union
+  {
     ble_gattc_attr_info16_t  attr_info16[1];     /**< Attribute information for 16-bit Attribute UUID.
                                                       @note This is a variable length array. The size of 1 indicated is only a placeholder for compilation.
                                                       See @ref sd_ble_evt_get for more information on how to use event structures with variable length array members. */

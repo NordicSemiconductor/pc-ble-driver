@@ -306,7 +306,8 @@ typedef struct
 typedef struct
 {
   uint8_t                               type;   /**< Type of authorize operation, see @ref BLE_GATTS_AUTHORIZE_TYPES. */
-  union ble_gatts_rw_authorize_reply_params_union {
+  union ble_gatts_rw_authorize_reply_params_union
+  {
     ble_gatts_authorize_params_t        read;   /**< Read authorization parameters. */
     ble_gatts_authorize_params_t        write;  /**< Write authorization parameters. */
   } params;                                     /**< Reply Parameters. */

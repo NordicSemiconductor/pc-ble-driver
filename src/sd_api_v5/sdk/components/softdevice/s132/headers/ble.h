@@ -316,7 +316,8 @@ typedef struct
   uint8_t              conn_cfg_tag;        /**< The application chosen tag it can use with the @ref sd_ble_gap_adv_start() and @ref sd_ble_gap_connect()
                                                  calls to select this configuration when creating a connection.
                                                  Must be different for all connection configurations added and not @ref BLE_CONN_CFG_TAG_DEFAULT. */
-  union ble_conn_cfg_params_union {
+  union ble_conn_cfg_params_union
+  {
     ble_gap_conn_cfg_t   gap_conn_cfg;      /**< GAP connection configuration, cfg_id is @ref BLE_CONN_CFG_GAP. */
     ble_gattc_conn_cfg_t gattc_conn_cfg;    /**< GATTC connection configuration, cfg_id is @ref BLE_CONN_CFG_GATTC. */
     ble_gatts_conn_cfg_t gatts_conn_cfg;    /**< GATTS connection configuration, cfg_id is @ref BLE_CONN_CFG_GATTS. */
