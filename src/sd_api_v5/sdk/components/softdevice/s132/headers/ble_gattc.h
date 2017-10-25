@@ -235,7 +235,7 @@ typedef struct
 {
   uint16_t                     count;            /**< Attribute count. */
   uint8_t                      format;           /**< Attribute information format, see @ref BLE_GATTC_ATTR_INFO_FORMAT. */
-  union {
+  union ble_gattc_attr_info_union {
     ble_gattc_attr_info16_t  attr_info16[1];     /**< Attribute information for 16-bit Attribute UUID.
                                                       @note This is a variable length array. The size of 1 indicated is only a placeholder for compilation.
                                                       See @ref sd_ble_evt_get for more information on how to use event structures with variable length array members. */
@@ -325,7 +325,7 @@ typedef struct
   uint16_t            conn_handle;                /**< Connection Handle on which event occurred. */
   uint16_t            gatt_status;                /**< GATT status code for the operation, see @ref BLE_GATT_STATUS_CODES. */
   uint16_t            error_handle;               /**< In case of error: The handle causing the error. In all other cases @ref BLE_GATT_HANDLE_INVALID. */
-  union
+  union ble_gattc_evt_union
   {
     ble_gattc_evt_prim_srvc_disc_rsp_t          prim_srvc_disc_rsp;         /**< Primary Service Discovery Response Event Parameters. */
     ble_gattc_evt_rel_disc_rsp_t                rel_disc_rsp;               /**< Relationship Discovery Response Event Parameters. */
