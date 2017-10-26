@@ -306,7 +306,7 @@ typedef struct
 typedef struct
 {
   uint8_t                               type;   /**< Type of authorize operation, see @ref BLE_GATTS_AUTHORIZE_TYPES. */
-  union ble_gatts_rw_authorize_reply_params_union
+  union gatts_rw_authorize_reply_params_union
   {
     ble_gatts_authorize_params_t        read;   /**< Read authorization parameters. */
     ble_gatts_authorize_params_t        write;  /**< Write authorization parameters. */
@@ -332,7 +332,7 @@ typedef struct
 } ble_gatts_cfg_attr_tab_size_t;
 
 /**@brief Config structure for GATTS configurations. */
-typedef union ble_gatts_cfg_union
+typedef union
 {
   ble_gatts_cfg_service_changed_t service_changed;  /**< Include service changed characteristic, cfg_id is @ref BLE_GATTS_CFG_SERVICE_CHANGED. */
   ble_gatts_cfg_attr_tab_size_t attr_tab_size;      /**< Attribute table size, cfg_id is @ref BLE_GATTS_CFG_ATTR_TAB_SIZE. */
@@ -364,7 +364,7 @@ typedef struct
 typedef struct
 {
   uint8_t                     type;             /**< Type of authorize operation, see @ref BLE_GATTS_AUTHORIZE_TYPES. */
-  union ble_gatts_evt_rw_authorize_request_union
+  union gatts_evt_rw_authorize_request_union
   {
     ble_gatts_evt_read_t      read;             /**< Attribute Read Parameters. */
     ble_gatts_evt_write_t     write;            /**< Attribute Write Parameters. */
@@ -406,7 +406,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                                       /**< Connection Handle on which the event occurred. */
-  union ble_gatts_evt_params_union
+  union gatts_evt_params_union
   {
     ble_gatts_evt_write_t                 write;                 /**< Write Event Parameters. */
     ble_gatts_evt_rw_authorize_request_t  authorize_request;     /**< Read or Write Authorize Request Parameters. */
