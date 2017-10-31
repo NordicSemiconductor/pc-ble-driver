@@ -690,7 +690,7 @@ SD_RPC_API uint32_t sd_ble_gatts_sys_attr_set(adapter_t *adapter, uint16_t conn_
  * @retval ::NRF_ERROR_DATA_SIZE The system attribute information did not fit into the provided buffer.
  * @retval ::NRF_ERROR_NOT_FOUND No system attributes found.
  */
-SD_RPC_API uint32_t sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uint8_t *p_sys_attr_data, uint16_t *p_len, uint32_t flags);
+SD_RPC_API uint32_t sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uint8_t *p_sys_attr_data, uint16_t *p_sys_attr_data_len, uint32_t flags);
 
 
 /**@brief Retrieve the first valid user attribute handle.

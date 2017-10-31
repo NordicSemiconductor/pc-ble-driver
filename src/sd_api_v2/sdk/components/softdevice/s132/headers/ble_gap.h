@@ -1078,7 +1078,7 @@ SD_RPC_API uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t *p
  * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported data type.
  * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
  */
-SD_RPC_API uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const *p_data, uint8_t dlen, uint8_t const *p_sr_data, uint8_t srdlen);
+SD_RPC_API uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const *p_adv_data, uint8_t dlen, uint8_t const *p_sr_data, uint8_t srdlen);
 
 
 /**@brief Start advertising (GAP Discoverable, Connectable modes, Broadcast Procedure).
@@ -1276,7 +1276,7 @@ SD_RPC_API uint32_t sd_ble_gap_device_name_set(adapter_t *adapter, ble_gap_conn_
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
  */
-SD_RPC_API uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_len);
+SD_RPC_API uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_dev_len);
 
 
 /**@brief Initiate the GAP Authentication procedure.
