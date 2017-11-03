@@ -8,7 +8,7 @@
 # All the paths provided as arguments are relative to the location of this script.
 # Usage: Usage: bootstrap -l link -d destination -p patch [-h]
 # 
-# Adapted from 'https://github.com/NordicSemiconductor/nrf5-sdk-for-eddystone'.
+# Adapted from 'https://github.com/NordicPlayground/nrf5-sdk-for-eddystone'.
 # Version 0.5
 
 ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
