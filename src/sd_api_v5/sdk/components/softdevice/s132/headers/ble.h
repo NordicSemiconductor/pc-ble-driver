@@ -195,7 +195,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                                 /**< Connection Handle on which this event occurred. */
-  union
+  union common_evt_params_union
   {
     ble_evt_user_mem_request_t      user_mem_request;    /**< User Memory Request Event Parameters. */
     ble_evt_user_mem_release_t      user_mem_release;    /**< User Memory Release Event Parameters. */
@@ -213,7 +213,7 @@ typedef struct
 typedef struct
 {
   ble_evt_hdr_t header;           /**< Event header. */
-  union
+  union evt_union
   {
     ble_common_evt_t  common_evt; /**< Common Event, evt_id in BLE_EVT_* series. */
     ble_gap_evt_t     gap_evt;    /**< GAP originated event, evt_id in BLE_GAP_EVT_* series. */
@@ -316,7 +316,8 @@ typedef struct
   uint8_t              conn_cfg_tag;        /**< The application chosen tag it can use with the @ref sd_ble_gap_adv_start() and @ref sd_ble_gap_connect()
                                                  calls to select this configuration when creating a connection.
                                                  Must be different for all connection configurations added and not @ref BLE_CONN_CFG_TAG_DEFAULT. */
-  union {
+  union conn_cfg_params_union
+  {
     ble_gap_conn_cfg_t   gap_conn_cfg;      /**< GAP connection configuration, cfg_id is @ref BLE_CONN_CFG_GAP. */
     ble_gattc_conn_cfg_t gattc_conn_cfg;    /**< GATTC connection configuration, cfg_id is @ref BLE_CONN_CFG_GATTC. */
     ble_gatts_conn_cfg_t gatts_conn_cfg;    /**< GATTS connection configuration, cfg_id is @ref BLE_CONN_CFG_GATTS. */

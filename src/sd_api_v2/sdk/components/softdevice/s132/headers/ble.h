@@ -170,7 +170,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                 /**< Connection Handle on which this event occurred. */
-  union
+  union common_evt_params_union
   {
     ble_evt_tx_complete_t           tx_complete;        /**< Transmission Complete. */
     ble_evt_user_mem_request_t      user_mem_request;   /**< User Memory Request Event Parameters. */
@@ -189,7 +189,7 @@ typedef struct
 typedef struct
 {
   ble_evt_hdr_t header;           /**< Event header. */
-  union
+  union evt_union
   {
     ble_common_evt_t  common_evt; /**< Common Event, evt_id in BLE_EVT_* series. */
     ble_gap_evt_t     gap_evt;    /**< GAP originated event, evt_id in BLE_GAP_EVT_* series. */

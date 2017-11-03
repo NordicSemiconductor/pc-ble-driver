@@ -120,7 +120,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                           /**< Connection Handle on which event occured. */
-  union
+  union l2cap_evt_params_union
   {
     ble_l2cap_evt_rx_t rx;                        /**< RX Event parameters. */
   } params;                                       /**< Event Parameters. */
@@ -191,7 +191,7 @@ SD_RPC_API uint32_t sd_ble_l2cap_cid_unregister(adapter_t *adapter, uint16_t cid
  * @retval ::BLE_ERROR_NO_TX_PACKETS Not enough application packets available.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, see @ref BLE_L2CAP_MTU_DEF.
  */
-SD_RPC_API uint32_t sd_ble_l2cap_tx(adapter_t *adapter, uint16_t conn_handle, ble_l2cap_header_t const *p_header, uint8_t const *p_data);
+SD_RPC_API uint32_t sd_ble_l2cap_tx(adapter_t *adapter, uint16_t conn_handle, ble_l2cap_header_t const *p_header, uint8_t const *p_tx_data);
 
 /** @} */
 

@@ -662,8 +662,8 @@ typedef struct
 typedef struct
 {
   uint8_t passkey[BLE_GAP_PASSKEY_LEN];         /**< 6-digit passkey in ASCII ('0'-'9' digits only). */
-  uint8_t match_request : 1;                    /**< If 1 requires the application to report the match using @ref sd_ble_gap_auth_key_reply 
-                                                     with either @ref BLE_GAP_AUTH_KEY_TYPE_NONE if there is no match or 
+  uint8_t match_request : 1;                    /**< If 1 requires the application to report the match using @ref sd_ble_gap_auth_key_reply
+                                                     with either @ref BLE_GAP_AUTH_KEY_TYPE_NONE if there is no match or
                                                      @ref BLE_GAP_AUTH_KEY_TYPE_PASSKEY if there is a match. */
 } ble_gap_evt_passkey_display_t;
 
@@ -683,7 +683,7 @@ typedef struct
 /**@brief Event structure for @ref BLE_GAP_EVT_LESC_DHKEY_REQUEST. */
 typedef struct
 {
-  ble_gap_lesc_p256_pk_t *p_pk_peer;  /**< LE Secure Connections remote P-256 Public Key. This will point to the application-supplied memory 
+  ble_gap_lesc_p256_pk_t *p_pk_peer;  /**< LE Secure Connections remote P-256 Public Key. This will point to the application-supplied memory
                                            inside the keyset during the call to @ref sd_ble_gap_sec_params_reply. */
   uint8_t oobd_req       :1;          /**< LESC OOB data required. A call to @ref sd_ble_gap_lesc_oob_data_set is required to complete the procedure. */
 } ble_gap_evt_lesc_dhkey_request_t;
@@ -723,7 +723,7 @@ typedef struct
   ble_gap_enc_key_t      *p_enc_key;           /**< Encryption Key, or NULL. */
   ble_gap_id_key_t       *p_id_key;            /**< Identity Key, or NULL. */
   ble_gap_sign_info_t    *p_sign_key;          /**< Signing Key, or NULL. */
-  ble_gap_lesc_p256_pk_t *p_pk;                /**< LE Secure Connections P-256 Public Key. When in debug mode the application must use the value defined 
+  ble_gap_lesc_p256_pk_t *p_pk;                /**< LE Secure Connections P-256 Public Key. When in debug mode the application must use the value defined
                                                     in the Core Bluetooth Specification v4.2 Vol.3, Part H, Section 2.3.5.6.1 */
 } ble_gap_sec_keys_t;
 
@@ -812,7 +812,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                                     /**< Connection Handle on which event occurred. */
-  union                                                     /**< union alternative identified by evt_id in enclosing struct. */
+  union gap_evt_params_union                                /**< union alternative identified by evt_id in enclosing struct. */
   {
     ble_gap_evt_connected_t                   connected;                    /**< Connected Event Parameters. */
     ble_gap_evt_disconnected_t                disconnected;                 /**< Disconnected Event Parameters. */
@@ -1078,7 +1078,7 @@ SD_RPC_API uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t *p
  * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported data type.
  * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
  */
-SD_RPC_API uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const *p_data, uint8_t dlen, uint8_t const *p_sr_data, uint8_t srdlen);
+SD_RPC_API uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const *p_adv_data, uint8_t dlen, uint8_t const *p_sr_data, uint8_t srdlen);
 
 
 /**@brief Start advertising (GAP Discoverable, Connectable modes, Broadcast Procedure).
@@ -1276,7 +1276,7 @@ SD_RPC_API uint32_t sd_ble_gap_device_name_set(adapter_t *adapter, ble_gap_conn_
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
  */
-SD_RPC_API uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_len);
+SD_RPC_API uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_dev_len);
 
 
 /**@brief Initiate the GAP Authentication procedure.
@@ -1370,8 +1370,8 @@ SD_RPC_API uint32_t sd_ble_gap_authenticate(adapter_t *adapter, uint16_t conn_ha
  * @param[in] sec_status Security status, see @ref BLE_GAP_SEC_STATUS.
  * @param[in] p_sec_params Pointer to a @ref ble_gap_sec_params_t security parameters structure. In the central role this must be set to NULL, as the parameters have
  *                         already been provided during a previous call to @ref sd_ble_gap_authenticate.
- * @param[in,out] p_sec_keyset Pointer to a @ref ble_gap_sec_keyset_t security keyset structure. Any keys generated and/or distributed as a result of the ongoing security procedure 
- *                         will be stored into the memory referenced by the pointers inside this structure. The keys will be stored and available to the application 
+ * @param[in,out] p_sec_keyset Pointer to a @ref ble_gap_sec_keyset_t security keyset structure. Any keys generated and/or distributed as a result of the ongoing security procedure
+ *                         will be stored into the memory referenced by the pointers inside this structure. The keys will be stored and available to the application
  *                         upon reception of a @ref BLE_GAP_EVT_AUTH_STATUS event.
  *                         Note that the SoftDevice expects the application to provide memory for storing the
  *                         peer's keys. So it must be ensured that the relevant pointers inside this structure are not NULL. The pointers to the local key

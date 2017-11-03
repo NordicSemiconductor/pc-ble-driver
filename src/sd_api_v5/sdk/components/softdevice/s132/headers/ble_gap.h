@@ -983,7 +983,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                                     /**< Connection Handle on which event occurred. */
-  union                                                     /**< union alternative identified by evt_id in enclosing struct. */
+  union gap_evt_params_union                                /**< union alternative identified by evt_id in enclosing struct. */
   {
     ble_gap_evt_connected_t                   connected;                    /**< Connected Event Parameters. */
     ble_gap_evt_disconnected_t                disconnected;                 /**< Disconnected Event Parameters. */
@@ -1434,7 +1434,7 @@ SVCALL(SD_BLE_GAP_PRIVACY_GET, uint32_t, sd_ble_gap_privacy_get(adapter_t *adapt
  * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported data type.
  * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
  */
-SVCALL(SD_BLE_GAP_ADV_DATA_SET, uint32_t, sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const *p_data, uint8_t dlen, uint8_t const *p_sr_data, uint8_t srdlen));
+SVCALL(SD_BLE_GAP_ADV_DATA_SET, uint32_t, sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const *p_adv_data, uint8_t dlen, uint8_t const *p_sr_data, uint8_t srdlen));
 
 
 /**@brief Start advertising (GAP Discoverable, Connectable modes, Broadcast Procedure).
@@ -1629,7 +1629,7 @@ SVCALL(SD_BLE_GAP_DEVICE_NAME_SET, uint32_t, sd_ble_gap_device_name_set(adapter_
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
  */
-SVCALL(SD_BLE_GAP_DEVICE_NAME_GET, uint32_t, sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_len));
+SVCALL(SD_BLE_GAP_DEVICE_NAME_GET, uint32_t, sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_dev_name_len));
 
 
 /**@brief Initiate the GAP Authentication procedure.
