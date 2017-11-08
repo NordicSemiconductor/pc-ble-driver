@@ -81,7 +81,7 @@ Precompiled connectivity firmware are provided and can be used with standard Nor
 
 You only need to recompile the connectivity application if you want to run it on a custom board. You can use the `hex/sd_api_v<x>/bootstrap_sd_api_v<X>.sh` script to download and patch the nRF SDK and the application with ease. Using this scripts, the steps 1 and 2 below are done automatically:
 
-1. [Download the nRF SDK 11 or 12](https://developer.nordicsemi.com/nRF5_SDK/) (depending on the SoftDevice API you want to use) and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
+1. [Download the nRF SDK 11 or 14](https://developer.nordicsemi.com/nRF5_SDK/) (depending on the SoftDevice API you want to use) and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
 2. Apply the patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
 3. Open the connectivity project `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci`
 4. Compile it using the the compiler of your choice
