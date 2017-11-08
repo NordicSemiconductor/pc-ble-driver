@@ -21,6 +21,13 @@ function set_sdk_link () {
     SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
 }
 
+function set_familypack_link () {
+    FAMILYPACK_LINK=$1
+
+    FAMILYPACK_FILE=${FAMILYPACK_LINK##*/}
+    FAMILYPACK_NAME=${FAMILYPACK_FILE%.pack}
+}
+
 # Configuration of the destination folder (relative path from this script)
 function set_dl_location () {
     DL_LOCATION="$ABS_PATH/$1"
@@ -160,12 +167,30 @@ function sdk_download () {
     # Keep only the components and the connectivity application ?
 }
 
+function familypack_download () {
+    if [[ -z "${FAMILYPACK_NAME}" ]]; then
+        fatal "Invalid Device Family Pack link"
+    fi
+
+    echo "> Downloading Device Family Pack '${FAMILYPACK_NAME}'..."
+
+    curl --progress-bar -o $DL_LOCATION/$SDK_NAME/$FAMILYPACK_FILE $FAMILYPACK_LINK
+
+    err_code=$?
+    if [ "$err_code" != "0" ]; then
+        fatal "Could not download Device Family Pack from '${FAMILYPACK_LINK}'"
+    fi
+}
+
 function main() {
 
     while [ "$1" != "" ]; do
         case $1 in
             -l | --link )  shift
                            set_sdk_link $1
+                           ;;
+            -f | --familypack ) shift
+                           set_familypack_link $1
                            ;;
             -d | --dest )  shift
                            set_dl_location $1
@@ -186,6 +211,7 @@ function main() {
     check_config
     sdk_download
     sdk_patch
+    familypack_download
 
     echo "> SDK ready to use. Exit."
     exit
