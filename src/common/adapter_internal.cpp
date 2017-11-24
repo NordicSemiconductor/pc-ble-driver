@@ -43,7 +43,7 @@
 
 #include <string>
 
-AdapterInternal::AdapterInternal(SerializationTransport *_transport): 
+AdapterInternal::AdapterInternal(SerializationTransport *_transport):
     eventCallback(nullptr),
     statusCallback(nullptr),
     logCallback(nullptr),
@@ -51,7 +51,7 @@ AdapterInternal::AdapterInternal(SerializationTransport *_transport):
 {
     this->transport = _transport;
 }
-                        
+
 AdapterInternal::~AdapterInternal()
 {
     delete transport;
