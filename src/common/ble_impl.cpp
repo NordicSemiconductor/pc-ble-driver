@@ -282,11 +282,3 @@ uint32_t conn_systemreset(adapter_t *adapter)
 
     return encode_decode(adapter, encode_function, nullptr);
 }
-
-// uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
-//                                  uint32_t * const            p_buf_len)
-// {
-//     printf("lololo\n");
-//     SER_REQ_ENC_BEGIN(CONN_SYSTEMRESET);
-//     SER_REQ_ENC_END;
-// }

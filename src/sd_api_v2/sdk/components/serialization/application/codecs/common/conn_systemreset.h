@@ -66,8 +66,8 @@ extern "C" {
  * @retval NRF_SUCCESS          Encoding success.
  * @retval NRF_ERROR_INTERNAL   Encoding failure. Transport error.
  */
-uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
-                                 uint32_t * const            p_buf_len);
+// uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
+//                                  uint32_t * const            p_buf_len);
 
 /** @} */
 #ifdef __cplusplus
