@@ -833,7 +833,6 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
     {
         case BLE_GAP_EVT_CONNECTED:
             on_connected(&(p_ble_evt->evt.gap_evt));
-            conn_systemreset(m_adapter);
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
