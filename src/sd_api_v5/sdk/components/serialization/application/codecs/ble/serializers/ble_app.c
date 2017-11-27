@@ -509,7 +509,6 @@ uint32_t ble_cfg_set_rsp_dec(uint8_t const * const p_buf,
 uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
                               uint32_t * const            p_buf_len)
 {
-    printf("lololo\n");
     SER_REQ_ENC_BEGIN(CONN_SYSTEMRESET);
     SER_REQ_ENC_END;
 }
