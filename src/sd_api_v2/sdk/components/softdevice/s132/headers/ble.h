@@ -622,6 +622,8 @@ SD_RPC_API uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_
  */
 SD_RPC_API uint32_t sd_ble_opt_get(adapter_t *adapter, uint32_t opt_id, ble_opt_t *p_opt);
 
+// TODO: Relocate conn_systemrest to a better place.
+// TODO: Add comments for conn_systemreset function, both here and enc header.
 SD_RPC_API uint32_t conn_systemreset(adapter_t *adapter);
 
 /** @} */

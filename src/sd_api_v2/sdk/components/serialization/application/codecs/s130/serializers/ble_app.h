@@ -473,8 +473,8 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
                        ble_evt_t * const     p_event,
                        uint32_t * const      p_event_len);
 
-uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
-                              uint32_t * const            p_buf_len);
+uint32_t conn_systemreset_enc(uint8_t * const  p_buf,
+                              uint32_t * const p_buf_len);
 
 
 /** @} */
