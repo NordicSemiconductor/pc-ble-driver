@@ -65,12 +65,12 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
 
     if(ret != NRF_SUCCESS)
     {
-        return ret;
+        return ret; 
     }
 
     if(descs.size() > *size)
     {
-        ret = NRF_ERROR_DATA_SIZE;
+        ret = NRF_ERROR_DATA_SIZE; 
     }
 
 	*size = (uint32_t) descs.size();
@@ -78,7 +78,7 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
     if(ret == NRF_SUCCESS)
     {
         int i = 0;
-        for(auto it = descs.begin(); it != descs.end(); ++it)
+        for(auto it = descs.begin(); it != descs.end(); ++it) 
         {
 			strcpy_s(serial_port_descs[i].port, SD_RPC_MAXPATHLEN, (*it)->comName.c_str());
 			strcpy_s(serial_port_descs[i].manufacturer, SD_RPC_MAXPATHLEN, (*it)->manufacturer.c_str());
@@ -91,8 +91,8 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
             ++i;
         }
     }
-
-    for(auto it = descs.begin(); it != descs.end(); ++it)
+    
+    for(auto it = descs.begin(); it != descs.end(); ++it) 
     {
        delete *it;
     }
