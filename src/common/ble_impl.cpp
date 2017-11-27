@@ -275,7 +275,6 @@ uint32_t sd_ble_user_mem_reply(adapter_t *adapter, uint16_t conn_handle, ble_use
 
 uint32_t conn_systemreset(adapter_t *adapter)
 {
-    printf("lalala\n");
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return conn_systemreset_enc(buffer, length);
     };
