@@ -35,30 +35,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
-#include <string.h>
 #include "ble_app.h"
 #include "ble_serialization.h"
-#include "ble_struct_serialization.h"
-#include "cond_field_serialization.h"
-#include "app_util.h"
 
-
-uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
-                              uint32_t * const            p_buf_len)
+uint32_t conn_systemreset_enc(uint8_t * const  p_buf,
+                              uint32_t * const p_buf_len)
 {
-	uint32_t index    = 0;
-    uint32_t err_code = NRF_SUCCESS;
+	uint32_t index = 0;
 
     SER_ASSERT_NOT_NULL(p_buf);
     SER_ASSERT_NOT_NULL(p_buf_len);
-
     SER_ASSERT_LENGTH_LEQ(index + 2, *p_buf_len);
 
     p_buf[index++] = CONN_SYSTEMRESET;
-
     *p_buf_len = index;
 
-    return err_code;
+    return NRF_SUCCESS;
 
 }
