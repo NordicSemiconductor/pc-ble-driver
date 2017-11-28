@@ -39,16 +39,14 @@
 #include "conn_systemreset.h"
 
 uint32_t conn_systemreset(uint8_t * const  p_buf,
-                              uint32_t * const p_buf_len)
+                          uint32_t * const p_buf_len)
 {
-	uint32_t index = 0;
-
     SER_ASSERT_NOT_NULL(p_buf);
     SER_ASSERT_NOT_NULL(p_buf_len);
-    SER_ASSERT_LENGTH_LEQ(index + 2, *p_buf_len);
+    SER_ASSERT_LENGTH_LEQ(2, *p_buf_len);
 
-    p_buf[index++] = CONN_SYSTEMRESET;
-    *p_buf_len = index;
+    *p_buf = CONN_SYSTEMRESET;
+    *p_buf_len = 1;
 
     return NRF_SUCCESS;
 }

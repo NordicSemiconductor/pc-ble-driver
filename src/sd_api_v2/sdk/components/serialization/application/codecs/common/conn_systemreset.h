@@ -44,7 +44,7 @@ extern "C" {
 
 enum CONN_SVCS
 {
-  CONN_SYSTEMRESET = 0,
+    CONN_SYSTEMRESET = 0,
 };
 
 /**
@@ -71,7 +71,6 @@ enum CONN_SVCS
  * @retval NRF_SUCCESS          Encoding success.
  * @retval NRF_ERROR_INTERNAL   Encoding failure. Transport error.
  */
-// uint32_t conn_systemreset(void);
 uint32_t conn_systemreset(uint8_t * const  p_buf,
                           uint32_t * const p_buf_len);
 
