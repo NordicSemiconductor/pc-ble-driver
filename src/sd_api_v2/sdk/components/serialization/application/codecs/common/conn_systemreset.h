@@ -42,6 +42,11 @@
 extern "C" {
 #endif
 
+enum CONN_SVCS
+{
+  CONN_SYSTEMRESET = 0,
+};
+
 /**
  * @addtogroup ser_codecs Serialization codecs
  * @ingroup ble_sdk_lib_serialization
@@ -67,6 +72,8 @@ extern "C" {
  * @retval NRF_ERROR_INTERNAL   Encoding failure. Transport error.
  */
 // uint32_t conn_systemreset(void);
+uint32_t conn_systemreset(uint8_t * const  p_buf,
+                          uint32_t * const p_buf_len);
 
 /** @} */
 #ifdef __cplusplus

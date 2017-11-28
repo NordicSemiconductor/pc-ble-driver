@@ -35,10 +35,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ble_app.h"
 #include "ble_serialization.h"
+#include "conn_systemreset.h"
 
-uint32_t conn_systemreset_enc(uint8_t * const  p_buf,
+uint32_t conn_systemreset(uint8_t * const  p_buf,
                               uint32_t * const p_buf_len)
 {
 	uint32_t index = 0;

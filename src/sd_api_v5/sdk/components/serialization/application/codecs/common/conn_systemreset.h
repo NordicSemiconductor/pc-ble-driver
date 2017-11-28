@@ -43,10 +43,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 enum CONN_SVCS
 {
   CONN_SYSTEMRESET = 0,
 };
+
 /**
  * @addtogroup ser_codecs Serialization codecs
  * @ingroup ble_sdk_lib_serialization
