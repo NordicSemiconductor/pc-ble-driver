@@ -43,6 +43,8 @@
 #include "uart_boost.h"
 #include "uart_settings_boost.h"
 #include "serial_port_enum.h"
+#include "conn_systemreset.h"
+#include "ble_common.h"
 
 #include <stdlib.h>
 
@@ -65,12 +67,12 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
 
     if(ret != NRF_SUCCESS)
     {
-        return ret; 
+        return ret;
     }
 
     if(descs.size() > *size)
     {
-        ret = NRF_ERROR_DATA_SIZE; 
+        ret = NRF_ERROR_DATA_SIZE;
     }
 
 	*size = (uint32_t) descs.size();
@@ -78,7 +80,7 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
     if(ret == NRF_SUCCESS)
     {
         int i = 0;
-        for(auto it = descs.begin(); it != descs.end(); ++it) 
+        for(auto it = descs.begin(); it != descs.end(); ++it)
         {
 			strcpy_s(serial_port_descs[i].port, SD_RPC_MAXPATHLEN, (*it)->comName.c_str());
 			strcpy_s(serial_port_descs[i].manufacturer, SD_RPC_MAXPATHLEN, (*it)->manufacturer.c_str());
@@ -91,8 +93,8 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
             ++i;
         }
     }
-    
-    for(auto it = descs.begin(); it != descs.end(); ++it) 
+
+    for(auto it = descs.begin(); it != descs.end(); ++it)
     {
        delete *it;
     }
@@ -185,3 +187,11 @@ uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_s
     return adapterLayer->logSeverityFilterSet(severity_filter);
 }
 
+uint32_t sd_rpc_conn_reset(adapter_t *adapter)
+{
+    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return conn_systemreset(buffer, length);
+    };
+
+    return encode_decode(adapter, encode_function, nullptr);
+}

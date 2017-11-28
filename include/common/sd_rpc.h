@@ -145,6 +145,8 @@ SD_RPC_API uint32_t sd_rpc_close(adapter_t *adapter);
  */
 SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_severity_t severity_filter);
 
+SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *adapter);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -504,11 +504,3 @@ uint32_t ble_cfg_set_rsp_dec(uint8_t const * const p_buf,
     SER_RSP_DEC_RESULT_ONLY(SD_BLE_CFG_SET);
 }
 #endif //NRF_SD_BLE_API_VERSION >= 4
-
-
-uint32_t conn_systemreset_enc(uint8_t * const             p_buf,
-                              uint32_t * const            p_buf_len)
-{
-    SER_REQ_ENC_BEGIN(CONN_SYSTEMRESET);
-    SER_REQ_ENC_END;
-}
