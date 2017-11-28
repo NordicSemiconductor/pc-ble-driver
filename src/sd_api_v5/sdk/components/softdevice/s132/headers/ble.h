@@ -79,6 +79,7 @@ enum BLE_COMMON_SVCS
   SD_BLE_OPT_SET,                       /**< Set a BLE option. */
   SD_BLE_OPT_GET,                       /**< Get a BLE option. */
   SD_BLE_CFG_SET,                       /**< Add a configuration to the BLE stack. */
+  CONN_SYSTEMRESET,
 };
 
 /**
@@ -608,6 +609,10 @@ SVCALL(SD_BLE_OPT_SET, uint32_t, sd_ble_opt_set(adapter_t *adapter, uint32_t opt
  *
  */
 SVCALL(SD_BLE_OPT_GET, uint32_t, sd_ble_opt_get(adapter_t *adapter, uint32_t opt_id, ble_opt_t *p_opt));
+
+// TODO: Relocate conn_systemrest to a better place.
+// TODO: Add comments for conn_systemreset function, both here and enc header.
+SVCALL(CONN_SYSTEMRESET, uint32_t, conn_systemreset(adapter_t *adapter));
 
 /** @} */
 #ifdef __cplusplus

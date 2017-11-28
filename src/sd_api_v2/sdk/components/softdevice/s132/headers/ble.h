@@ -78,6 +78,7 @@ enum BLE_COMMON_SVCS
   SD_BLE_USER_MEM_REPLY,                /**< User Memory Reply. */
   SD_BLE_OPT_SET,                       /**< Set a BLE option. */
   SD_BLE_OPT_GET,                       /**< Get a BLE option. */
+  CONN_SYSTEMRESET,
 };
 
   /**
@@ -620,6 +621,10 @@ SD_RPC_API uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_
  *
  */
 SD_RPC_API uint32_t sd_ble_opt_get(adapter_t *adapter, uint32_t opt_id, ble_opt_t *p_opt);
+
+// TODO: Relocate conn_systemrest to a better place.
+// TODO: Add comments for conn_systemreset function, both here and enc header.
+SD_RPC_API uint32_t conn_systemreset(adapter_t *adapter);
 
 /** @} */
 #ifdef __cplusplus
