@@ -44,9 +44,15 @@
 extern "C" {
 #endif
 
+/** @addtogroup CONN_ENUMERATIONS Enumerations
+ * @{ */
+
+/**
+ * @brief Connectivity API SVC numbers.
+ */
 enum CONN_SVCS
 {
-    CONN_SYSTEMRESET = 0,
+    CONN_SYSTEMRESET = 0x00,
 };
 
 /**
