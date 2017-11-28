@@ -51,5 +51,4 @@ uint32_t conn_systemreset_enc(uint8_t * const  p_buf,
     *p_buf_len = index;
 
     return NRF_SUCCESS;
-
 }
