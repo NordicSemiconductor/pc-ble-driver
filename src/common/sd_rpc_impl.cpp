@@ -43,7 +43,7 @@
 #include "uart_boost.h"
 #include "uart_settings_boost.h"
 #include "serial_port_enum.h"
-#include "conn_systemreset.h"
+#include "conn_systemreset_app.h"
 #include "ble_common.h"
 
 #include <stdlib.h>
@@ -190,7 +190,7 @@ uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_s
 uint32_t sd_rpc_conn_reset(adapter_t *adapter)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return conn_systemreset(buffer, length);
+        return conn_systemreset_enc(buffer, length);
     };
 
     return encode_decode(adapter, encode_function, nullptr);

@@ -36,10 +36,10 @@
  */
 
 #include "ble_serialization.h"
-#include "conn_systemreset.h"
+#include "conn_systemreset_app.h"
 
-uint32_t conn_systemreset(uint8_t * const  p_buf,
-                          uint32_t * const p_buf_len)
+uint32_t conn_systemreset_enc(uint8_t * const  p_buf,
+                              uint32_t * const p_buf_len)
 {
     SER_ASSERT_NOT_NULL(p_buf);
     SER_ASSERT_NOT_NULL(p_buf_len);
