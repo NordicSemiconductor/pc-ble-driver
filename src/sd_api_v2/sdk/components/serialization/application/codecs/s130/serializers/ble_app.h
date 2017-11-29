@@ -361,7 +361,7 @@ uint32_t ble_enable_req_enc(ble_enable_params_t * p_ble_enable_params,
 uint32_t ble_enable_rsp_dec(uint8_t const * const p_buf,
                             uint32_t              packet_len,
                             uint32_t * const      p_result_code);
-                             
+
 /**@brief Encodes @ref sd_ble_opt_get command request.
  *
  * @sa @ref nrf51_opt_get_encoding for packet format,

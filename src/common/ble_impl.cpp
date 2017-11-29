@@ -40,7 +40,6 @@
 
 #include "ble.h"
 #include "ble_app.h"
-#include "conn_systemreset.h"
 
 #include <stdint.h>
 
@@ -270,14 +269,4 @@ uint32_t sd_ble_user_mem_reply(adapter_t *adapter, uint16_t conn_handle, ble_use
     };
 
     return encode_decode(adapter, encode_function, decode_function);
-}
-
-
-uint32_t conn_systemreset(adapter_t *adapter)
-{
-    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return 0;
-    };
-
-    return encode_decode(adapter, encode_function, nullptr);
 }
