@@ -69,7 +69,7 @@
 
 // Constants use for state machine states UNINITIALIZED and INITIALIZED
 const auto NON_ACTIVE_STATE_TIMEOUT = std::chrono::milliseconds(250);  // Duration to wait until resending a packet
-const uint8_t PACKET_RETRANSMISSIONS = 4;                              // Number of times to send reliable packets before giving in
+const uint8_t PACKET_RETRANSMISSIONS = 6;                              // Number of times to send reliable packets before giving in
 
 // Other constants
 const auto OPEN_WAIT_TIMEOUT = std::chrono::milliseconds(2000);   // Duration to wait for state ACTIVE after open is called
@@ -316,14 +316,14 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
 
             if (isSyncConfigPacket)
             {
-                exit->syncConfigReceived = true;
                 sendControlPacket(CONTROL_PKT_SYNC_CONFIG_RESPONSE);
-                exit->syncConfigRspSent = true;
                 syncWaitCondition.notify_all();
             }
 
-            if (isSyncPacket) {
+            if (isSyncPacket)
+            {
                 sendControlPacket(CONTROL_PKT_SYNC_RESPONSE);
+                syncWaitCondition.notify_all();
             }
         }
         else if (currentState == STATE_ACTIVE)
@@ -334,6 +334,11 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
             {
                 exit->syncReceived = true;
                 syncWaitCondition.notify_all();
+            }
+
+            if (isSyncConfigPacket)
+            {
+                sendControlPacket(CONTROL_PKT_SYNC_CONFIG_RESPONSE);
             }
         }
     }
@@ -522,11 +527,12 @@ void H5Transport::setupStateMachine()
         uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
         std::unique_lock<std::mutex> syncGuard(syncMutex);
 
-        while (!exit->isFullfilled() && syncRetransmission--)
+        while (!exit->isFullfilled() && syncRetransmission > 0)
         {
             sendControlPacket(CONTROL_PKT_SYNC);
             exit->syncSent = true;
             syncWaitCondition.wait_for(syncGuard, NON_ACTIVE_STATE_TIMEOUT);
+            syncRetransmission--;
         }
 
         if (exit->isFullfilled())
@@ -548,22 +554,16 @@ void H5Transport::setupStateMachine()
         std::unique_lock<std::mutex> syncGuard(syncMutex);
 
         // Send a package immediately
-        sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
-        exit->syncConfigSent = true;
 
         while (!exit->isFullfilled() && syncRetransmission > 0)
         {
-            auto status = syncWaitCondition.wait_for(syncGuard, NON_ACTIVE_STATE_TIMEOUT);
-
-            if (status == std::cv_status::timeout)
-            {
-                sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
-                syncRetransmission--;
-            }
+            sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
+            exit->syncConfigSent = true;
+            syncWaitCondition.wait_for(syncGuard, NON_ACTIVE_STATE_TIMEOUT);
+            syncRetransmission--;
         }
 
-        if (exit->syncConfigSent && exit->syncConfigRspReceived
-            && exit->syncConfigReceived && exit->syncConfigRspSent)
+        if (exit->syncConfigSent && exit->syncConfigRspReceived)
         {
             return STATE_ACTIVE;
         }
