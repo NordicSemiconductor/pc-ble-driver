@@ -88,7 +88,7 @@ index 216ed97..147d7d5 100644
  #define INVALID_PKT_TYPE             0xFFFFFFFFu                                       /**< Internal invalid packet type value. */
  #define MAX_TRANSMISSION_TIME_ms     (MAX_PACKET_SIZE_IN_BITS * BAUD_TIME_us / 1000uL) /**< Max transmission time of a single application packet over UART in units of mseconds. */
 -#define RETRANSMISSION_TIMEOUT_IN_ms (10uL * MAX_TRANSMISSION_TIME_ms)                 /**< Retransmission timeout for application packet in units of mseconds. */
-+#define RETRANSMISSION_TIMEOUT_IN_ms (100uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
++#define RETRANSMISSION_TIMEOUT_IN_ms (50uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
 
  #ifdef  HCI_LINK_CONTROL
  #define HCI_PKT_SYNC        0x7E01u                                                    /**< Link Control Packet: type SYNC */
@@ -156,7 +156,7 @@ index d4a4883..346093a 100644
 +    .revision_hash      = 0,
 +    .version_major      = 1,
 +    .version_minor      = 2,
-+    .version_patch      = 1,
++    .version_patch      = 2,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
 +    .transport_type     = 1,

@@ -151,7 +151,7 @@ diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/c
 +#if SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud115200
  #define RETRANSMISSION_TIMEOUT_IN_ms (10uL * MAX_TRANSMISSION_TIME_ms)                 /**< Retransmission timeout for application packet in units of mseconds. */
 +#else
-+#define RETRANSMISSION_TIMEOUT_IN_ms (100uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
++#define RETRANSMISSION_TIMEOUT_IN_ms (50uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
 +#endif
  
  #ifdef  HCI_LINK_CONTROL
@@ -498,7 +498,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +    .revision_hash      = 0,
 +    .version_major      = 1,
 +    .version_minor      = 2,
-+    .version_patch      = 1,
++    .version_patch      = 2,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = 2,
 +    .transport_type     = 1,
