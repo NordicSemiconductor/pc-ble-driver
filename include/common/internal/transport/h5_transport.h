@@ -130,27 +130,21 @@ class InitializedExitCriterias : public ExitCriterias
 public:
     bool syncConfigSent;
     bool syncConfigRspReceived;
-    bool syncConfigReceived;
-    bool syncConfigRspSent;
 
     InitializedExitCriterias()
         : ExitCriterias(),
         syncConfigSent(false),
-        syncConfigRspReceived(false),
-        syncConfigReceived(false),
-        syncConfigRspSent(false) {}
+        syncConfigRspReceived(false) {}
 
     bool isFullfilled() const override
     {
-        return ioResourceError || close || (syncConfigSent && syncConfigRspReceived && syncConfigReceived && syncConfigRspSent);
+        return ioResourceError || close || (syncConfigSent && syncConfigRspReceived);
     }
 
     void reset() override
     {
         ExitCriterias::reset();
         syncConfigSent = false;
-        syncConfigRspSent = false;
-        syncConfigReceived = false;
         syncConfigRspReceived = false;
     };
 
