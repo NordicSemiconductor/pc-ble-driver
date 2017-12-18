@@ -144,7 +144,19 @@ diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/c
  #define TX_EVT_QUEUE_SIZE            16
  #define RX_EVT_QUEUE_SIZE            16
  #define PKT_TYPE_VENDOR_SPECIFIC     14                                                /**< Packet type vendor specific. */
-@@ -756,6 +758,11 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
+@@ -48,7 +50,11 @@
+ #define INITIAL_SEQ_NUMBER           INITIAL_ACK_NUMBER_EXPECTED                       /**< Initial acknowledge number transmitted. */
+ #define INVALID_PKT_TYPE             0xFFFFFFFFu                                       /**< Internal invalid packet type value. */
+ #define MAX_TRANSMISSION_TIME_ms     (MAX_PACKET_SIZE_IN_BITS * BAUD_TIME_us / 1000uL) /**< Max transmission time of a single application packet over UART in units of mseconds. */
++#if SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud115200
+ #define RETRANSMISSION_TIMEOUT_IN_ms (10uL * MAX_TRANSMISSION_TIME_ms)                 /**< Retransmission timeout for application packet in units of mseconds. */
++#else
++#define RETRANSMISSION_TIMEOUT_IN_ms (50uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
++#endif
+ 
+ #ifdef  HCI_LINK_CONTROL
+ #define HCI_PKT_SYNC        0x7E01u                                                    /**< Link Control Packet: type SYNC */
+@@ -756,6 +762,11 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
              event.evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer,
              event.evt.ser_phy_slip_evt.evt_params.received_pkt.num_of_bytes);
  
@@ -486,7 +498,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +    .revision_hash      = 0,
 +    .version_major      = 2,
 +    .version_minor      = 0,
-+    .version_patch      = 0,
++    .version_patch      = 1,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = 2,
 +    .transport_type     = 1,
