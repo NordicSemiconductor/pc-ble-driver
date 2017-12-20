@@ -34,42 +34,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-#ifndef CONN_SYSTEMRESET_H__
-#define CONN_SYSTEMRESET_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "ble_serialization.h"
+#include "conn_systemreset_app.h"
 
-/**
- * @addtogroup ser_codecs Serialization codecs
- * @ingroup ble_sdk_lib_serialization
- */
+uint32_t conn_systemreset_enc(uint8_t * const  p_buf,
+                              uint32_t * const p_buf_len)
+{
+    SER_ASSERT_NOT_NULL(p_buf);
+    SER_ASSERT_NOT_NULL(p_buf_len);
+    SER_ASSERT_LENGTH_LEQ(2, *p_buf_len);
 
-/**
- * @addtogroup ser_app_common_codecs Application common codecs
- * @ingroup ser_codecs
- */
+    *p_buf = CONN_SYSTEMRESET;
+    *p_buf_len = 1;
 
-/**@file
- *
- * @defgroup conn_systemreset Connectivity chip reset command request encoder.
- * @{
- * @ingroup  ser_app_common_codecs
- *
- * @brief    Connectivity chip reset command request encoder.
- */
-
-/**@brief Function for performing the connectivity chip reset.
- *
- * @retval NRF_SUCCESS          Encoding success.
- * @retval NRF_ERROR_INTERNAL   Encoding failure. Transport error.
- */
-uint32_t conn_systemreset(void);
-
-/** @} */
-#ifdef __cplusplus
+    return NRF_SUCCESS;
 }
-#endif
-#endif // CONN_SYSTEMRESET_H__
