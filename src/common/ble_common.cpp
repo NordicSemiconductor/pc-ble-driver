@@ -60,8 +60,8 @@ uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, de
 
     if (_adapter->isInternalError(err_code))
     {
-        error_message << "Not able to decode packet received from target. Code #" << err_code;
-        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str().c_str());
+        error_message << "Not able to encode packet received from target. Code #" << err_code;
+        _adapter->statusHandler(PKT_ENCODE_ERROR, error_message.str().c_str());
         return NRF_ERROR_INTERNAL;
     }
 
