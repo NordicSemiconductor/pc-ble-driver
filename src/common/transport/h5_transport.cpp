@@ -227,9 +227,17 @@ uint32_t H5Transport::send(std::vector<uint8_t> &data)
         logPacket(true, h5EncodedPacket);
         nextTransportLayer->send(lastPacket);
 
+        const uint8_t seqNumBefore = seqNum;
+
         auto status = ackWaitCondition.wait_for(ackGuard, std::chrono::milliseconds(retransmissionInterval));
 
-        if (status == std::cv_status::no_timeout)
+        // Checking for timeout. Also checking against spurios wakeup by making sure the sequence
+        // number has  actually increased. If the sequence number has not increased, we have not
+        // received an ACK packet, and should not exit the loop (unless timeout).
+        // Ref. spurious wakeup:
+        // http://en.cppreference.com/w/cpp/thread/condition_variable
+        // https://en.wikipedia.org/wiki/Spurious_wakeup
+        if (status == std::cv_status::no_timeout && seqNum != seqNumBefore)
         {
             lastPacket.clear();
             return NRF_SUCCESS;
