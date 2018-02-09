@@ -50,6 +50,12 @@
 
 #include <stdint.h>
 
+#if BOOST_VERSION >= 106600
+typedef boost::asio::io_context asio_io_context;
+#else
+typedef boost::asio::io_service asio_io_context;
+#endif
+
 /**
  * @brief The UartBoost class opens, reads and writes a serial port using the boost asio library
  */
@@ -97,9 +103,9 @@ private:
      */
     void asyncWrite();
 
-    boost::asio::io_service ioService;
+    asio_io_context ioService;
     boost::asio::serial_port serialPort;
-    boost::asio::io_service::work workNotifier;
+    asio_io_context::work workNotifier;
     boost::thread ioWorkThread;
 
     boost::array<uint8_t, BUFFER_SIZE> readBuffer;
