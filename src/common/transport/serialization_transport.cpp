@@ -160,7 +160,8 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
 // Event Thread
 void SerializationTransport::eventHandlingRunner()
 {
-    do {
+    while (runEventThread) {
+
         std::unique_lock<std::mutex> eventLock(eventMutex);
         eventWaitCondition.wait(eventLock);
         while (!eventQueue.empty())
@@ -194,7 +195,7 @@ void SerializationTransport::eventHandlingRunner()
 
             eventLock.lock();
         }
-    } while (runEventThread);
+    }
 }
 
 // Read Thread
