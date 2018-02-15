@@ -44,6 +44,7 @@
 
 #include <boost/array.hpp>
 #include <boost/thread.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 
 #include <deque>
 #include <mutex>
@@ -107,6 +108,7 @@ private:
     boost::asio::serial_port serialPort;
     asio_io_context::work workNotifier;
     boost::thread ioWorkThread;
+    boost::interprocess::file_lock serialPortLock;
 
     boost::array<uint8_t, BUFFER_SIZE> readBuffer;
     std::vector<uint8_t> writeBufferVector;
@@ -117,6 +119,7 @@ private:
     boost::function<void(const boost::system::error_code, const size_t)> callbackWriteHandle;
 
     bool asyncWriteInProgress;
+    bool useAdvisoryLocking;
     UartSettingsBoost uartSettingsBoost;
 };
 

@@ -41,6 +41,8 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/config.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 
 #include <sstream>
 #include <mutex>
@@ -60,6 +62,10 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
       asyncWriteInProgress(false),
       uartSettingsBoost(communicationParameters)
 {
+    // We want to prevent opening the same port multiple times. On Windows the
+    // serial port is locked by the OS when opened. In POSIX no locking is done,
+    // so then we use the advisory locking feature of Boost.Interprocess.
+    useAdvisoryLocking = strcmp(BOOST_PLATFORM, "linux") == 0 || strcmp(BOOST_PLATFORM, "Mac OS") == 0;
 }
 
 UartBoost::~UartBoost()
@@ -78,6 +84,16 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
 
     try
     {
+        if (useAdvisoryLocking) {
+            serialPortLock = boost::interprocess::file_lock(portName.c_str());
+            if (!serialPortLock.try_lock()) {
+                std::stringstream message;
+                message << "UART port " << uartSettingsBoost.getPortName().c_str() << " is busy.";
+                statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+                return NRF_ERROR_INTERNAL;
+            }
+        }
+
         serialPort.open(portName);
     }
     catch (std::exception& ex)
@@ -85,7 +101,7 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
         std::stringstream message;
         message << "Exception thrown on " << ex.what() << " on UART port " << uartSettingsBoost.getPortName().c_str() << ".";
         statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
-            return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_INTERNAL;
     }
 
     const auto baudRate = uartSettingsBoost.getBoostBaudRate();
@@ -177,6 +193,9 @@ uint32_t UartBoost::close()
         serialPort.close();
         ioService.stop();
         ioWorkThread.join();
+        if (useAdvisoryLocking) {
+            serialPortLock.unlock();
+        }
 
         std::stringstream message;
         message << "UART port " << uartSettingsBoost.getPortName().c_str() << " closed.";
