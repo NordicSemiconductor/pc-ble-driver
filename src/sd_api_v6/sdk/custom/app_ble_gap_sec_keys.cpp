@@ -125,3 +125,25 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
 
     return err_code;
 }
+
+#if NRF_SD_BLE_API_VERSION >= 6
+uint32_t app_ble_gap_scan_data_set(ble_data_t const * p_data)
+{
+    return NRF_ERROR_NOT_SUPPORTED;
+}
+
+uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t * p_data)
+{
+    return NRF_ERROR_NOT_SUPPORTED;
+}
+
+uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t * p_adv_data, uint8_t * p_scan_rsp_data)
+{
+    return NRF_ERROR_NOT_SUPPORTED;
+}
+
+uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t * * pp_adv_data, uint8_t **pp_scan_rsp_data)
+{
+    return NRF_ERROR_NOT_SUPPORTED;
+}
+#endif

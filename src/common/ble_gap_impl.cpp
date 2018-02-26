@@ -53,7 +53,11 @@
 
 uint32_t sd_ble_gap_adv_start(
     adapter_t *adapter,
+#if NRF_SD_BLE_API_VERSION > 5
+    uint8_t p_adv_handle
+#else
     ble_gap_adv_params_t const * const p_adv_params
+#endif
 #if NRF_SD_BLE_API_VERSION >= 4
     , uint8_t conn_cfg_tag
 #endif
@@ -61,7 +65,11 @@ uint32_t sd_ble_gap_adv_start(
 {
     encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_start_req_enc(
+#if NRF_SD_BLE_API_VERSION > 5
+            p_adv_handle,
+#else
             p_adv_params,
+#endif
 #if NRF_SD_BLE_API_VERSION >= 4
             conn_cfg_tag,
 #endif
@@ -181,6 +189,7 @@ uint32_t sd_ble_gap_ppcp_set(adapter_t *adapter, ble_gap_conn_params_t const * c
 }
 
 
+#if defined(NRF_SD_BLE_API_VERSION) && (NRF_SD_BLE_API_VERSION <= 5)
 uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const * const p_data,
     uint8_t               dlen,
     uint8_t const * const p_sr_data,
@@ -201,6 +210,7 @@ uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const * const p_dat
 
     return encode_decode(adapter, encode_function, decode_function);
 }
+#endif
 
 
 uint32_t sd_ble_gap_conn_param_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_conn_params_t const * const p_conn_params)
@@ -445,10 +455,17 @@ uint32_t sd_ble_gap_privacy_get(adapter_t *adapter, ble_gap_privacy_params_t *p_
 }
 #endif
 
-uint32_t sd_ble_gap_adv_stop(adapter_t *adapter)
+uint32_t sd_ble_gap_adv_stop(adapter_t *adapter
+#if NRF_SD_BLE_API_VERSION > 5
+    , uint8_t p_adv_handle
+#endif
+    )
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_stop_req_enc(
+#if NRF_SD_BLE_API_VERSION > 5
+            p_adv_handle,
+#endif
             buffer,
             length);
     };
@@ -568,10 +585,18 @@ uint32_t sd_ble_gap_rssi_stop(adapter_t *adapter, uint16_t conn_handle)
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gap_tx_power_set(adapter_t *adapter, int8_t tx_power)
+uint32_t sd_ble_gap_tx_power_set(adapter_t *adapter, 
+#if NRF_SD_BLE_API_VERSION > 5
+    uint8_t p_role,
+    uint16_t p_handle,
+#endif
+    int8_t tx_power)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_tx_power_set_req_enc(
+#if NRF_SD_BLE_API_VERSION > 5
+            p_role, p_handle,
+#endif
             tx_power,
             buffer,
             length);
@@ -656,11 +681,18 @@ uint32_t sd_ble_gap_connect_cancel(adapter_t *adapter)
 }
 
 
-uint32_t sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const * const p_scan_params)
+uint32_t sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const * const p_scan_params
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+    , ble_data_t const * p_adv_report_buffer
+#endif
+)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_scan_start_req_enc(
             p_scan_params,
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+            p_adv_report_buffer,
+#endif
             buffer,
             length);
     };
@@ -700,13 +732,19 @@ uint32_t sd_ble_gap_encrypt(adapter_t *adapter,
 }
 
 
-uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t  conn_handle,
-    int8_t  * p_rssi)
+uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle,
+#if NRF_SD_BLE_API_VERSION > 5
+    uint8_t * p_ch_index,
+#endif
+    int8_t * p_rssi)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_rssi_get_req_enc(
             conn_handle,
             p_rssi,
+#if NRF_SD_BLE_API_VERSION > 5
+            p_ch_index,
+#endif
             buffer,
             length);
     };
@@ -716,6 +754,9 @@ uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t  conn_handle,
             buffer,
             length,
             (int8_t *)p_rssi,
+#if NRF_SD_BLE_API_VERSION > 5
+            (uint8_t *)p_ch_index,
+#endif
             result);
     };
 

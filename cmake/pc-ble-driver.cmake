@@ -55,7 +55,7 @@ set(Boost_USE_STATIC_LIBS   ON)
 find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
 
 # Add or remove SD API versions here
-set(SD_API_VER_NUMS 2 5)
+set(SD_API_VER_NUMS 2 6)
 list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
 
 set(SD_API_VER_PREFIX "SD_API_V")
@@ -96,7 +96,8 @@ foreach(SD_API_VER ${SD_API_VERS})
     set(PC_BLE_DRIVER_${SD_API_VER}_PUBLIC_INCLUDE_DIRS ${PC_BLE_DRIVER_ROOT_DIR}/include
                                                         ${PC_BLE_DRIVER_ROOT_DIR}/include/common
                                                         ${PC_BLE_DRIVER_ROOT_DIR}/include/common/sdk_compat
-                                                        ${PC_BLE_DRIVER_ROOT_DIR}/src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers)
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
+                                                        ${PC_BLE_DRIVER_ROOT_DIR}/src/${SD_API_VER_L}/sdk/components/softdevice/s140/headers)
 endforeach(SD_API_VER)
 
 find_package(Git REQUIRED)

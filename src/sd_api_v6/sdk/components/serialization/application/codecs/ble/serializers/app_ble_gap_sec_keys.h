@@ -58,6 +58,10 @@
 extern "C" {
 #endif
 
+#ifndef SER_MAX_CONNECTIONS
+#define SER_MAX_CONNECTIONS 8
+#endif
+
 /**@brief GAP connection - keyset mapping structure.
  *
  * @note  This structure is used to map keysets to connection instances and store them in a static table.
@@ -68,6 +72,23 @@ typedef struct
   uint8_t                conn_active;    /**< Indication that keys for this connection are used by the SoftDevice. 0: keys used; 1: keys not used. */
   ble_gap_sec_keyset_t   keyset;         /**< Keyset structure, see @ref ble_gap_sec_keyset_t.*/
 } ser_ble_gap_app_keyset_t;
+
+/**@brief GAP connection - keys table for storage.
+ *
+ * @note  This array is used to store keys.
+ */
+extern ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
+
+/**@brief Sets root context for calls to *_context_create, *_context_destroy, *_context_find
+*
+* @param[in]     context             root pointer to use as key for finding keysets
+*/
+void app_ble_gap_sec_context_root_set(void *context);
+
+/**@brief Release root context for calls to *_context_create, *_context_destroy, *_context_find
+*
+*/
+void app_ble_gap_sec_context_root_release();
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
