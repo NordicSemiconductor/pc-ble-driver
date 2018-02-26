@@ -556,7 +556,10 @@ enum BLE_GAP_TX_POWER_ROLES
 #define BLE_GAP_PHY_NOT_SET                      0xFF    /**< PHY is not configured. */
 
 /**@brief Supported PHYs in connections, for scanning, and for advertising. */
-#define BLE_GAP_PHYS_SUPPORTED  (BLE_GAP_PHY_1MBPS | BLE_GAP_PHY_2MBPS) /**< All PHYs except @ref BLE_GAP_PHY_CODED are supported. */
+#define BLE_GAP_PHYS_SUPPORTED  (BLE_GAP_PHY_1MBPS | BLE_GAP_PHY_2MBPS | BLE_GAP_PHY_CODED) /**< All PHYs are supported.
+                                                                                                 @note Coded PHY is only supported
+                                                                                                       as an experimental feature
+                                                                                                       in this SoftDevice. */
 
 /**@} */
 
@@ -616,6 +619,7 @@ enum BLE_GAP_TX_POWER_ROLES
 /**@defgroup BLE_GAP_EVENT_LENGTH GAP event length defines.
  * @{ */
 #define BLE_GAP_EVENT_LENGTH_MIN            (2)  /**< Minimum event length, in 1.25 ms units. */
+#define BLE_GAP_EVENT_LENGTH_CODED_PHY_MIN  (6)  /**< The shortest event length in 1.25 ms units supporting LE Coded PHY. */
 #define BLE_GAP_EVENT_LENGTH_DEFAULT        (3)  /**< Default event length, in 1.25 ms units. */
 /**@} */
 
@@ -805,13 +809,14 @@ typedef struct
   uint8_t                  primary_phy;             /**< Indicates the PHY on which the primary advertising channel packets
                                                          are transmitted. If set to @ref BLE_GAP_PHY_AUTO, @ref BLE_GAP_PHY_1MBPS
                                                          will be used.
-                                                         The only supported value by this SoftDevice is @ref BLE_GAP_PHY_1MBPS. */
+                                                         Valid values are @ref BLE_GAP_PHY_1MBPS and @ref BLE_GAP_PHY_CODED.
+                                                         @note The primary_phy shall indicate @ref BLE_GAP_PHY_1MBPS if
+                                                               @ref ble_gap_adv_properties_t::type is not an extended advertising type. */
   uint8_t                  secondary_phy;           /**< Indicates the PHY on which the secondary advertising channel packets
                                                          are transmitted.
                                                          If set to @ref BLE_GAP_PHY_AUTO, @ref BLE_GAP_PHY_1MBPS will be used.
                                                          Valid values are
-                                                         @ref BLE_GAP_PHY_1MBPS and @ref BLE_GAP_PHY_2MBPS. @ref BLE_GAP_PHY_CODED
-                                                         is not supported by this SoftDevice.
+                                                         @ref BLE_GAP_PHY_1MBPS, @ref BLE_GAP_PHY_2MBPS, and @ref BLE_GAP_PHY_CODED.
                                                          If @ref ble_gap_adv_properties_t::type is an extended advertising type
                                                          and connectable, this is the PHY that will be used to establish a
                                                          connection and send AUX_ADV_IND packets on.
@@ -887,7 +892,11 @@ typedef struct
                                                          - When used with @ref sd_ble_gap_connect, the
                                                            bitfield indicates the PHYs on where a connection may be initiated.
                                                            If scan_phys contains @ref BLE_GAP_PHY_1MBPS and/or @ref BLE_GAP_PHY_2MBPS,
-                                                           the primary scan PHY is @ref BLE_GAP_PHY_1MBPS. */
+                                                           the primary scan PHY is @ref BLE_GAP_PHY_1MBPS.
+                                                           If scan_phys also contains @ref BLE_GAP_PHY_CODED, the primary scan
+                                                           PHY will also contain @ref BLE_GAP_PHY_CODED. If the only scan PHY is
+                                                           @ref BLE_GAP_PHY_CODED, the primary scan PHY is
+                                                           @ref BLE_GAP_PHY_CODED only. */
   uint16_t              interval;                   /**< Scan interval in 625 us units. @sa BLE_GAP_SCAN_INTERVALS. */
   uint16_t              window;                     /**< Scan window in 625 us units. @sa BLE_GAP_SCAN_WINDOW. */
   uint16_t              timeout;                    /**< Scan timeout in 10 ms units. @sa BLE_GAP_SCAN_TIMEOUT. */
@@ -1212,7 +1221,8 @@ typedef struct
 /**@brief Event structure for @ref BLE_GAP_EVT_RSSI_CHANGED. */
 typedef struct
 {
-  int8_t  rssi;                                 /**< Received Signal Strength Indication in dBm. */
+  int8_t  rssi;                                 /**< Received Signal Strength Indication in dBm.
+                                                     @note ERRATA-153 requires the rssi sample to be compensated based on a temperature measurement. */
   uint8_t ch_index;                             /**< Data Channel Index on which the Signal Strength is measured (0-36). */
 } ble_gap_evt_rssi_changed_t;
 
@@ -1261,7 +1271,8 @@ typedef struct
                                                         This field is set to @ref BLE_GAP_POWER_LEVEL_INVALID if the
                                                         last received packet did not contain the Tx Power field.
                                                         @note TX Power is only included in extended advertising packets. */
-  int8_t                    rssi;                  /**< Received Signal Strength Indication in dBm of the last packet received. */
+  int8_t                    rssi;                  /**< Received Signal Strength Indication in dBm of the last packet received.
+                                                        @note ERRATA-153 requires the rssi sample to be compensated based on a temperature measurement. */
   uint8_t                   ch_index;              /**< Channel Index on which the last advertising packet is received (0-39). */
   uint8_t                   set_id;                /**< Set ID of the received advertising data. Set ID is not present
                                                         if set to @ref BLE_GAP_ADV_REPORT_SET_ID_NOT_AVAILABLE. */
@@ -1299,7 +1310,8 @@ typedef struct
 typedef struct
 {
   uint8_t                 adv_handle;        /**< Advertising handle for the advertising set which received the Scan Request */
-  int8_t                  rssi;              /**< Received Signal Strength Indication in dBm. */
+  int8_t                  rssi;              /**< Received Signal Strength Indication in dBm.
+                                                  @note ERRATA-153 requires the rssi sample to be compensated based on a temperature measurement. */
   ble_gap_addr_t          peer_addr;         /**< Bluetooth address of the peer device. If the peer_addr resolved: @ref ble_gap_addr_t::addr_id_peer is set to 1
                                                   and the address is the device's identity address. */
 } ble_gap_evt_scan_req_report_t;
@@ -1830,7 +1842,6 @@ SVCALL(SD_BLE_GAP_ADV_SET_CONFIGURE, uint32_t, sd_ble_gap_adv_set_configure(uint
  *                                        - p_adv_params is configured with connectable advertising, but the event_length parameter
  *                                          associated with conn_cfg_tag is too small to be able to establish a connection on
  *                                          the selected advertising phys. Use @ref sd_ble_cfg_set to increase the event length.
- * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
  */
 SVCALL(SD_BLE_GAP_ADV_START, uint32_t, sd_ble_gap_adv_start(uint8_t adv_handle, uint8_t conn_cfg_tag));
 
@@ -1925,7 +1936,7 @@ SVCALL(SD_BLE_GAP_DISCONNECT, uint32_t, sd_ble_gap_disconnect(uint16_t conn_hand
  *                     - For all other roles handle is ignored.
  * @param[in] tx_power Radio transmit power in dBm (see note for accepted values).
  *
-  * @note Supported tx_power values: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +3dBm and +4dBm.
+  * @note Supported tx_power values: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +2dBm, +3dBm, +4dBm, +5dBm, +6dBm, +7dBm and +8dBm.
   * @note The initiator will have the same transmit power as the scanner.
  * @note When a connection is created it will inherit the transmit power from the initiator or
  *       advertiser leading to the connection.
@@ -2372,6 +2383,7 @@ SVCALL(SD_BLE_GAP_RSSI_STOP, uint32_t, sd_ble_gap_rssi_stop(uint16_t conn_handle
  *
  *        @ref sd_ble_gap_rssi_start must be called to start reporting RSSI before using this function. @ref NRF_ERROR_NOT_FOUND
  *        will be returned until RSSI was sampled for the first time after calling @ref sd_ble_gap_rssi_start.
+ * @note ERRATA-153 requires the rssi sample to be compensated based on a temperature measurement.
  * @mscs
  * @mmsc{@ref BLE_GAP_CENTRAL_RSSI_READ_MSC}
  * @endmscs
@@ -2441,7 +2453,6 @@ SVCALL(SD_BLE_GAP_RSSI_GET, uint32_t, sd_ble_gap_rssi_get(uint16_t conn_handle, 
  * @retval ::NRF_ERROR_INVALID_LENGTH The provided buffer length is invalid. See @ref BLE_GAP_SCAN_BUFFER_MIN.
  * @retval ::NRF_ERROR_RESOURCES Not enough BLE role slots available.
  *                               Stop one or more currently active roles (Central, Peripheral or Broadcaster) and try again
- * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
  */
 SVCALL(SD_BLE_GAP_SCAN_START, uint32_t, sd_ble_gap_scan_start(ble_gap_scan_params_t const *p_scan_params, ble_data_t const * p_adv_report_buffer));
 
@@ -2496,7 +2507,6 @@ SVCALL(SD_BLE_GAP_SCAN_STOP, uint32_t, sd_ble_gap_scan_stop(void));
  *                                 - The event_length parameter associated with conn_cfg_tag is too small to be able to
  *                                   establish a connection on the selected @ref ble_gap_scan_params_t::scan_phys.
  *                                   Use @ref sd_ble_cfg_set to increase the event length.
- * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
  */
 SVCALL(SD_BLE_GAP_CONNECT, uint32_t, sd_ble_gap_connect(ble_gap_addr_t const *p_peer_addr, ble_gap_scan_params_t const *p_scan_params, ble_gap_conn_params_t const *p_conn_params, uint8_t conn_cfg_tag));
 
@@ -2543,6 +2553,10 @@ SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(void));
  *            If the PHY procedure was rejected by the peer for a different reason, the status will
  *            contain the reason as specified by the peer.
  *
+ * @note      @ref BLE_GAP_PHY_CODED is only supported as an experimental feature in this SoftDevice.
+ *            When this function is used to reply to a PHY Update, depending on the peers preferences,
+ *            @ref BLE_GAP_PHY_AUTO might result in the PHY to be changed to @ref BLE_GAP_PHY_CODED.
+ *
  * @events
  * @event{@ref BLE_GAP_EVT_PHY_UPDATE, Result of the PHY Update Procedure.}
  * @endevents
@@ -2559,8 +2573,10 @@ SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(void));
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
- * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
+ * @retval ::NRF_ERROR_RESOURCES The connection event length configured for this link is not sufficient for the combination of
+ *                               @ref ble_gap_phys_t::tx_phys, @ref ble_gap_phys_t::rx_phys, and @ref ble_gap_data_length_params_t.
+ *                               The connection event length is configured with @ref BLE_CONN_CFG_GAP using @ref sd_ble_cfg_set.
  * @retval ::NRF_ERROR_BUSY Procedure is already in progress or not allowed at this time. Process pending events and wait for the pending procedure to complete and retry.
  *
  */
