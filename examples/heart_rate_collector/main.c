@@ -551,8 +551,13 @@ static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const ch
     data_t   dev_name;
 
     // Initialize advertisement report for parsing
+#if NRF_SD_BLE_API >= 6 
+    adv_data.p_data     = p_adv_report->data.p_data;
+    adv_data.data_len   = p_adv_report->data.len;
+#else
     adv_data.p_data     = (uint8_t *)p_adv_report->data;
     adv_data.data_len   = p_adv_report->dlen;
+#endif
 
 
     //search for advertising names
@@ -654,7 +659,7 @@ static uint32_t ble_options_set()
 }
 
 #if NRF_SD_BLE_API >= 5
-uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
+static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 {
     const uint32_t ram_start = 0; // Value is not used by ble-driver
     uint32_t error_code;
@@ -696,7 +701,14 @@ uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
  */
 static uint32_t scan_start()
 {
-    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param);
+#if NRF_SD_BLE_API > 5
+    const ble_data_t m_adv_report_buffer;
+#endif
+    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param
+#if NRF_SD_BLE_API > 5
+    , &m_adv_report_buffer
+#endif
+    );
 
     if (error_code != NRF_SUCCESS)
     {
@@ -933,6 +945,7 @@ int main(int argc, char * argv[])
     m_adapter =  adapter_init(serial_port, baud_rate);
     sd_rpc_log_handler_severity_filter_set(m_adapter, SD_RPC_LOG_INFO);
     error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler);
+
 
     if (error_code != NRF_SUCCESS)
     {

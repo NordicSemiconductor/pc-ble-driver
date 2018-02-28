@@ -362,7 +362,9 @@ static uint32_t advertisement_data_set()
     const uint8_t * sr_data        = NULL;
     const uint8_t   sr_data_length = 0;
 
+#if NRF_SD_BLE_API <= 5
     error_code = sd_ble_gap_adv_data_set(m_adapter, data_buffer, index, sr_data, sr_data_length);
+#endif
 
     if (error_code != NRF_SUCCESS)
     {
@@ -385,11 +387,21 @@ static uint32_t advertising_start()
     uint32_t             error_code;
     ble_gap_adv_params_t adv_params;
 
-    adv_params.type        = BLE_GAP_ADV_TYPE_ADV_IND;
-    adv_params.p_peer_addr = NULL;                        // Undirected advertisement.
-    adv_params.fp          = BLE_GAP_ADV_FP_ANY;
-    adv_params.interval    = ADVERTISING_INTERVAL_40_MS;
-    adv_params.timeout     = ADVERTISING_TIMEOUT_3_MIN;
+#if NRF_SD_BLE_API > 5
+	ble_gap_adv_properties_t adv_properties;
+	adv_properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+
+	adv_params.properties = adv_properties;
+	adv_params.filter_policy = BLE_GAP_ADV_FP_ANY;
+	adv_params.duration = ADVERTISING_TIMEOUT_3_MIN;
+#endif
+#if NRF_SD_BLE_API <= 5
+	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	adv_params.fp = BLE_GAP_ADV_FP_ANY;
+	adv_params.timeout = ADVERTISING_TIMEOUT_3_MIN;
+#endif
+	adv_params.p_peer_addr = NULL;                        // Undirected advertisement.
+	adv_params.interval = ADVERTISING_INTERVAL_40_MS;
 #if NRF_SD_BLE_API == 2
     adv_params.p_whitelist = NULL;
 #endif
