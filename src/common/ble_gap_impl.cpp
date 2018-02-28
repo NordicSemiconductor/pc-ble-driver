@@ -54,7 +54,7 @@
 uint32_t sd_ble_gap_adv_start(
     adapter_t *adapter,
 #if NRF_SD_BLE_API_VERSION > 5
-    uint8_t p_adv_handle
+    uint8_t adv_handle
 #else
     ble_gap_adv_params_t const * const p_adv_params
 #endif
@@ -66,7 +66,7 @@ uint32_t sd_ble_gap_adv_start(
     encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_start_req_enc(
 #if NRF_SD_BLE_API_VERSION > 5
-            p_adv_handle,
+            adv_handle,
 #else
             p_adv_params,
 #endif
@@ -457,14 +457,14 @@ uint32_t sd_ble_gap_privacy_get(adapter_t *adapter, ble_gap_privacy_params_t *p_
 
 uint32_t sd_ble_gap_adv_stop(adapter_t *adapter
 #if NRF_SD_BLE_API_VERSION > 5
-    , uint8_t p_adv_handle
+    , uint8_t adv_handle
 #endif
     )
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_stop_req_enc(
 #if NRF_SD_BLE_API_VERSION > 5
-            p_adv_handle,
+            adv_handle,
 #endif
             buffer,
             length);
@@ -587,15 +587,15 @@ uint32_t sd_ble_gap_rssi_stop(adapter_t *adapter, uint16_t conn_handle)
 
 uint32_t sd_ble_gap_tx_power_set(adapter_t *adapter, 
 #if NRF_SD_BLE_API_VERSION > 5
-    uint8_t p_role,
-    uint16_t p_handle,
+    uint8_t role,
+    uint16_t handle,
 #endif
     int8_t tx_power)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_tx_power_set_req_enc(
 #if NRF_SD_BLE_API_VERSION > 5
-            p_role, p_handle,
+            role, handle,
 #endif
             tx_power,
             buffer,
