@@ -701,7 +701,14 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
  */
 static uint32_t scan_start()
 {
-    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param);
+#if NRF_SD_BLE_API > 5
+    const ble_data_t m_adv_report_buffer;
+#endif
+    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param
+#if NRF_SD_BLE_API > 5
+    , &m_adv_report_buffer
+#endif
+    );
 
     if (error_code != NRF_SUCCESS)
     {
@@ -940,63 +947,63 @@ int main(int argc, char * argv[])
     error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler);
 
 
-//     if (error_code != NRF_SUCCESS)
-//     {
-//         printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code);
-//         fflush(stdout);
-//         return error_code;
-//     }
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
 
-// #if NRF_SD_BLE_API >= 5
-//     ble_cfg_set(m_config_id);
-// #endif
+#if NRF_SD_BLE_API >= 5
+    ble_cfg_set(m_config_id);
+#endif
 
-//     error_code = ble_stack_init();
+    error_code = ble_stack_init();
 
-//     if (error_code != NRF_SUCCESS)
-//     {
-//         return error_code;
-//     }
+    if (error_code != NRF_SUCCESS)
+    {
+        return error_code;
+    }
 
-// #if NRF_SD_BLE_API < 5
-//     error_code = ble_options_set();
+#if NRF_SD_BLE_API < 5
+    error_code = ble_options_set();
 
-//     if (error_code != NRF_SUCCESS)
-//     {
-//         return error_code;
-//     }
-// #endif
+    if (error_code != NRF_SUCCESS)
+    {
+        return error_code;
+    }
+#endif
 
-//     error_code = scan_start();
+    error_code = scan_start();
 
-//     if (error_code != NRF_SUCCESS)
-//     {
-//         return error_code;
-//     }
+    if (error_code != NRF_SUCCESS)
+    {
+        return error_code;
+    }
 
-//     // Endlessly loop.
-//     for (; ;)
-//     {
-//         char c = (char)getchar();
-//         if (c == 'q' || c == 'Q')
-//         {
-//             error_code = sd_rpc_close(m_adapter);
+    // Endlessly loop.
+    for (; ;)
+    {
+        char c = (char)getchar();
+        if (c == 'q' || c == 'Q')
+        {
+            error_code = sd_rpc_close(m_adapter);
 
-//             if (error_code != NRF_SUCCESS)
-//             {
-//                 printf("Failed to close nRF BLE Driver. Error code: 0x%02X\n", error_code);
-//                 fflush(stdout);
-//                 return error_code;
-//             }
+            if (error_code != NRF_SUCCESS)
+            {
+                printf("Failed to close nRF BLE Driver. Error code: 0x%02X\n", error_code);
+                fflush(stdout);
+                return error_code;
+            }
 
-//             printf("Closed\n");
-//             fflush(stdout);
+            printf("Closed\n");
+            fflush(stdout);
 
-//             return NRF_SUCCESS;
-//         }
+            return NRF_SUCCESS;
+        }
 
-//         // Toggle notifications on the HRM characteristic every time user input is received.
-//         cccd_value ^= BLE_CCCD_NOTIFY;
-//         hrm_cccd_set(cccd_value);
-//     }
+        // Toggle notifications on the HRM characteristic every time user input is received.
+        cccd_value ^= BLE_CCCD_NOTIFY;
+        hrm_cccd_set(cccd_value);
+    }
 }
