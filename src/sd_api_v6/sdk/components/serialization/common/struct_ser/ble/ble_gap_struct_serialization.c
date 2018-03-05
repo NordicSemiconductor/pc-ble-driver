@@ -1420,6 +1420,7 @@ uint32_t ble_gap_cfg_role_count_t_enc(void const * const p_void_struct,
 {
     SER_STRUCT_ENC_BEGIN(ble_gap_cfg_role_count_t);
 
+    SER_PUSH_uint8(&p_struct->adv_set_count);
     SER_PUSH_uint8(&p_struct->periph_role_count);
     SER_PUSH_uint8(&p_struct->central_role_count);
     SER_PUSH_uint8(&p_struct->central_sec_count);
