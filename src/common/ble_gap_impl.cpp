@@ -51,6 +51,34 @@
 
 #include <stdint.h>
 
+#if NRF_SD_BLE_API_VERSION > 5
+uint32_t sd_ble_gap_adv_set_configure(
+    adapter_t *adapter,
+    uint8_t *p_adv_handle,
+    ble_gap_adv_data_t const *p_adv_data,
+    ble_gap_adv_params_t const *p_adv_params)
+{
+    encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gap_adv_set_configure_req_enc(
+            p_adv_handle,
+            p_adv_data,
+            p_adv_params,
+            buffer,
+            length);
+    };
+
+    decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
+        return ble_gap_adv_set_configure_rsp_dec(
+            buffer,
+            length,
+            p_adv_handle,
+            result);
+    };
+
+    return encode_decode(adapter, encode_function, decode_function);
+}
+#endif
+
 uint32_t sd_ble_gap_adv_start(
     adapter_t *adapter,
 #if NRF_SD_BLE_API_VERSION > 5
