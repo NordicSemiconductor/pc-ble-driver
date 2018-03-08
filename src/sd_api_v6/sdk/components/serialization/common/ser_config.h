@@ -66,8 +66,8 @@ extern "C" {
 
 /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
  *  packet length). */
-#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (384UL)
-#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (384UL)
+#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (500UL)
+#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (500UL)
 
 #define SER_HAL_TRANSPORT_MAX_PKT_SIZE ((SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE) >= \
                                         (SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE)    \
@@ -99,7 +99,7 @@ extern "C" {
 
 /** UART transmission parameters */
 #define SER_PHY_UART_FLOW_CTRL          NRF_UART_HWFC_ENABLED
-#define SER_PHY_UART_PARITY             NRF_UART_PARITY_INCLUDED
+#define SER_PHY_UART_PARITY             NRF_UART_PARITY_EXCLUDED
 #define SER_PHY_UART_BAUDRATE_VAL       1000000
 
 #define SER_PHY_UART_BAUDRATE CONCAT_2(NRF_UART_BAUDRATE_,SER_PHY_UART_BAUDRATE_VAL)
@@ -109,6 +109,8 @@ extern "C" {
 #define CONN_CHIP_WAKEUP_TIME           500     /**< Time for the connectivity chip to reset and become ready to receive serialized commands (in milliseconds). */
 
 #define SER_MAX_CONNECTIONS 8
+
+#define HCI_LINK_CONTROL
 
 #ifndef SER_MAX_ADV_DATA
 #define SER_MAX_ADV_DATA 256

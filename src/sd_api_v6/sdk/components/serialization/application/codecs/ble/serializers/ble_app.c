@@ -151,11 +151,12 @@ uint32_t ble_opt_get_rsp_dec(uint8_t const * const p_buf,
             p_struct   = &(p_opt->gap_opt.compat_mode);
         break;
 #else
+#ifndef S112
         case BLE_GAP_OPT_COMPAT_MODE_1:
             fp_decoder = ble_gap_opt_compat_mode_1_t_dec;
             p_struct   = &(p_opt->gap_opt.compat_mode_1);
         break;
-
+#endif
 #endif
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION == 4
         case BLE_GAP_OPT_COMPAT_MODE_2:
@@ -240,10 +241,12 @@ uint32_t ble_opt_set_req_enc(uint32_t const          opt_id,
                 p_struct   = &(p_opt->gap_opt.compat_mode);
             break;
 #else
+#ifndef S112
             case BLE_GAP_OPT_COMPAT_MODE_1:
                 fp_encoder = ble_gap_opt_compat_mode_1_t_enc;
                 p_struct   = &(p_opt->gap_opt.compat_mode_1);
             break;
+#endif
             case BLE_GAP_OPT_SLAVE_LATENCY_DISABLE:
                 fp_encoder = ble_gap_opt_slave_latency_disable_t_enc;
                 p_struct   = &(p_opt->gap_opt.slave_latency_disable);
@@ -464,7 +467,7 @@ uint32_t ble_cfg_set_req_enc(uint32_t              cfg_id,
                 fp_encoder = ble_gatt_conn_cfg_t_enc;
                 p_struct   = &(p_cfg->conn_cfg.params.gatt_conn_cfg);
                 break;
-#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION >= 5
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION >= 5 && !defined(S112)
             case BLE_CONN_CFG_L2CAP:
                 fp_encoder = ble_l2cap_conn_cfg_t_enc;
                 p_struct   = &(p_cfg->conn_cfg.params.l2cap_conn_cfg);

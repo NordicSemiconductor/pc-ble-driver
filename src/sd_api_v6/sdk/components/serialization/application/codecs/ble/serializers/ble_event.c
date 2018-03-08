@@ -99,10 +99,11 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
             fp_event_decoder = ble_gap_evt_conn_param_update_dec;
             break;
 
+#ifndef S112
         case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
             fp_event_decoder = ble_gap_evt_conn_param_update_request_dec;
             break;
-
+#endif
         case BLE_GAP_EVT_CONN_SEC_UPDATE:
             fp_event_decoder = ble_gap_evt_conn_sec_update_dec;
             break;
@@ -154,7 +155,7 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
             fp_event_decoder = ble_gap_evt_phy_update_request_dec;
             break;
 #endif
-#if NRF_SD_BLE_API_VERSION >= 4
+#if NRF_SD_BLE_API_VERSION >= 4  && !defined(S112)
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
             fp_event_decoder = ble_gap_evt_data_length_update_request_dec;
             break;
@@ -252,7 +253,7 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
             break;
 #endif
 
-#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION >= 5
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION >= 5 && !defined(S112)
         case BLE_L2CAP_EVT_CH_SETUP_REQUEST:
             fp_event_decoder = ble_l2cap_evt_ch_setup_request_dec;
             break;
@@ -286,10 +287,11 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
             break;
 
 #endif
+#ifndef S112
         case BLE_GAP_EVT_ADV_REPORT:
             fp_event_decoder = ble_gap_evt_adv_report_dec;
             break;
-
+#endif
         case BLE_GAP_EVT_SCAN_REQ_REPORT:
             fp_event_decoder = ble_gap_evt_scan_req_report_dec;
             break;
