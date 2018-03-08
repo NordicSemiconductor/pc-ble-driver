@@ -346,7 +346,7 @@ typedef struct
  * @retval ::NRF_ERROR_RESOURCES            The limit has been reached for available L2CAP channels,
  *                                          see @ref ble_l2cap_conn_cfg_t::ch_count.
  */
-SVCALL(SD_BLE_L2CAP_CH_SETUP, uint32_t, sd_ble_l2cap_ch_setup(uint16_t conn_handle, uint16_t *p_local_cid, ble_l2cap_ch_setup_params_t const *p_params));
+SVCALL(SD_BLE_L2CAP_CH_SETUP, uint32_t, sd_ble_l2cap_ch_setup(adapter_t *adapter, uint16_t conn_handle, uint16_t *p_local_cid, ble_l2cap_ch_setup_params_t const *p_params));
 
 /**@brief Release an L2CAP channel.
  *
@@ -369,7 +369,7 @@ SVCALL(SD_BLE_L2CAP_CH_SETUP, uint32_t, sd_ble_l2cap_ch_setup(uint16_t conn_hand
  *                                          in progress for the L2CAP channel).
  * @retval ::NRF_ERROR_NOT_FOUND            CID not found.
  */
-SVCALL(SD_BLE_L2CAP_CH_RELEASE, uint32_t, sd_ble_l2cap_ch_release(uint16_t conn_handle, uint16_t local_cid));
+SVCALL(SD_BLE_L2CAP_CH_RELEASE, uint32_t, sd_ble_l2cap_ch_release(adapter_t *adapter, uint16_t conn_handle, uint16_t local_cid));
 
 /**@brief Receive an SDU on an L2CAP channel.
  *
@@ -403,7 +403,7 @@ SVCALL(SD_BLE_L2CAP_CH_RELEASE, uint32_t, sd_ble_l2cap_ch_release(uint16_t conn_
  * @retval ::NRF_ERROR_RESOURCES            Too many SDU data buffers supplied. Wait for a
  *                                          @ref BLE_L2CAP_EVT_CH_RX event and retry.
  */
-SVCALL(SD_BLE_L2CAP_CH_RX, uint32_t, sd_ble_l2cap_ch_rx(uint16_t conn_handle, uint16_t local_cid, ble_data_t const *p_sdu_buf));
+SVCALL(SD_BLE_L2CAP_CH_RX, uint32_t, sd_ble_l2cap_ch_rx(adapter_t *adapter, uint16_t conn_handle, uint16_t local_cid, ble_data_t const *p_sdu_buf));
 
 /**@brief Transmit an SDU on an L2CAP channel.
  *
@@ -448,7 +448,7 @@ SVCALL(SD_BLE_L2CAP_CH_RX, uint32_t, sd_ble_l2cap_ch_rx(uint16_t conn_handle, ui
  * @retval ::NRF_ERROR_RESOURCES            Too many SDUs queued for transmission. Wait for a
  *                                          @ref BLE_L2CAP_EVT_CH_TX event and retry.
  */
-SVCALL(SD_BLE_L2CAP_CH_TX, uint32_t, sd_ble_l2cap_ch_tx(uint16_t conn_handle, uint16_t local_cid, ble_data_t const *p_sdu_buf));
+SVCALL(SD_BLE_L2CAP_CH_TX, uint32_t, sd_ble_l2cap_ch_tx(adapter_t *adapter, uint16_t conn_handle, uint16_t local_cid, ble_data_t const *p_sdu_buf));
 
 /**@brief Advanced SDU reception flow control.
  *
@@ -492,7 +492,7 @@ SVCALL(SD_BLE_L2CAP_CH_TX, uint32_t, sd_ble_l2cap_ch_tx(uint16_t conn_handle, ui
  *                                          in progress for an L2CAP channel).
  * @retval ::NRF_ERROR_NOT_FOUND            CID not found.
  */
-SVCALL(SD_BLE_L2CAP_CH_FLOW_CONTROL, uint32_t, sd_ble_l2cap_ch_flow_control(uint16_t conn_handle, uint16_t local_cid, uint16_t credits, uint16_t *p_credits));
+SVCALL(SD_BLE_L2CAP_CH_FLOW_CONTROL, uint32_t, sd_ble_l2cap_ch_flow_control(adapter_t *adapter, uint16_t conn_handle, uint16_t local_cid, uint16_t credits, uint16_t *p_credits));
 
 /** @} */
 
