@@ -84,6 +84,13 @@ extern uint32_t __StackTop;
 extern uint32_t __StackLimit;
 #define STACK_BASE    &__StackLimit
 #define STACK_TOP     &__StackTop
+
+#else
+extern uint32_t __StackTop;
+extern uint32_t __StackLimit;
+#define STACK_BASE    &__StackLimit
+#define STACK_TOP     &__StackTop
+
 #endif
 
 /* These macros are valid only when absolute placement is used for the application
@@ -1182,7 +1189,18 @@ static __INLINE bool is_word_aligned(void const* p)
  *
  * @return      true if address is in stack space, false otherwise.
  */
-
+static __INLINE bool is_address_from_stack(void * ptr)
+{
+    if (((uint32_t)ptr >= (uint32_t)STACK_BASE) &&
+        ((uint32_t)ptr <  (uint32_t)STACK_TOP) )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 #ifdef __cplusplus
 }

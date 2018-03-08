@@ -22,14 +22,15 @@ index a4dfe24..5184dcd 100644
  #define SER_PHY_UART_BAUDRATE_VAL       1000000
 
  /** Find UART baud rate value based on the chosen register setting. */
-@@ -145,6 +145,7 @@ extern "C" {
+@@ -110,6 +110,8 @@ extern "C" {
 
  #define SER_MAX_CONNECTIONS 8
 
 +#define HCI_LINK_CONTROL
-
- #ifdef __cplusplus
- }
++
+ #ifndef SER_MAX_ADV_DATA
+ #define SER_MAX_ADV_DATA 256
+ #endif
 diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
 index 9eaf33a..7b4fe8e 100644
 --- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
@@ -165,6 +166,6 @@ index bcb67e3..516ccd7 100644
 +#endif
 +
  #if defined(APP_USBD_ENABLED) && APP_USBD_ENABLED
+ #include "app_usbd_serial_num.h"
  #ifdef BOARD_PCA10059
- #include "nrf_usb_buttonless_dfu.h"
- #endif
+ #include "nrf_usb_dfu_trigger.h"

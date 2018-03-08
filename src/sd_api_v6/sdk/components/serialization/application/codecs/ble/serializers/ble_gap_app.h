@@ -840,7 +840,7 @@ uint32_t ble_gap_rssi_start_req_enc(uint16_t         conn_handle,
 uint32_t ble_gap_rssi_start_rsp_dec(uint8_t const * const p_buf,
                                     uint32_t              packet_len,
                                     uint32_t * const      p_result_code);
-
+#ifndef S112
 /**@brief Encodes @ref sd_ble_gap_scan_stop command request.
  *
  * @sa @ref ble_gap_scan_stop_rsp_dec for command response decoder.
@@ -1027,6 +1027,7 @@ uint32_t ble_gap_encrypt_req_enc(uint16_t                          conn_handle,
 uint32_t ble_gap_encrypt_rsp_dec(uint8_t const * const p_buf,
                                  uint32_t              packet_len,
                                  uint32_t      * const p_result_code);
+#endif //!S112
 
 /**@brief Encodes @ref sd_ble_gap_rssi_get command request.
  *
@@ -1461,7 +1462,7 @@ uint32_t ble_gap_device_identities_set_rsp_dec(uint8_t const * const p_buf,
                                        uint32_t              packet_len,
                                        uint32_t * const      p_result_code);
 
-#if NRF_SD_BLE_API_VERSION >= 4
+#if NRF_SD_BLE_API_VERSION >= 4 && !defined(S112)
 /**
  * @brief Encodes @ref sd_ble_gap_data_length_update command request.
  *
