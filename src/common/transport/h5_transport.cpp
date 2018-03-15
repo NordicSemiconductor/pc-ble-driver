@@ -320,13 +320,15 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
 
             if (isSyncConfigResponsePacket) {
                 exit->syncConfigRspReceived = true;
-                syncWaitCondition.notify_all();
+                //syncWaitCondition.notify_all();
             }
 
             if (isSyncConfigPacket)
             {
                 sendControlPacket(CONTROL_PKT_SYNC_CONFIG_RESPONSE);
-                syncWaitCondition.notify_all();
+                exit->syncConfigReceived = true;
+                exit->syncConfigRspSent = true;
+                //syncWaitCondition.notify_all();
             }
 
             if (isSyncPacket)
@@ -568,7 +570,7 @@ void H5Transport::setupStateMachine()
 
         // Send a package immediately
 
-        while (!exit->isFullfilled() && syncRetransmission > 0)
+        while (!(exit->syncConfigSent && exit->syncConfigRspReceived) && syncRetransmission > 0)
         {
             sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
             exit->syncConfigSent = true;
@@ -576,7 +578,15 @@ void H5Transport::setupStateMachine()
             syncRetransmission--;
         }
 
-        if (exit->syncConfigSent && exit->syncConfigRspReceived)
+        syncRetransmission = PACKET_RETRANSMISSIONS;
+
+        while (!exit->syncConfigReceived && !exit->syncConfigRspSent && syncRetransmission > 0)
+        {
+            syncWaitCondition.wait_for(syncGuard, NON_ACTIVE_STATE_TIMEOUT);
+            syncRetransmission--;
+        }
+
+        if (exit->isFullfilled())
         {
             return STATE_ACTIVE;
         }
