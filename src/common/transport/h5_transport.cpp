@@ -206,10 +206,10 @@ uint32_t H5Transport::send(std::vector<uint8_t> &data)
 
     h5_encode(data,
               h5EncodedPacket,
-              seqNum,
+              0, //seqNum,
               ackNum,
               true,
-              true,
+              false, //Reliable packet
               VENDOR_SPECIFIC_PACKET);
 
     std::vector<uint8_t> encodedPacket;
@@ -225,7 +225,8 @@ uint32_t H5Transport::send(std::vector<uint8_t> &data)
     while (remainingRetransmissions--)
     {
         logPacket(true, h5EncodedPacket);
-        nextTransportLayer->send(lastPacket);
+        //NON-RELIABLE MOD
+        return nextTransportLayer->send(lastPacket);
 
         const uint8_t seqNumBefore = seqNum;
 
@@ -366,6 +367,10 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
                 {
                     sendControlPacket(CONTROL_PKT_ACK);
                 }
+            }
+            else // Unreliable packet
+            {
+                dataCallback(h5Payload.data(), h5Payload.size());
             }
         }
     }
