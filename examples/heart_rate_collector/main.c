@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
+#include <time.h>
 
 #ifdef _WIN32
 #define UART_PORT_NAME "COM1"
@@ -55,7 +57,7 @@ enum
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME "Nordic_HRM" /**< Connect to a peripheral using a given advertising name here. */
+#define TARGET_DEV_NAME "Nordic_HRM1" /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT 1            /**< Maximum number of peer's application intends to manage. */
 
 #define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
@@ -79,6 +81,10 @@ static uint16_t    m_hrm_char_handle = 0;
 static uint16_t    m_hrm_cccd_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
+static uint32_t m_hvx_count = 0;
+static clock_t m_hvx_start;
+static uint32_t m_pkts_lost = 0;
+static uint32_t m_previous_counter = 0;
 
 static const ble_gap_scan_params_t m_scan_param =
 {
@@ -386,18 +392,53 @@ static void on_write_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
  */
 static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
-    if (p_ble_gattc_evt->params.hvx.handle >= m_hrm_char_handle ||
-            p_ble_gattc_evt->params.hvx.handle <= m_hrm_cccd_handle) // Heart rate measurement.
-    {
-        // We know the heart rate reading is encoded as 2 bytes [flag, value].
-        printf("Received heart rate measurement: %d\n", p_ble_gattc_evt->params.hvx.data[1]);
-    }
-    else // Unknown data.
-    {
-        printf("Un-parsed data received on handle: %04X\n", p_ble_gattc_evt->params.hvx.handle);
+    clock_t now = clock();
+
+    if (!m_hvx_start) {
+        m_hvx_start = now;
     }
 
+    m_hvx_count++;
+
+    float seconds = (float)(now - m_hvx_start) / CLOCKS_PER_SEC;
+
+    int i = 0;
+    int length = p_ble_gattc_evt->params.hvx.len;
+
+    float pkt_per_sec = m_hvx_count / seconds;
+
+    if (m_hvx_count % 10 == 0) {
+        printf("pkts: %06d, pkts lost: %d, pkt/s: %f\n", m_hvx_count, m_pkts_lost, pkt_per_sec);
+    }
+
+    if (length < 4) {
+        return;
+    }
+
+    if ((m_previous_counter + 1) % 256 != p_ble_gattc_evt->params.hvx.data[3]) {
+        m_pkts_lost++;
+    }
+
+    m_previous_counter = p_ble_gattc_evt->params.hvx.data[3];
+
+    //printf("pkts lost: %d, value: %02X%02X\n",
+    //    m_pkts_lost,
+    //    p_ble_gattc_evt->params.hvx.data[2],
+    //    p_ble_gattc_evt->params.hvx.data[3]);
     fflush(stdout);
+
+//    if (p_ble_gattc_evt->params.hvx.handle >= m_hrm_char_handle ||
+//            p_ble_gattc_evt->params.hvx.handle <= m_hrm_cccd_handle) // Heart rate measurement.
+//    {
+//        // We know the heart rate reading is encoded as 2 bytes [flag, value].
+//        printf("Received heart rate measurement: %d\n", p_ble_gattc_evt->params.hvx.data[1]);
+//    }
+//    else // Unknown data.
+//    {
+//        printf("Un-parsed data received on handle: %04X\n", p_ble_gattc_evt->params.hvx.handle);
+//    }
+//
+//    fflush(stdout);
 }
 
 /**@brief Function called on BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST event.
@@ -466,8 +507,8 @@ static adapter_t * adapter_init(char * serial_port)
 
     phy = sd_rpc_physical_layer_create_uart(serial_port, BAUD_RATE, SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
-    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
-    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
+    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 250);
+    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 1500);
     return sd_rpc_adapter_create(transport_layer);
 }
 
@@ -863,6 +904,7 @@ int main(int argc, char * argv[])
     {
         printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code);
         fflush(stdout);
+        char ch = (char)getchar();
         return error_code;
     }
 

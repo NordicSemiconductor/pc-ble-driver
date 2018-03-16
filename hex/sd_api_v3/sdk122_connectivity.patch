@@ -71,13 +71,13 @@ index 5d413ce..2517c43 100644
  
  #ifdef __cplusplus
 diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
-index 216ed97..147d7d5 100644
+index 72e6203..bd7720f 100644
 --- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 +++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 @@ -39,6 +39,8 @@
                                   (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
  #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
-
+ 
 +#define PKT_TYPE_RESET 5
 +
  #define TX_EVT_QUEUE_SIZE            16
@@ -89,20 +89,131 @@ index 216ed97..147d7d5 100644
  #define MAX_TRANSMISSION_TIME_ms     (MAX_PACKET_SIZE_IN_BITS * BAUD_TIME_us / 1000uL) /**< Max transmission time of a single application packet over UART in units of mseconds. */
 -#define RETRANSMISSION_TIMEOUT_IN_ms (10uL * MAX_TRANSMISSION_TIME_ms)                 /**< Retransmission timeout for application packet in units of mseconds. */
 +#define RETRANSMISSION_TIMEOUT_IN_ms (50uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
-
+ 
  #ifdef  HCI_LINK_CONTROL
  #define HCI_PKT_SYNC        0x7E01u                                                    /**< Link Control Packet: type SYNC */
-@@ -770,6 +772,10 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
-
+@@ -365,7 +367,7 @@ static bool is_rx_pkt_valid(const uint8_t * p_buffer, uint32_t length)
+ 
+     if (!(p_buffer[0] & RELIABLE_PKT_MASK))
+     {
+-        return false;
++        //return false; //Accept non-reliable packets
+     }
+ 
+     if ((p_buffer[1] & 0x0Fu) != PKT_TYPE_VENDOR_SPECIFIC)
+@@ -373,12 +375,13 @@ static bool is_rx_pkt_valid(const uint8_t * p_buffer, uint32_t length)
+         return false;
+     }
+ 
++#if 0 //Skip CRC checking, only expecting non-reliable packets
+     const uint32_t expected_checksum =
+         ((p_buffer[0] + p_buffer[1] + p_buffer[2] + p_buffer[3])) & 0xFFu;
+ 
+     if (expected_checksum != 0)
+     {
+-        return false;
++        //return false;
+     }
+ 
+     const uint16_t crc_calculated = crc16_compute(p_buffer, (length - PKT_CRC_SIZE), NULL);
+@@ -388,6 +391,7 @@ static bool is_rx_pkt_valid(const uint8_t * p_buffer, uint32_t length)
+     {
+         return false;
+     }
++#endif
+ 
+     return true;
+ }
+@@ -427,7 +431,8 @@ static __INLINE uint8_t packet_seq_nmbr_extract(const uint8_t * p_buffer)
+  */
+ static __INLINE uint8_t tx_packet_byte_zero_construct(void)
+ {
+-    const uint32_t value = DATA_INTEGRITY_MASK | RELIABLE_PKT_MASK |
++    const uint32_t value = DATA_INTEGRITY_MASK |
++                           //RELIABLE_PKT_MASK | //Make packet non-reliable
+                            (packet_ack_get() << 3u) | packet_seq_get();
+ 
+     return (uint8_t) value;
+@@ -770,6 +775,10 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
+ 
          NRF_LOG_DEBUG("EVT_PKT_RECEIVED 0x%X/%u\r\n", packet_type,
              p_event->evt_params.received_pkt.num_of_bytes);
 +        if (packet_type == PKT_TYPE_RESET)
 +        {
 +            NVIC_SystemReset();
 +        }
-
+ 
          if (packet_type == PKT_TYPE_ACK )
          {
+@@ -977,8 +986,12 @@ static void hci_tx_fsm_event_process(hci_evt_t * p_event)
+             if ((p_event->evt_source == HCI_SLIP_EVT) &&
+                 (p_event->evt.ser_phy_slip_evt.evt_type == SER_PHY_HCI_SLIP_EVT_PKT_SENT))
+             {
+-                hci_timeout_setup(1);
+-                m_hci_tx_fsm_state = HCI_TX_STATE_WAIT_FOR_ACK;
++//NON-RELIABLE MOD
++                //hci_timeout_setup(1);
++                //m_hci_tx_fsm_state = HCI_TX_STATE_WAIT_FOR_ACK;
++                hci_timeout_setup(0);
++                hci_pkt_sent_upcall();
++                m_hci_tx_fsm_state = HCI_TX_STATE_SEND;
+             }
+             else if ((p_event->evt_source == HCI_SLIP_EVT) &&
+                      (p_event->evt.ser_phy_slip_evt.evt_type == SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED))
+@@ -1082,12 +1095,14 @@ static void hci_mem_request(hci_evt_t * p_event)
+ }
+ 
+ 
++//NON-RELIABLE MOD
++#if 0
+ static void hci_inc_ack()
+ {
+     m_packet_ack_number++;
+     m_packet_ack_number &= 0x07u;
+ }
+-
++#endif
+ 
+ static void hci_rx_fsm_event_process(hci_evt_t * p_event)
+ {
+@@ -1102,7 +1117,8 @@ static void hci_rx_fsm_event_process(hci_evt_t * p_event)
+                 uint8_t rx_seq_number = packet_seq_nmbr_extract(
+                     p_event->evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer);
+ 
+-                if (packet_ack_get() == rx_seq_number)
++//NON-RELIABLE MOD
++                if (true) //packet_ack_get() == rx_seq_number)
+                 {
+                     hci_mem_request(p_event);
+                     m_hci_rx_fsm_state = HCI_RX_STATE_WAIT_FOR_MEM;
+@@ -1128,10 +1144,17 @@ static void hci_rx_fsm_event_process(hci_evt_t * p_event)
+                            m_p_rx_packet + PKT_HDR_SIZE,
+                            m_rx_packet_length - PKT_HDR_SIZE - PKT_CRC_SIZE);
+                     (void) ser_phy_hci_slip_rx_buf_free(m_p_rx_packet);
++//NON-RELIABLE MOD
++                    packet_received_callback(m_p_rx_buffer,
++                                             m_rx_packet_length - PKT_HDR_SIZE - PKT_CRC_SIZE);
++                    (void) ser_phy_hci_slip_rx_buf_free(p_event->evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer);
+                 }
+-                m_hci_rx_fsm_state = HCI_RX_STATE_WAIT_FOR_SLIP_ACK_END;
++                m_hci_rx_fsm_state = HCI_RX_STATE_RECEIVE;
++//NON-RELIABLE MOD
++#if 0
+                 hci_inc_ack(); // SEQ was valid for good packet, we will send incremented SEQ as ACK
+                 ack_transmit();
++#endif
+             }
+ 
+             break;
+@@ -1154,7 +1177,7 @@ static void hci_rx_fsm_event_process(hci_evt_t * p_event)
+                 m_hci_rx_fsm_state = HCI_RX_STATE_RECEIVE;
+             }
+             else if ((p_event->evt_source == HCI_SLIP_EVT) &&
+-                    (p_event->evt.ser_phy_slip_evt.evt_type == SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED))
++                (p_event->evt.ser_phy_slip_evt.evt_type == SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED))
+             {
+                 (void) ser_phy_hci_slip_rx_buf_free(p_event->evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer);
+             }
 diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/components/serialization/connectivity/ser_conn_error_handling.c
 index 2fdd1e6..adb53cc 100644
 --- a/components/serialization/connectivity/ser_conn_error_handling.c
