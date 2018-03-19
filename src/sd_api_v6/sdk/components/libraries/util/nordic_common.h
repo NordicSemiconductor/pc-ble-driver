@@ -73,9 +73,13 @@ extern "C" {
  * without evaluating its value.
  */
 //lint -emacro(491,NRF_MODULE_ENABLED) // Suppers warning 491 "non-standard use of 'defined' preprocessor operator"
+#ifdef NRF_MODULE_ENABLE_ALL
+#warning "Do not use NRF_MODULE_ENABLE_ALL for real builds."
+#define NRF_MODULE_ENABLED(module) 1
+#else
 #define NRF_MODULE_ENABLED(module) \
     ((defined(module ## _ENABLED) && (module ## _ENABLED)) ? 1 : 0)
-
+#endif
 /** The upper 8 bits of a 32 bit value */
 //lint -emacro(572,MSB_32) // Suppress warning 572 "Excessive shift value"
 #define MSB_32(a) (((a) & 0xFF000000) >> 24)

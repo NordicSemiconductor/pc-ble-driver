@@ -85,6 +85,7 @@ extern ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
 */
 void app_ble_gap_sec_context_root_set(void *context);
 
+
 /**@brief Release root context for calls to *_context_create, *_context_destroy, *_context_find
 *
 */
