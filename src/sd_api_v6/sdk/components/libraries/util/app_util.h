@@ -86,11 +86,8 @@ extern uint32_t __StackLimit;
 #define STACK_TOP     &__StackTop
 
 #else
-extern uint32_t __StackTop;
-extern uint32_t __StackLimit;
-#define STACK_BASE    &__StackLimit
-#define STACK_TOP     &__StackTop
-
+#define STACK_BASE 0x1F000 // Arbitrary value.
+#define STACK_TOP  0x20000 // Arbitrary value.
 #endif
 
 /* These macros are valid only when absolute placement is used for the application
@@ -103,12 +100,12 @@ extern uint32_t __StackLimit;
 #define CODE_SIZE  (0x1000) // Arbitrary value.
 
 #elif defined ( __CC_ARM )
-extern char Image$$ER_IROM1$$Base;
-extern char Image$$ER_IROM1$$Length;
-extern char Image$$ER_IROM1$$Limit;
-#define CODE_START ((uint32_t)&Image$$ER_IROM1$$Base)
-#define CODE_END   ((uint32_t)&Image$$ER_IROM1$$Limit)
-#define CODE_SIZE  ((uint32_t)&Image$$ER_IROM1$$Length)
+extern char Load$$LR$$LR_IROM1$$Base;
+extern char Load$$LR$$LR_IROM1$$Length;
+extern char Load$$LR$$LR_IROM1$$Limit;
+#define CODE_START ((uint32_t)&Load$$LR$$LR_IROM1$$Base)
+#define CODE_END   ((uint32_t)&Load$$LR$$LR_IROM1$$Limit)
+#define CODE_SIZE  ((uint32_t)&Load$$LR$$LR_IROM1$$Length)
 
 #elif defined ( __ICCARM__ )
 extern void * __vector_table;

@@ -443,7 +443,7 @@ typedef struct
  * @retval ::NRF_ERROR_FORBIDDEN Forbidden value supplied, certain UUIDs are reserved for the stack.
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  */
-SVCALL(SD_BLE_GATTS_SERVICE_ADD, uint32_t, sd_ble_gatts_service_add(adapter_t *adapter, uint8_t type, ble_uuid_t const *p_uuid, uint16_t *p_handle));
+SVCALL(SD_BLE_GATTS_SERVICE_ADD, uint32_t, sd_ble_gatts_service_add(uint8_t type, ble_uuid_t const *p_uuid, uint16_t *p_handle));
 
 
 /**@brief Add an include declaration to the Attribute Table.
@@ -469,7 +469,7 @@ SVCALL(SD_BLE_GATTS_SERVICE_ADD, uint32_t, sd_ble_gatts_service_add(adapter_t *a
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  * @retval ::NRF_ERROR_NOT_FOUND Attribute not found.
  */
-SVCALL(SD_BLE_GATTS_INCLUDE_ADD, uint32_t, sd_ble_gatts_include_add(adapter_t *adapter, uint16_t service_handle, uint16_t inc_srvc_handle, uint16_t *p_include_handle));
+SVCALL(SD_BLE_GATTS_INCLUDE_ADD, uint32_t, sd_ble_gatts_include_add(uint16_t service_handle, uint16_t inc_srvc_handle, uint16_t *p_include_handle));
 
 
 /**@brief Add a characteristic declaration, a characteristic value declaration and optional characteristic descriptor declarations to the Attribute Table.
@@ -498,7 +498,7 @@ SVCALL(SD_BLE_GATTS_INCLUDE_ADD, uint32_t, sd_ble_gatts_include_add(adapter_t *a
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, attribute lengths are restricted by @ref BLE_GATTS_ATTR_LENS_MAX.
  */
-SVCALL(SD_BLE_GATTS_CHARACTERISTIC_ADD, uint32_t, sd_ble_gatts_characteristic_add(adapter_t *adapter, uint16_t service_handle, ble_gatts_char_md_t const *p_char_md, ble_gatts_attr_t const *p_attr_char_value, ble_gatts_char_handles_t *p_handles));
+SVCALL(SD_BLE_GATTS_CHARACTERISTIC_ADD, uint32_t, sd_ble_gatts_characteristic_add(uint16_t service_handle, ble_gatts_char_md_t const *p_char_md, ble_gatts_attr_t const *p_attr_char_value, ble_gatts_char_handles_t *p_handles));
 
 
 /**@brief Add a descriptor to the Attribute Table.
@@ -521,7 +521,7 @@ SVCALL(SD_BLE_GATTS_CHARACTERISTIC_ADD, uint32_t, sd_ble_gatts_characteristic_ad
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, attribute lengths are restricted by @ref BLE_GATTS_ATTR_LENS_MAX.
  */
-SVCALL(SD_BLE_GATTS_DESCRIPTOR_ADD, uint32_t, sd_ble_gatts_descriptor_add(adapter_t *adapter, uint16_t char_handle, ble_gatts_attr_t const *p_attr, uint16_t *p_handle));
+SVCALL(SD_BLE_GATTS_DESCRIPTOR_ADD, uint32_t, sd_ble_gatts_descriptor_add(uint16_t char_handle, ble_gatts_attr_t const *p_attr, uint16_t *p_handle));
 
 /**@brief Set the value of a given attribute.
  *
@@ -544,7 +544,7 @@ SVCALL(SD_BLE_GATTS_DESCRIPTOR_ADD, uint32_t, sd_ble_gatts_descriptor_add(adapte
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, attribute lengths are restricted by @ref BLE_GATTS_ATTR_LENS_MAX.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
  */
-SVCALL(SD_BLE_GATTS_VALUE_SET, uint32_t, sd_ble_gatts_value_set(adapter_t *adapter, uint16_t conn_handle, uint16_t handle, ble_gatts_value_t *p_value));
+SVCALL(SD_BLE_GATTS_VALUE_SET, uint32_t, sd_ble_gatts_value_set(uint16_t conn_handle, uint16_t handle, ble_gatts_value_t *p_value));
 
 /**@brief Get the value of a given attribute.
  *
@@ -568,7 +568,7 @@ SVCALL(SD_BLE_GATTS_VALUE_SET, uint32_t, sd_ble_gatts_value_set(adapter_t *adapt
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
  * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref sd_ble_gatts_sys_attr_set to set them to a known value.
  */
-SVCALL(SD_BLE_GATTS_VALUE_GET, uint32_t, sd_ble_gatts_value_get(adapter_t *adapter, uint16_t conn_handle, uint16_t handle, ble_gatts_value_t *p_value));
+SVCALL(SD_BLE_GATTS_VALUE_GET, uint32_t, sd_ble_gatts_value_get(uint16_t conn_handle, uint16_t handle, ble_gatts_value_t *p_value));
 
 /**@brief Notify or Indicate an attribute value.
  *
@@ -633,7 +633,7 @@ SVCALL(SD_BLE_GATTS_VALUE_GET, uint32_t, sd_ble_gatts_value_get(adapter_t *adapt
  *                               Wait for a @ref BLE_GATTS_EVT_HVN_TX_COMPLETE event and retry.
  * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
  */
-SVCALL(SD_BLE_GATTS_HVX, uint32_t, sd_ble_gatts_hvx(adapter_t *adapter, uint16_t conn_handle, ble_gatts_hvx_params_t const *p_hvx_params));
+SVCALL(SD_BLE_GATTS_HVX, uint32_t, sd_ble_gatts_hvx(uint16_t conn_handle, ble_gatts_hvx_params_t const *p_hvx_params));
 
 /**@brief Indicate the Service Changed attribute value.
  *
@@ -669,7 +669,7 @@ SVCALL(SD_BLE_GATTS_HVX, uint32_t, sd_ble_gatts_hvx(adapter_t *adapter, uint16_t
  * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref sd_ble_gatts_sys_attr_set to set them to a known value.
  * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
  */
-SVCALL(SD_BLE_GATTS_SERVICE_CHANGED, uint32_t, sd_ble_gatts_service_changed(adapter_t *adapter, uint16_t conn_handle, uint16_t start_handle, uint16_t end_handle));
+SVCALL(SD_BLE_GATTS_SERVICE_CHANGED, uint32_t, sd_ble_gatts_service_changed(uint16_t conn_handle, uint16_t start_handle, uint16_t end_handle));
 
 /**@brief Respond to a Read/Write authorization request.
  *
@@ -702,7 +702,7 @@ SVCALL(SD_BLE_GATTS_SERVICE_CHANGED, uint32_t, sd_ble_gatts_service_changed(adap
  *                                         or invalid data to be written provided by the application.
  * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
  */
-SVCALL(SD_BLE_GATTS_RW_AUTHORIZE_REPLY, uint32_t, sd_ble_gatts_rw_authorize_reply(adapter_t *adapter, uint16_t conn_handle, ble_gatts_rw_authorize_reply_params_t const *p_rw_authorize_reply_params));
+SVCALL(SD_BLE_GATTS_RW_AUTHORIZE_REPLY, uint32_t, sd_ble_gatts_rw_authorize_reply(uint16_t conn_handle, ble_gatts_rw_authorize_reply_params_t const *p_rw_authorize_reply_params));
 
 
 /**@brief Update persistent system attribute information.
@@ -746,7 +746,7 @@ SVCALL(SD_BLE_GATTS_RW_AUTHORIZE_REPLY, uint32_t, sd_ble_gatts_rw_authorize_repl
  * @retval ::NRF_ERROR_INVALID_DATA Invalid data supplied, the data should be exactly the same as retrieved with @ref sd_ble_gatts_sys_attr_get.
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  */
-SVCALL(SD_BLE_GATTS_SYS_ATTR_SET, uint32_t, sd_ble_gatts_sys_attr_set(adapter_t *adapter, uint16_t conn_handle, uint8_t const *p_sys_attr_data, uint16_t len, uint32_t flags));
+SVCALL(SD_BLE_GATTS_SYS_ATTR_SET, uint32_t, sd_ble_gatts_sys_attr_set(uint16_t conn_handle, uint8_t const *p_sys_attr_data, uint16_t len, uint32_t flags));
 
 
 /**@brief Retrieve persistent system attribute information from the stack.
@@ -779,7 +779,7 @@ SVCALL(SD_BLE_GATTS_SYS_ATTR_SET, uint32_t, sd_ble_gatts_sys_attr_set(adapter_t 
  * @retval ::NRF_ERROR_DATA_SIZE The system attribute information did not fit into the provided buffer.
  * @retval ::NRF_ERROR_NOT_FOUND No system attributes found.
  */
-SVCALL(SD_BLE_GATTS_SYS_ATTR_GET, uint32_t, sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uint8_t *p_sys_attr_data, uint16_t *p_len, uint32_t flags));
+SVCALL(SD_BLE_GATTS_SYS_ATTR_GET, uint32_t, sd_ble_gatts_sys_attr_get(uint16_t conn_handle, uint8_t *p_sys_attr_data, uint16_t *p_len, uint32_t flags));
 
 
 /**@brief Retrieve the first valid user attribute handle.
@@ -789,7 +789,7 @@ SVCALL(SD_BLE_GATTS_SYS_ATTR_GET, uint32_t, sd_ble_gatts_sys_attr_get(adapter_t 
  * @retval ::NRF_SUCCESS Successfully retrieved the handle.
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  */
-SVCALL(SD_BLE_GATTS_INITIAL_USER_HANDLE_GET, uint32_t, sd_ble_gatts_initial_user_handle_get(adapter_t *adapter, uint16_t *p_handle));
+SVCALL(SD_BLE_GATTS_INITIAL_USER_HANDLE_GET, uint32_t, sd_ble_gatts_initial_user_handle_get(uint16_t *p_handle));
 
 /**@brief Retrieve the attribute UUID and/or metadata.
  *
@@ -802,7 +802,7 @@ SVCALL(SD_BLE_GATTS_INITIAL_USER_HANDLE_GET, uint32_t, sd_ble_gatts_initial_user
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameters supplied. Returned when both @c p_uuid and @c p_md are NULL.
  * @retval ::NRF_ERROR_NOT_FOUND Attribute was not found.
  */
-SVCALL(SD_BLE_GATTS_ATTR_GET, uint32_t, sd_ble_gatts_attr_get(adapter_t *adapter, uint16_t handle, ble_uuid_t * p_uuid, ble_gatts_attr_md_t * p_md));
+SVCALL(SD_BLE_GATTS_ATTR_GET, uint32_t, sd_ble_gatts_attr_get(uint16_t handle, ble_uuid_t * p_uuid, ble_gatts_attr_md_t * p_md));
 
 /**@brief Reply to an ATT_MTU exchange request by sending an Exchange MTU Response to the client.
  *
@@ -832,7 +832,7 @@ SVCALL(SD_BLE_GATTS_ATTR_GET, uint32_t, sd_ble_gatts_attr_get(adapter_t *adapter
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid Server RX MTU size supplied.
  * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
  */
-SVCALL(SD_BLE_GATTS_EXCHANGE_MTU_REPLY, uint32_t, sd_ble_gatts_exchange_mtu_reply(adapter_t *adapter, uint16_t conn_handle, uint16_t server_rx_mtu));
+SVCALL(SD_BLE_GATTS_EXCHANGE_MTU_REPLY, uint32_t, sd_ble_gatts_exchange_mtu_reply(uint16_t conn_handle, uint16_t server_rx_mtu));
 /** @} */
 
 #ifdef __cplusplus
