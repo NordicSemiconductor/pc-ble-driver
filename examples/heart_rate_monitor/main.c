@@ -43,7 +43,7 @@
 #define UART_PORT_NAME "/dev/ttyACM0"
 #endif
 
-#define BAUD_RATE 115200 /**< The baud rate to be used for serial communication with nRF5 device. */
+#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #define ADVERTISING_INTERVAL_40_MS 64  /**< 0.625 ms = 40 ms */
 #define ADVERTISING_TIMEOUT_3_MIN  180 /**< 1 sec = 3 min */
@@ -357,11 +357,15 @@ static uint32_t advertising_start()
 static uint8_t heart_rate_measurement_encode(uint8_t * encoded_hrm, uint8_t heart_rate)
 {
     uint8_t flags = 0;
+    uint8_t length = 1;
 
+    // Very simple encoding
+    encoded_hrm[length++] = heart_rate;
+
+    // Add flags
     encoded_hrm[0] = flags;
-    encoded_hrm[1] = heart_rate;
 
-    return 2;
+    return length;
 }
 
 /**@brief Function for adding the Heart Rate Measurement characteristic.
@@ -511,6 +515,15 @@ static uint32_t heart_rate_measurement_send()
 
     error_code = sd_ble_gatts_hvx(m_adapter, m_connection_handle, &hvx_params);
 
+    if (error_code == NRF_SUCCESS && (hvx_length != length))
+    {
+        error_code = NRF_ERROR_DATA_SIZE;
+        printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+
     if (error_code != NRF_SUCCESS)
     {
         printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code);
@@ -589,7 +602,7 @@ int main(int argc, char * argv[])
             heart_rate_measurement_send();
         }
 
-		Sleep(1000);
+		Sleep(10);
 	}
 
     error_code = sd_rpc_close(m_adapter);
