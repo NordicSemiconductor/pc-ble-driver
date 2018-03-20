@@ -721,10 +721,10 @@ static uint32_t scan_start()
 #if NRF_SD_BLE_API > 5
     ble_data_t m_adv_report_buffer;
     
-
     m_adv_report_buffer.p_data = mp_data;
     m_adv_report_buffer.len = sizeof(mp_data);
 #endif
+
     uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param
 #if NRF_SD_BLE_API > 5
     , &m_adv_report_buffer
