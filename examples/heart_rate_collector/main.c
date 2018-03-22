@@ -83,6 +83,9 @@ static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
 static uint32_t    m_config_id = 1;
 static uint8_t	   mp_data[100] = { 0 };
+#if NRF_SD_BLE_API > 5 
+static ble_data_t  m_adv_report_buffer;
+#endif
 
 static const ble_gap_scan_params_t m_scan_param =
 {
@@ -208,6 +211,21 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
     ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr, str);
     printf("Received advertisement report with device address: 0x%s\n", str);
     fflush(stdout);
+
+#if NRF_SD_BLE_API > 5 
+	err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
+
+	if (err_code != NRF_SUCCESS)
+	{
+		printf("Scan start failed with error code: %d\n", err_code);
+		fflush(stdout);
+	}
+	else
+	{
+		printf("Scan started\n");
+		fflush(stdout);
+	}
+#endif
 
     if (find_adv_name(&p_ble_gap_evt->params.adv_report, TARGET_DEV_NAME))
     {
@@ -718,9 +736,7 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
  */
 static uint32_t scan_start()
 {
-#if NRF_SD_BLE_API > 5
-    ble_data_t m_adv_report_buffer;
-    
+#if NRF_SD_BLE_API > 5 
     m_adv_report_buffer.p_data = mp_data;
     m_adv_report_buffer.len = sizeof(mp_data);
 #endif
@@ -733,7 +749,7 @@ static uint32_t scan_start()
 
     if (error_code != NRF_SUCCESS)
     {
-        printf("Scan start failed\n");
+        printf("Scan start failed with error code: %d\n", error_code);
         fflush(stdout);
     } else
     {

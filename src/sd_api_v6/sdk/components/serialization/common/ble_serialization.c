@@ -170,7 +170,7 @@ uint32_t uint16_t_dec(uint8_t const * const p_buf,
                       uint32_t * const      p_index,
                       void *                p_field)
 {
-    uint16_t * p_u16 = (uint16_t *)p_field;
+     uint16_t * p_u16 = (uint16_t *)p_field;
 
     SER_ASSERT_LENGTH_LEQ(2, ((int32_t)buf_len - *p_index));
 

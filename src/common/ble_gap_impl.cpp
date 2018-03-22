@@ -716,6 +716,13 @@ uint32_t sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const *
 )
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+        if (p_adv_report_buffer)
+        {
+            // TODO: handle the error
+            uint32_t error = app_ble_gap_scan_data_set(p_adv_report_buffer);
+        }
+#endif
         return ble_gap_scan_start_req_enc(
             p_scan_params,
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
