@@ -56,7 +56,6 @@ class BLESecurityContext
 {
 private:
     void *context;
-
 public:
     explicit BLESecurityContext(void* context) : context(context)
     {
