@@ -83,7 +83,7 @@ static uint32_t                 m_config_id                     = 1;
 static uint8_t					m_adv_handle					= 0;
 
 #if NRF_SD_BLE_API >= 6
-static ble_gap_adv_params_t		m_adv_params;
+static ble_gap_adv_params_t     m_adv_params;
 #endif
 
 static uint32_t advertising_start();
@@ -374,10 +374,12 @@ static uint32_t advertisement_data_set()
 #if NRF_SD_BLE_API >= 6
     ble_gap_adv_properties_t adv_properties;
     adv_properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+    adv_properties.anonymous = NULL;
+    adv_properties.include_tx_power = NULL;
 
     m_adv_params.properties = adv_properties;
 	m_adv_params.filter_policy = BLE_GAP_ADV_FP_ANY;
-	m_adv_params.duration = ADVERTISING_TIMEOUT_3_MIN;
+	m_adv_params.duration = BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED;
 	m_adv_params.p_peer_addr = NULL;                        // Undirected advertisement.
 	m_adv_params.interval = ADVERTISING_INTERVAL_40_MS;
 	m_adv_params.max_adv_evts = 0;
