@@ -82,7 +82,7 @@ static uint16_t    m_hrm_cccd_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
 static uint32_t    m_config_id = 1;
-static uint8_t	   mp_data[100] = { 0 };
+static uint8_t	   mp_data[250] = { 0 };
 #if NRF_SD_BLE_API > 5 
 static ble_data_t  m_adv_report_buffer;
 #endif
@@ -212,7 +212,7 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
     printf("Received advertisement report with device address: 0x%s\n", str);
     fflush(stdout);
 
-#if NRF_SD_BLE_API > 5 
+#if NRF_SD_BLE_API > 5
 	err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
 
 	if (err_code != NRF_SUCCESS)
@@ -583,7 +583,7 @@ static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const ch
 
     // Initialize advertisement report for parsing
 #if NRF_SD_BLE_API >= 6 
-    adv_data.p_data     = p_adv_report->data.p_data;
+    adv_data.p_data     = (uint8_t *)p_adv_report->data.p_data;
     adv_data.data_len   = p_adv_report->data.len;
 #else
     adv_data.p_data     = (uint8_t *)p_adv_report->data;
@@ -591,6 +591,7 @@ static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const ch
 #endif
 
 
+	printf("Data: %s\n", adv_data.p_data);
     //search for advertising names
     err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
                                 &adv_data,
@@ -952,7 +953,7 @@ int main(int argc, char * argv[])
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  cccd_value = 0;
-	char c = (char)getchar();
+	// char c = (char)getchar();
 
     if (argc > 2)
     {
