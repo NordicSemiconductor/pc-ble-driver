@@ -406,6 +406,7 @@ static uint32_t advertisement_data_set()
 	m_adv_data.scan_rsp_data = scan_rsp_data;
 
     error_code = sd_ble_gap_adv_set_configure(m_adapter, &m_adv_handle, &m_adv_data, &m_adv_params);
+    error_code = app_ble_gap_adv_set_register(m_adv_handle, &adv_data, NULL); 
 #endif
 
     if (error_code != NRF_SUCCESS)
@@ -643,7 +644,7 @@ int main(int argc, char * argv[])
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  cccd_value = 0;
-	char c = (char)getchar();
+	// char c = (char)getchar();
 
     if (argc > 2)
     {
