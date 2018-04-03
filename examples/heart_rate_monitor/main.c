@@ -79,7 +79,7 @@ static bool                     m_send_notifications            = false;
 static bool                     m_advertisement_timed_out       = false;
 static adapter_t *              m_adapter                       = NULL;
 static uint32_t                 m_config_id                     = 1;
-static uint8_t					m_adv_handle					= 0;
+static uint8_t                  m_adv_handle                    = 0;
 
 #if NRF_SD_BLE_API >= 6
 static ble_gap_adv_params_t     m_adv_params;
@@ -372,37 +372,36 @@ static uint32_t advertisement_data_set()
 #endif
 #if NRF_SD_BLE_API >= 6
     ble_gap_adv_properties_t adv_properties;
-    adv_properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-    adv_properties.anonymous = NULL;
+    adv_properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+    adv_properties.anonymous        = NULL;
     adv_properties.include_tx_power = NULL;
 
-    m_adv_params.properties = adv_properties;
-	m_adv_params.filter_policy = BLE_GAP_ADV_FP_ANY;
-	m_adv_params.duration = BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED;
-	m_adv_params.p_peer_addr = NULL;                        // Undirected advertisement.
-	m_adv_params.interval = ADVERTISING_INTERVAL_40_MS;
-	m_adv_params.max_adv_evts = 0;
-	m_adv_params.primary_phy = BLE_GAP_PHY_AUTO;
-	m_adv_params.secondary_phy = BLE_GAP_PHY_AUTO;
-	m_adv_params.channel_mask[0] = 0;
-	m_adv_params.channel_mask[1] = 0;
-	m_adv_params.channel_mask[2] = 0;
-	m_adv_params.channel_mask[3] = 0;
-	m_adv_params.channel_mask[4] = 0;
+    m_adv_params.properties         = adv_properties;
+    m_adv_params.filter_policy      = BLE_GAP_ADV_FP_ANY;
+    m_adv_params.duration           = BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED;
+    m_adv_params.p_peer_addr        = NULL;
+    m_adv_params.interval           = ADVERTISING_INTERVAL_40_MS;
+    m_adv_params.max_adv_evts       = 0;
+    m_adv_params.primary_phy        = BLE_GAP_PHY_AUTO;
+    m_adv_params.secondary_phy      = BLE_GAP_PHY_AUTO;
+    m_adv_params.channel_mask[0]    = 0;
+    m_adv_params.channel_mask[1]    = 0;
+    m_adv_params.channel_mask[2]    = 0;
+    m_adv_params.channel_mask[3]    = 0;
+    m_adv_params.channel_mask[4]    = 0;
 
-	ble_gap_adv_data_t m_adv_data;
+    ble_gap_adv_data_t m_adv_data;
 
-	ble_data_t adv_data;
-	adv_data.p_data = data_buffer;
-	adv_data.len =	  index;
+    ble_data_t adv_data;
+    adv_data.p_data = data_buffer;
+    adv_data.len    = index;
 
-	ble_data_t scan_rsp_data;
-	scan_rsp_data.p_data = NULL;
-	scan_rsp_data.len =	   0;
+    ble_data_t scan_rsp_data;
+    scan_rsp_data.p_data = NULL;
+    scan_rsp_data.len    = 0;
 
-
-	m_adv_data.adv_data = adv_data;
-	m_adv_data.scan_rsp_data = scan_rsp_data;
+    m_adv_data.adv_data         = adv_data;
+    m_adv_data.scan_rsp_data    = scan_rsp_data;
 
     error_code = sd_ble_gap_adv_set_configure(m_adapter, &m_adv_handle, &m_adv_data, &m_adv_params);
     error_code = app_ble_gap_adv_set_register(m_adv_handle, &adv_data, NULL); 
@@ -430,9 +429,9 @@ static uint32_t advertising_start()
     ble_gap_adv_params_t adv_params;
 
 #if NRF_SD_BLE_API <= 5
-	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	adv_params.fp = BLE_GAP_ADV_FP_ANY;
-	adv_params.timeout = ADVERTISING_TIMEOUT_3_MIN;
+    adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+    adv_params.fp = BLE_GAP_ADV_FP_ANY;
+    adv_params.timeout = ADVERTISING_TIMEOUT_3_MIN;
 #endif
 #if NRF_SD_BLE_API == 2
     adv_params.p_whitelist = NULL;
@@ -441,9 +440,9 @@ static uint32_t advertising_start()
 #if NRF_SD_BLE_API <= 3
     error_code = sd_ble_gap_adv_start(m_adapter, &adv_params);
 #elif NRF_SD_BLE_API == 5
-	error_code = sd_ble_gap_adv_start(m_adapter, &adv_params, BLE_CONN_CFG_TAG_DEFAULT);
-#elif NRF_SD_BLE_API > 5
-	error_code = sd_ble_gap_adv_start(m_adapter, m_adv_handle, BLE_CONN_CFG_TAG_DEFAULT);
+    error_code = sd_ble_gap_adv_start(m_adapter, &adv_params, BLE_CONN_CFG_TAG_DEFAULT);
+#elif NRF_SD_BLE_API >= 6
+    error_code = sd_ble_gap_adv_start(m_adapter, m_adv_handle, BLE_CONN_CFG_TAG_DEFAULT);
 #endif
 
     if (error_code != NRF_SUCCESS)
@@ -643,7 +642,6 @@ int main(int argc, char * argv[])
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  cccd_value = 0;
-	// char c = (char)getchar();
 
     if (argc > 2)
     {
