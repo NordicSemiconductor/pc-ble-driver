@@ -1645,7 +1645,7 @@ typedef union
  * @retval ::NRF_ERROR_INVALID_STATE The identity address cannot be changed while advertising,
  *                                   scanning or creating a connection.
  */
-SVCALL(SD_BLE_GAP_ADDR_SET, uint32_t, sd_ble_gap_addr_set(adapter_t * adapter, ble_gap_addr_t const *p_addr));
+SVCALL(SD_BLE_GAP_ADDR_SET, uint32_t, sd_ble_gap_addr_set(adapter_t *adapter, ble_gap_addr_t const *p_addr));
 
 
 /**@brief Get local Bluetooth identity address.
@@ -1658,7 +1658,7 @@ SVCALL(SD_BLE_GAP_ADDR_SET, uint32_t, sd_ble_gap_addr_set(adapter_t * adapter, b
  * @retval ::NRF_SUCCESS Address successfully retrieved.
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid or NULL pointer supplied.
  */
-SVCALL(SD_BLE_GAP_ADDR_GET, uint32_t, sd_ble_gap_addr_get(adapter_t * adapter, ble_gap_addr_t *p_addr));
+SVCALL(SD_BLE_GAP_ADDR_GET, uint32_t, sd_ble_gap_addr_get(adapter_t *adapter, ble_gap_addr_t *p_addr));
 
 
 /**@brief Set the active whitelist in the SoftDevice.
@@ -1684,7 +1684,7 @@ SVCALL(SD_BLE_GAP_ADDR_GET, uint32_t, sd_ble_gap_addr_get(adapter_t * adapter, b
  * @retval ::NRF_ERROR_DATA_SIZE The given whitelist size is invalid (zero or too large); this can only return when
  *                               pp_wl_addrs is not NULL.
  */
-SVCALL(SD_BLE_GAP_WHITELIST_SET, uint32_t, sd_ble_gap_whitelist_set(adapter_t * adapter, ble_gap_addr_t const * const * pp_wl_addrs, uint8_t len));
+SVCALL(SD_BLE_GAP_WHITELIST_SET, uint32_t, sd_ble_gap_whitelist_set(adapter_t *adapter, ble_gap_addr_t const * const * pp_wl_addrs, uint8_t len));
 
 
 /**@brief Set device identity list.
@@ -1715,7 +1715,7 @@ SVCALL(SD_BLE_GAP_WHITELIST_SET, uint32_t, sd_ble_gap_whitelist_set(adapter_t * 
  * @retval ::NRF_ERROR_DATA_SIZE The given device identity list size invalid (zero or too large); this can
  *                               only return when pp_id_keys is not NULL.
  */
-SVCALL(SD_BLE_GAP_DEVICE_IDENTITIES_SET, uint32_t, sd_ble_gap_device_identities_set(adapter_t * adapter, ble_gap_id_key_t const * const * pp_id_keys, ble_gap_irk_t const * const * pp_local_irks, uint8_t len));
+SVCALL(SD_BLE_GAP_DEVICE_IDENTITIES_SET, uint32_t, sd_ble_gap_device_identities_set(adapter_t *adapter, ble_gap_id_key_t const * const * pp_id_keys, ble_gap_irk_t const * const * pp_local_irks, uint8_t len));
 
 
 /**@brief Set privacy settings.
@@ -1739,7 +1739,7 @@ SVCALL(SD_BLE_GAP_DEVICE_IDENTITIES_SET, uint32_t, sd_ble_gap_device_identities_
  * @retval ::NRF_ERROR_INVALID_STATE Privacy settings cannot be changed while advertising, scanning
  *                                   or creating a connection.
  */
-SVCALL(SD_BLE_GAP_PRIVACY_SET, uint32_t, sd_ble_gap_privacy_set(adapter_t * adapter, ble_gap_privacy_params_t const *p_privacy_params));
+SVCALL(SD_BLE_GAP_PRIVACY_SET, uint32_t, sd_ble_gap_privacy_set(adapter_t *adapter, ble_gap_privacy_params_t const *p_privacy_params));
 
 
 /**@brief Get privacy settings.
@@ -1753,7 +1753,7 @@ SVCALL(SD_BLE_GAP_PRIVACY_SET, uint32_t, sd_ble_gap_privacy_set(adapter_t * adap
  * @retval ::NRF_ERROR_INVALID_ADDR The pointer given for returning the privacy settings may be NULL or invalid.
  *                                  Otherwise, the p_device_irk pointer in privacy parameter is an invalid pointer.
  */
-SVCALL(SD_BLE_GAP_PRIVACY_GET, uint32_t, sd_ble_gap_privacy_get(adapter_t * adapter, ble_gap_privacy_params_t *p_privacy_params));
+SVCALL(SD_BLE_GAP_PRIVACY_GET, uint32_t, sd_ble_gap_privacy_get(adapter_t *adapter, ble_gap_privacy_params_t *p_privacy_params));
 
 
 /**@brief Configure an advertising set. Set, clear or update advertising and scan response data.
@@ -1800,7 +1800,7 @@ SVCALL(SD_BLE_GAP_PRIVACY_GET, uint32_t, sd_ble_gap_privacy_get(adapter_t * adap
  *                                                     existing advertising handle instead.
  * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
  */
-SVCALL(SD_BLE_GAP_ADV_SET_CONFIGURE, uint32_t, sd_ble_gap_adv_set_configure(adapter_t * adapter, uint8_t *p_adv_handle, ble_gap_adv_data_t const *p_adv_data, ble_gap_adv_params_t const *p_adv_params));
+SVCALL(SD_BLE_GAP_ADV_SET_CONFIGURE, uint32_t, sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle, ble_gap_adv_data_t const *p_adv_data, ble_gap_adv_params_t const *p_adv_params));
 
 
 /**@brief Start advertising (GAP Discoverable, Connectable modes, Broadcast Procedure).
@@ -1843,7 +1843,7 @@ SVCALL(SD_BLE_GAP_ADV_SET_CONFIGURE, uint32_t, sd_ble_gap_adv_set_configure(adap
  *                                          associated with conn_cfg_tag is too small to be able to establish a connection on
  *                                          the selected advertising phys. Use @ref sd_ble_cfg_set to increase the event length.
  */
-SVCALL(SD_BLE_GAP_ADV_START, uint32_t, sd_ble_gap_adv_start(adapter_t * adapter, uint8_t adv_handle, uint8_t conn_cfg_tag));
+SVCALL(SD_BLE_GAP_ADV_START, uint32_t, sd_ble_gap_adv_start(adapter_t *adapter, uint8_t adv_handle, uint8_t conn_cfg_tag));
 
 
 /**@brief Stop advertising (GAP Discoverable, Connectable modes, Broadcast Procedure).
@@ -1859,7 +1859,7 @@ SVCALL(SD_BLE_GAP_ADV_START, uint32_t, sd_ble_gap_adv_start(adapter_t * adapter,
  * @retval ::BLE_ERROR_INVALID_ADV_HANDLE Invalid advertising handle.
  * @retval ::NRF_ERROR_INVALID_STATE The advertising handle is not advertising.
  */
-SVCALL(SD_BLE_GAP_ADV_STOP, uint32_t, sd_ble_gap_adv_stop(adapter_t * adapter, uint8_t adv_handle));
+SVCALL(SD_BLE_GAP_ADV_STOP, uint32_t, sd_ble_gap_adv_stop(adapter_t *adapter, uint8_t adv_handle));
 
 
 
@@ -1897,7 +1897,7 @@ SVCALL(SD_BLE_GAP_ADV_STOP, uint32_t, sd_ble_gap_adv_stop(adapter_t * adapter, u
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
  */
-SVCALL(SD_BLE_GAP_CONN_PARAM_UPDATE, uint32_t, sd_ble_gap_conn_param_update(adapter_t * adapter, uint16_t conn_handle, ble_gap_conn_params_t const *p_conn_params));
+SVCALL(SD_BLE_GAP_CONN_PARAM_UPDATE, uint32_t, sd_ble_gap_conn_param_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_conn_params_t const *p_conn_params));
 
 
 /**@brief Disconnect (GAP Link Termination).
@@ -1921,7 +1921,7 @@ SVCALL(SD_BLE_GAP_CONN_PARAM_UPDATE, uint32_t, sd_ble_gap_conn_param_update(adap
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation (disconnection is already in progress).
  */
-SVCALL(SD_BLE_GAP_DISCONNECT, uint32_t, sd_ble_gap_disconnect(adapter_t * adapter, uint16_t conn_handle, uint8_t hci_status_code));
+SVCALL(SD_BLE_GAP_DISCONNECT, uint32_t, sd_ble_gap_disconnect(adapter_t *adapter, uint16_t conn_handle, uint8_t hci_status_code));
 
 
 /**@brief Set the radio's transmit power.
@@ -1946,7 +1946,7 @@ SVCALL(SD_BLE_GAP_DISCONNECT, uint32_t, sd_ble_gap_disconnect(adapter_t * adapte
  * @retval ::BLE_ERROR_INVALID_ADV_HANDLE Advertising handle not found.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_TX_POWER_SET, uint32_t, sd_ble_gap_tx_power_set(adapter_t * adapter, uint8_t role, uint16_t handle, int8_t tx_power));
+SVCALL(SD_BLE_GAP_TX_POWER_SET, uint32_t, sd_ble_gap_tx_power_set(adapter_t *adapter, uint8_t role, uint16_t handle, int8_t tx_power));
 
 
 /**@brief Set GAP Appearance value.
@@ -1956,7 +1956,7 @@ SVCALL(SD_BLE_GAP_TX_POWER_SET, uint32_t, sd_ble_gap_tx_power_set(adapter_t * ad
  * @retval ::NRF_SUCCESS  Appearance value set successfully.
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
  */
-SVCALL(SD_BLE_GAP_APPEARANCE_SET, uint32_t, sd_ble_gap_appearance_set(adapter_t * adapter, uint16_t appearance));
+SVCALL(SD_BLE_GAP_APPEARANCE_SET, uint32_t, sd_ble_gap_appearance_set(adapter_t *adapter, uint16_t appearance));
 
 
 /**@brief Get GAP Appearance value.
@@ -1966,7 +1966,7 @@ SVCALL(SD_BLE_GAP_APPEARANCE_SET, uint32_t, sd_ble_gap_appearance_set(adapter_t 
  * @retval ::NRF_SUCCESS Appearance value retrieved successfully.
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  */
-SVCALL(SD_BLE_GAP_APPEARANCE_GET, uint32_t, sd_ble_gap_appearance_get(adapter_t * adapter, uint16_t *p_appearance));
+SVCALL(SD_BLE_GAP_APPEARANCE_GET, uint32_t, sd_ble_gap_appearance_get(adapter_t *adapter, uint16_t *p_appearance));
 
 
 /**@brief Set GAP Peripheral Preferred Connection Parameters.
@@ -1977,7 +1977,7 @@ SVCALL(SD_BLE_GAP_APPEARANCE_GET, uint32_t, sd_ble_gap_appearance_get(adapter_t 
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
  */
-SVCALL(SD_BLE_GAP_PPCP_SET, uint32_t, sd_ble_gap_ppcp_set(adapter_t * adapter, ble_gap_conn_params_t const *p_conn_params));
+SVCALL(SD_BLE_GAP_PPCP_SET, uint32_t, sd_ble_gap_ppcp_set(adapter_t *adapter, ble_gap_conn_params_t const *p_conn_params));
 
 
 /**@brief Get GAP Peripheral Preferred Connection Parameters.
@@ -1987,7 +1987,7 @@ SVCALL(SD_BLE_GAP_PPCP_SET, uint32_t, sd_ble_gap_ppcp_set(adapter_t * adapter, b
  * @retval ::NRF_SUCCESS Peripheral Preferred Connection Parameters retrieved successfully.
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  */
-SVCALL(SD_BLE_GAP_PPCP_GET, uint32_t, sd_ble_gap_ppcp_get(adapter_t * adapter, ble_gap_conn_params_t *p_conn_params));
+SVCALL(SD_BLE_GAP_PPCP_GET, uint32_t, sd_ble_gap_ppcp_get(adapter_t *adapter, ble_gap_conn_params_t *p_conn_params));
 
 
 /**@brief Set GAP device name.
@@ -2005,7 +2005,7 @@ SVCALL(SD_BLE_GAP_PPCP_GET, uint32_t, sd_ble_gap_ppcp_get(adapter_t * adapter, b
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
  * @retval ::NRF_ERROR_FORBIDDEN Device name is not writable.
  */
-SVCALL(SD_BLE_GAP_DEVICE_NAME_SET, uint32_t, sd_ble_gap_device_name_set(adapter_t * adapter, ble_gap_conn_sec_mode_t const *p_write_perm, uint8_t const *p_dev_name, uint16_t len));
+SVCALL(SD_BLE_GAP_DEVICE_NAME_SET, uint32_t, sd_ble_gap_device_name_set(adapter_t *adapter, ble_gap_conn_sec_mode_t const *p_write_perm, uint8_t const *p_dev_name, uint16_t len));
 
 
 /**@brief Get GAP device name.
@@ -2022,7 +2022,7 @@ SVCALL(SD_BLE_GAP_DEVICE_NAME_SET, uint32_t, sd_ble_gap_device_name_set(adapter_
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
  */
-SVCALL(SD_BLE_GAP_DEVICE_NAME_GET, uint32_t, sd_ble_gap_device_name_get(adapter_t * adapter, uint8_t *p_dev_name, uint16_t *p_len));
+SVCALL(SD_BLE_GAP_DEVICE_NAME_GET, uint32_t, sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t *p_dev_name, uint16_t *p_len));
 
 
 /**@brief Initiate the GAP Authentication procedure.
@@ -2072,7 +2072,7 @@ SVCALL(SD_BLE_GAP_DEVICE_NAME_GET, uint32_t, sd_ble_gap_device_name_get(adapter_
  * @retval ::NRF_ERROR_NOT_SUPPORTED Setting of sign or link fields in @ref ble_gap_sec_kdist_t not supported.
  * @retval ::NRF_ERROR_TIMEOUT A SMP timeout has occurred, and further SMP operations on this link is prohibited.
  */
-SVCALL(SD_BLE_GAP_AUTHENTICATE, uint32_t, sd_ble_gap_authenticate(adapter_t * adapter, uint16_t conn_handle, ble_gap_sec_params_t const *p_sec_params));
+SVCALL(SD_BLE_GAP_AUTHENTICATE, uint32_t, sd_ble_gap_authenticate(adapter_t *adapter, uint16_t conn_handle, ble_gap_sec_params_t const *p_sec_params));
 
 
 /**@brief Reply with GAP security parameters.
@@ -2131,7 +2131,7 @@ SVCALL(SD_BLE_GAP_AUTHENTICATE, uint32_t, sd_ble_gap_authenticate(adapter_t * ad
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  * @retval ::NRF_ERROR_NOT_SUPPORTED Setting of sign or link fields in @ref ble_gap_sec_kdist_t not supported.
  */
-SVCALL(SD_BLE_GAP_SEC_PARAMS_REPLY, uint32_t, sd_ble_gap_sec_params_reply(adapter_t * adapter, uint16_t conn_handle, uint8_t sec_status, ble_gap_sec_params_t const *p_sec_params, ble_gap_sec_keyset_t const *p_sec_keyset));
+SVCALL(SD_BLE_GAP_SEC_PARAMS_REPLY, uint32_t, sd_ble_gap_sec_params_reply(adapter_t *adapter, uint16_t conn_handle, uint8_t sec_status, ble_gap_sec_params_t const *p_sec_params, ble_gap_sec_keyset_t const *p_sec_keyset));
 
 
 /**@brief Reply with an authentication key.
@@ -2165,7 +2165,7 @@ SVCALL(SD_BLE_GAP_SEC_PARAMS_REPLY, uint32_t, sd_ble_gap_sec_params_reply(adapte
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_AUTH_KEY_REPLY, uint32_t, sd_ble_gap_auth_key_reply(adapter_t * adapter, uint16_t conn_handle, uint8_t key_type, uint8_t const *p_key));
+SVCALL(SD_BLE_GAP_AUTH_KEY_REPLY, uint32_t, sd_ble_gap_auth_key_reply(adapter_t *adapter, uint16_t conn_handle, uint8_t key_type, uint8_t const *p_key));
 
 
 /**@brief Reply with an LE Secure connections DHKey.
@@ -2199,7 +2199,7 @@ SVCALL(SD_BLE_GAP_AUTH_KEY_REPLY, uint32_t, sd_ble_gap_auth_key_reply(adapter_t 
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_LESC_DHKEY_REPLY, uint32_t, sd_ble_gap_lesc_dhkey_reply(adapter_t * adapter, uint16_t conn_handle, ble_gap_lesc_dhkey_t const *p_dhkey));
+SVCALL(SD_BLE_GAP_LESC_DHKEY_REPLY, uint32_t, sd_ble_gap_lesc_dhkey_reply(adapter_t *adapter, uint16_t conn_handle, ble_gap_lesc_dhkey_t const *p_dhkey));
 
 
 /**@brief Notify the peer of a local keypress.
@@ -2218,7 +2218,7 @@ SVCALL(SD_BLE_GAP_LESC_DHKEY_REPLY, uint32_t, sd_ble_gap_lesc_dhkey_reply(adapte
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  * @retval ::NRF_ERROR_BUSY The BLE stack is busy. Retry at later time.
  */
-SVCALL(SD_BLE_GAP_KEYPRESS_NOTIFY, uint32_t, sd_ble_gap_keypress_notify(adapter_t * adapter, uint16_t conn_handle, uint8_t kp_not));
+SVCALL(SD_BLE_GAP_KEYPRESS_NOTIFY, uint32_t, sd_ble_gap_keypress_notify(adapter_t *adapter, uint16_t conn_handle, uint8_t kp_not));
 
 
 /**@brief Generate a set of OOB data to send to a peer out of band.
@@ -2239,7 +2239,7 @@ SVCALL(SD_BLE_GAP_KEYPRESS_NOTIFY, uint32_t, sd_ble_gap_keypress_notify(adapter_
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_LESC_OOB_DATA_GET, uint32_t, sd_ble_gap_lesc_oob_data_get(adapter_t * adapter, uint16_t conn_handle, ble_gap_lesc_p256_pk_t const *p_pk_own, ble_gap_lesc_oob_data_t *p_oobd_own));
+SVCALL(SD_BLE_GAP_LESC_OOB_DATA_GET, uint32_t, sd_ble_gap_lesc_oob_data_get(adapter_t *adapter, uint16_t conn_handle, ble_gap_lesc_p256_pk_t const *p_pk_own, ble_gap_lesc_oob_data_t *p_oobd_own));
 
 /**@brief Provide the OOB data sent/received out of band.
  *
@@ -2267,7 +2267,7 @@ SVCALL(SD_BLE_GAP_LESC_OOB_DATA_GET, uint32_t, sd_ble_gap_lesc_oob_data_get(adap
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_LESC_OOB_DATA_SET, uint32_t, sd_ble_gap_lesc_oob_data_set(adapter_t * adapter, uint16_t conn_handle, ble_gap_lesc_oob_data_t const *p_oobd_own, ble_gap_lesc_oob_data_t const *p_oobd_peer));
+SVCALL(SD_BLE_GAP_LESC_OOB_DATA_SET, uint32_t, sd_ble_gap_lesc_oob_data_set(adapter_t *adapter, uint16_t conn_handle, ble_gap_lesc_oob_data_t const *p_oobd_own, ble_gap_lesc_oob_data_t const *p_oobd_peer));
 
 
 /**@brief Initiate GAP Encryption procedure.
@@ -2296,7 +2296,7 @@ SVCALL(SD_BLE_GAP_LESC_OOB_DATA_SET, uint32_t, sd_ble_gap_lesc_oob_data_set(adap
  * @retval ::BLE_ERROR_INVALID_ROLE Operation is not supported in the Peripheral role.
  * @retval ::NRF_ERROR_BUSY Procedure already in progress or not allowed at this time, wait for pending procedures to complete and retry.
  */
-SVCALL(SD_BLE_GAP_ENCRYPT, uint32_t, sd_ble_gap_encrypt(adapter_t * adapter, uint16_t conn_handle, ble_gap_master_id_t const *p_master_id, ble_gap_enc_info_t const *p_enc_info));
+SVCALL(SD_BLE_GAP_ENCRYPT, uint32_t, sd_ble_gap_encrypt(adapter_t *adapter, uint16_t conn_handle, ble_gap_master_id_t const *p_master_id, ble_gap_enc_info_t const *p_enc_info));
 
 
 /**@brief Reply with GAP security information.
@@ -2319,7 +2319,7 @@ SVCALL(SD_BLE_GAP_ENCRYPT, uint32_t, sd_ble_gap_encrypt(adapter_t * adapter, uin
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_SEC_INFO_REPLY, uint32_t, sd_ble_gap_sec_info_reply(adapter_t * adapter, uint16_t conn_handle, ble_gap_enc_info_t const *p_enc_info, ble_gap_irk_t const *p_id_info, ble_gap_sign_info_t const *p_sign_info));
+SVCALL(SD_BLE_GAP_SEC_INFO_REPLY, uint32_t, sd_ble_gap_sec_info_reply(adapter_t *adapter, uint16_t conn_handle, ble_gap_enc_info_t const *p_enc_info, ble_gap_irk_t const *p_id_info, ble_gap_sign_info_t const *p_sign_info));
 
 
 /**@brief Get the current connection security.
@@ -2331,7 +2331,7 @@ SVCALL(SD_BLE_GAP_SEC_INFO_REPLY, uint32_t, sd_ble_gap_sec_info_reply(adapter_t 
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_CONN_SEC_GET, uint32_t, sd_ble_gap_conn_sec_get(adapter_t * adapter, uint16_t conn_handle, ble_gap_conn_sec_t *p_conn_sec));
+SVCALL(SD_BLE_GAP_CONN_SEC_GET, uint32_t, sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle, ble_gap_conn_sec_t *p_conn_sec));
 
 
 /**@brief Start reporting the received signal strength to the application.
@@ -2357,7 +2357,7 @@ SVCALL(SD_BLE_GAP_CONN_SEC_GET, uint32_t, sd_ble_gap_conn_sec_get(adapter_t * ad
  * @retval ::NRF_ERROR_INVALID_STATE       RSSI reporting is already ongoing.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_RSSI_START, uint32_t, sd_ble_gap_rssi_start(adapter_t * adapter, uint16_t conn_handle, uint8_t threshold_dbm, uint8_t skip_count));
+SVCALL(SD_BLE_GAP_RSSI_START, uint32_t, sd_ble_gap_rssi_start(adapter_t *adapter, uint16_t conn_handle, uint8_t threshold_dbm, uint8_t skip_count));
 
 
 /**@brief Stop reporting the received signal strength.
@@ -2376,7 +2376,7 @@ SVCALL(SD_BLE_GAP_RSSI_START, uint32_t, sd_ble_gap_rssi_start(adapter_t * adapte
  * @retval ::NRF_ERROR_INVALID_STATE       RSSI reporting is not ongoing.
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  */
-SVCALL(SD_BLE_GAP_RSSI_STOP, uint32_t, sd_ble_gap_rssi_stop(adapter_t * adapter, uint16_t conn_handle));
+SVCALL(SD_BLE_GAP_RSSI_STOP, uint32_t, sd_ble_gap_rssi_stop(adapter_t *adapter, uint16_t conn_handle));
 
 
 /**@brief Get the received signal strength for the last connection event.
@@ -2398,7 +2398,7 @@ SVCALL(SD_BLE_GAP_RSSI_STOP, uint32_t, sd_ble_gap_rssi_stop(adapter_t * adapter,
  * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
  * @retval ::NRF_ERROR_INVALID_STATE       RSSI reporting is not ongoing.
  */
-SVCALL(SD_BLE_GAP_RSSI_GET, uint32_t, sd_ble_gap_rssi_get(adapter_t * adapter, uint16_t conn_handle, int8_t *p_rssi, uint8_t *p_ch_index));
+SVCALL(SD_BLE_GAP_RSSI_GET, uint32_t, sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle, int8_t *p_rssi, uint8_t *p_ch_index));
 
 
 /**@brief Start or continue scanning (GAP Discovery procedure, Observer Procedure).
@@ -2454,7 +2454,7 @@ SVCALL(SD_BLE_GAP_RSSI_GET, uint32_t, sd_ble_gap_rssi_get(adapter_t * adapter, u
  * @retval ::NRF_ERROR_RESOURCES Not enough BLE role slots available.
  *                               Stop one or more currently active roles (Central, Peripheral or Broadcaster) and try again
  */
-SVCALL(SD_BLE_GAP_SCAN_START, uint32_t, sd_ble_gap_scan_start(adapter_t * adapter, ble_gap_scan_params_t const *p_scan_params, ble_data_t const * p_adv_report_buffer));
+SVCALL(SD_BLE_GAP_SCAN_START, uint32_t, sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const *p_scan_params, ble_data_t const * p_adv_report_buffer));
 
 
 /**@brief Stop scanning (GAP Discovery procedure, Observer Procedure).
@@ -2469,7 +2469,7 @@ SVCALL(SD_BLE_GAP_SCAN_START, uint32_t, sd_ble_gap_scan_start(adapter_t * adapte
  * @retval ::NRF_SUCCESS Successfully stopped scanning procedure.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation. Not in the scanning state.
  */
-SVCALL(SD_BLE_GAP_SCAN_STOP, uint32_t, sd_ble_gap_scan_stop(adapter_t * adapter));
+SVCALL(SD_BLE_GAP_SCAN_STOP, uint32_t, sd_ble_gap_scan_stop(adapter_t *adapter));
 
 
 /**@brief Create a connection (GAP Link Establishment).
@@ -2508,7 +2508,7 @@ SVCALL(SD_BLE_GAP_SCAN_STOP, uint32_t, sd_ble_gap_scan_stop(adapter_t * adapter)
  *                                   establish a connection on the selected @ref ble_gap_scan_params_t::scan_phys.
  *                                   Use @ref sd_ble_cfg_set to increase the event length.
  */
-SVCALL(SD_BLE_GAP_CONNECT, uint32_t, sd_ble_gap_connect(adapter_t * adapter, ble_gap_addr_t const *p_peer_addr, ble_gap_scan_params_t const *p_scan_params, ble_gap_conn_params_t const *p_conn_params, uint8_t conn_cfg_tag));
+SVCALL(SD_BLE_GAP_CONNECT, uint32_t, sd_ble_gap_connect(adapter_t *adapter, ble_gap_addr_t const *p_peer_addr, ble_gap_scan_params_t const *p_scan_params, ble_gap_conn_params_t const *p_conn_params, uint8_t conn_cfg_tag));
 
 
 /**@brief Cancel a connection establishment.
@@ -2520,7 +2520,7 @@ SVCALL(SD_BLE_GAP_CONNECT, uint32_t, sd_ble_gap_connect(adapter_t * adapter, ble
  * @retval ::NRF_SUCCESS Successfully canceled an ongoing connection procedure.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
  */
-SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(adapter_t * adapter));
+SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(adapter_t *adapter));
 
 
 /**@brief Initiate or respond to a PHY Update Procedure
@@ -2580,7 +2580,7 @@ SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(adapter_t 
  * @retval ::NRF_ERROR_BUSY Procedure is already in progress or not allowed at this time. Process pending events and wait for the pending procedure to complete and retry.
  *
  */
-SVCALL(SD_BLE_GAP_PHY_UPDATE, uint32_t, sd_ble_gap_phy_update(adapter_t * adapter, uint16_t conn_handle, ble_gap_phys_t const *p_gap_phys));
+SVCALL(SD_BLE_GAP_PHY_UPDATE, uint32_t, sd_ble_gap_phy_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_phys_t const *p_gap_phys));
 
 
 /**@brief Initiate or respond to a Data Length Update Procedure.
@@ -2615,7 +2615,7 @@ SVCALL(SD_BLE_GAP_PHY_UPDATE, uint32_t, sd_ble_gap_phy_update(adapter_t * adapte
  * @retval ::NRF_ERROR_BUSY Peer has already initiated a Data Length Update Procedure. Process the
  *                          pending @ref BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST event to respond.
  */
-SVCALL(SD_BLE_GAP_DATA_LENGTH_UPDATE, uint32_t, sd_ble_gap_data_length_update(adapter_t * adapter, uint16_t conn_handle, ble_gap_data_length_params_t const *p_dl_params, ble_gap_data_length_limitation_t *p_dl_limitation));
+SVCALL(SD_BLE_GAP_DATA_LENGTH_UPDATE, uint32_t, sd_ble_gap_data_length_update(adapter_t *adapter, uint16_t conn_handle, ble_gap_data_length_params_t const *p_dl_params, ble_gap_data_length_limitation_t *p_dl_limitation));
 
 /**@brief   Start the Quality of Service (QoS) channel survey module.
  *
@@ -2647,14 +2647,14 @@ SVCALL(SD_BLE_GAP_DATA_LENGTH_UPDATE, uint32_t, sd_ble_gap_data_length_update(ad
  *                                   Set @ref ble_gap_cfg_role_count_t::qos_channel_survey_role_available using
  *                                   @ref sd_ble_cfg_set.
  */
-SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_START, uint32_t, sd_ble_gap_qos_channel_survey_start(adapter_t * adapter, uint32_t interval_us));
+SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_START, uint32_t, sd_ble_gap_qos_channel_survey_start(adapter_t *adapter, uint32_t interval_us));
 
 /**@brief   Stop the Quality of Service (QoS) channel survey module.
  *
  * @retval ::NRF_SUCCESS             The module is successfully stopped.
  * @retval ::NRF_ERROR_INVALID_STATE Trying to stop the module when it is not running.
  */
-SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_STOP, uint32_t, sd_ble_gap_qos_channel_survey_stop(adapter_t * adapter));
+SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_STOP, uint32_t, sd_ble_gap_qos_channel_survey_stop(adapter_t *adapter));
 
 
 /** @} */

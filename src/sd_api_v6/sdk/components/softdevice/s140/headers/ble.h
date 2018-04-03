@@ -391,7 +391,7 @@ typedef union
  *                                    large enough to fit this configuration's memory requirement. Check *p_app_ram_base
  *                                    and set the start address of the application RAM region accordingly.
  */
-SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t * adapter, uint32_t * p_app_ram_base));
+SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t *adapter, uint32_t * p_app_ram_base));
 
 /**@brief Add configurations for the BLE stack
  *
@@ -427,7 +427,7 @@ SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t * adapter, uint32_t * p_
  * @retval ::NRF_ERROR_NO_MEM         The amount of memory assigned to the SoftDevice by app_ram_base is not
  *                                    large enough to fit this configuration's memory requirement.
  */
-SVCALL(SD_BLE_CFG_SET, uint32_t, sd_ble_cfg_set(adapter_t * adapter, uint32_t cfg_id, ble_cfg_t const * p_cfg, uint32_t app_ram_base));
+SVCALL(SD_BLE_CFG_SET, uint32_t, sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const * p_cfg, uint32_t app_ram_base));
 
 /**@brief Get an event from the pending events queue.
  *
@@ -465,7 +465,7 @@ SVCALL(SD_BLE_CFG_SET, uint32_t, sd_ble_cfg_set(adapter_t * adapter, uint32_t cf
  * @retval ::NRF_ERROR_NOT_FOUND No events ready to be pulled.
  * @retval ::NRF_ERROR_DATA_SIZE Event ready but could not fit into the supplied buffer.
  */
-SVCALL(SD_BLE_EVT_GET, uint32_t, sd_ble_evt_get(adapter_t * adapter, uint8_t *p_dest, uint16_t *p_len));
+SVCALL(SD_BLE_EVT_GET, uint32_t, sd_ble_evt_get(adapter_t *adapter, uint8_t *p_dest, uint16_t *p_len));
 
 
 /**@brief Add a Vendor Specific base UUID.
@@ -494,7 +494,7 @@ SVCALL(SD_BLE_EVT_GET, uint32_t, sd_ble_evt_get(adapter_t * adapter, uint8_t *p_
  * @retval ::NRF_ERROR_INVALID_ADDR If p_vs_uuid or p_uuid_type is NULL or invalid.
  * @retval ::NRF_ERROR_NO_MEM If there are no more free slots for VS UUIDs.
  */
-SVCALL(SD_BLE_UUID_VS_ADD, uint32_t, sd_ble_uuid_vs_add(adapter_t * adapter, ble_uuid128_t const *p_vs_uuid, uint8_t *p_uuid_type));
+SVCALL(SD_BLE_UUID_VS_ADD, uint32_t, sd_ble_uuid_vs_add(adapter_t *adapter, ble_uuid128_t const *p_vs_uuid, uint8_t *p_uuid_type));
 
 
 /** @brief Decode little endian raw UUID bytes (16-bit or 128-bit) into a 24 bit @ref ble_uuid_t structure.
@@ -515,7 +515,7 @@ SVCALL(SD_BLE_UUID_VS_ADD, uint32_t, sd_ble_uuid_vs_add(adapter_t * adapter, ble
  * @retval ::NRF_ERROR_INVALID_LENGTH Invalid UUID length.
  * @retval ::NRF_ERROR_NOT_FOUND For a 128-bit UUID, no match in the populated table of UUIDs.
  */
-SVCALL(SD_BLE_UUID_DECODE, uint32_t, sd_ble_uuid_decode(adapter_t * adapter, uint8_t uuid_le_len, uint8_t const *p_uuid_le, ble_uuid_t *p_uuid));
+SVCALL(SD_BLE_UUID_DECODE, uint32_t, sd_ble_uuid_decode(adapter_t *adapter, uint8_t uuid_le_len, uint8_t const *p_uuid_le, ble_uuid_t *p_uuid));
 
 
 /** @brief Encode a @ref ble_uuid_t structure into little endian raw UUID bytes (16-bit or 128-bit).
@@ -530,7 +530,7 @@ SVCALL(SD_BLE_UUID_DECODE, uint32_t, sd_ble_uuid_decode(adapter_t * adapter, uin
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_INVALID_PARAM Invalid UUID type.
  */
-SVCALL(SD_BLE_UUID_ENCODE, uint32_t, sd_ble_uuid_encode(adapter_t * adapter, ble_uuid_t const *p_uuid, uint8_t *p_uuid_le_len, uint8_t *p_uuid_le));
+SVCALL(SD_BLE_UUID_ENCODE, uint32_t, sd_ble_uuid_encode(adapter_t *adapter, ble_uuid_t const *p_uuid, uint8_t *p_uuid_le_len, uint8_t *p_uuid_le));
 
 
 /**@brief Get Version Information.
@@ -543,7 +543,7 @@ SVCALL(SD_BLE_UUID_ENCODE, uint32_t, sd_ble_uuid_encode(adapter_t * adapter, ble
  * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
  * @retval ::NRF_ERROR_BUSY The BLE stack is busy (typically doing a locally-initiated disconnection procedure).
  */
-SVCALL(SD_BLE_VERSION_GET, uint32_t, sd_ble_version_get(adapter_t * adapter, ble_version_t *p_version));
+SVCALL(SD_BLE_VERSION_GET, uint32_t, sd_ble_version_get(adapter_t *adapter, ble_version_t *p_version));
 
 
 /**@brief Provide a user memory block.
@@ -569,7 +569,7 @@ SVCALL(SD_BLE_VERSION_GET, uint32_t, sd_ble_version_get(adapter_t * adapter, ble
  * @retval ::NRF_ERROR_INVALID_LENGTH Invalid user memory block length supplied.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection state or no user memory request pending.
  */
-SVCALL(SD_BLE_USER_MEM_REPLY, uint32_t, sd_ble_user_mem_reply(adapter_t * adapter, uint16_t conn_handle, ble_user_mem_block_t const *p_block));
+SVCALL(SD_BLE_USER_MEM_REPLY, uint32_t, sd_ble_user_mem_reply(adapter_t *adapter, uint16_t conn_handle, ble_user_mem_block_t const *p_block));
 
 /**@brief Set a BLE option.
  *
@@ -589,7 +589,7 @@ SVCALL(SD_BLE_USER_MEM_REPLY, uint32_t, sd_ble_user_mem_reply(adapter_t * adapte
  * @retval ::NRF_ERROR_INVALID_STATE Unable to set the parameter at this time.
  * @retval ::NRF_ERROR_BUSY The BLE stack is busy or the previous procedure has not completed.
  */
-SVCALL(SD_BLE_OPT_SET, uint32_t, sd_ble_opt_set(adapter_t * adapter, uint32_t opt_id, ble_opt_t const *p_opt));
+SVCALL(SD_BLE_OPT_SET, uint32_t, sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_t const *p_opt));
 
 
 /**@brief Get a BLE option.
@@ -608,7 +608,7 @@ SVCALL(SD_BLE_OPT_SET, uint32_t, sd_ble_opt_set(adapter_t * adapter, uint32_t op
  * @retval ::NRF_ERROR_NOT_SUPPORTED This option is not supported.
  *
  */
-SVCALL(SD_BLE_OPT_GET, uint32_t, sd_ble_opt_get(adapter_t * adapter, uint32_t opt_id, ble_opt_t *p_opt));
+SVCALL(SD_BLE_OPT_GET, uint32_t, sd_ble_opt_get(adapter_t *adapter, uint32_t opt_id, ble_opt_t *p_opt));
 
 /** @} */
 #ifdef __cplusplus
