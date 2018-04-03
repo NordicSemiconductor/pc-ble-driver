@@ -212,21 +212,6 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
     printf("Received advertisement report with device address: 0x%s\n", str);
     fflush(stdout);
 
-#if NRF_SD_BLE_API > 5
-	err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
-
-	if (err_code != NRF_SUCCESS)
-	{
-		printf("Scan start failed with error code: %d\n", err_code);
-		fflush(stdout);
-	}
-	else
-	{
-		printf("Scan started\n");
-		fflush(stdout);
-	}
-#endif
-
     if (find_adv_name(&p_ble_gap_evt->params.adv_report, TARGET_DEV_NAME))
     {
         if (m_connected_devices >= MAX_PEER_COUNT || m_connection_is_in_progress)
@@ -251,6 +236,24 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 
         m_connection_is_in_progress = true;
     }
+#if NRF_SD_BLE_API > 5
+    else {
+        err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Scan start failed with error code: %d\n", err_code);
+            fflush(stdout);
+            scan_start();
+        }
+        else
+        {
+            printf("Scan started\n");
+            fflush(stdout);
+        }
+    }
+#endif
+
 }
 
 /**@brief Function called on BLE_GAP_EVT_TIMEOUT event.
