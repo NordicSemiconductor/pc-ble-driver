@@ -405,7 +405,6 @@ static uint32_t advertisement_data_set()
     m_adv_data.scan_rsp_data    = scan_rsp_data;
 
     error_code = sd_ble_gap_adv_set_configure(m_adapter, &m_adv_handle, &m_adv_data, &m_adv_params);
-    error_code = app_ble_gap_adv_set_register(m_adv_handle, &adv_data, NULL); 
 #endif
 
     if (error_code != NRF_SUCCESS)
