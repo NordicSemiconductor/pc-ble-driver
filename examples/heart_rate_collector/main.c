@@ -244,7 +244,7 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
         {
             printf("Scan start failed with error code: %d\n", err_code);
             fflush(stdout);
-            scan_start();
+            // scan_start();
         }
         else
         {
