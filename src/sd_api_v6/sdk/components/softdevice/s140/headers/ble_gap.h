@@ -2469,7 +2469,7 @@ SVCALL(SD_BLE_GAP_SCAN_START, uint32_t, sd_ble_gap_scan_start(adapter_t *adapter
  * @retval ::NRF_SUCCESS Successfully stopped scanning procedure.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation. Not in the scanning state.
  */
-SVCALL(SD_BLE_GAP_SCAN_STOP, uint32_t, sd_ble_gap_scan_stop(void));
+SVCALL(SD_BLE_GAP_SCAN_STOP, uint32_t, sd_ble_gap_scan_stop(adapter_t *adapter));
 
 
 /**@brief Create a connection (GAP Link Establishment).
@@ -2520,7 +2520,7 @@ SVCALL(SD_BLE_GAP_CONNECT, uint32_t, sd_ble_gap_connect(adapter_t *adapter, ble_
  * @retval ::NRF_SUCCESS Successfully canceled an ongoing connection procedure.
  * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation.
  */
-SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(void));
+SVCALL(SD_BLE_GAP_CONNECT_CANCEL, uint32_t, sd_ble_gap_connect_cancel(adapter_t *adapter));
 
 
 /**@brief Initiate or respond to a PHY Update Procedure
@@ -2654,7 +2654,7 @@ SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_START, uint32_t, sd_ble_gap_qos_channel_sur
  * @retval ::NRF_SUCCESS             The module is successfully stopped.
  * @retval ::NRF_ERROR_INVALID_STATE Trying to stop the module when it is not running.
  */
-SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_STOP, uint32_t, sd_ble_gap_qos_channel_survey_stop(void));
+SVCALL(SD_BLE_GAP_QOS_CHANNEL_SURVEY_STOP, uint32_t, sd_ble_gap_qos_channel_survey_stop(adapter_t *adapter));
 
 
 /** @} */

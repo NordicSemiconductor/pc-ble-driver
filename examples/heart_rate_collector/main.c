@@ -82,21 +82,37 @@ static uint16_t    m_hrm_cccd_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
 static uint32_t    m_config_id = 1;
+static uint8_t	   mp_data[100] = { 0 };
+#if NRF_SD_BLE_API >= 6 
+static ble_data_t  m_adv_report_buffer;
+#endif
 
 static const ble_gap_scan_params_t m_scan_param =
 {
-     1,                       // Active scanning set.
-     0,                       // Selective scanning not set.
+#if NRF_SD_BLE_API >= 6
+    0,                       // Set if accept extended advertising packetets.
+    0,                       // Set if report inomplete reports.
+#endif
+    0,                       // Set if active scanning.
+#if NRF_SD_BLE_API < 6
+    0,                       // Set if selective scanning.
+#endif
+#if NRF_SD_BLE_API >= 6
+    BLE_GAP_SCAN_FP_ACCEPT_ALL,
+    BLE_GAP_PHY_1MBPS,
+#endif
 #if NRF_SD_BLE_API == 2
-     NULL,                    // White-list not set.
+    NULL,                    // Set white-list.
 #endif
-#if NRF_SD_BLE_API >= 3
-     0,                       // adv_dir_report not set.
+#if NRF_SD_BLE_API == 3 || NRF_SD_BLE_API == 5
+    0,                       // Set adv_dir_report.
 #endif
-
-     (uint16_t)SCAN_INTERVAL,
-     (uint16_t)SCAN_WINDOW,
-     (uint16_t)SCAN_TIMEOUT
+    (uint16_t)SCAN_INTERVAL,
+    (uint16_t)SCAN_WINDOW,
+    (uint16_t)SCAN_TIMEOUT
+#if NRF_SD_BLE_API >= 6
+    , 0                      // Set chennel mask.
+#endif
 };
 
 static const ble_gap_conn_params_t m_connection_param =
@@ -220,6 +236,24 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 
         m_connection_is_in_progress = true;
     }
+#if NRF_SD_BLE_API >= 6
+    else {
+        err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Scan start failed with error code: %d\n", err_code);
+            fflush(stdout);
+            // scan_start();
+        }
+        else
+        {
+            printf("Scan started\n");
+            fflush(stdout);
+        }
+    }
+#endif
+
 }
 
 /**@brief Function called on BLE_GAP_EVT_TIMEOUT event.
@@ -552,13 +586,12 @@ static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const ch
 
     // Initialize advertisement report for parsing
 #if NRF_SD_BLE_API >= 6 
-    adv_data.p_data     = p_adv_report->data.p_data;
+    adv_data.p_data     = (uint8_t *)p_adv_report->data.p_data;
     adv_data.data_len   = p_adv_report->data.len;
 #else
     adv_data.p_data     = (uint8_t *)p_adv_report->data;
     adv_data.data_len   = p_adv_report->dlen;
 #endif
-
 
     //search for advertising names
     err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
@@ -667,9 +700,13 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 
     // Configure the connection roles.
     memset(&ble_cfg, 0, sizeof(ble_cfg));
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
+
+#if NRF_SD_BLE_API >= 6
+    ble_cfg.gap_cfg.role_count_cfg.adv_set_count  = BLE_GAP_ADV_SET_COUNT_DEFAULT;
+#endif
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 0;
     ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 0;
 
     error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
     if (error_code != NRF_SUCCESS)
@@ -701,18 +738,20 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
  */
 static uint32_t scan_start()
 {
-#if NRF_SD_BLE_API > 5
-    const ble_data_t m_adv_report_buffer;
+#if NRF_SD_BLE_API >= 6
+    m_adv_report_buffer.p_data = mp_data;
+    m_adv_report_buffer.len = sizeof(mp_data);
 #endif
+
     uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param
-#if NRF_SD_BLE_API > 5
+#if NRF_SD_BLE_API >= 6
     , &m_adv_report_buffer
 #endif
     );
 
     if (error_code != NRF_SUCCESS)
     {
-        printf("Scan start failed\n");
+        printf("Scan start failed with error code: %d\n", error_code);
         fflush(stdout);
     } else
     {

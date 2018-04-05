@@ -67,27 +67,6 @@ uint32_t ble_uuid128_t_dec(uint8_t const * const p_buf,
                            uint32_t * const      p_index,
                            void * const          p_void_struct);
 
-uint32_t ble_l2cap_header_t_enc(void const * const p_void_struct,
-                                uint8_t * const    p_buf,
-                                uint32_t           buf_len,
-                                uint32_t * const   p_index);
-
-uint32_t ble_l2cap_header_t_dec(uint8_t const * const p_buf,
-                                uint32_t              buf_len,
-                                uint32_t * const      p_index,
-                                void * const          p_void_struct);
-
-uint32_t ble_l2cap_evt_rx_t_enc(void const * const p_void_struct,
-                                uint8_t * const    p_buf,
-                                uint32_t           buf_len,
-                                uint32_t * const   p_index);
-
-uint32_t ble_l2cap_evt_rx_t_dec(uint8_t const * const p_buf,
-                                uint32_t              buf_len,
-                                uint32_t * const      p_index,
-                                uint32_t * const      p_ext_len,
-                                void * const          p_void_struct);
-
 uint32_t ble_enable_params_t_enc(void const * const p_void_struct,
                                  uint8_t * const    p_buf,
                                  uint32_t           buf_len,
