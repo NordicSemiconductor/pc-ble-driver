@@ -60,7 +60,12 @@ uint32_t sd_ble_gap_adv_set_configure(
 {
     encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
-        uint32_t err_code = app_ble_gap_adv_set_register(*p_adv_handle, p_adv_data->adv_data.p_data, p_adv_data->scan_rsp_data.p_data);
+        uint32_t err_code;
+        if (p_adv_data) {
+            err_code = app_ble_gap_adv_set_register(*p_adv_handle, p_adv_data->adv_data.p_data, p_adv_data->scan_rsp_data.p_data);
+        } else {
+            err_code = app_ble_gap_adv_set_register(*p_adv_handle, NULL, NULL);
+        }
         if (err_code != NRF_SUCCESS)
         {
             return err_code;
