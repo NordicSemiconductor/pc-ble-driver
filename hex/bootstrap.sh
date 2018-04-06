@@ -115,7 +115,11 @@ function sdk_patch () {
     LC_CTYPE=C
     # If OS is Linuix or Darwin
     # Change the format of line ending to unix
-    if [[ "${UNAME}" == "Linux" || "${UNAME}" == "Darwin" ]]; then
+    if [[ "${UNAME}" == "Linux" ]]; then
+        echo "> Modifying SDK line ending format..."
+        find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i $'s/\r//' {} \;
+    fi
+    if [[ "${UNAME}" == "Darwin" ]]; then
         echo "> Modifying SDK line ending format..."
         find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i '' $'s/\r//' {} \;
     fi
