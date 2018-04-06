@@ -110,6 +110,15 @@ function sdk_exists () {
 
 # Patch the downloaded SDK in order to compile the connectivity application
 function sdk_patch () {
+    # Detect which OS is running
+    UNAME="$(uname)"
+    # If OS is Linuix or Darwin
+    # Change the format of line ending to unix
+    if [[ "${UNAME}" == "Linux" || "${UNAME}" == "Darwin" ]]; then
+        echo "> Modifying SDK line ending format..."
+        find ./ -type f -exec sed -i 's/\r//' {} \;
+    fi
+
     echo "> Applying SDK patch '${PATCH_FILE}'..."
 
     # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
