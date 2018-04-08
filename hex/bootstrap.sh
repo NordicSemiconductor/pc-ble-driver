@@ -116,11 +116,12 @@ function sdk_patch () {
     # Change the format of line ending to unix
     if [[ "${UNAME}" == "Linux" ]]; then
         echo "> Modifying SDK line ending format..."
-        find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i $"s/\r//" {} \;
+        find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i $'s/\r//' {} \;
     fi
     if [[ "${UNAME}" == "Darwin" ]]; then
         echo "> Modifying SDK line ending format..."
-        find $DL_LOCATION/$SDK_NAME/ -type f -exec LC_ALL=C sed -i "" $"s/\r//" {} \;
+        LC_CTYPE=C
+        find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i '' $'s/\r//' {} \;
     fi
 
     echo "> Applying SDK patch '${PATCH_FILE}'..."
