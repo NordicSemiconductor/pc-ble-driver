@@ -112,7 +112,7 @@ function sdk_exists () {
 function sdk_patch () {
     # Detect which OS is running
     UNAME="$(uname)"
-    # If OS is Linuix or Darwin
+    # If OS is Linux or Darwin
     # Change the format of line ending to unix
     if [[ "${UNAME}" == "Linux" ]]; then
         echo "> Modifying SDK line ending format..."
