@@ -169,6 +169,13 @@ function sdk_download () {
         fatal "Could not unzip the SDK file"
     fi
 
+    if [ -d $DL_LOCATION/$SDK_NAME/$SDK_NAME ]; then
+        echo "> Moving SDK folder..."
+        SDK_NAME_TMP=$SDK_NAME"_tmp"
+        mv -T $DL_LOCATION/$SDK_NAME/$SDK_NAME $DL_LOCATION/$SDK_NAME_TMP
+        mv -T $DL_LOCATION/$SDK_NAME_TMP $DL_LOCATION/$SDK_NAME 
+    fi
+
     echo "> Clean up. Removing SDK zip file..."
     rm $DL_LOCATION/$SDK_FILE
 
