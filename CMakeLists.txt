@@ -68,7 +68,6 @@ endif()
 # Add common compiler definitions
 add_definitions(
     -DSD_RPC_EXPORTS
-    -DHCI_LINK_CONTROL # Adds support for Link Control packets according to the HCI standard
 )
 
 # Add libraries
