@@ -1,30 +1,28 @@
-diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
-index a4dfe24..5184dcd 100644
---- a/components/serialization/common/ser_config.h
-+++ b/components/serialization/common/ser_config.h
-@@ -99,7 +99,7 @@ extern "C" {
-
+diff -r -u a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
+--- a/components/serialization/common/ser_config.h	2018-04-10 15:13:46.773171146 +0200
++++ b/components/serialization/common/ser_config.h	2018-04-10 15:08:22.403536159 +0200
+@@ -99,7 +99,7 @@
+ 
  /** UART transmission parameters */
  #define SER_PHY_UART_FLOW_CTRL          NRF_UART_HWFC_ENABLED
 -#define SER_PHY_UART_PARITY             NRF_UART_PARITY_INCLUDED
 +#define SER_PHY_UART_PARITY             NRF_UART_PARITY_EXCLUDED
  #define SER_PHY_UART_BAUDRATE_VAL       1000000
-
- /** Find UART baud rate value based on the chosen register setting. */
-@@ -110,6 +110,8 @@ extern "C" {
-
+ 
+ #define SER_PHY_UART_BAUDRATE CONCAT_2(NRF_UART_BAUDRATE_,SER_PHY_UART_BAUDRATE_VAL)
+@@ -110,6 +110,8 @@
+ 
  #define SER_MAX_CONNECTIONS 8
-
+ 
 +#define HCI_LINK_CONTROL
 +
  #ifndef SER_MAX_ADV_DATA
  #define SER_MAX_ADV_DATA 256
  #endif
-diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
-index 9eaf33a..7b4fe8e 100644
---- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
-+++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
-@@ -69,10 +69,10 @@ extern "C" {
+diff -r -u a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+--- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h	2018-04-10 15:13:46.765171109 +0200
++++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h	2018-04-10 15:08:22.403536159 +0200
+@@ -69,10 +69,10 @@
  /* UART configuration */
  #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOWEST
  
@@ -39,36 +37,21 @@ index 9eaf33a..7b4fe8e 100644
  
  
  #ifdef __cplusplus
-diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
-index 216ed97..147d7d5 100644
---- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
-+++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+diff -r -u a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+--- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c	2018-04-10 15:13:46.757171071 +0200
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c	2018-04-10 15:08:22.403536159 +0200
 @@ -67,6 +67,8 @@
                                   (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
  #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
-
+ 
 +#define PKT_TYPE_RESET 5
 +
  #define TX_EVT_QUEUE_SIZE            16
  #define RX_EVT_QUEUE_SIZE            16
  #define PKT_TYPE_VENDOR_SPECIFIC     14                                                /**< Packet type vendor specific. */
-diff --git a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
-index 9358db3..9ad5be2 100644
---- a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
-+++ b/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
-@@ -48,6 +48,8 @@
- #endif
- // <h> nRF_BLE
-
-+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 250
-+
- //==========================================================
- // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
-
-diff --git a/examples/connectivity/ble_connectivity/main.c b/examples/connectivity/ble_connectivity/main.c
-index bcb67e3..516ccd7 100644
---- a/examples/connectivity/ble_connectivity/main.c
-+++ b/examples/connectivity/ble_connectivity/main.c
+diff -r -u a/examples/connectivity/ble_connectivity/main.c b/examples/connectivity/ble_connectivity/main.c
+--- a/examples/connectivity/ble_connectivity/main.c	2018-04-10 15:13:46.781171183 +0200
++++ b/examples/connectivity/ble_connectivity/main.c	2018-04-10 15:08:46.987028059 +0200
 @@ -57,6 +57,7 @@
  #include "ser_conn_handlers.h"
  #include "boards.h"
@@ -77,7 +60,8 @@ index bcb67e3..516ccd7 100644
  
  #include "nrf_log.h"
  #include "nrf_log_ctrl.h"
-@@ -65,6 +66,38 @@ NRF_LOG_MODULE_REGISTER();
+@@ -64,6 +65,38 @@
+ 
  #include "ser_phy_debug_comm.h"
  
 +#if defined ( __CC_ARM )
@@ -115,4 +99,28 @@ index bcb67e3..516ccd7 100644
  #if defined(APP_USBD_ENABLED) && APP_USBD_ENABLED
  #include "app_usbd_serial_num.h"
  #ifdef BOARD_PCA10059
- #include "nrf_usb_dfu_trigger.h"
+@@ -146,12 +179,6 @@
+         /* Nothing to do */
+     }
+ #endif
+-    if (!NRF_LOG_PROCESS())
+-    {
+-        /* Sleep waiting for an application event. */
+-        uint32_t err_code = sd_app_evt_wait();
+-        APP_ERROR_CHECK(err_code);
+-    }
+ }
+ 
+ /**@brief Main function of the connectivity application. */
+diff -r -u a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+--- a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h	2018-04-10 15:13:46.789171220 +0200
++++ b/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h	2018-04-10 15:08:22.403536159 +0200
+@@ -48,6 +48,8 @@
+ #endif
+ // <h> nRF_BLE 
+ 
++#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+  
