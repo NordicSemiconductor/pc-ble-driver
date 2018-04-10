@@ -158,8 +158,9 @@ function sdk_download () {
     if [ -d $DL_LOCATION/$SDK_NAME/$SDK_NAME ]; then
         echo "> Moving SDK folder..."
         SDK_NAME_TMP=$SDK_NAME"_tmp"
-        mv -T $DL_LOCATION/$SDK_NAME/$SDK_NAME $DL_LOCATION/$SDK_NAME_TMP
-        mv -T $DL_LOCATION/$SDK_NAME_TMP $DL_LOCATION/$SDK_NAME 
+        mv $DL_LOCATION/$SDK_NAME/$SDK_NAME $DL_LOCATION/$SDK_NAME_TMP
+        mv $DL_LOCATION/$SDK_NAME_TMP/* $DL_LOCATION/$SDK_NAME
+        rm -rf $DL_LOCATION/$SDK_NAME_TMP
     fi
 
     echo "> Clean up. Removing SDK zip file..."
