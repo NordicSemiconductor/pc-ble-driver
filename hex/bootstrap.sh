@@ -221,8 +221,7 @@ function main() {
     sdk_patch
     familypack_download
 
-    echo "> SDK ready to use. Exit."
-    exit
+    echo "> SDK ready to use."
 }
 
 if [ "${1}" != "--source-only" ]; then
