@@ -1,0 +1,12 @@
+diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+--- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+@@ -800,7 +800,7 @@
+
+         if (packet_type == PKT_TYPE_RESET)
+         {
+-            NVIC_SystemReset();
++            // NVIC_SystemReset();
+         }
+         else if (packet_type == PKT_TYPE_ACK )
+         {
