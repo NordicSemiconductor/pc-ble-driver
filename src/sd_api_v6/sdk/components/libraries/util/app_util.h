@@ -82,8 +82,10 @@ extern char CSTACK$$Length;
 #elif defined   ( __GNUC__ )
 extern uint32_t __StackTop;
 extern uint32_t __StackLimit;
-#define STACK_BASE    &__StackLimit
-#define STACK_TOP     &__StackTop
+// #define STACK_BASE    &__StackLimit
+// #define STACK_TOP     &__StackTop
+#define STACK_BASE 0x1F000 // Arbitrary value.
+#define STACK_TOP  0x20000 // Arbitrary value.
 
 #else
 #define STACK_BASE 0x1F000 // Arbitrary value.
