@@ -159,6 +159,18 @@ diff -r -u -w a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/con
  //==========================================================
  // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
   
+diff -r -u -w a/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
+--- a/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h   2018-04-10 15:22:40.825481300 +0200
++++ b/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h   2018-04-13 15:13:18.704945900 +0200
+@@ -48,6 +48,8 @@
+ #endif
+ // <h> nRF_BLE 
+ 
++#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+  
 diff -r -u -w a/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
 --- a/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
 +++ b/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
