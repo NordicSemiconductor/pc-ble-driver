@@ -73,7 +73,7 @@ static uint16_t    m_connection_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
 static uint32_t    m_config_id = 1;
-static uint8_t	   mp_data[250] = { 0 };
+static uint8_t	   mp_data[100] = { 0 };
 #if NRF_SD_BLE_API >= 6 
 static ble_data_t  m_adv_report_buffer;
 #endif
@@ -120,7 +120,6 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
 static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find);
 static uint32_t scan_start();
 static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer);
-static void pairing_just_works_start();
 
 /**@brief Function for handling error message events from sd_rpc.
  *
@@ -331,7 +330,7 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
 	memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
 
 	uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, m_connection_handle,
-		BLE_GAP_SEC_STATUS_SUCCESS, NULL, NULL);
+		BLE_GAP_SEC_STATUS_SUCCESS, NULL, &m_sec_keyset);
 
 	if (err_code != NRF_SUCCESS)
 	{
@@ -546,7 +545,7 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 #if NRF_SD_BLE_API >= 6
     ble_cfg.gap_cfg.role_count_cfg.adv_set_count  = BLE_GAP_ADV_SET_COUNT_DEFAULT;
 #endif
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 0;
     ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
     ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
 
@@ -649,7 +648,13 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 			break;
 
 		case BLE_GAP_EVT_CONN_SEC_UPDATE:
-			printf("Connection security update: \n");
+			printf("Connection security updated\n");
+			fflush(stdout);
+			break;
+
+		case BLE_GAP_EVT_AUTH_STATUS:
+			printf("Authentication status: 0x%02X\n",
+				p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
 			fflush(stdout);
 			break;
 
@@ -658,24 +663,6 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             fflush(stdout);
             break;
     }
-}
-
-static void pairing_just_works_start()
-{
-    ble_gap_sec_params_t p_sec_params;
-	memset(&p_sec_params, 0, sizeof(p_sec_params));
-
-	p_sec_params.bond = 1;
-	p_sec_params.mitm = 0;
-	p_sec_params.io_caps = 0;
-
-	uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
-	if (error_code != NRF_SUCCESS)
-	{
-		printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code);
-		fflush(stdout);
-		return error_code;
-	}
 }
 
 /**@brief Function for application main entry.

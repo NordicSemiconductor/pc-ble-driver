@@ -196,13 +196,14 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             }
             break;
 
-        case BLE_GAP_EVT_AUTH_STATUS:
-			printf("Authentication status: \n");
+		case BLE_GAP_EVT_CONN_SEC_UPDATE:
+			printf("Connection security updated\n");
 			fflush(stdout);
 			break;
 
-		case BLE_GAP_EVT_CONN_SEC_UPDATE:
-			printf("Connection security update: \n");
+		case BLE_GAP_EVT_AUTH_STATUS:
+			printf("Authentication status: 0x%02X\n",
+				p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
 			fflush(stdout);
 			break;
 
