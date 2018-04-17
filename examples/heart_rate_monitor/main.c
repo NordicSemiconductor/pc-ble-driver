@@ -321,8 +321,8 @@ static uint32_t advertisement_data_set()
 #if NRF_SD_BLE_API >= 6
     ble_gap_adv_properties_t adv_properties;
     adv_properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-    adv_properties.anonymous        = NULL;
-    adv_properties.include_tx_power = NULL;
+    adv_properties.anonymous        = 0;
+    adv_properties.include_tx_power = 0;
 
     m_adv_params.properties         = adv_properties;
     m_adv_params.filter_policy      = BLE_GAP_ADV_FP_ANY;
@@ -374,6 +374,7 @@ static uint32_t advertising_start()
 {
     uint32_t             error_code;
     ble_gap_adv_params_t adv_params;
+    memset(&adv_params, 0, sizeof(adv_params));
 
 #if NRF_SD_BLE_API <= 5
     adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;

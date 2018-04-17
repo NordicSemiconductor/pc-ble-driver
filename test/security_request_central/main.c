@@ -1,23 +1,60 @@
-/* Copyright (c) 2015 Nordic Semiconductor. All Rights Reserved.
+/*
+ * copyright (c) 2012 - 2018, nordic semiconductor asa
+ * all rights reserved.
  *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ * redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
  *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
+ * 1. redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
  *
- */
-/**@example examples/heart_rate_collector
+ * 2. redistributions in binary form, except as embedded into a nordic
+ *    semiconductor asa integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
  *
- * @brief Heart Rate Collector Sample Application main file.
+ * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
  *
- * This file contains the source code for a sample application that acts as a BLE Central device.
- * This application scans for a Heart Rate Sensor device and reads it's heart rate data.
- * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
+ * 4. This software, with or without modification, must only be used with a
+ *    Nordic Semiconductor ASA integrated circuit.
+ *
+ * 5. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**@example test/security_request_central
+ *
+ * @brief Security Request Central Sample Application main file.
+ *
+ * This file contains the source code for a sample application that acts as a BLE Central device.
+ * This application scans for a Security Request Peripheral device and sends security request.
+ * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
+ * 
+ * Structure of this file
+ * - Includes
+ * - Definitions
+ * - Global variables
+ * - Global functions
+ * - Event functions
+ * - Event dispatcher
+ * - Main
+ */
+
+/** Includes */
 #include "ble.h"
 #include "sd_rpc.h"
 
@@ -25,6 +62,8 @@
 #include <stdio.h>
 #include <string.h>
 
+
+/** Definitions */
 #ifdef _WIN32
 #define DEFAULT_UART_PORT_NAME "COM1"
 #define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
@@ -37,7 +76,6 @@
 #define DEFAULT_UART_PORT_NAME "/dev/ttyACM0"
 #define DEFAULT_BAUD_RATE 1000000
 #endif
-
 
 enum
 {
@@ -68,12 +106,14 @@ typedef struct
     uint16_t      data_len; /**< Length of data. */
 } data_t;
 
+
+/** Global variables */
 static uint8_t     m_connected_devices = 0;
 static uint16_t    m_connection_handle = 0;
 static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
 static uint32_t    m_config_id = 1;
-static uint8_t	   mp_data[100] = { 0 };
+static uint8_t       mp_data[100] = { 0 };
 #if NRF_SD_BLE_API >= 6 
 static ble_data_t  m_adv_report_buffer;
 #endif
@@ -114,12 +154,8 @@ static const ble_gap_conn_params_t m_connection_param =
     (uint16_t)CONNECTION_SUPERVISION_TIMEOUT
 };
 
-/* Local function forward declarations */
-static uint32_t ble_stack_init();
-static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata);
-static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find);
-static uint32_t scan_start();
-static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer);
+
+/** Global functions */
 
 /**@brief Function for handling error message events from sd_rpc.
  *
@@ -163,180 +199,6 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
             fflush(stdout);
             break;
     }
-}
-
-/**@brief Function called on BLE_GAP_EVT_CONNECTED event.
- *
- * @details Update connection state and proceed to discovering the peer's GATT services.
- *
- * @param[in] p_ble_gap_evt GAP event.
- */
-static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
-{
-    printf("Connection established\n");
-    fflush(stdout);
-
-    m_connected_devices++;
-    m_connection_handle = p_ble_gap_evt->conn_handle;
-    m_connection_is_in_progress = false;
-
-    // service_discovery_start();
-}
-
-/**@brief Function called on BLE_GAP_EVT_ADV_REPORT event.
- *
- * @details Create a connection if received advertising packet corresponds to desired BLE device.
- *
- * @param[in] p_ble_gap_evt Advertising Report Event.
- */
-static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
-{
-    uint32_t err_code;
-    uint8_t  str[STRING_BUFFER_SIZE] = {0};
-
-    // Log the Bluetooth device address of advertisement packet received.
-    ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr, str);
-    printf("Received advertisement report with device address: 0x%s\n", str);
-    fflush(stdout);
-
-    if (find_adv_name(&p_ble_gap_evt->params.adv_report, TARGET_DEV_NAME))
-    {
-        if (m_connected_devices >= MAX_PEER_COUNT || m_connection_is_in_progress)
-        {
-            return;
-        }
-
-        err_code = sd_ble_gap_connect(m_adapter,
-                                      &(p_ble_gap_evt->params.adv_report.peer_addr),
-                                      &m_scan_param,
-                                      &m_connection_param
-#if NRF_SD_BLE_API >= 5
-                                     , m_config_id
-#endif
-                                     );
-        if (err_code != NRF_SUCCESS)
-        {
-            printf("Connection Request Failed, reason %d\n", err_code);
-            fflush(stdout);
-            return;
-        }
-
-        m_connection_is_in_progress = true;
-    }
-#if NRF_SD_BLE_API >= 6
-    else {
-        err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
-
-        if (err_code != NRF_SUCCESS)
-        {
-            printf("Scan start failed with error code: %d\n", err_code);
-            fflush(stdout);
-            // scan_start();
-        }
-        else
-        {
-            printf("Scan started\n");
-            fflush(stdout);
-        }
-    }
-#endif
-
-}
-
-/**@brief Function called on BLE_GAP_EVT_TIMEOUT event.
- *
- * @param[in] ble_gap_evt_t Timeout Event.
- */
-static void on_timeout(const ble_gap_evt_t * const p_ble_gap_evt)
-{
-    if (p_ble_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
-    {
-        m_connection_is_in_progress = false;
-    }
-    else if (p_ble_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
-    {
-        scan_start();
-    }
-}
-
-/**@brief Function called on BLE_GAP_EVT_SEC_REQUEST event.
-*
-* @param[in] ble_gap_evt_t Timeout Event.
-*/
-static void on_sec_request(const ble_gap_evt_t * const p_ble_gap_evt)
-{
-	printf("Security request received.\n", m_connection_handle);
-	fflush(stdout);
-	ble_gap_sec_params_t p_sec_params;
-	memset(&p_sec_params, 0, sizeof(p_sec_params));
-
-	p_sec_params.bond = 0;
-	p_sec_params.mitm = 0;
-	p_sec_params.lesc = 0;
-	p_sec_params.keypress = 0;
-	p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
-	p_sec_params.oob = 0;
-	p_sec_params.min_key_size = 7;
-	p_sec_params.max_key_size = 16;
-
-	ble_gap_sec_kdist_t kdist_own;
-	ble_gap_sec_kdist_t kdist_peer;
-	memset(&kdist_own, 0, sizeof(kdist_own));
-	memset(&kdist_peer, 0, sizeof(kdist_peer));
-
-	p_sec_params.kdist_own = kdist_own;
-	p_sec_params.kdist_peer = kdist_peer;
-
-
-	uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
-	// uint32_t error_code = sd_ble_gap_sec_params_reply(m_adapter, m_connection_handle, BLE_GAP_SEC_STATUS_SUCCESS, NULL, &p_sec_keyset);
-	if (error_code != NRF_SUCCESS)
-	{
-		printf("Failed to handle security request. Error code: 0x%02X\n", error_code);
-		fflush(stdout);
-		return error_code;
-	}
-}
-
-/**@brief Function called on BLE_GAP_EVT_SEC_REQUEST event.
-*
-* @param[in] ble_gap_evt_t Timeout Event.
-*/
-static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
-{
-	printf("Security params reuqest received\n");
-	fflush(stdout);
-
-	ble_gap_sec_params_t p_sec_params;
-	memset(&p_sec_params, 0, sizeof(p_sec_params));
-	p_sec_params.bond = 0;
-	p_sec_params.mitm = 0;
-	p_sec_params.lesc = 0;
-	p_sec_params.keypress = 0;
-	p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
-	p_sec_params.oob = 0;
-	p_sec_params.min_key_size = 7;
-	p_sec_params.max_key_size = 16;
-
-	ble_gap_sec_kdist_t kdist_own;
-	ble_gap_sec_kdist_t kdist_peer;
-	memset(&kdist_own, 0, sizeof(kdist_own));
-	memset(&kdist_peer, 0, sizeof(kdist_peer));
-
-	p_sec_params.kdist_own = kdist_own;
-	p_sec_params.kdist_peer = kdist_peer;
-
-	ble_gap_sec_keyset_t m_sec_keyset;
-	memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
-
-	uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, m_connection_handle,
-		BLE_GAP_SEC_STATUS_SUCCESS, NULL, &m_sec_keyset);
-
-	if (err_code != NRF_SUCCESS)
-	{
-		printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
-		fflush(stdout);
-	}
 }
 
 /**@brief Function for initializing serial communication with the target nRF5 Bluetooth slave.
@@ -533,6 +395,10 @@ static uint32_t ble_options_set()
 }
 
 #if NRF_SD_BLE_API >= 5
+/**@brief Function for setting configuration for the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 {
     const uint32_t ram_start = 0; // Value is not used by ble-driver
@@ -603,6 +469,183 @@ static uint32_t scan_start()
     return error_code;
 }
 
+
+/** Event functions */
+
+/**@brief Function called on BLE_GAP_EVT_CONNECTED event.
+ *
+ * @details Update connection state and proceed to discovering the peer's GATT services.
+ *
+ * @param[in] p_ble_gap_evt GAP event.
+ */
+static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    printf("Connection established\n");
+    fflush(stdout);
+
+    m_connected_devices++;
+    m_connection_handle = p_ble_gap_evt->conn_handle;
+    m_connection_is_in_progress = false;
+
+    // service_discovery_start();
+}
+
+/**@brief Function called on BLE_GAP_EVT_ADV_REPORT event.
+ *
+ * @details Create a connection if received advertising packet corresponds to desired BLE device.
+ *
+ * @param[in] p_ble_gap_evt Advertising Report Event.
+ */
+static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    uint32_t err_code;
+    uint8_t  str[STRING_BUFFER_SIZE] = {0};
+
+    // Log the Bluetooth device address of advertisement packet received.
+    ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr, str);
+    printf("Received advertisement report with device address: 0x%s\n", str);
+    fflush(stdout);
+
+    if (find_adv_name(&p_ble_gap_evt->params.adv_report, TARGET_DEV_NAME))
+    {
+        if (m_connected_devices >= MAX_PEER_COUNT || m_connection_is_in_progress)
+        {
+            return;
+        }
+
+        err_code = sd_ble_gap_connect(m_adapter,
+                                      &(p_ble_gap_evt->params.adv_report.peer_addr),
+                                      &m_scan_param,
+                                      &m_connection_param
+#if NRF_SD_BLE_API >= 5
+                                     , m_config_id
+#endif
+                                     );
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Connection Request Failed, reason %d\n", err_code);
+            fflush(stdout);
+            return;
+        }
+
+        m_connection_is_in_progress = true;
+    }
+#if NRF_SD_BLE_API >= 6
+    else {
+        err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Scan start failed with error code: %d\n", err_code);
+            fflush(stdout);
+            // scan_start();
+        }
+        else
+        {
+            printf("Scan started\n");
+            fflush(stdout);
+        }
+    }
+#endif
+
+}
+
+/**@brief Function called on BLE_GAP_EVT_TIMEOUT event.
+ *
+ * @param[in] ble_gap_evt_t Timeout Event.
+ */
+static void on_timeout(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    if (p_ble_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
+    {
+        m_connection_is_in_progress = false;
+    }
+    else if (p_ble_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
+    {
+        scan_start();
+    }
+}
+
+/**@brief Function called on BLE_GAP_EVT_SEC_REQUEST event.
+*
+* @param[in] ble_gap_evt_t Timeout Event.
+*/
+static void on_sec_request(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    printf("Security request received.\n");
+    fflush(stdout);
+    ble_gap_sec_params_t p_sec_params;
+    memset(&p_sec_params, 0, sizeof(p_sec_params));
+
+    p_sec_params.bond = 0;
+    p_sec_params.mitm = 0;
+    p_sec_params.lesc = 0;
+    p_sec_params.keypress = 0;
+    p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob = 0;
+    p_sec_params.min_key_size = 7;
+    p_sec_params.max_key_size = 16;
+
+    ble_gap_sec_kdist_t kdist_own;
+    ble_gap_sec_kdist_t kdist_peer;
+    memset(&kdist_own, 0, sizeof(kdist_own));
+    memset(&kdist_peer, 0, sizeof(kdist_peer));
+
+    p_sec_params.kdist_own = kdist_own;
+    p_sec_params.kdist_peer = kdist_peer;
+
+    uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("Failed to handle security request. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+    }
+}
+
+/**@brief Function called on BLE_GAP_EVT_SEC_REQUEST event.
+*
+* @param[in] ble_gap_evt_t Timeout Event.
+*/
+static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    printf("Security params reuqest received\n");
+    fflush(stdout);
+
+    ble_gap_sec_params_t p_sec_params;
+    memset(&p_sec_params, 0, sizeof(p_sec_params));
+    p_sec_params.bond = 0;
+    p_sec_params.mitm = 0;
+    p_sec_params.lesc = 0;
+    p_sec_params.keypress = 0;
+    p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob = 0;
+    p_sec_params.min_key_size = 7;
+    p_sec_params.max_key_size = 16;
+
+    ble_gap_sec_kdist_t kdist_own;
+    ble_gap_sec_kdist_t kdist_peer;
+    memset(&kdist_own, 0, sizeof(kdist_own));
+    memset(&kdist_peer, 0, sizeof(kdist_peer));
+
+    p_sec_params.kdist_own = kdist_own;
+    p_sec_params.kdist_peer = kdist_peer;
+
+    ble_gap_sec_keyset_t m_sec_keyset;
+    memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
+
+    uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, m_connection_handle,
+        BLE_GAP_SEC_STATUS_SUCCESS, NULL, &m_sec_keyset);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
+        fflush(stdout);
+    }
+}
+
+
+/** Event dispatcher */
+
 /**@brief Function for handling the Application's BLE Stack events.
  *
  * @param[in] adapter The transport adapter.
@@ -639,24 +682,24 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             on_timeout(&(p_ble_evt->evt.gap_evt));
             break;
 
-		case BLE_GAP_EVT_SEC_REQUEST:
-			on_sec_request(&(p_ble_evt->evt.gap_evt));
-			break;
+        case BLE_GAP_EVT_SEC_REQUEST:
+            on_sec_request(&(p_ble_evt->evt.gap_evt));
+            break;
 
-		case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-			on_sec_params_request(&(p_ble_evt->evt.gap_evt));
-			break;
+        case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+            on_sec_params_request(&(p_ble_evt->evt.gap_evt));
+            break;
 
-		case BLE_GAP_EVT_CONN_SEC_UPDATE:
-			printf("Connection security updated\n");
-			fflush(stdout);
-			break;
+        case BLE_GAP_EVT_CONN_SEC_UPDATE:
+            printf("Connection security updated\n");
+            fflush(stdout);
+            break;
 
-		case BLE_GAP_EVT_AUTH_STATUS:
-			printf("Authentication status: 0x%02X\n",
-				p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
-			fflush(stdout);
-			break;
+        case BLE_GAP_EVT_AUTH_STATUS:
+            printf("Authentication status: 0x%02X\n",
+                p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
+            fflush(stdout);
+            break;
 
         default:
             printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id);
@@ -664,6 +707,9 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             break;
     }
 }
+
+
+/** Main */
 
 /**@brief Function for application main entry.
  *
