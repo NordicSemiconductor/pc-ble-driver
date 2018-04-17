@@ -383,6 +383,10 @@ static uint32_t advertising_start()
     return NRF_SUCCESS;
 }
 
+/**@brief Function for starting the security request process.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 static void security_request_start()
 {
     printf("Start to authenticate\n");

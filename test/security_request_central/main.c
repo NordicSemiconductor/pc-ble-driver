@@ -586,14 +586,6 @@ static void on_sec_request(const ble_gap_evt_t * const p_ble_gap_evt)
     p_sec_params.min_key_size = 7;
     p_sec_params.max_key_size = 16;
 
-    ble_gap_sec_kdist_t kdist_own;
-    ble_gap_sec_kdist_t kdist_peer;
-    memset(&kdist_own, 0, sizeof(kdist_own));
-    memset(&kdist_peer, 0, sizeof(kdist_peer));
-
-    p_sec_params.kdist_own = kdist_own;
-    p_sec_params.kdist_peer = kdist_peer;
-
     uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
     if (error_code != NRF_SUCCESS)
     {
@@ -621,14 +613,6 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
     p_sec_params.oob = 0;
     p_sec_params.min_key_size = 7;
     p_sec_params.max_key_size = 16;
-
-    ble_gap_sec_kdist_t kdist_own;
-    ble_gap_sec_kdist_t kdist_peer;
-    memset(&kdist_own, 0, sizeof(kdist_own));
-    memset(&kdist_peer, 0, sizeof(kdist_peer));
-
-    p_sec_params.kdist_own = kdist_own;
-    p_sec_params.kdist_peer = kdist_peer;
 
     ble_gap_sec_keyset_t m_sec_keyset;
     memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
