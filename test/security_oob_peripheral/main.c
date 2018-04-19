@@ -398,20 +398,10 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
     p_sec_params.mitm = 1;
     p_sec_params.lesc = 0;
     p_sec_params.keypress = 0;
-    p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.io_caps = BLE_GAP_IO_CAPS_DISPLAY_ONLY;
     p_sec_params.oob = 1;
     p_sec_params.min_key_size = 7;
     p_sec_params.max_key_size = 16;
-
-    ble_gap_sec_kdist_t kdist_own;
-    ble_gap_sec_kdist_t kdist_peer;
-    memset(&kdist_own, 0, sizeof(kdist_own));
-    memset(&kdist_peer, 0, sizeof(kdist_peer));
-
-    kdist_own.enc = 1;
-    kdist_peer.enc = 1;
-    p_sec_params.kdist_own = kdist_own;
-    p_sec_params.kdist_peer = kdist_peer;
 
     ble_gap_sec_keyset_t m_sec_keyset;
     memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
@@ -420,19 +410,6 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
     ble_gap_sec_keys_t keys_peer;
     memset(&keys_own, 0, sizeof(keys_own));
     memset(&keys_peer, 0, sizeof(keys_peer));
-
-    ble_gap_enc_key_t p_enc_key;
-    memset(&p_enc_key, 0, sizeof(p_enc_key));
-
-    keys_own.p_enc_key = &p_enc_key;
-    keys_own.p_id_key = NULL;
-    keys_own.p_pk = NULL;
-    keys_own.p_sign_key = NULL;
-
-    keys_peer.p_enc_key = &p_enc_key;
-    keys_peer.p_id_key = NULL;
-    keys_peer.p_pk = NULL;
-    keys_peer.p_sign_key = NULL;
 
     m_sec_keyset.keys_own = keys_own;
     m_sec_keyset.keys_peer = keys_peer;
@@ -456,11 +433,11 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
 */
 static void on_auth_key_request(const ble_gap_evt_t * const p_ble_gap_evt)
 {
-    uint8_t oob_data[16] = { 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+    uint8_t oob_data[17] = { 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
     uint32_t err_code = sd_ble_gap_auth_key_reply(m_adapter,
                                                   m_connection_handle,
                                                   BLE_GAP_AUTH_KEY_TYPE_OOB,
-                                                  &oob_data[0]);
+                                                  oob_data);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -514,6 +491,12 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             fflush(stdout);
             on_sec_params_request(&(p_ble_evt->evt.gap_evt));
             break;
+
+		case BLE_GAP_EVT_PASSKEY_DISPLAY:
+			printf("Passkey received: %s\n",
+				p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
+			fflush(stdout);
+			break;
 
         case BLE_GAP_EVT_AUTH_KEY_REQUEST:
             printf("Auth key reuqest received\n");

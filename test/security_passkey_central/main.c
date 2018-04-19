@@ -484,20 +484,10 @@ static uint32_t authenticate_start()
     p_sec_params.mitm = 1;
     p_sec_params.lesc = 0;
     p_sec_params.keypress = 0;
-    p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
-    p_sec_params.oob = 1;
+    p_sec_params.io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY;
+    p_sec_params.oob = 0;
     p_sec_params.min_key_size = 7;
     p_sec_params.max_key_size = 16;
-
-    ble_gap_sec_kdist_t kdist_own;
-    ble_gap_sec_kdist_t kdist_peer;
-    memset(&kdist_own, 0, sizeof(kdist_own));
-    memset(&kdist_peer, 0, sizeof(kdist_peer));
-
-    kdist_own.enc = 1;
-    kdist_peer.enc = 1;
-    p_sec_params.kdist_own = kdist_own;
-    p_sec_params.kdist_peer = kdist_peer;
 
     uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
     if (error_code != NRF_SUCCESS)
@@ -620,19 +610,6 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
     memset(&keys_own, 0, sizeof(keys_own));
     memset(&keys_peer, 0, sizeof(keys_peer));
 
-    ble_gap_enc_key_t p_enc_key;
-    memset(&p_enc_key, 0, sizeof(p_enc_key));
-
-    keys_own.p_enc_key = &p_enc_key;
-    keys_own.p_id_key = NULL;
-    keys_own.p_pk = NULL;
-    keys_own.p_sign_key = NULL;
-
-    keys_peer.p_enc_key = &p_enc_key;
-    keys_peer.p_id_key = NULL;
-    keys_peer.p_pk = NULL;
-    keys_peer.p_sign_key = NULL;
-
     m_sec_keyset.keys_own = keys_own;
     m_sec_keyset.keys_peer = keys_peer;
 
@@ -715,13 +692,18 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
             printf("Security params request received\n");
             fflush(stdout);
-            // on_sec_params_request(&(p_ble_evt->evt.gap_evt));
+            on_sec_params_request(&(p_ble_evt->evt.gap_evt));
             break;
+
+		case BLE_GAP_EVT_PASSKEY_DISPLAY:
+			printf("Passkey received: %s\n",
+				   p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
+			fflush(stdout);
+			break;
 
         case BLE_GAP_EVT_AUTH_KEY_REQUEST:
             printf("Auth key reuqest received\n");
             fflush(stdout);
-            // on_auth_key_request(&(p_ble_evt->evt.gap_evt));
             break;
 
         case BLE_GAP_EVT_CONN_SEC_UPDATE:
