@@ -108,12 +108,12 @@ typedef struct
 
 
 /** Global variables */
-static uint8_t     m_connected_devices = 0;
-static uint16_t    m_connection_handle = 0;
-static bool        m_connection_is_in_progress = false;
-static adapter_t * m_adapter = NULL;
-static uint32_t    m_config_id = 1;
-static uint8_t     mp_data[100] = { 0 };
+static uint8_t     m_connected_devices          = 0;
+static uint16_t    m_connection_handle          = 0;
+static bool        m_connection_is_in_progress  = false;
+static adapter_t * m_adapter                    = NULL;
+static uint32_t    m_config_id                  = 1;
+static uint8_t     mp_data[100]                 = { 0 };
 #if NRF_SD_BLE_API >= 6 
 static ble_data_t  m_adv_report_buffer;
 #endif
@@ -213,7 +213,9 @@ static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port,
+                                            baud_rate,
+                                            SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -383,10 +385,10 @@ static uint32_t ble_options_set()
     ble_opt_t        opt;
     ble_common_opt_t common_opt;
 
-    common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
-    common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
-    common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
-    opt.common_opt = common_opt;
+    common_opt.conn_bw.role                 = BLE_GAP_ROLE_CENTRAL;
+    common_opt.conn_bw.conn_bw.conn_bw_rx   = BLE_CONN_BW_HIGH;
+    common_opt.conn_bw.conn_bw.conn_bw_tx   = BLE_CONN_BW_HIGH;
+    opt.common_opt                          = common_opt;
 
     return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
 #else
@@ -409,11 +411,11 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
     memset(&ble_cfg, 0, sizeof(ble_cfg));
 
 #if NRF_SD_BLE_API >= 6
-    ble_cfg.gap_cfg.role_count_cfg.adv_set_count  = BLE_GAP_ADV_SET_COUNT_DEFAULT;
+    ble_cfg.gap_cfg.role_count_cfg.adv_set_count        = BLE_GAP_ADV_SET_COUNT_DEFAULT;
 #endif
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 0;
-    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count    = 0;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count   = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count    = 1;
 
     error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
     if (error_code != NRF_SUCCESS)
@@ -480,14 +482,14 @@ static uint32_t authenticate_start()
 
     ble_gap_sec_params_t p_sec_params;
     memset(&p_sec_params, 0, sizeof(p_sec_params));
-    p_sec_params.bond = 1;
-    p_sec_params.mitm = 1;
-    p_sec_params.lesc = 0;
-    p_sec_params.keypress = 0;
-    p_sec_params.io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY;
-    p_sec_params.oob = 0;
-    p_sec_params.min_key_size = 7;
-    p_sec_params.max_key_size = 16;
+    p_sec_params.bond           = 1;
+    p_sec_params.mitm           = 1;
+    p_sec_params.lesc           = 0;
+    p_sec_params.keypress       = 0;
+    p_sec_params.io_caps        = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY;
+    p_sec_params.oob            = 0;
+    p_sec_params.min_key_size   = 7;
+    p_sec_params.max_key_size   = 16;
 
     uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
     if (error_code != NRF_SUCCESS)
@@ -610,33 +612,14 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
     memset(&keys_own, 0, sizeof(keys_own));
     memset(&keys_peer, 0, sizeof(keys_peer));
 
-    m_sec_keyset.keys_own = keys_own;
-    m_sec_keyset.keys_peer = keys_peer;
+    m_sec_keyset.keys_own   = keys_own;
+    m_sec_keyset.keys_peer  = keys_peer;
 
     uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter,
                                                     m_connection_handle,
                                                     BLE_GAP_SEC_STATUS_SUCCESS,
                                                     NULL,
                                                     &m_sec_keyset);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
-        fflush(stdout);
-    }
-}
-
-/**@brief Function called on BLE_GAP_EVT_AUTH_KEY_REQUEST event.
-*
-* @param[in] ble_gap_evt_t AUTH_KEY_REQUEST Event.
-*/
-static void on_auth_key_request(const ble_gap_evt_t * const p_ble_gap_evt)
-{
-    uint8_t oob_data[16] = { 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
-    uint32_t err_code = sd_ble_gap_auth_key_reply(m_adapter,
-                                                  m_connection_handle,
-                                                  BLE_GAP_AUTH_KEY_TYPE_OOB,
-                                                  &oob_data[0]);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -653,6 +636,7 @@ static void on_auth_key_request(const ble_gap_evt_t * const p_ble_gap_evt)
  * @param[in] adapter The transport adapter.
  * @param[in] p_ble_evt Bluetooth stack event.
  */
+
 static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 {
     if (p_ble_evt == NULL)

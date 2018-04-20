@@ -113,16 +113,16 @@ typedef struct
 
 
 /** Global variables */
-static uint8_t     m_connected_devices = 0;
-static uint16_t    m_connection_handle = 0;
-static uint16_t    m_service_start_handle = 0;
-static uint16_t    m_service_end_handle = 0;
-static uint16_t    m_hrm_char_handle = 0;
-static uint16_t    m_hrm_cccd_handle = 0;
-static bool        m_connection_is_in_progress = false;
-static adapter_t * m_adapter = NULL;
-static uint32_t    m_config_id = 1;
-static uint8_t	   mp_data[100] = { 0 };
+static uint8_t     m_connected_devices          = 0;
+static uint16_t    m_connection_handle          = 0;
+static uint16_t    m_service_start_handle       = 0;
+static uint16_t    m_service_end_handle         = 0;
+static uint16_t    m_hrm_char_handle            = 0;
+static uint16_t    m_hrm_cccd_handle            = 0;
+static bool        m_connection_is_in_progress  = false;
+static adapter_t * m_adapter                    = NULL;
+static uint32_t    m_config_id                  = 1;
+static uint8_t     mp_data[100]                 = { 0 };
 #if NRF_SD_BLE_API >= 6 
 static ble_data_t  m_adv_report_buffer;
 #endif
@@ -222,7 +222,9 @@ static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port,
+                                            baud_rate,
+                                            SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -392,10 +394,10 @@ static uint32_t ble_options_set()
     ble_opt_t        opt;
     ble_common_opt_t common_opt;
 
-    common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
-    common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
-    common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
-    opt.common_opt = common_opt;
+    common_opt.conn_bw.role                 = BLE_GAP_ROLE_CENTRAL;
+    common_opt.conn_bw.conn_bw.conn_bw_rx   = BLE_CONN_BW_HIGH;
+    common_opt.conn_bw.conn_bw.conn_bw_tx   = BLE_CONN_BW_HIGH;
+    opt.common_opt                          = common_opt;
 
     return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
 #else
@@ -418,11 +420,11 @@ static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
     memset(&ble_cfg, 0, sizeof(ble_cfg));
 
 #if NRF_SD_BLE_API >= 6
-    ble_cfg.gap_cfg.role_count_cfg.adv_set_count  = BLE_GAP_ADV_SET_COUNT_DEFAULT;
+    ble_cfg.gap_cfg.role_count_cfg.adv_set_count        = BLE_GAP_ADV_SET_COUNT_DEFAULT;
 #endif
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 0;
-    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 0;
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count    = 0;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count   = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count    = 0;
 
     error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
     if (error_code != NRF_SUCCESS)
@@ -548,8 +550,8 @@ static uint32_t descr_discovery_start()
         return NRF_ERROR_INVALID_STATE;
     }
 
-    handle_range.start_handle = m_hrm_char_handle;
-    handle_range.end_handle = m_service_end_handle;
+    handle_range.start_handle   = m_hrm_char_handle;
+    handle_range.end_handle     = m_service_end_handle;
 
     return sd_ble_gattc_descriptors_discover(m_adapter, m_connection_handle, &handle_range);
 }
@@ -573,11 +575,11 @@ static uint32_t hrm_cccd_set(uint8_t value)
         return NRF_ERROR_INVALID_STATE;
     }
 
-    write_params.handle = m_hrm_cccd_handle;
-    write_params.len = 2;
-    write_params.p_value = cccd_value;
-    write_params.write_op = BLE_GATT_OP_WRITE_REQ;
-    write_params.offset = 0;
+    write_params.handle     = m_hrm_cccd_handle;
+    write_params.len        = 2;
+    write_params.p_value    = cccd_value;
+    write_params.write_op   = BLE_GATT_OP_WRITE_REQ;
+    write_params.offset     = 0;
 
     return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
 }
@@ -597,7 +599,7 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
     fflush(stdout);
 
     m_connected_devices++;
-    m_connection_handle = p_ble_gap_evt->conn_handle;
+    m_connection_handle         = p_ble_gap_evt->conn_handle;
     m_connection_is_in_progress = false;
 
     service_discovery_start();
@@ -651,7 +653,6 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
         {
             printf("Scan start failed with error code: %d\n", err_code);
             fflush(stdout);
-            // scan_start();
         }
         else
         {

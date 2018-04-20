@@ -36,9 +36,9 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**@example test/security_request_peripheral
+/**@example test/security_legacy_pairing_peripheral
  *
- * @brief Security Request Peripheral Sample Application main file.
+ * @brief Security Legacy Pairing Peripheral Sample Application main file.
  *
  * This file contains the source code for a sample application that acts as a BLE Central device.
  * This application waits for a Security Request Central device and sends security request.
@@ -175,7 +175,9 @@ static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port,
+                                            baud_rate,
+                                            SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -197,15 +199,15 @@ static uint32_t ble_stack_init()
 #endif
 
 #if NRF_SD_BLE_API == 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+    ble_enable_params.gatt_enable_params.att_mtu            = GATT_MTU_SIZE_DEFAULT;
 #elif NRF_SD_BLE_API < 3
-    ble_enable_params.gatts_enable_params.attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    ble_enable_params.gatts_enable_params.service_changed = false;
-    ble_enable_params.gap_enable_params.periph_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_conn_count = 0;
-    ble_enable_params.gap_enable_params.central_sec_count = 0;
+    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+    ble_enable_params.gatts_enable_params.service_changed   = false;
+    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
+    ble_enable_params.gap_enable_params.central_conn_count  = 0;
+    ble_enable_params.gap_enable_params.central_sec_count   = 0;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count = 1;
+    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 #endif
 
 #if NRF_SD_BLE_API <= 3
@@ -231,6 +233,10 @@ static uint32_t ble_stack_init()
 }
 
 #if NRF_SD_BLE_API >= 5
+/**@brief Function for setting configuration for the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 {
     const uint32_t ram_start = 0; // Value is not used by ble-driver
@@ -355,12 +361,12 @@ static uint32_t advertising_start()
     memset(&adv_params, 0, sizeof(adv_params));
 
 #if NRF_SD_BLE_API <= 5
-    adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-    adv_params.fp = BLE_GAP_ADV_FP_ANY;
-    adv_params.timeout = ADVERTISING_TIMEOUT_3_MIN;
+    adv_params.type         = BLE_GAP_ADV_TYPE_ADV_IND;
+    adv_params.fp           = BLE_GAP_ADV_FP_ANY;
+    adv_params.timeout      = ADVERTISING_TIMEOUT_3_MIN;
 #endif
 #if NRF_SD_BLE_API == 2
-    adv_params.p_whitelist = NULL;
+    adv_params.p_whitelist  = NULL;
 #endif
 
 #if NRF_SD_BLE_API <= 3
@@ -394,14 +400,14 @@ static void security_request_start()
     ble_gap_sec_params_t p_sec_params;
     memset(&p_sec_params, 0, sizeof(p_sec_params));
 
-    p_sec_params.bond = 0;
-    p_sec_params.mitm = 0;
-    p_sec_params.lesc = 0;
-    p_sec_params.keypress = 0;
-    p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
-    p_sec_params.oob = 0;
-    p_sec_params.min_key_size = 7;
-    p_sec_params.max_key_size = 16;
+    p_sec_params.bond           = 0;
+    p_sec_params.mitm           = 0;
+    p_sec_params.lesc           = 0;
+    p_sec_params.keypress       = 0;
+    p_sec_params.io_caps        = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob            = 0;
+    p_sec_params.min_key_size   = 7;
+    p_sec_params.max_key_size   = 16;
 
     uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
     if (error_code != NRF_SUCCESS)
@@ -422,28 +428,31 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     ble_gap_sec_params_t p_sec_params;
     memset(&p_sec_params, 0, sizeof(p_sec_params));
-    p_sec_params.bond = 0;
-    p_sec_params.mitm = 0;
-    p_sec_params.lesc = 0;
-    p_sec_params.keypress = 0;
-    p_sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;
-    p_sec_params.oob = 0;
-    p_sec_params.min_key_size = 7;
-    p_sec_params.max_key_size = 16;
+    p_sec_params.bond           = 0;
+    p_sec_params.mitm           = 0;
+    p_sec_params.lesc           = 0;
+    p_sec_params.keypress       = 0;
+    p_sec_params.io_caps        = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob            = 0;
+    p_sec_params.min_key_size   = 7;
+    p_sec_params.max_key_size   = 16;
 
     ble_gap_sec_kdist_t kdist_own;
     ble_gap_sec_kdist_t kdist_peer;
     memset(&kdist_own, 0, sizeof(kdist_own));
     memset(&kdist_peer, 0, sizeof(kdist_peer));
 
-    p_sec_params.kdist_own = kdist_own;
+    p_sec_params.kdist_own  = kdist_own;
     p_sec_params.kdist_peer = kdist_peer;
 
     ble_gap_sec_keyset_t m_sec_keyset;
     memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
 
-    uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, m_connection_handle,
-                                                    BLE_GAP_SEC_STATUS_SUCCESS, &p_sec_params, &m_sec_keyset);
+    uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, 
+                                                    m_connection_handle,
+                                                    BLE_GAP_SEC_STATUS_SUCCESS,
+                                                    &p_sec_params,
+                                                    &m_sec_keyset);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -511,7 +520,8 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 
 #if NRF_SD_BLE_API >= 3
         case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-            err_code = sd_ble_gatts_exchange_mtu_reply(adapter, m_connection_handle,
+            err_code = sd_ble_gatts_exchange_mtu_reply(adapter,
+                                                       m_connection_handle,
                                                        GATT_MTU_SIZE_DEFAULT);
 
             if (err_code != NRF_SUCCESS)
@@ -551,9 +561,9 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 int main(int argc, char * argv[])
 {
     uint32_t error_code;
-    char *   serial_port = DEFAULT_UART_PORT_NAME;
-    uint32_t baud_rate = DEFAULT_BAUD_RATE;
-    uint8_t  cccd_value = 0;
+    char *   serial_port    = DEFAULT_UART_PORT_NAME;
+    uint32_t baud_rate      = DEFAULT_BAUD_RATE;
+    uint8_t  cccd_value     = 0;
 
     if (argc > 2)
     {

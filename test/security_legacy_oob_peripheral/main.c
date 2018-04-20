@@ -175,7 +175,9 @@ static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port,
+                                            baud_rate,
+                                            SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -197,15 +199,15 @@ static uint32_t ble_stack_init()
 #endif
 
 #if NRF_SD_BLE_API == 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+    ble_enable_params.gatt_enable_params.att_mtu            = GATT_MTU_SIZE_DEFAULT;
 #elif NRF_SD_BLE_API < 3
-    ble_enable_params.gatts_enable_params.attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    ble_enable_params.gatts_enable_params.service_changed = false;
-    ble_enable_params.gap_enable_params.periph_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_conn_count = 0;
-    ble_enable_params.gap_enable_params.central_sec_count = 0;
+    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+    ble_enable_params.gatts_enable_params.service_changed   = false;
+    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
+    ble_enable_params.gap_enable_params.central_conn_count  = 0;
+    ble_enable_params.gap_enable_params.central_sec_count   = 0;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count = 1;
+    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 #endif
 
 #if NRF_SD_BLE_API <= 3
@@ -231,6 +233,10 @@ static uint32_t ble_stack_init()
 }
 
 #if NRF_SD_BLE_API >= 5
+/**@brief Function for setting configuration for the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 {
     const uint32_t ram_start = 0; // Value is not used by ble-driver
@@ -394,14 +400,14 @@ static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     ble_gap_sec_params_t p_sec_params;
     memset(&p_sec_params, 0, sizeof(p_sec_params));
-    p_sec_params.bond = 1;
-    p_sec_params.mitm = 1;
-    p_sec_params.lesc = 0;
-    p_sec_params.keypress = 0;
-    p_sec_params.io_caps = BLE_GAP_IO_CAPS_DISPLAY_ONLY;
-    p_sec_params.oob = 1;
-    p_sec_params.min_key_size = 7;
-    p_sec_params.max_key_size = 16;
+    p_sec_params.bond           = 1;
+    p_sec_params.mitm           = 1;
+    p_sec_params.lesc           = 0;
+    p_sec_params.keypress       = 0;
+    p_sec_params.io_caps        = BLE_GAP_IO_CAPS_DISPLAY_ONLY;
+    p_sec_params.oob            = 1;
+    p_sec_params.min_key_size   = 7;
+    p_sec_params.max_key_size   = 16;
 
     ble_gap_sec_keyset_t m_sec_keyset;
     memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
@@ -492,11 +498,11 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             on_sec_params_request(&(p_ble_evt->evt.gap_evt));
             break;
 
-		case BLE_GAP_EVT_PASSKEY_DISPLAY:
-			printf("Passkey received: %s\n",
-				p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
-			fflush(stdout);
-			break;
+        case BLE_GAP_EVT_PASSKEY_DISPLAY:
+            printf("Passkey received: %s\n",
+                p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
+            fflush(stdout);
+            break;
 
         case BLE_GAP_EVT_AUTH_KEY_REQUEST:
             printf("Auth key reuqest received\n");
