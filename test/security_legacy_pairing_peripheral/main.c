@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2012 - 2018, Nordic Semiconductor ASA
- * All rights reserved.
+ * copyright (c) 2012 - 2018, nordic semiconductor asa
+ * all rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
+ * redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
+ * 1. redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
+ * 2. redistributions in binary form, except as embedded into a nordic
+ *    semiconductor asa integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
@@ -36,12 +36,12 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**@example examples/heart_rate_monitor
+/**@example test/security_legacy_pairing_peripheral
  *
- * @brief Heart Rate Service Sample Application main file.
+ * @brief Security Legacy Pairing Peripheral Sample Application main file.
  *
- * This file contains the source code for a sample application using the Heart Rate service.
- * This service exposes heart rate data from a Heart Rate Sensor intended for fitness applications.
+ * This file contains the source code for a sample application that acts as a BLE Central device.
+ * This application waits for a Security Request Central device and sends security request.
  * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
  * 
  * Structure of this file
@@ -97,15 +97,8 @@
 #define MAX_HRM_LEN (BLE_EVT_LEN_MAX(GATT_MTU_SIZE_DEFAULT) - OPCODE_LENGTH - HANDLE_LENGTH)
 #endif
 
-#define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
-#define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR 0x2A37 /**< Heart Rate Measurement characteristic UUID. */
-
-#define HEART_RATE_BASE     65
-#define HEART_RATE_INCREASE 3
-#define HEART_RATE_LIMIT    190
-
 #define BUFFER_SIZE 30           /**< Sufficiently large buffer for the advertising data.  */
-#define DEVICE_NAME "Nordic_HRM" /**< Name device advertises as over Bluetooth. */
+#define DEVICE_NAME "Nordic_SP" /**< Name device advertises as over Bluetooth. */
 
 #ifndef GATT_MTU_SIZE_DEFAULT
 #define GATT_MTU_SIZE_DEFAULT BLE_GATT_ATT_MTU_DEFAULT
@@ -114,10 +107,6 @@
 
 /** Global variables */
 static uint16_t                 m_connection_handle             = BLE_CONN_HANDLE_INVALID;
-static uint16_t                 m_heart_rate_service_handle     = 0;
-static ble_gatts_char_handles_t m_heart_rate_measurement_handle;
-static uint8_t                  m_heart_rate                    = HEART_RATE_BASE;
-static bool                     m_send_notifications            = false;
 static bool                     m_advertisement_timed_out       = false;
 static adapter_t *              m_adapter                       = NULL;
 static uint32_t                 m_config_id                     = 1;
@@ -306,13 +295,6 @@ static uint32_t advertisement_data_set()
     memcpy((char *)&data_buffer[index], device_name, name_length);
     index += name_length;
 
-    // Set the device's available services.
-    data_buffer[index++] = 3;
-    data_buffer[index++] = BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE;
-    // Store BLE_UUID_HEART_RATE_SERVICE in little-endian format.
-    data_buffer[index++] = BLE_UUID_HEART_RATE_SERVICE & 0xFF;
-    data_buffer[index++] = (BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8;
-
     // No scan response.
     const uint8_t * sr_data        = NULL;
     const uint8_t   sr_data_length = 0;
@@ -379,12 +361,12 @@ static uint32_t advertising_start()
     memset(&adv_params, 0, sizeof(adv_params));
 
 #if NRF_SD_BLE_API <= 5
-    adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-    adv_params.fp = BLE_GAP_ADV_FP_ANY;
-    adv_params.timeout = ADVERTISING_TIMEOUT_3_MIN;
+    adv_params.type         = BLE_GAP_ADV_TYPE_ADV_IND;
+    adv_params.fp           = BLE_GAP_ADV_FP_ANY;
+    adv_params.timeout      = ADVERTISING_TIMEOUT_3_MIN;
 #endif
 #if NRF_SD_BLE_API == 2
-    adv_params.p_whitelist = NULL;
+    adv_params.p_whitelist  = NULL;
 #endif
 
 #if NRF_SD_BLE_API <= 3
@@ -407,183 +389,77 @@ static uint32_t advertising_start()
     return NRF_SUCCESS;
 }
 
-/**@brief Function for encoding a Heart Rate Measurement.
- *
- * @param[in]   heart_rate    Measurement to be encoded.
- * @param[out]  encoded_hrm   Buffer where the encoded data will be written.
- *
- * @return      Size of encoded data.
- */
-static uint8_t heart_rate_measurement_encode(uint8_t * encoded_hrm, uint8_t heart_rate)
-{
-    uint8_t flags = 0;
-
-    encoded_hrm[0] = flags;
-    encoded_hrm[1] = heart_rate;
-
-    return 2;
-}
-
-/**@brief Function for adding the Heart Rate Measurement characteristic.
+/**@brief Function for starting the security request process.
  *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
-static uint32_t characteristic_init()
+static void security_request_start()
 {
-    uint32_t            error_code;
-    ble_gatts_char_md_t char_md;
-    ble_gatts_attr_md_t cccd_md;
-    ble_gatts_attr_t    attr_char_value;
-    ble_uuid_t          ble_uuid;
-    ble_gatts_attr_md_t attr_md;
-    uint8_t             encoded_initial_hrm[MAX_HRM_LEN];
-    uint16_t            attr_char_value_init_len;
-
-    memset(&cccd_md, 0, sizeof(cccd_md));
-
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
-    cccd_md.vloc = BLE_GATTS_VLOC_STACK;
-
-    memset(&char_md, 0, sizeof(char_md));
-
-    char_md.char_props.notify = 1;
-    char_md.p_char_user_desc  = NULL;
-    char_md.p_char_pf         = NULL;
-    char_md.p_user_desc_md    = NULL;
-    char_md.p_cccd_md         = &cccd_md;
-    char_md.p_sccd_md         = NULL;
-
-    BLE_UUID_BLE_ASSIGN(ble_uuid, BLE_UUID_HEART_RATE_MEASUREMENT_CHAR);
-
-    memset(&attr_md, 0, sizeof(attr_md));
-
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
-    attr_md.vloc       = BLE_GATTS_VLOC_STACK;
-    attr_md.rd_auth    = 0;
-    attr_md.wr_auth    = 0;
-    attr_md.vlen       = 1;
-
-    memset(&attr_char_value, 0, sizeof(attr_char_value));
-
-    attr_char_value_init_len = heart_rate_measurement_encode(encoded_initial_hrm, 0);
-
-    attr_char_value.p_uuid       = &ble_uuid;
-    attr_char_value.p_attr_md    = &attr_md;
-    attr_char_value.init_len     = attr_char_value_init_len;
-    attr_char_value.init_offs    = 0;
-    attr_char_value.max_len      = MAX_HRM_LEN;
-    attr_char_value.p_value      = encoded_initial_hrm;
-
-    error_code = sd_ble_gatts_characteristic_add(m_adapter, m_heart_rate_service_handle,
-                                                 &char_md,
-                                                 &attr_char_value,
-                                                 &m_heart_rate_measurement_handle);
-
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("Failed to initialize characteristics. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-        return error_code;
-    }
-
-    printf("Characteristics initiated\n");
+    printf("Start to authenticate\n");
     fflush(stdout);
-    return NRF_SUCCESS;
-}
+    ble_gap_sec_params_t p_sec_params;
+    memset(&p_sec_params, 0, sizeof(p_sec_params));
 
-/**@brief Function for initializing services that will be used by the application.
- *
- * @details Initialize the Heart Rate service and it's characteristics and add to GATT.
- *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t services_init()
-{
-    uint32_t    error_code;
-    ble_uuid_t  ble_uuid;
+    p_sec_params.bond           = 0;
+    p_sec_params.mitm           = 0;
+    p_sec_params.lesc           = 0;
+    p_sec_params.keypress       = 0;
+    p_sec_params.io_caps        = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob            = 0;
+    p_sec_params.min_key_size   = 7;
+    p_sec_params.max_key_size   = 16;
 
-    BLE_UUID_BLE_ASSIGN(ble_uuid, BLE_UUID_HEART_RATE_SERVICE);
-
-    error_code = sd_ble_gatts_service_add(m_adapter,
-                                          BLE_GATTS_SRVC_TYPE_PRIMARY,
-                                          &ble_uuid,
-                                          &m_heart_rate_service_handle);
-
+    uint32_t error_code = sd_ble_gap_authenticate(m_adapter, m_connection_handle, &p_sec_params);
     if (error_code != NRF_SUCCESS)
     {
-        printf("Failed to initialize heart rate service. Error code: 0x%02X\n", error_code);
+        printf("Failed to open nRF BLE Driver. Error code: 0x%02X\n", error_code);
         fflush(stdout);
-        return error_code;
     }
-
-    printf("Services initiated\n");
-    fflush(stdout);
-
-    error_code = characteristic_init();
-
-    if (error_code != NRF_SUCCESS)
-    {
-        return error_code;
-    }
-
-    return NRF_SUCCESS;
-}
-
-/**@brief Function for simulating a heart rate sensor reading.
- *
- * @details This modifies a global variable `m_heart_rate`.
- */
-static void heart_rate_generate()
-{
-    m_heart_rate += HEART_RATE_INCREASE;
-
-    if (m_heart_rate > HEART_RATE_LIMIT)
-    {
-        m_heart_rate = HEART_RATE_BASE;
-    }
-}
-
-/**@brief Function for sending the heart rate measurement over Bluetooth.
- *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t heart_rate_measurement_send()
-{
-    uint32_t               error_code;
-    uint8_t                encoded_hrm[MAX_HRM_LEN];
-    uint16_t               hvx_length;
-    ble_gatts_hvx_params_t hvx_params;
-    uint8_t                length;
-
-    heart_rate_generate();
-
-    length = heart_rate_measurement_encode(encoded_hrm, m_heart_rate);
-
-    hvx_length = length;
-
-    hvx_params.handle   = m_heart_rate_measurement_handle.value_handle;
-    hvx_params.type     = BLE_GATT_HVX_NOTIFICATION;
-    hvx_params.offset   = 0;
-    hvx_params.p_len    = &hvx_length;
-    hvx_params.p_data   = encoded_hrm;
-
-    error_code = sd_ble_gatts_hvx(m_adapter, m_connection_handle, &hvx_params);
-
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("Failed to send heart rate measurement. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-        return error_code;
-    }
-
-    return NRF_SUCCESS;
 }
 
 
 /** Event functions */
 
+/**@brief Function called on BLE_GAP_EVT_SEC_PARAMS_REQUEST event.
+*
+* @param[in] ble_gap_evt_t Timeout Event.
+*/
+static void on_sec_params_request(const ble_gap_evt_t * const p_ble_gap_evt)
+{
+    ble_gap_sec_params_t p_sec_params;
+    memset(&p_sec_params, 0, sizeof(p_sec_params));
+    p_sec_params.bond           = 0;
+    p_sec_params.mitm           = 0;
+    p_sec_params.lesc           = 0;
+    p_sec_params.keypress       = 0;
+    p_sec_params.io_caps        = BLE_GAP_IO_CAPS_NONE;
+    p_sec_params.oob            = 0;
+    p_sec_params.min_key_size   = 7;
+    p_sec_params.max_key_size   = 16;
+
+    ble_gap_sec_kdist_t kdist_own;
+    ble_gap_sec_kdist_t kdist_peer;
+    memset(&kdist_own, 0, sizeof(kdist_own));
+    memset(&kdist_peer, 0, sizeof(kdist_peer));
+
+    p_sec_params.kdist_own  = kdist_own;
+    p_sec_params.kdist_peer = kdist_peer;
+
+    ble_gap_sec_keyset_t m_sec_keyset;
+    memset(&m_sec_keyset, 0, sizeof(m_sec_keyset));
+
+    uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, 
+                                                    m_connection_handle,
+                                                    BLE_GAP_SEC_STATUS_SUCCESS,
+                                                    &p_sec_params,
+                                                    &m_sec_keyset);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
+        fflush(stdout);
+    }
+}
 
 /** Event dispatcher */
 
@@ -609,13 +485,13 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             m_connection_handle = p_ble_evt->evt.gap_evt.conn_handle;
             printf("Connected, connection handle 0x%04X\n", m_connection_handle);
             fflush(stdout);
+            security_request_start();
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
             printf("Disconnected\n");
             fflush(stdout);
             m_connection_handle = BLE_CONN_HANDLE_INVALID;
-            m_send_notifications = false;
             advertising_start();
             break;
 
@@ -625,28 +501,27 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             m_advertisement_timed_out = true;
             break;
 
-        case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-            err_code = sd_ble_gatts_sys_attr_set(adapter, m_connection_handle, NULL, 0, 0);
-
-            if (err_code != NRF_SUCCESS)
-            {
-                printf("Failed updating persistent sys attr info. Error code: 0x%02X\n", err_code);
-                fflush(stdout);
-            }
+        case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+            printf("Security params reuqest received\n");
+            fflush(stdout);
+            on_sec_params_request(&(p_ble_evt->evt.gap_evt));
             break;
 
-        case BLE_GATTS_EVT_WRITE:
-            if (p_ble_evt->evt.gatts_evt.params.write.handle ==
-                    m_heart_rate_measurement_handle.cccd_handle)
-            {
-                uint8_t write_data = p_ble_evt->evt.gatts_evt.params.write.data[0];
-                m_send_notifications = write_data == BLE_GATT_HVX_NOTIFICATION;
-            }
+        case BLE_GAP_EVT_CONN_SEC_UPDATE:
+            printf("Connection security updated\n");
+            fflush(stdout);
+            break;
+
+        case BLE_GAP_EVT_AUTH_STATUS:
+            printf("Authentication status: 0x%02X\n",
+                p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
+            fflush(stdout);
             break;
 
 #if NRF_SD_BLE_API >= 3
         case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-            err_code = sd_ble_gatts_exchange_mtu_reply(adapter, m_connection_handle,
+            err_code = sd_ble_gatts_exchange_mtu_reply(adapter,
+                                                       m_connection_handle,
                                                        GATT_MTU_SIZE_DEFAULT);
 
             if (err_code != NRF_SUCCESS)
@@ -675,6 +550,7 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
         }
 }
 
+
 /** Main */
 
 /**@brief Function for application main entry.
@@ -685,9 +561,9 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 int main(int argc, char * argv[])
 {
     uint32_t error_code;
-    char *   serial_port = DEFAULT_UART_PORT_NAME;
-    uint32_t baud_rate = DEFAULT_BAUD_RATE;
-    uint8_t  cccd_value = 0;
+    char *   serial_port    = DEFAULT_UART_PORT_NAME;
+    uint32_t baud_rate      = DEFAULT_BAUD_RATE;
+    uint8_t  cccd_value     = 0;
 
     if (argc > 2)
     {
@@ -744,13 +620,6 @@ int main(int argc, char * argv[])
         return error_code;
     }
 
-    error_code = services_init();
-
-    if (error_code != NRF_SUCCESS)
-    {
-        return error_code;
-    }
-
     error_code = advertising_start();
 
     if (error_code != NRF_SUCCESS)
@@ -760,11 +629,6 @@ int main(int argc, char * argv[])
 
     while (!m_advertisement_timed_out)
     {
-        if (m_connection_handle != BLE_CONN_HANDLE_INVALID && m_send_notifications)
-        {
-            heart_rate_measurement_send();
-        }
-
         Sleep(1000);
     }
 
