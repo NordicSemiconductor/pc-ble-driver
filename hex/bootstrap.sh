@@ -8,7 +8,7 @@
 # All the paths provided as arguments are relative to the location of this script.
 # Usage: Usage: bootstrap -l link -d destination -p patch [-h]
 # 
-# Adapted from 'https://github.com/NordicSemiconductor/nrf5-sdk-for-eddystone'.
+# Adapted from 'https://github.com/NordicPlayground/nrf5-sdk-for-eddystone'.
 # Version 0.5
 
 ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,6 +19,13 @@ function set_sdk_link () {
 
     SDK_FILE=${SDK_LINK##*/}  # SDK file name with extension
     SDK_NAME=${SDK_FILE%.zip} # SDK folder name without extension
+}
+
+function set_familypack_link () {
+    FAMILYPACK_LINK=$1
+
+    FAMILYPACK_FILE=${FAMILYPACK_LINK##*/}
+    FAMILYPACK_NAME=${FAMILYPACK_FILE%.pack}
 }
 
 # Configuration of the destination folder (relative path from this script)
@@ -103,6 +110,20 @@ function sdk_exists () {
 
 # Patch the downloaded SDK in order to compile the connectivity application
 function sdk_patch () {
+    # Detect which OS is running
+    UNAME="$(uname)"
+    # If OS is Linux or Darwin
+    # Change the format of line ending to unix
+    if [[ "${UNAME}" == "Linux" ]]; then
+        echo "> Modifying SDK line ending format..."
+        find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i $'s/\r//' {} \;
+    fi
+    if [[ "${UNAME}" == "Darwin" ]]; then
+        echo "> Modifying SDK line ending format..."
+        LC_CTYPE=C
+        find $DL_LOCATION/$SDK_NAME/ -type f -exec sed -i '' $'s/\r//' {} \;
+    fi
+
     echo "> Applying SDK patch '${PATCH_FILE}'..."
 
     # Apply the patch from the base nRF SDK folder (remove the first portion of the path)
@@ -148,6 +169,14 @@ function sdk_download () {
         fatal "Could not unzip the SDK file"
     fi
 
+    if [ -d $DL_LOCATION/$SDK_NAME/$SDK_NAME ]; then
+        echo "> Moving SDK folder..."
+        SDK_NAME_TMP=$SDK_NAME"_tmp"
+        mv $DL_LOCATION/$SDK_NAME/$SDK_NAME $DL_LOCATION/$SDK_NAME_TMP
+        mv $DL_LOCATION/$SDK_NAME_TMP/* $DL_LOCATION/$SDK_NAME
+        rm -rf $DL_LOCATION/$SDK_NAME_TMP
+    fi
+
     echo "> Clean up. Removing SDK zip file..."
     rm $DL_LOCATION/$SDK_FILE
 
@@ -160,12 +189,30 @@ function sdk_download () {
     # Keep only the components and the connectivity application ?
 }
 
+function familypack_download () {
+    if [[ -z "${FAMILYPACK_NAME}" ]]; then
+        fatal "Invalid Device Family Pack link"
+    fi
+
+    echo "> Downloading Device Family Pack '${FAMILYPACK_NAME}'..."
+
+    curl --progress-bar -o $DL_LOCATION/$SDK_NAME/$FAMILYPACK_FILE $FAMILYPACK_LINK
+
+    err_code=$?
+    if [ "$err_code" != "0" ]; then
+        fatal "Could not download Device Family Pack from '${FAMILYPACK_LINK}'"
+    fi
+}
+
 function main() {
 
     while [ "$1" != "" ]; do
         case $1 in
             -l | --link )  shift
                            set_sdk_link $1
+                           ;;
+            -f | --familypack ) shift
+                           set_familypack_link $1
                            ;;
             -d | --dest )  shift
                            set_dl_location $1
@@ -186,9 +233,11 @@ function main() {
     check_config
     sdk_download
     sdk_patch
+    familypack_download
 
-    echo "> SDK ready to use. Exit."
-    exit
+    echo "> SDK ready to use."
 }
 
-main "$@"
+if [ "${1}" != "--source-only" ]; then
+   main "$@"
+fi
