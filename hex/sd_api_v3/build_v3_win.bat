@@ -3,12 +3,12 @@
 @SET scriptpath=%~dp0
 @SET rootpath=%scriptpath%..\..
 
-IF "%CONN_VERSION%"=="" (SET CONN_VERSION=0.0.0)
+REM Get command line argument
+IF "%1"=="" ( SET CONN_VERSION=0.0.0
+) ELSE ( SET CONN_VERSION=%1 )
 
 REM Run bootstrap script
 cd %scriptpath%
-
-REM Run bootstrap script
 "c:\program files\git\bin\bash.exe" bootstrap_sd_api_v3.sh
 
 REM Workaround to reduce path length before build
