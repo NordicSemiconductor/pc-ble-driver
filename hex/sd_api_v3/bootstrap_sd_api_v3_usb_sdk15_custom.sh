@@ -6,7 +6,7 @@
 ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source $ABS_PATH/../bootstrap.sh \
-  -l 'insert/valid/path/to/nRF5_SDK_15.0.0_2e1b341.zip' \
+  -l 'insert/valid/path/to/nRF5_SDK_15.0.0_0a8a0ca.zip' \
   -f 'https://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/NordicSemiconductor.nRF_DeviceFamilyPack.8.16.0.pack' \
   -d "../sdk" \
   -p 'sd_api_v3/sdk150_connectivity_2e1b341.patch'
