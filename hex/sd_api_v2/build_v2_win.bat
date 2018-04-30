@@ -3,7 +3,9 @@
 @SET scriptpath=%~dp0
 @SET rootpath=%scriptpath%..\..
 
-IF "%CONN_VERSION%"=="" (SET CONN_VERSION=0.0.0)
+REM Get command line argument
+IF "%1"=="" ( SET CONN_VERSION=0.0.0
+) ELSE ( SET CONN_VERSION=%1 )
 
 REM Run bootstrap script
 cd %scriptpath%
