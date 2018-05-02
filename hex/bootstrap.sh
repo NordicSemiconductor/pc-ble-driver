@@ -169,6 +169,14 @@ function sdk_download () {
         fatal "Could not unzip the SDK file"
     fi
 
+    if [ -d $DL_LOCATION/$SDK_NAME/$SDK_NAME ]; then
+        echo "> Moving SDK folder..."
+        SDK_NAME_TMP=$SDK_NAME"_tmp"
+        mv $DL_LOCATION/$SDK_NAME/$SDK_NAME $DL_LOCATION/$SDK_NAME_TMP
+        mv $DL_LOCATION/$SDK_NAME_TMP/* $DL_LOCATION/$SDK_NAME
+        rm -rf $DL_LOCATION/$SDK_NAME_TMP
+    fi
+
     echo "> Clean up. Removing SDK zip file..."
     rm $DL_LOCATION/$SDK_FILE
 
@@ -227,8 +235,7 @@ function main() {
     sdk_patch
     familypack_download
 
-    echo "> SDK ready to use. Exit."
-    exit
+    echo "> SDK ready to use."
 }
 
 if [ "${1}" != "--source-only" ]; then
