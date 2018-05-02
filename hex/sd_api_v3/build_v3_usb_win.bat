@@ -9,7 +9,7 @@ IF "%1"=="" (SET CONN_VERSION=0.0.0
 
 IF NOT EXIST %rootpath%\sdk\s122 (
     ECHO "SDK 12 not downloaded, please run build_v3_win.bat first"
-    GOTO :eof
+    EXIT /b 1
 )
 
 ECHO ON
