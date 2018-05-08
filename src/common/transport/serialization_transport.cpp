@@ -117,7 +117,7 @@ uint32_t SerializationTransport::close()
     return nextTransportLayer->close();
 }
 
-uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength)
+uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength, serialization_pkt_type_t pktType)
 {
     // Mutex to avoid multiple threads sending commands at the same time.
     std::unique_lock<std::mutex> sendGuard(sendMutex);
@@ -126,7 +126,7 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
     responseLength = rspLength;
 
     std::vector<uint8_t> commandBuffer(cmdLength + 1);
-    commandBuffer[0] = SERIALIZATION_COMMAND;
+    commandBuffer[0] = pktType;
     memcpy(&commandBuffer[1], cmdBuffer, cmdLength * sizeof(uint8_t));
 
     auto errCode = nextTransportLayer->send(commandBuffer);
