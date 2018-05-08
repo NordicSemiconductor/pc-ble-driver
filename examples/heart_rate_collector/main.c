@@ -893,6 +893,7 @@ int main(int argc, char * argv[])
         char c = (char)getchar();
         if (c == 'q' || c == 'Q')
         {
+            error_code = sd_ble_gap_scan_stop(m_adapter);
             error_code = sd_rpc_close(m_adapter);
 
             if (error_code != NRF_SUCCESS)

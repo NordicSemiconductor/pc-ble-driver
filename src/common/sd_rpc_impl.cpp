@@ -189,9 +189,13 @@ uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_s
 
 uint32_t sd_rpc_conn_reset(adapter_t *adapter)
 {
-    encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return conn_systemreset_enc(buffer, length);
-    };
+    AdapterInternal *intAdapter = static_cast<AdapterInternal*>(adapter->internal);
 
-    return encode_decode(adapter, encode_function, nullptr);
+    uint32_t tx_buffer_length = 1;
+    uint32_t rx_buffer_length = 0;
+
+    std::unique_ptr<uint8_t> tx_buffer(static_cast<uint8_t*>(std::malloc(50)));
+    //std::unique_ptr<uint8_t> rx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
+
+    return intAdapter->transport->send(tx_buffer.get(), tx_buffer_length, nullptr, &rx_buffer_length, SERIALIZATION_RESET_CMD);
 }
