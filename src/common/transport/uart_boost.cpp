@@ -39,35 +39,66 @@
 #include "uart_settings_boost.h"
 #include "nrf_error.h"
 
+#include <functional>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <mutex>
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport(),
-      ioService(),
-      serialPort(ioService),
-      workNotifier(ioService),
-      ioWorkThread(),
       readBuffer(),
       writeBufferVector(),
       writeQueue(),
       queueMutex(),
       callbackReadHandle(),
       callbackWriteHandle(),
+      uartSettingsBoost(communicationParameters),
       asyncWriteInProgress(false),
-      uartSettingsBoost(communicationParameters)
+      ioServiceThread(nullptr)
 {
+    ioService = new asio_io_context();
+    serialPort = new boost::asio::serial_port(*ioService);
+    workNotifier = new asio_io_context::work(*ioService);
 }
 
+// The order of destructor invocation is important here. See:
+// https://svn.boost.org/trac10/ticket/10447
 UartBoost::~UartBoost()
 {
-    UartBoost::close();
-    workNotifier.~work();
-    ioWorkThread.join();
-    ioService.stop();
+    try
+    {
+        if (serialPort != nullptr)
+        {
+            delete serialPort;
+        }
+
+        if (workNotifier != nullptr)
+        {
+            delete workNotifier;
+        }
+
+        if (ioServiceThread != nullptr)
+        {
+            if (ioServiceThread->joinable())
+            {
+                ioServiceThread->join();
+                delete ioServiceThread;
+            }
+        }
+
+        if (ioService != nullptr)
+        {
+            delete ioService;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Error in ~UartBoost::UartBoost" << e.what() << std::endl;
+        std::terminate();
+    }
 }
 
 uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
@@ -78,27 +109,36 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
 
     try
     {
-        serialPort.open(portName);
+        serialPort->open(portName);
+
+        // Wait a bit before making the device available since there are problems 
+        // if data is sent right after open.
+        //
+        // Not sure if this is an OS issue or if it is an issue with the device USB stack.
+        // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
+        // All of these devices use the Segger OB which at the time of testing has firmware version
+        // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
+        //std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+        const auto baudRate = uartSettingsBoost.getBoostBaudRate();
+        const auto flowControl = uartSettingsBoost.getBoostFlowControl();
+        const auto stopBits = uartSettingsBoost.getBoostStopBits();
+        const auto parity = uartSettingsBoost.getBoostParity();
+        const auto characterSize = uartSettingsBoost.getBoostCharacterSize();
+
+        serialPort->set_option(baudRate);
+        serialPort->set_option(flowControl);
+        serialPort->set_option(stopBits);
+        serialPort->set_option(parity);
+        serialPort->set_option(characterSize);
     }
     catch (std::exception& ex)
     {
         std::stringstream message;
-        message << "Exception thrown on " << ex.what() << " on UART port " << uartSettingsBoost.getPortName().c_str() << ".";
-        statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
-            return NRF_ERROR_INTERNAL;
+        message << "Error setting up serial port " << uartSettingsBoost.getPortName() << ". " << ex.what();
+        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        return NRF_ERROR_INTERNAL;
     }
-
-    const auto baudRate = uartSettingsBoost.getBoostBaudRate();
-    const auto flowControl = uartSettingsBoost.getBoostFlowControl();
-    const auto stopBits = uartSettingsBoost.getBoostStopBits();
-    const auto parity = uartSettingsBoost.getBoostParity();
-    const auto characterSize = uartSettingsBoost.getBoostCharacterSize();
-
-    serialPort.set_option(baudRate);
-    serialPort.set_option(flowControl);
-    serialPort.set_option(stopBits);
-    serialPort.set_option(parity);
-    serialPort.set_option(characterSize);
 
     try
     {
@@ -111,15 +151,33 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
                                    boost::asio::placeholders::error,
                                    boost::asio::placeholders::bytes_transferred);
 
-        // run the IO service as a separate thread, so the main thread can block on standard input
-        boost::function<std::size_t()> ioServiceRun = boost::bind(&boost::asio::io_service::run, &ioService);
-        ioWorkThread = boost::thread(ioServiceRun);
+        // run execution of io_service handlers in a separate thread
+        if (ioServiceThread != nullptr)
+        {
+            std::cerr << "ioServiceThread already exists.... aborting." << std::endl;
+            std::terminate();
+        }
+
+        ioServiceThread = new std::thread([&]() {
+            try {
+                auto count = ioService->run();
+                std::stringstream message;
+                message << "serial io_context executed " << count << " handlers.";
+                upperLogCallback(SD_RPC_LOG_TRACE, message.str());
+            }
+            catch (std::exception &e)
+            {
+                std::stringstream message;
+                message << "serial io_context error: " << e.what() << ".";
+                upperLogCallback(SD_RPC_LOG_ERROR, message.str());
+            }
+        });
     }
     catch (std::exception& ex)
     {
         std::stringstream message;
-        message << "Exception thrown when starting UART work thread. " << ex.what() << " on UART port " << uartSettingsBoost.getPortName().c_str() << ".";
-        statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        message << "Error starting serial port work thread. " << ex.what() << " on serial port " << uartSettingsBoost.getPortName() << ".";
+        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
         return NRF_ERROR_INTERNAL;
     }
 
@@ -160,12 +218,12 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
 
     std::stringstream message;
     message << "Successfully opened "
-        << uartSettingsBoost.getPortName().c_str() << ". "
+        << uartSettingsBoost.getPortName() << ". "
         << "Baud rate: " << uartSettingsBoost.getBaudRate() << ". "
         << "Flow control: " << flow_control_string.str() << ". "
         << "Parity: " << parity_string.str() << "." << std::endl;
 
-    logCallback(SD_RPC_LOG_INFO, message.str());
+    upperLogCallback(SD_RPC_LOG_INFO, message.str());
 
     return NRF_SUCCESS;
 }
@@ -174,20 +232,28 @@ uint32_t UartBoost::close()
 {
     try
     {
-        serialPort.close();
-        ioService.stop();
-        ioWorkThread.join();
+        serialPort->close();
+        ioService->stop();
+
+        if (ioServiceThread != nullptr)
+        {
+            if (ioServiceThread->joinable())
+            {
+                ioServiceThread->join();
+            }
+
+            ioServiceThread = nullptr;
+        }
 
         std::stringstream message;
-        message << "UART port " << uartSettingsBoost.getPortName().c_str() << " closed.";
-        logCallback(SD_RPC_LOG_INFO, message.str());
-
+        message << "serial port " << uartSettingsBoost.getPortName() << " closed.";
+        upperLogCallback(SD_RPC_LOG_INFO, message.str());
     }
     catch (std::exception& ex)
     {
         std::stringstream message;
-        message << "Exception thrown on " << ex.what() << " on UART port "  << uartSettingsBoost.getPortName().c_str() << ".";
-        logCallback(SD_RPC_LOG_ERROR, message.str());
+        message << "Error closing serial port " << uartSettingsBoost.getPortName() << ", " << ex.what() << ".";
+        upperLogCallback(SD_RPC_LOG_ERROR, message.str());
     }
 
     asyncWriteInProgress = false;
@@ -196,7 +262,7 @@ uint32_t UartBoost::close()
     return NRF_SUCCESS;
 }
 
-uint32_t UartBoost::send(std::vector<uint8_t> &data)
+uint32_t UartBoost::send(const std::vector<uint8_t> &data)
 {
     queueMutex.lock();
     writeQueue.insert(writeQueue.end(), data.begin(), data.end());
@@ -212,45 +278,55 @@ uint32_t UartBoost::send(std::vector<uint8_t> &data)
 
 void UartBoost::readHandler(const boost::system::error_code& errorCode, const size_t bytesTransferred)
 {
-    if (!errorCode)
+    if (errorCode == boost::system::errc::success)
     {
         auto readBufferData = readBuffer.data();
-        dataCallback(readBufferData, bytesTransferred);
+        upperDataCallback(readBufferData, bytesTransferred);
         asyncRead(); // Initiate a new read
     }
     else if (errorCode == boost::asio::error::operation_aborted)
     {
         std::stringstream message;
-        message << "UART read operation on port " << uartSettingsBoost.getPortName().c_str() << " aborted.";
-        logCallback(SD_RPC_LOG_DEBUG, message.str());
+        message << "serial port read on port " << uartSettingsBoost.getPortName() << " aborted.";
+        upperLogCallback(SD_RPC_LOG_DEBUG, message.str());
         return;
     }
     else
     {
         std::stringstream message;
-        message << "UART implementation failed while reading bytes from UART port " << uartSettingsBoost.getPortName().c_str() << ".";
-        statusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
-        return;
+        message << "serial port read failed on port " << uartSettingsBoost.getPortName() << ". ";
+        message << "Error: " << errorCode.message() << " [" << errorCode.value() << "]";
+        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        // TODO: handle this case in upper layers
     }
 }
 
 void UartBoost::writeHandler (const boost::system::error_code& errorCode, const size_t bytesTransferred)
 {
-    if (errorCode == boost::asio::error::operation_aborted)
+    if (errorCode == boost::system::errc::success)
+    {
+        asyncWrite();
+    }
+    else if (errorCode == boost::asio::error::operation_aborted)
     {
         std::stringstream message;
-        message << "UART write operation on port " << uartSettingsBoost.getPortName().c_str() << " aborted.";
-        logCallback(SD_RPC_LOG_DEBUG, message.str());
+        message << "serial port write operation on port " << uartSettingsBoost.getPortName() << " aborted.";
+        upperLogCallback(SD_RPC_LOG_DEBUG, message.str());
 
-        // In case of an aborted connection, suppress notifications and return (i.e. no asyncWrite)
+        // In case of an aborted write operation, suppress notifications and return (i.e. no asyncWrite)
         queueMutex.lock();
         writeQueue.clear();
         asyncWriteInProgress = false;
         queueMutex.unlock();
         return;
     }
-
-    asyncWrite();
+    else
+    {
+        std::stringstream message;
+        message << "serial port write operation on port " << uartSettingsBoost.getPortName()
+            << " failed. Error: " << errorCode.message() << "[" << errorCode.value() << "]";
+        upperLogCallback(SD_RPC_LOG_ERROR, message.str());
+    }
 }
 
 void UartBoost::startRead()
@@ -261,7 +337,7 @@ void UartBoost::startRead()
 void UartBoost::asyncRead()
 {
     auto mutableReadBuffer = boost::asio::buffer(readBuffer, BUFFER_SIZE);
-    serialPort.async_read_some(mutableReadBuffer, callbackReadHandle);
+    serialPort->async_read_some(mutableReadBuffer, callbackReadHandle);
 }
 
 void UartBoost::asyncWrite()
@@ -280,11 +356,11 @@ void UartBoost::asyncWrite()
         asyncWriteInProgress = true;
         writeBufferVector.clear();
 
-        /* Write all available bytes at once */
+        /* Write all available bytes in one operation */
         writeBufferVector.insert(writeBufferVector.begin(), writeQueue.begin(), writeQueue.end());
         writeQueue.clear();
     }
 
-    boost::asio::mutable_buffers_1 mutableWriteBuffer = boost::asio::buffer(writeBufferVector, writeBufferVector.size());
-    boost::asio::async_write(serialPort, mutableWriteBuffer, callbackWriteHandle);
+    auto buffer = boost::asio::buffer(writeBufferVector, writeBufferVector.size());
+    boost::asio::async_write(*serialPort, buffer, callbackWriteHandle);
 }

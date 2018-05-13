@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.11)
+project(pc-ble-driver)
 
 include (cmake/pc-ble-driver.cmake)
 
@@ -84,9 +85,6 @@ foreach(SD_API_VER ${SD_API_VERS})
     add_library(${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
 endforeach(SD_API_VER)
 
-# build test_uart executable
-add_executable(test_uart test/test_uart.cpp)
-
 # Set common include directories
 include_directories(
         include/common
@@ -131,7 +129,6 @@ foreach(SD_API_VER ${SD_API_VERS})
         # Assume Linux
         target_link_libraries(${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "udev" "pthread")
         target_link_libraries(${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "udev" "pthread")
-        target_link_libraries(test_uart PRIVATE "pthread")
     endif()
 
     # Specify libraries to link serialization library with
@@ -139,6 +136,5 @@ foreach(SD_API_VER ${SD_API_VERS})
     target_link_libraries (${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
 endforeach(SD_API_VER)
 
-
-target_link_libraries(test_uart PRIVATE ${Boost_LIBRARIES})
-
+# Add tests
+add_subdirectory(test)

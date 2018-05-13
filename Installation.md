@@ -98,7 +98,7 @@ Note: This step is not required for macOS (OS X).
 
 Use the following link to download the Boost source code:
 
-* [Boost](http://www.boost.org/users/download) (>=1.54.0)
+* [Boost](http://www.boost.org/users/download) (>=1.67.0)
 
 - Download and extract Boost to a folder of your choice.
 - Set the environment variable `BOOST_ROOT` to the path where you have extracted Boost.
@@ -194,7 +194,7 @@ Assuming that you have built the Boost libraries and installed the tools require
 
 To build this project you will need the following tools:
 
-* [CMake](https://cmake.org/) (>=3.3)
+* [CMake](https://cmake.org/) (>=3.11)
 * A C/C++ toolchain (should already have been installed to build Boost)
 
 See the following sections for platform-specific instructions on the installation of the dependencies.
