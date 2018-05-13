@@ -120,7 +120,7 @@ uint32_t SerializationTransport::close()
 uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength, serialization_pkt_type_t pktType)
 {
     // Mutex to avoid multiple threads sending commands at the same time.
-    std::unique_lock<std::mutex> sendGuard(sendMutex);
+    std::lock_guard<std::mutex> sendGuard(sendMutex);
     rspReceived = false;
     responseBuffer = rspBuffer;
     responseLength = rspLength;
@@ -141,17 +141,21 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
 
     std::unique_lock<std::mutex> responseGuard(responseMutex);
 
+    std::chrono::milliseconds timeout(responseTimeout);
+    std::chrono::system_clock::time_point wakeupTime = std::chrono::system_clock::now() + timeout;
+
+    responseWaitCondition.wait_until(
+        responseGuard,
+        wakeupTime,
+        [&] {
+            return rspReceived;
+        }
+    );
+
     if (!rspReceived)
     {
-        std::chrono::milliseconds timeout(responseTimeout);
-        std::chrono::system_clock::time_point wakeupTime = std::chrono::system_clock::now() + timeout;
-        std::cv_status status = responseWaitCondition.wait_until(responseGuard, wakeupTime);
-
-        if (status == std::cv_status::timeout)
-        {
-            logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
-            return NRF_ERROR_INTERNAL;
-        }
+        logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
+        return NRF_ERROR_INTERNAL;
     }
 
     return NRF_SUCCESS;
