@@ -510,21 +510,29 @@ void H5Transport::setupStateMachine()
 
         std::unique_lock<std::mutex> syncGuard(syncMutex);
 
-        while (!exit->isFullfilled())
-        {
-            sendControlPacket(CONTROL_PKT_RESET);
-            statusCallback(RESET_PERFORMED, "Target Reset performed");
-            exit->resetSent = true;
-            syncWaitCondition.wait_for(syncGuard, RESET_WAIT_DURATION, [&] { return exit->isFullfilled(); });
-        }
+        // Send the reset packet, and wait for the device to reboot and ready for receiving commands
+        sendControlPacket(CONTROL_PKT_RESET);
+        statusCallback(RESET_PERFORMED, "Target Reset performed");
+        exit->resetSent = true;
+        syncWaitCondition.wait_for(syncGuard, RESET_WAIT_DURATION, [&] { return exit->isFullfilled(); });
+        exit->resetWait = true;
 
-        if (!exit->isFullfilled())
+        // Order is of importance
+        if (exit->ioResourceError)
         {
             return STATE_FAILED;
         }
-        else
+        else if (exit->close)
+        {
+            return STATE_FAILED;
+        }
+        else if (exit->resetSent && exit->resetWait)
         {
             return STATE_UNINITIALIZED;
+        }
+        else
+        {
+            return STATE_FAILED;
         }
     };
 
