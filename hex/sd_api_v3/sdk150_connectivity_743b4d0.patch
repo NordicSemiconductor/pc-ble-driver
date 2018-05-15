@@ -1,0 +1,15 @@
+--- "nRF5_SDK_15.0.0_743b4d0/examples/connectivity/ble_connectivity/main.c"	2018-05-15 14:52:34.663130300 +0200
++++ "nRF5_SDK_15.0.0_743b4d0/examples/connectivity/ble_connectivity/main.c"	2018-05-15 14:30:43.871942600 +0200
+@@ -161,9 +161,9 @@
+     .struct_version     = 2,
+     .rfu0               = 0xFFFFFF,
+     .revision_hash      = 0,
+-    .version_major      = 2,
+-    .version_minor      = 0,
+-    .version_patch      = 1,
++    .version_major      = 1,
++    .version_minor      = 2,
++    .version_patch      = 2,
+     .rfu1               = 0xFF,
+     .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
+     .transport_type     = 1,
