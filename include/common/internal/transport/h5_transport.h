@@ -177,20 +177,22 @@ class ResetExitCriterias : public ExitCriterias
 {
 public:
     bool resetSent;
+    bool resetWait;
 
     ResetExitCriterias()
-        : ExitCriterias(), resetSent(false)
+        : ExitCriterias(), resetSent(false), resetWait(false)
     {}
 
     bool isFullfilled() const override
     {
-        return ioResourceError || close || resetSent;
+        return ioResourceError || close || (resetSent && resetWait);
     }
 
     void reset() override
     {
         ExitCriterias::reset();
         resetSent = false;
+        resetWait = false;
     }
 };
 
