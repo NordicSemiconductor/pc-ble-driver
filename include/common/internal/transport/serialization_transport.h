@@ -58,13 +58,16 @@ struct eventData_t
     uint32_t dataLength;
 };
 
+/**
+ * @brief Serialization packet types
+ */
 typedef enum
 {
     SERIALIZATION_COMMAND = 0,
     SERIALIZATION_RESPONSE = 1,
     SERIALIZATION_EVENT = 2,
-    SERIALIZATION_DTM_CMD = 3,
-    SERIALIZATION_DTM_RESP = 4,
+    SERIALIZATION_DTM_CMD = 3,      // Direct test mode command
+    SERIALIZATION_DTM_RESP = 4,     // Direct test mode response
     SERIALIZATION_RESET_CMD = 5
 } serialization_pkt_type_t;
 
