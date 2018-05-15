@@ -27,15 +27,16 @@
 
 #ifdef _WIN32
 #define UART_PORT_NAME "COM1"
+#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
 #define UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define BAUD_RATE 115200 /**< Baud rate 1M is not supported on MacOS. */
 #endif
 #ifdef __linux__
 #define UART_PORT_NAME "/dev/ttyACM0"
+#define BAUD_RATE 1000000
 #endif
-
-#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 enum
 {
@@ -894,6 +895,13 @@ int main(int argc, char * argv[])
         if (c == 'q' || c == 'Q')
         {
             error_code = sd_ble_gap_scan_stop(m_adapter);
+
+            if (error_code != NRF_SUCCESS)
+            {
+                printf("Failed to stop scanning. Error code: 0x%02X\n", error_code);
+                fflush(stdout);
+            }
+
             error_code = sd_rpc_close(m_adapter);
 
             if (error_code != NRF_SUCCESS)
