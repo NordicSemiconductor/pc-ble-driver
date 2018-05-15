@@ -35,16 +35,16 @@
 
 #ifdef _WIN32
 #define UART_PORT_NAME "COM1"
+#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
 #define UART_PORT_NAME "/dev/tty.usbmodem00000"
+#define BAUD_RATE 115200 /**< Baud rate 1M is not supported on MacOS. */
 #endif
 #ifdef __linux__
 #define UART_PORT_NAME "/dev/ttyACM0"
+#define BAUD_RATE 1000000
 #endif
-
-#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
-
 #define ADVERTISING_INTERVAL_40_MS 64  /**< 0.625 ms = 40 ms */
 #define ADVERTISING_TIMEOUT_3_MIN  180 /**< 1 sec = 3 min */
 
