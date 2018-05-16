@@ -20,7 +20,7 @@ cd %scriptpath%
 
 @ECHO Workaround to reduce path length before build
 cd %rootpath%\sdk
-rename nRF5_SDK_15.0.0_a53641a s15
+rename nRF5_SDK_15.0.0_743b4d0 s15
 
 @ECHO Compile
 cd %rootpath%\sdk\s15\examples\connectivity\ble_connectivity\pca10059\ser_s132v3_usb_hci\arm5_no_packs
