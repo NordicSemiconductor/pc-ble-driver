@@ -58,11 +58,17 @@ struct eventData_t
     uint32_t dataLength;
 };
 
+/**
+ * @brief Serialization packet types
+ */
 typedef enum
 {
     SERIALIZATION_COMMAND = 0,
     SERIALIZATION_RESPONSE = 1,
-    SERIALIZATION_EVENT = 2
+    SERIALIZATION_EVENT = 2,
+    SERIALIZATION_DTM_CMD = 3,      // Direct test mode command
+    SERIALIZATION_DTM_RESP = 4,     // Direct test mode response
+    SERIALIZATION_RESET_CMD = 5
 } serialization_pkt_type_t;
 
 class SerializationTransport {
@@ -71,7 +77,8 @@ public:
     ~SerializationTransport();
     uint32_t open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback);
     uint32_t close();
-    uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength);
+    uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength,
+        serialization_pkt_type_t pktType=SERIALIZATION_COMMAND);
 
 private:
     SerializationTransport();
