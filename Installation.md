@@ -9,9 +9,9 @@ The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDev
 
 * Connectivity firmware for pca10028, pca10031: connectivity_x.x.x_115k2/1m_with_s130_x.x.hex
 * Connectivity firmware for pca10040, pca10056: connectivity_x.x.x_115k2/1m_with_s132_x.x.hex
-* Connectivity firmware for pca10059: connectivity_x.x.x_usb_with_s132_x.x.hex **
+* Connectivity firmware for pca10059: connectivity_x.x.x_usb_with/for_s132_x.x.hex **
 
-** *Note: connectivity firmware for pca10059 is also available as separate files for application and SoftDevice to allow for updating via serial DFU.*
+** *Note: connectivity firmware for pca10059 is also available both merged and as separate files for application and SoftDevice to allow for updating via serial DFU.*
 
 ## Operating system support
 
