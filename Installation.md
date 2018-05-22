@@ -99,7 +99,7 @@ Device Firmware Upgrade with [nrfutil](http://infocenter.nordicsemi.com/topic/co
 
 #### Programming from nRF Connect for Desktop, BLE app
 
-Start nRF Connect for Desktop, and from there start the Bluetooth Low Energy app. Select you device from the device selector, and accept when prompted to program the device with the connectivity firmware.
+Start nRF Connect for Desktop, and from there start the Bluetooth Low Energy app. Select your device from the device selector, and accept when prompted to program the device with the connectivity firmware.
 
 #### Programming from nRF Connect for Desktop, Programming app
 
