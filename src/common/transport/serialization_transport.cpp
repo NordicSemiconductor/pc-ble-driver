@@ -95,10 +95,8 @@ uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t even
 
 uint32_t SerializationTransport::close()
 {
-    eventMutex.lock();
     runEventThread = false;
-    eventWaitCondition.notify_one();
-    eventMutex.unlock();
+    eventWaitCondition.notify_all();
 
     if (eventThread != nullptr)
     {
