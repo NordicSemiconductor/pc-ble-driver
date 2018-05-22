@@ -64,10 +64,6 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
 
 UartBoost::~UartBoost()
 {
-    UartBoost::close();
-    workNotifier.~work();
-    ioWorkThread.join();
-    ioService.stop();
 }
 
 uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
@@ -174,6 +170,7 @@ uint32_t UartBoost::close()
 {
     try
     {
+        serialPort.cancel();
         serialPort.close();
         ioService.stop();
         ioWorkThread.join();

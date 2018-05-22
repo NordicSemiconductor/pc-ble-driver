@@ -652,6 +652,11 @@ void H5Transport::startStateMachine()
     {
         stateMachineThread = new std::thread(std::bind(&H5Transport::stateMachineWorker, this));
     }
+    else
+    {
+        // Terminate if the state machine already exists, this should not happen.
+        std::terminate();
+    }
 }
 
 void H5Transport::stopStateMachine()
