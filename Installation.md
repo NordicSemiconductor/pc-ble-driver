@@ -2,18 +2,24 @@
 
 The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
-* SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
+* SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 series ICs)
+* SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (nRF52 series ICs)
 
 The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
+
+* Connectivity firmware for pca10028, pca10031: connectivity_x.x.x_115k2/1m_with_s130_x.x.hex
+* Connectivity firmware for pca10040, pca10056: connectivity_x.x.x_115k2/1m_with_s132_x.x.hex
+* Connectivity firmware for pca10059: connectivity_x.x.x_usb_with_s132_x.x.hex **
+
+** *Note: connectivity firmware for pca10059 is also available as separate files for application and SoftDevice to allow for updating via serial DFU.*
 
 ## Operating system support
 
 * Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
 * GNU/Linux (Ubuntu tested) 32 and 64-bit
-* macOS (OS X) 32 and 64-bit
+* macOS (OS X) 64-bit
 
-## Hardware setup
+## Hardware setup for J-Link based kits
 
 ### Installing drivers and tools
 
@@ -29,9 +35,9 @@ Additionally to flash the connectivity firmware you will need `nrfjprog` which i
 * [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
 * [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
-### Flashing the connectivity firmware
+### Programming the connectivity firmware
 
-To use this library you will need to flash the connectivity firmware on a nRF5x IC
+To use this library you will need to program the connectivity firmware on a nRF5x IC
 
 Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
@@ -75,11 +81,35 @@ There are two ways to solve this issue:
 
 If you want to revert back to the Segger firmware you will have to download the it from [this location](http://www.nordicsemi.com/eng/nordic/Products/nRF51-DK/nRF5x-OB-JLink-IF/52276)
 
+## Hardware setup for Nordic USB kits (non J-Link)
+
+### Installing drivers and tools
+Some kits, like the pca10059 nRF52 dongle, do not have onboard debugger and will have to be programmed via serial DFU.
+On Windows, device drivers are required for the kits to be detected correctly by the operating system. To install the required drivers, please make sure you have the latest [nRF Connect for Desktop](http://www.nordicsemi.com/eng/Products/Bluetooth-low-energy/nRF-Connect-for-desktop) installed.
+
+### Programming the connectivity firmware via serial DFU
+
+Programming the connectivity firmware via serial DFU can be done from command line or from nRF Connect for Desktop.
+
+#### Programming from command line with nrfutil
+
+Device Firmware Upgrade with [nrfutil](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.tools/dita/tools/nrfutil/nrfutil_intro.html?cp=5_5) is normally done in two steps: 1: generating the DFU zip package, and 2: performing the DFU procedure. A DFU zip package has been pre-made and is included in this repository. To run the DFU procedure with nrfutil with the pre-made DFU package:
+
+    nrfutil dfu usb_serial -pkg connectivity_x.x.x_usb_dfu_pkg.zip -p <serial port>
+
+#### Programming from nRF Connect for Desktop, BLE app
+
+Start nRF Connect for Desktop, and from there start the Bluetooth Low Energy app. Select you device from the device selector, and accept when prompted to program the device with the connectivity firmware.
+
+#### Programming from nRF Connect for Desktop, Programming app
+
+Start nRF Connect for Desktop, and from there start the Programming app. In the app, select your device from the device selector. Upload the connectivity application and the SoftDevice hex files.
+
 ## Compiling the connectivity .hex files
 
 Precompiled connectivity firmware are provided and can be used with standard Nordic Development Kits. The .hex files are available in the `hex/sd_api_v<x>` folder. They include the SoftDevice and the connectivity application.
 
-You only need to recompile the connectivity application if you want to run it on a custom board. You can use the `hex/sd_api_v<x>/bootstrap_sd_api_v<X>.sh` script to download and patch the nRF SDK and the application with ease. Using this scripts, the steps 1 and 2 below are done automatically:
+You only need to recompile the connectivity application if you want to run it on a custom board. You can use the `hex/sd_api_v<x>/bootstrap_sd_api_v<X>.sh` script to download and patch the nRF SDK and the application with ease. Using this script, the steps 1 and 2 below are done automatically:
 
 1. [Download the nRF SDK 11 or 12](https://developer.nordicsemi.com/nRF5_SDK/) (depending on the SoftDevice API you want to use) and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
 2. Apply the patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
