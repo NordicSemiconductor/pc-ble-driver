@@ -49,6 +49,8 @@
     | 15   | SLEEP MESSAGE   | 0x07 0x78
 */
 
+#include <iostream>
+
 #include "h5_transport.h"
 #include "sd_rpc_types.h"
 #include "nrf_error.h"
@@ -655,6 +657,7 @@ void H5Transport::startStateMachine()
     else
     {
         // Terminate if the state machine already exists, this should not happen.
+        std::cerr << __FILE__ << ":" << __LINE__ << " stateMachineThread exists, this should not happen. Terminating." << std::endl;
         std::terminate();
     }
 }
