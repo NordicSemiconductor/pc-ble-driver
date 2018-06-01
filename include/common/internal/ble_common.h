@@ -38,6 +38,10 @@
 #define BLE_COMMON_IMPL_H__
 
 #include <functional>
+#include <vector>
+
+#include <boost/version.hpp>
+
 #include "adapter.h"
 #include <stdint.h>
 #include "app_ble_gap_sec_keys.h"
@@ -69,5 +73,67 @@ public:
     }
 };
 
-#endif
+class LibraryVersion
+{
+private:
+    const std::string name;
+    const unsigned int major;
+    const unsigned int minor;
+    const unsigned int patch;
+    const std::string buildVersion;
 
+public:
+    LibraryVersion(
+        const std::string& name,
+        const unsigned int &major,
+        const unsigned int &minor,
+        const unsigned int &patch,
+        const std::string &buildVersion = std::string {}
+    ): name(name), major(major), minor(minor), patch(patch), buildVersion(buildVersion) {}
+
+    std::string getName() const
+    {
+        return name;
+    }
+
+    unsigned int getMajorVersion() const
+    {
+        return major;
+    }
+
+    unsigned int getMinorVersion() const
+    {
+        return minor;
+    }
+
+    unsigned int getPatchVersion() const
+    {
+        return patch;
+    }
+
+    std::string getBuildVersion() const
+    {
+        return buildVersion;
+    }
+};
+
+class LibraryVersions
+{
+private:
+    LibraryVersions() {}
+
+public:
+    static void get(std::vector<LibraryVersion> &versions)
+    {
+        versions.push_back(
+            LibraryVersion(
+                "boost", 
+                BOOST_VERSION / 100000,
+                BOOST_VERSION / 100 % 100,
+                BOOST_VERSION % 100
+            )
+        );
+    }
+};
+
+#endif

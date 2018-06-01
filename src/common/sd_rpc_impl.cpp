@@ -200,3 +200,28 @@ uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
     return intAdapter->transport->send(&tx_buffer_vector[0], tx_buffer_length, nullptr,
             &rx_buffer_length, SERIALIZATION_RESET_CMD);
 }
+
+uint32_t sd_rpc_library_versions(library_version_t versions[], uint32_t *size)
+{
+    std::vector<LibraryVersion> versions_;
+    LibraryVersions::get(versions_);
+
+    if (versions_.size() > *size) {
+        return NRF_ERROR_DATA_SIZE;
+    }
+
+	auto i = 0;
+
+    std::for_each(versions_.begin(), versions_.end(), [&](const LibraryVersion& lv) {
+		strcpy_s(versions[i].name, SD_RPC_MAXPATHLEN, lv.getName().c_str());
+		versions[i].major = lv.getMajorVersion();
+        versions[i].minor = lv.getMinorVersion();
+        versions[i].patch = lv.getPatchVersion();
+        strcpy_s(versions[i].build, SD_RPC_MAXPATHLEN, lv.getBuildVersion().c_str());
+		i++;
+    });
+
+    *size = versions_.size();
+
+    return NRF_SUCCESS;
+}

@@ -45,7 +45,9 @@
 
 #include "config/platform.h"
 #include "sd_rpc_types.h"
+
 #include "adapter.h"
+#include "library_version.h"
 
 #include "ble.h"
 
@@ -154,6 +156,16 @@ SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, s
  * @retval NRF_ERROR    There was an error reset the connectivity chip.
  */
 SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode);
+
+/** @breif Get version of libraries and other components used by the BLE driver
+ *
+ * @param[out]       versions  The libraries version info.
+ * @param[in, out]   size      Number of version elements allocated space for and number of elements returned.
+ *
+ * @retval NRF_SUCCESS          all library versions are provided
+ * @retval NRF_ERROR_DATA_SIZE  array is not large enough
+ */
+SD_RPC_API uint32_t sd_rpc_library_versions(library_version_t versions[], uint32_t *size);
 
 #ifdef __cplusplus
 }
