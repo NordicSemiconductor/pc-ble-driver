@@ -224,7 +224,7 @@ Assuming that you have built the Boost libraries and installed the tools require
 
 To build this project you will need the following tools:
 
-* [CMake](https://cmake.org/) (>=3.3)
+* [CMake](https://cmake.org/) (>=3.8)
 * A C/C++ toolchain (should already have been installed to build Boost)
 
 See the following sections for platform-specific instructions on the installation of the dependencies.
