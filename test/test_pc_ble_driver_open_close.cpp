@@ -66,11 +66,6 @@
 #define SCAN_WINDOW   0x0050 /**< Determines scan window in units of 0.625 milliseconds. */
 #define SCAN_TIMEOUT  0x0    /**< Scan timeout between 0x01 and 0xFFFF in seconds, 0x0 disables timeout. */
 
-std::fstream logFile(
-    "test_pc_ble_driver_open_close.txt",
-    std::fstream::out | std::fstream::trunc
-);
-
 typedef struct
 {
     uint8_t *     p_data;   /**< Pointer to data. */
@@ -106,7 +101,7 @@ static std::string ble_address_to_string_convert(ble_gap_addr_t address);
 
 static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message)
 {
-    DEBUG("Status: " << code << ", message: " << message);
+    NRF_LOG("Status: " << code << ", message: " << message);
 }
 
 static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, const char * message)
@@ -114,19 +109,19 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
     switch (severity)
     {
         case SD_RPC_LOG_ERROR:
-            DEBUG("Error: " << message);
+            NRF_LOG("Error: " << message);
             break;
 
         case SD_RPC_LOG_WARNING:
-            DEBUG("Warning: " << message);
+            NRF_LOG("Warning: " << message);
             break;
 
         case SD_RPC_LOG_INFO:
-            DEBUG("Info: " << message);
+            NRF_LOG("Info: " << message);
             break;
 
         default:
-            DEBUG("Log: " << message);
+            NRF_LOG("Log: " << message);
             break;
     }
 }
@@ -135,7 +130,7 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     // Log the Bluetooth device address of advertisement packet received.
     auto address = ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr);
-    DEBUG("Received advertisement report with device address: " << address);
+    NRF_LOG("Received advertisement report with device address: " << address);
 }
 
 static void on_timeout(const ble_gap_evt_t * const p_ble_gap_evt)
@@ -204,10 +199,10 @@ static uint32_t ble_stack_init()
         case NRF_SUCCESS:
             break;
         case NRF_ERROR_INVALID_STATE:
-            DEBUG("BLE stack already enabled");
+            NRF_LOG("BLE stack already enabled");
             break;
         default:
-            DEBUG("Failed to enable BLE stack. Error code: " << err_code);
+            NRF_LOG("Failed to enable BLE stack. Error code: " << err_code);
             break;
     }
 
@@ -258,7 +253,7 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 {
     if (p_ble_evt == NULL)
     {
-        DEBUG("Received an empty BLE event");
+        NRF_LOG("Received an empty BLE event");
         return;
     }
 
@@ -271,26 +266,13 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             on_timeout(&(p_ble_evt->evt.gap_evt));
             break;
        default:
-            DEBUG("Received an un-handled event with ID: " << p_ble_evt->header.evt_id);
+            NRF_LOG("Received an un-handled event with ID: " << p_ble_evt->header.evt_id);
             break;
     }
 }
 
 TEST_CASE("test_pc_ble_driver_open_close")
 {
-    // Setup logging
-    setLogCallback([](const char *message) -> void
-    {
-        // You should not use stdout/stderr on Windows since this will have a huge impact on
-        // the application since this logger is not offloading the displaying of data
-        // to a separate thread. 
-        //
-        // This stack overflow thread contains more info in regards to cmd.exe output:
-        //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
-
-        logFile << message << std::flush;
-    });
-
     uint32_t baudRate = BAUD_RATE;
 
     auto env = ::test::getEnvironment();
@@ -321,10 +303,13 @@ TEST_CASE("test_pc_ble_driver_open_close")
 #endif
 
             REQUIRE(sd_ble_gap_scan_start(m_adapter, &m_scan_param) == NRF_SUCCESS);
+
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+
             REQUIRE(sd_rpc_close(m_adapter) == NRF_SUCCESS);
             sd_rpc_adapter_delete(m_adapter);
 
-            DEBUG("Iteration #" << (i + 1) << " of " << numberOfIterations << " complete.");
+            NRF_LOG("Iteration #" << (i + 1) << " of " << numberOfIterations << " complete.");
         }
     }
 }

@@ -62,11 +62,6 @@
 using namespace std::chrono_literals;
 using std::chrono::system_clock;
 
-std::fstream logFile(
-    "test_uart_boost.txt",
-    std::fstream::out | std::fstream::trunc
-);
-
 struct PortStats {
     uint32_t pktCount;
     uint32_t pktMaxSize;
@@ -95,18 +90,6 @@ std::ostream& operator<<(std::ostream &out, PortStats stats)
 
 TEST_CASE("open_close")
 {
-    setLogCallback([](const char *message) -> void
-    {
-        // You should not use stdout/stderr on Windows since this will have a huge impact on
-        // the application since this logger is not offloading the displaying of data
-        // to a separate thread. 
-        //
-        // This stack overflow thread contains more info in regards to cmd.exe output:
-        //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
-
-        logFile << message << std::flush;
-    });
-
     auto env = ::test::getEnvironment();
 
     INFO("Two serial ports must be specifided.Please specify environment variables BLE_DRIVER_TEST_SERIAL_PORT_A and BLE_DRIVER_TEST_SERIAL_PORT_B");
@@ -148,13 +131,13 @@ TEST_CASE("open_close")
 
     auto status_callback = [](sd_rpc_app_status_t code, const char *message) -> void
     {
-        DEBUG("code: " << code << " message: " << message);
+        NRF_LOG("code: " << code << " message: " << message);
         REQUIRE(code == NRF_SUCCESS);
     };
 
     auto log_callback = [&](sd_rpc_log_severity_t severity, std::string &message) -> void
     {
-        DEBUG("severity: " << severity << " message: " << message);
+        NRF_LOG("severity: " << severity << " message: " << message);
 
         if (severity == 1)
         {
@@ -164,8 +147,7 @@ TEST_CASE("open_close")
 
             for (auto match : matches)
             {
-                DEBUG("M");
-                DEBUG(match.str());
+                NRF_LOG(match.str());
             }
 
             REQUIRE(matches.size() == 2);

@@ -186,9 +186,7 @@ namespace test
 
         uint32_t send(const std::vector<uint8_t> &data)
         {
-            std::stringstream logEntry;
-            logEntry << "->" << testutil::convertToString(data) << " length: " << data.size();
-            DEBUG(logEntry.str());
+            NRF_LOG("->" << testutil::convertToString(data) << " length: " << data.size());
             return NRF_SUCCESS;
         }
 
@@ -204,7 +202,7 @@ namespace test
     {
     public:
         H5TransportWrapper(Transport *nextTransportLayer, uint32_t retransmission_interval) noexcept
-            : H5Transport(nextTransportLayer, retransmission_interval)
+            : H5Transport(nextTransportLayer, retransmission_interval), isOpenDone(false), result(-1)
         {
         }
 
@@ -260,6 +258,7 @@ namespace test
 
         uint32_t getResult()
         {
+            auto lock = std::unique_lock<std::mutex>(openWait);
             return result;
         }
 

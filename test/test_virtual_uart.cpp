@@ -1,5 +1,6 @@
 // Logging support
 #include "internal/log.h"
+
 #include "test_setup.h"
 #include "test_util.h"
 
@@ -21,25 +22,8 @@
 using namespace std::chrono_literals;
 using std::chrono::system_clock;
 
-std::fstream logFile(
-    "test_virtual_uart.txt",
-    std::fstream::out | std::fstream::trunc
-);
-
 TEST_CASE("virtual_uart")
 {
-    setLogCallback([](const char *message) -> void
-    {
-        // You should not use stdout/stderr on Windows since this will have a huge impact on
-        // the application since this logger is not offloading the displaying of data
-        // to a separate thread. 
-        //
-        // This stack overflow thread contains more info in regards to cmd.exe output:
-        //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
-
-        logFile << message << std::flush;
-    });
-
     SECTION("open close")
     {
         auto uartA = new VirtualUart("uartA");
@@ -59,7 +43,7 @@ TEST_CASE("virtual_uart")
         {
             return [=](sd_rpc_app_status_t code, const char *message) -> void
             {
-                DEBUG("[" << name << "][status] code: " << code << " message: " << message);
+                NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
             };
         };
 
@@ -67,7 +51,7 @@ TEST_CASE("virtual_uart")
         {
             return [=](sd_rpc_log_severity_t severity, std::string &message) -> void
             {
-                DEBUG("[" << name << "][log] severity: " << severity << " message: " << message);
+                NRF_LOG("[" << name << "][log] severity: " << severity << " message: " << message);
             };
         };
 
@@ -76,7 +60,7 @@ TEST_CASE("virtual_uart")
             return [name, &payloadReceived](uint8_t *data, size_t length) -> void
             {
                 payloadReceived.assign(data, data + length);
-                DEBUG("[" << name << "][data]<- " << testutil::convertToString(payloadReceived) << " length: " << length);
+                NRF_LOG("[" << name << "][data]<- " << testutil::convertToString(payloadReceived) << " length: " << length);
             };
         };
 

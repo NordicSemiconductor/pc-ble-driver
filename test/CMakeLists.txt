@@ -25,7 +25,7 @@ foreach(test_src ${tests_src})
     
     # Build executable
     add_executable(${test_name} ${test_src})
-    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER})
+    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER} -DNRF_LOG_FILENAME="${test_name}.txt")
 
     if (MSVC)
         target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${SD_API_VER})

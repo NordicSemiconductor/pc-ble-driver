@@ -1,6 +1,8 @@
 #ifndef VIRTUAL_UART_HPP__
 #define VIRTUAL_UART_HPP__
 
+#include "internal/log.h"
+
 #include <vector>
 #include <mutex>
 #include <condition_variable>
@@ -47,7 +49,7 @@ public:
 
         if (peer == nullptr)
         {
-            DEBUG("Peer port must be specified before calling open.");
+            NRF_LOG("Peer port must be specified before calling open.");
             return NRF_ERROR_INTERNAL;
         }
 
@@ -66,7 +68,7 @@ public:
                         // TODO: do a proper SLIP decoding later on in case header hits SLIP encoding rules
                         if (H5Transport::isResetPacket(data, 2))
                         {
-                            DEBUG("[" << name << "]" << " Requested to send RESET, ignoring since a reset does not make sense in this case.");
+                            NRF_LOG("[" << name << "]" << " Requested to send RESET, ignoring since a reset does not make sense in this case.");
                         }
                         else
                         {
@@ -83,7 +85,7 @@ public:
                             }
                             catch (std::exception &e)
                             {
-                                DEBUG("[" << name << "] " << "error sending " << e.what());
+                                NRF_LOG("[" << name << "] " << "error sending " << e.what());
                             }
                         }
                     });
@@ -108,29 +110,29 @@ public:
 
                         if (H5Transport::isResetPacket(data, 2))
                         {
-                            DEBUG("[" << name << "] Received RESET, ignoring");
+                            NRF_LOG("[" << name << "] Received RESET, ignoring");
                         }
                         else if (H5Transport::isSyncPacket(data, 5) && stopAtPktType <= CONTROL_PKT_SYNC)
                         {
-                            DEBUG("[" << name << "] Received SYNC ignored.");
+                            NRF_LOG("[" << name << "] Received SYNC ignored.");
                             stoppedProcessing = true;
                             outDataAvailable.notify_all();
                         }
                         else if (H5Transport::isSyncResponsePacket(data, 5) && stopAtPktType <= CONTROL_PKT_SYNC_RESPONSE)
                         {
-                            DEBUG("[" << name << "] Received SYNC RESPONSE ignored.");
+                            NRF_LOG("[" << name << "] Received SYNC RESPONSE ignored.");
                             stoppedProcessing = true;
                             outDataAvailable.notify_all();
                         }
                         else if (H5Transport::isSyncConfigPacket(data, 5) && stopAtPktType <= CONTROL_PKT_SYNC_CONFIG)
                         {
-                            DEBUG("[" << name << "] Received SYNC CONFIG ignored.");
+                            NRF_LOG("[" << name << "] Received SYNC CONFIG ignored.");
                             stoppedProcessing = true;
                             outDataAvailable.notify_all();
                         }
                         else if (H5Transport::isSyncConfigResponsePacket(data, 5) && stopAtPktType <= CONTROL_PKT_SYNC_CONFIG_RESPONSE)
                         {
-                            DEBUG("[" << name << "] Received SYNC CONFIG RESPONSE ignored.");
+                            NRF_LOG("[" << name << "] Received SYNC CONFIG RESPONSE ignored.");
                             stoppedProcessing = true;
                             outDataAvailable.notify_all();
                         }
@@ -145,7 +147,7 @@ public:
                             }
                             catch (std::exception &e)
                             {
-                                DEBUG("[" << name << "]" << name << "] error calling data callback: " << e.what());
+                                NRF_LOG("[" << name << "]" << name << "] error calling data callback: " << e.what());
                             }
                         }
                     });

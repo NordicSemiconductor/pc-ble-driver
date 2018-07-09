@@ -35,12 +35,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Logging support
-#include "internal/log.h"
-
 // Test framework
 #define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
+
+// Logging support
+#include "internal/log.h"
 
 #include "transport.h"
 #include "h5_transport.h"
@@ -68,11 +68,6 @@
 using namespace std::chrono_literals;
 using std::chrono::system_clock;
 
-std::fstream logFile(
-    "test_h5_transport.txt",
-    std::fstream::out | std::fstream::trunc
-);
-
 class H5TransportTestSetup
 {
 public:
@@ -85,18 +80,18 @@ public:
 
     void statusCallback(sd_rpc_app_status_t code, const char *message)
     {
-        DEBUG("[" << name << "][status] code: " << code << " message: " << message);
+        NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
     }
 
     void dataCallback(uint8_t *data, size_t length)
     {
         incoming.assign(data, data + length);
-        DEBUG("[" << name << "][data]<- " << testutil::convertToString(incoming) << " length: " << length);
+        NRF_LOG("[" << name << "][data]<- " << testutil::convertToString(incoming) << " length: " << length);
     }
 
     void logCallback(sd_rpc_log_severity_t severity, std::string message)
     {
-        DEBUG("[" << name << "][log] severity: " << severity << " message: " << message);
+        NRF_LOG("[" << name << "][log] severity: " << severity << " message: " << message);
     }
 
     void setup()
@@ -142,18 +137,6 @@ private:
 
 TEST_CASE("H5TransportWrapper")
 {
-    setLogCallback([](const char *message) -> void
-    {
-        // You should not use stdout/stderr on Windows since this will have a huge impact on
-        // the application since this logger is not offloading the displaying of data
-        // to a separate thread. 
-        //
-        // This stack overflow thread contains more info in regards to cmd.exe output:
-        //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
-
-        logFile << message << std::flush;
-    });
-
     SECTION("open_close")
     {
         for (auto i = 0; i < 100; i++)
@@ -188,19 +171,6 @@ TEST_CASE("H5TransportWrapper")
 
 TEST_CASE("H5Transport")
 {
-    // Setup logging
-    setLogCallback([](const char *message) -> void
-    {
-        // You should not use stdout/stderr on Windows since this will have a huge impact on
-        // the application since this logger is not offloading the displaying of data
-        // to a separate thread. 
-        //
-        // This stack overflow thread contains more info in regards to cmd.exe output:
-        //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
-
-        logFile << message << std::flush;
-    });
-
     SECTION("fail_open_invalid_inbound")
     {
         auto lowerTransport = new test::VirtualTransportSendSync();
@@ -208,8 +178,8 @@ TEST_CASE("H5Transport")
         transportUnderTest.setup();
 
         REQUIRE(transportUnderTest.wait() == NRF_ERROR_TIMEOUT);
-        REQUIRE(transportUnderTest.state() == STATE_FAILED);
-        DEBUG("Transport closed.");
+        REQUIRE(transportUnderTest.state() == STATE_NO_RESPONSE);
+        NRF_LOG("Transport closed.");
     }
 
     SECTION("packet_recognition")
@@ -251,7 +221,7 @@ TEST_CASE("H5Transport")
             // H5Transport will retry n number of times if it does not
             // receive a CONTROL_PKT_SYNC_RESPONSE. 
             // If there is still no reponse, it enters STATE_FAILED.
-            REQUIRE(transportUnderTest.state() == STATE_FAILED);
+            REQUIRE(transportUnderTest.state() == STATE_NO_RESPONSE);
             testerTransport.wait();
         }
 
@@ -275,7 +245,7 @@ TEST_CASE("H5Transport")
             testerTransport.setup();
 
             REQUIRE(transportUnderTest.wait() == NRF_ERROR_TIMEOUT);
-            REQUIRE(transportUnderTest.state() == STATE_FAILED);
+            REQUIRE(transportUnderTest.state() == STATE_NO_RESPONSE);
             testerTransport.wait();
         }
 
@@ -300,7 +270,7 @@ TEST_CASE("H5Transport")
             testerTransport.setup();
 
             REQUIRE(transportUnderTest.wait() == NRF_ERROR_TIMEOUT);
-            REQUIRE(transportUnderTest.state() == STATE_FAILED);
+            REQUIRE(transportUnderTest.state() == STATE_NO_RESPONSE);
             testerTransport.wait();
         }
     }

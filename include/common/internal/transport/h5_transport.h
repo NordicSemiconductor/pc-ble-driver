@@ -60,6 +60,7 @@ typedef enum
     STATE_ACTIVE,
     STATE_FAILED,
     STATE_CLOSED,
+    STATE_NO_RESPONSE,
     STATE_UNKNOWN
 } h5_state_t;
 
