@@ -94,6 +94,12 @@ H5Transport::H5Transport(Transport *_nextTransportLayer, uint32_t retransmission
 
 H5Transport::~H5Transport()
 {
+    delete exitCriterias[STATE_START];
+    delete exitCriterias[STATE_RESET];
+    delete exitCriterias[STATE_UNINITIALIZED];
+    delete exitCriterias[STATE_INITIALIZED];
+    delete exitCriterias[STATE_ACTIVE];
+
     delete nextTransportLayer;
 }
 
