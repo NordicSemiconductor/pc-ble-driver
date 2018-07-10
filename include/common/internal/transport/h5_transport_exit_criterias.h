@@ -38,11 +38,14 @@
 #ifndef H5_TRANSPORT_EXIT_CRITERIAS_H
 #define H5_TRANSPORT_EXIT_CRITERIAS_H
 
+#include <sstream>
+
 class ExitCriterias
 {
 public:
     ExitCriterias() noexcept
         : ioResourceError(false), close(false) {}
+    ExitCriterias(const ExitCriterias&) = delete;
     virtual ~ExitCriterias() {}
 
     bool ioResourceError;
@@ -54,6 +57,13 @@ public:
     {
         ioResourceError = false; close = false;
     }
+
+    virtual std::string toString()
+    {
+        std::stringstream info;
+        info << "ioResourceError:" << ioResourceError << " close:" << close;
+        return info.str();
+    }
 };
 
 class StartExitCriterias : public ExitCriterias
@@ -64,6 +74,8 @@ public:
     StartExitCriterias() noexcept
         : ExitCriterias(),
         isOpened(false) {}
+    StartExitCriterias(const StartExitCriterias&) = delete;
+
 
     bool isFullfilled() const override
     {
@@ -74,6 +86,49 @@ public:
     {
         ExitCriterias::reset();
         isOpened = false;
+    }
+
+    std::string toString() override
+    {
+        std::stringstream info;
+        info << "state:START " << ExitCriterias::toString() 
+            << " isOpened:" << isOpened
+            << " isFullfilled:" << isFullfilled();
+        return info.str();
+    }
+};
+
+class ResetExitCriterias : public ExitCriterias
+{
+public:
+    bool resetSent;
+    bool resetWait;
+
+    ResetExitCriterias() noexcept
+        : ExitCriterias(), resetSent(false), resetWait(false) {}
+    ResetExitCriterias(const ResetExitCriterias&) = delete;
+
+    bool isFullfilled() const override
+    {
+        return ioResourceError || close || (resetSent && resetWait);
+    }
+
+    void reset() override
+    {
+        ExitCriterias::reset();
+        resetSent = false;
+        resetWait = false;
+    }
+
+    std::string toString() override
+    {
+        std::stringstream info;
+        info << "state:RESET " << ExitCriterias::toString() 
+            << " resetSent:" << resetSent
+            << " resetWait:" << resetWait
+            << " isFullfilled:" << isFullfilled();
+
+        return info.str();
     }
 };
 
@@ -87,6 +142,7 @@ public:
         : ExitCriterias(),
         syncSent(false),
         syncRspReceived(false) {}
+    UninitializedExitCriterias(const UninitializedExitCriterias&) = delete;
 
     bool isFullfilled() const override
     {
@@ -98,6 +154,16 @@ public:
         ExitCriterias::reset();
         syncSent = false;
         syncRspReceived = false;
+    }
+
+    std::string toString() override
+    {
+        std::stringstream info;
+        info << "state:UNINITIALIZED " << ExitCriterias::toString() 
+            << " syncSent:" << syncSent
+            << " syncRspReceived:" << syncRspReceived
+            << " isFullfilled:" << isFullfilled();
+        return info.str();
     }
 };
 
@@ -111,6 +177,7 @@ public:
         : ExitCriterias(),
         syncConfigSent(false),
         syncConfigRspReceived(false) {}
+    InitializedExitCriterias(const InitializedExitCriterias&) = delete;
 
     bool isFullfilled() const override
     {
@@ -124,6 +191,15 @@ public:
         syncConfigRspReceived = false;
     };
 
+    std::string toString() override
+    {
+        std::stringstream info;
+        info << "state:INITIALIZED " << ExitCriterias::toString() 
+            << " syncConfigSent:" << syncConfigSent
+            << " syncConfigRspReceived:" << syncConfigRspReceived
+            << " isFullfilled:" << isFullfilled();
+        return info.str();
+    }
 };
 
 class ActiveExitCriterias : public ExitCriterias
@@ -135,6 +211,7 @@ public:
     ActiveExitCriterias() noexcept
         : ExitCriterias(), irrecoverableSyncError(false),
         syncReceived(false) {}
+    ActiveExitCriterias(const ActiveExitCriterias&) = delete;
 
     bool isFullfilled() const override {
         return ioResourceError || close || syncReceived || irrecoverableSyncError;
@@ -146,28 +223,16 @@ public:
         irrecoverableSyncError = false;
         syncReceived = false;
     }
-};
 
-class ResetExitCriterias : public ExitCriterias
-{
-public:
-    bool resetSent;
-    bool resetWait;
-
-    ResetExitCriterias() noexcept
-        : ExitCriterias(), resetSent(false), resetWait(false)
-    {}
-
-    bool isFullfilled() const override
+    std::string toString() override
     {
-        return ioResourceError || close || (resetSent && resetWait);
-    }
+        std::stringstream info;
+        info << "state:ACTIVE " << ExitCriterias::toString() 
+            << " irrecoverableSyncError:" << irrecoverableSyncError
+            << " syncReceived:" << syncReceived
+            << " isFullfilled:" << isFullfilled();
 
-    void reset() override
-    {
-        ExitCriterias::reset();
-        resetSent = false;
-        resetWait = false;
+        return info.str();
     }
 };
 

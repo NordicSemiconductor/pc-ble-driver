@@ -72,7 +72,6 @@ typedef struct
     uint16_t      data_len; /**< Length of data. */
 } data_t;
 
-static bool        m_connection_is_in_progress = false;
 static adapter_t * m_adapter = NULL;
 
 #if NRF_SD_BLE_API >= 5
@@ -96,8 +95,8 @@ static const ble_gap_scan_params_t m_scan_param =
 
 /* Local function forward declarations */
 static uint32_t ble_stack_init();
-static uint32_t scan_start();
 static std::string ble_address_to_string_convert(ble_gap_addr_t address);
+static bool error = false;
 
 static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message)
 {
@@ -137,7 +136,13 @@ static void on_timeout(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     if (p_ble_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
     {
-        REQUIRE(sd_ble_gap_scan_start(m_adapter, &m_scan_param) == NRF_SUCCESS);
+        auto result = sd_ble_gap_scan_start(m_adapter, &m_scan_param);
+
+        if (result != NRF_SUCCESS)
+        {
+            error = true;
+            NRF_LOG("ERROR: starting scan failed. Code: " << result);
+        }
     }
 }
 
@@ -156,7 +161,6 @@ static adapter_t * adapter_init(const char * serial_port, uint32_t baud_rate)
 
 static std::string ble_address_to_string_convert(ble_gap_addr_t address)
 {
-    const int address_length = 6;
     std::stringstream retval;
 
     for (int i = sizeof(address.addr) - 1; i >= 0; --i)
@@ -209,9 +213,9 @@ static uint32_t ble_stack_init()
     return err_code;
 }
 
+#if NRF_SD_BLE_API <= 3
 static uint32_t ble_options_set()
 {
-#if NRF_SD_BLE_API <= 3
     ble_opt_t        opt;
     ble_common_opt_t common_opt;
 
@@ -221,10 +225,8 @@ static uint32_t ble_options_set()
     opt.common_opt = common_opt;
 
     return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
-#else
-    return NRF_ERROR_NOT_SUPPORTED;
-#endif
 }
+#endif
 
 #if NRF_SD_BLE_API >= 5
 void ble_cfg_set(uint8_t conn_cfg_tag)
@@ -305,6 +307,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
             REQUIRE(sd_ble_gap_scan_start(m_adapter, &m_scan_param) == NRF_SUCCESS);
 
             std::this_thread::sleep_for(std::chrono::seconds(2));
+            REQUIRE(error == false);
 
             REQUIRE(sd_rpc_close(m_adapter) == NRF_SUCCESS);
             sd_rpc_adapter_delete(m_adapter);

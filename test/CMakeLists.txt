@@ -22,15 +22,19 @@ file(GLOB tests_src "test_*.cpp")
 
 foreach(test_src ${tests_src})
     get_filename_component(test_name ${test_src} NAME_WE)
-    
+
     # Build executable
     add_executable(${test_name} ${test_src})
     target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER} -DNRF_LOG_FILENAME="${test_name}.txt")
 
-    if (MSVC)
+
+    if(WIN32)
+        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${SD_API_VER})
+    elseif(APPLE)
         target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${SD_API_VER})
     else()
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_shared_sd_api_v${SD_API_VER})
+        # Assume Linux
+        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${SD_API_VER} "pthread")
     endif()
 
     add_test(NAME ${test_name} COMMAND ${test_name})

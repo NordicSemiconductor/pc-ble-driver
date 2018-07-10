@@ -11,3 +11,4 @@ The following environment variables affects the running of the tests:
 | BLE_DRIVER_TEST_SERIAL_PORT_A        | The serial port to use in the tests.
 | BLE_DRIVER_TEST_SERIAL_PORT_B        | The serial port to use in the tests. Used in tests where two devices are needed.
 | BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS | The number of open close iterations to run before concluding the test. It defaults to 100 iterations. 
+| BLE_DRIVER_TEST_LOGLEVEL             | Specifies the pc-ble-driver log level. Defaults to 'info'. Can be 'trace', 'debug','info','warning','error','fatal'.

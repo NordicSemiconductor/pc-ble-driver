@@ -256,12 +256,6 @@ namespace test
             return H5Transport::close();
         }
 
-        uint32_t getResult()
-        {
-            auto lock = std::unique_lock<std::mutex>(openWait);
-            return result;
-        }
-
         uint32_t waitForResult()
         {
             auto lock = std::unique_lock<std::mutex>(openWait);

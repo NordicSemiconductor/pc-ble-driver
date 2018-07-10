@@ -80,7 +80,7 @@ const auto RESET_WAIT_DURATION = std::chrono::milliseconds(300);  // Duration to
 
 #pragma region Public methods
 H5Transport::H5Transport(Transport *_nextTransportLayer, uint32_t retransmission_interval)
-    : Transport(), 
+    : Transport(),
     seqNum(0), ackNum(0), c0Found(false),
     unprocessedData(), incomingPacketCount(0), outgoingPacketCount(0),
     errorPacketCount(0),
@@ -161,7 +161,7 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
         statusCallback,
         dataCallback,
         upperLogCallback);
-    
+
     std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
 
     if (errorCode != NRF_SUCCESS)
@@ -213,9 +213,8 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
 uint32_t H5Transport::close()
 {
     std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-
     auto exitCriteria = exitCriterias[currentState];
-    
+
     if (exitCriteria != nullptr)
     {
         exitCriteria->close = true;
@@ -324,7 +323,7 @@ void H5Transport::processPacket(payload_t &packet)
     payload_t h5Payload;
 
     err_code = h5_decode(
-        slipPayload, 
+        slipPayload,
         h5Payload,
         &seq_num,
         &ack_num,
@@ -357,7 +356,7 @@ void H5Transport::processPacket(payload_t &packet)
             {
                 dynamic_cast<UninitializedExitCriterias*>(exitCriterias[currentState])->syncRspReceived = true;
             }
-            else if (H5Transport::isSyncPacket(h5Payload)) 
+            else if (H5Transport::isSyncPacket(h5Payload))
             {
                 sendControlPacket(CONTROL_PKT_SYNC_RESPONSE);
             }
@@ -366,7 +365,7 @@ void H5Transport::processPacket(payload_t &packet)
         {
             auto exit = dynamic_cast<InitializedExitCriterias*>(exitCriterias[currentState]);
 
-            if (H5Transport::isSyncConfigResponsePacket(h5Payload)) 
+            if (H5Transport::isSyncConfigResponsePacket(h5Payload))
             {
                 exit->syncConfigRspReceived = true;
             }
@@ -446,7 +445,7 @@ void H5Transport::statusHandler(sd_rpc_app_status_t code, const char * error)
         {
             exitCriteria->ioResourceError = true;
         }
-        
+
         stateMachineLock.unlock();
         stateMachineChange.notify_all();
     }
@@ -530,23 +529,19 @@ void H5Transport::setupStateMachine()
 {
     // All states lock on mutex stateMachineMutex.
     // The lock is released when values are ready to be updated and when the states goes out of scope.
-    stateActions[STATE_START] = [&]() -> h5_state_t {
+    stateActions[STATE_START] = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<StartExitCriterias*>(exitCriterias[STATE_START]);
-        exit->reset();
 
         stateMachineReady = true;
-        
+
         // Notify other threads that the state machine is ready
         stateMachineLock.unlock();
         stateMachineChange.notify_all();
         stateMachineLock.lock();
 
-        do
-        {
-            stateMachineChange.wait(stateMachineLock);
-        } 
-        while (!exit->isFullfilled());
+        // Wait for notification of a stateMachineChange that exists the state
+        stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
 
         // Order is of importance when returning state
         if (exit->ioResourceError)
@@ -567,10 +562,9 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_RESET] = [&]() -> h5_state_t {
+    stateActions[STATE_RESET] = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<ResetExitCriterias*>(exitCriterias[STATE_RESET]);
-        exit->reset();
 
         // Send the reset packet, and wait for the device to reboot and ready for receiving commands
         sendControlPacket(CONTROL_PKT_RESET);
@@ -579,7 +573,7 @@ void H5Transport::setupStateMachine()
         {
             statusCallback(RESET_PERFORMED, "Target Reset performed");
         }
-        
+
         exit->resetSent = true;
         stateMachineChange.wait_for(stateMachineLock, RESET_WAIT_DURATION, [&exit] { return exit->isFullfilled(); });
         exit->resetWait = true;
@@ -603,11 +597,10 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_UNINITIALIZED] = [&]() -> h5_state_t
+    stateActions[STATE_UNINITIALIZED] = [this]() -> h5_state_t
     {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<UninitializedExitCriterias*>(exitCriterias[STATE_UNINITIALIZED]);
-        exit->reset();
         uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
 
         while (!exit->isFullfilled() && syncRetransmission > 0)
@@ -645,11 +638,10 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_INITIALIZED] = [&]() -> h5_state_t
+    stateActions[STATE_INITIALIZED] = [this]() -> h5_state_t
     {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<InitializedExitCriterias*>(exitCriterias[STATE_INITIALIZED]);
-        exit->reset();
         uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
 
         // Send a package immediately
@@ -694,21 +686,18 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_ACTIVE] = [&]() -> h5_state_t
+    stateActions[STATE_ACTIVE] = [this]() -> h5_state_t
     {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<ActiveExitCriterias*>(exitCriterias[STATE_ACTIVE]);
-        exit->reset();
 
         seqNum = 0;
         ackNum = 0;
 
         statusHandler(CONNECTION_ACTIVE, "Connection active");
-
-        while (!exit->isFullfilled())
-        {
-            stateMachineChange.wait(stateMachineLock);
-        }
+        stateMachineChange.wait(stateMachineLock, [this, &exit] {
+            return exit->isFullfilled();
+        });
 
         if (exit->ioResourceError)
         {
@@ -764,9 +753,9 @@ void H5Transport::startStateMachine()
         // when the state machine is ready to process states
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         stateMachineThread = std::thread([this] { stateMachineWorker(); });
-        
+
         // Wait for the state machine to be ready
-        stateMachineChange.wait(stateMachineLock, [this]() { 
+        stateMachineChange.wait(stateMachineLock, [this]() {
             return stateMachineReady;
         });
     }
@@ -789,20 +778,47 @@ void H5Transport::stopStateMachine()
 // State machine thread
 void H5Transport::stateMachineWorker()
 {
-    h5_state_t nextState;
-
     while (currentState != STATE_FAILED && currentState != STATE_CLOSED && currentState != STATE_NO_RESPONSE)
     {
-        nextState = stateActions[currentState]();
+        auto nextState = stateActions[currentState]();
 
         // Make sure that state is not changed when assigning a new current state
         {
             std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
             logStateTransition(currentState, nextState);
+
+            // Reset the next states variables before starting to use them.
+            switch (nextState)
+            {
+                case STATE_START:
+                    dynamic_cast<StartExitCriterias*>(exitCriterias[STATE_START])->reset();
+                    break;
+                case STATE_RESET:
+                    dynamic_cast<ResetExitCriterias*>(exitCriterias[STATE_RESET])->reset();
+                    break;
+                case STATE_UNINITIALIZED:
+                    dynamic_cast<UninitializedExitCriterias*>(exitCriterias[STATE_UNINITIALIZED])->reset();
+                    break;
+                case STATE_INITIALIZED:
+                    dynamic_cast<InitializedExitCriterias*>(exitCriterias[STATE_INITIALIZED])->reset();
+                    break;
+                case STATE_ACTIVE:
+                    dynamic_cast<ActiveExitCriterias*>(exitCriterias[STATE_ACTIVE])->reset();
+                    break;
+                case STATE_FAILED:
+                case STATE_CLOSED:
+                case STATE_NO_RESPONSE:
+                    // These are terminal states that do not have exit criterias associated with them
+                    break;
+                case STATE_UNKNOWN:
+                    // Not used
+                    break;
+            }
+
             currentState = nextState;
         }
 
-        // Inform interested parties that new current state is set
+        // Inform interested parties that new current state is set and ready
         stateWaitCondition.notify_all();
     }
 }
@@ -810,7 +826,7 @@ void H5Transport::stateMachineWorker()
 bool H5Transport::waitForState(h5_state_t state, std::chrono::milliseconds timeout)
 {
     std::unique_lock<std::mutex> lock(stateMutex);
-    return stateWaitCondition.wait_for(lock, timeout, [&] { return currentState == state; });
+    return stateWaitCondition.wait_for(lock, timeout, [&state, this] { return currentState == state; });
 }
 
 #pragma endregion State machine related methods
@@ -915,7 +931,7 @@ std::string H5Transport::hciPacketLinkControlToString(payload_t payload) const
         else if (isSyncConfigResponsePacket(payload))
         {
             retval << "CONFIG_RESP [" << configToString(payload[2]) << "]";
-        } 
+        }
         else
         {
             if (payload[0] == 0x05 && payload[1] == 0xfa)
@@ -953,7 +969,7 @@ std::string H5Transport::h5PktToString(bool out, payload_t &h5Packet) const
     uint8_t header_checksum;
 
     auto err_code = h5_decode(
-        h5Packet, 
+        h5Packet,
         payload,
         &seq_num,
         &ack_num,

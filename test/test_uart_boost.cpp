@@ -53,19 +53,19 @@
 #include <random>
 #include <regex>
 #include <iterator>
+#include <chrono>
 
 #if defined(_MSC_VER)
 // Disable warning "This function or variable may be unsafe. Consider using _dupenv_s instead."
 #pragma warning(disable: 4996)
 #endif
 
-using namespace std::chrono_literals;
 using std::chrono::system_clock;
 
 struct PortStats {
     uint32_t pktCount;
-    uint32_t pktMaxSize;
     uint32_t pktMinSize;
+    uint32_t pktMaxSize;
 
     PortStats() : pktCount(0), pktMinSize(std::numeric_limits<uint32_t>::max()), pktMaxSize(0) {}
 };
@@ -92,7 +92,7 @@ TEST_CASE("open_close")
 {
     auto env = ::test::getEnvironment();
 
-    INFO("Two serial ports must be specifided.Please specify environment variables BLE_DRIVER_TEST_SERIAL_PORT_A and BLE_DRIVER_TEST_SERIAL_PORT_B");
+    INFO("Two serial ports must be specifided. Please specify environment variables BLE_DRIVER_TEST_SERIAL_PORT_A and BLE_DRIVER_TEST_SERIAL_PORT_B");
     REQUIRE(env.serialPorts.size() == 2);
 
     auto envPortA = env.serialPorts.at(0);
@@ -119,6 +119,8 @@ TEST_CASE("open_close")
     bp.stopBits = UartStopBitsOne;
     auto b = new UartBoost(bp);
 
+    bool error = false;
+
     std::vector<uint8_t> receivedOnA;
     std::vector<uint8_t> receivedOnB;
 
@@ -129,13 +131,17 @@ TEST_CASE("open_close")
     std::generate(sendOnB.begin(), sendOnB.end(), std::rand);
     std::generate(sendOnA.begin(), sendOnA.end(), std::rand);
 
-    auto status_callback = [](sd_rpc_app_status_t code, const char *message) -> void
+    auto status_callback = [&error](sd_rpc_app_status_t code, const char *message) -> void
     {
         NRF_LOG("code: " << code << " message: " << message);
-        REQUIRE(code == NRF_SUCCESS);
+        if (code != NRF_SUCCESS)
+        {
+            error = true;
+            NRF_LOG("ERROR: code is " << std::to_string(code) << " must be " << std::to_string(NRF_SUCCESS));
+        }
     };
 
-    auto log_callback = [&](sd_rpc_log_severity_t severity, std::string &message) -> void
+    auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity, std::string message) -> void
     {
         NRF_LOG("severity: " << severity << " message: " << message);
 
@@ -150,10 +156,19 @@ TEST_CASE("open_close")
                 NRF_LOG(match.str());
             }
 
-            REQUIRE(matches.size() == 2);
-            const auto port_ = matches[1].str();
+            if (matches.size() != 2)
+            {
+                NRF_LOG("ERROR: match size must be 2");
+                error = true;
+                return;
+            }
 
-            REQUIRE((port_ == portA || port_ == portB));
+            const auto port_ = matches[1].str();
+            if (!(port_ == portA || port_ == portB))
+            {
+                NRF_LOG("ERROR: ports must match either " << portA << " or " << portB);
+                error = true;
+            }
         }
     };
 
@@ -162,7 +177,7 @@ TEST_CASE("open_close")
 
     b->open(
         status_callback,
-        [&](uint8_t *data, size_t length) -> void
+        [&receivedOnB, &portBStats](uint8_t *data, size_t length) -> void
         {
             receivedOnB.insert(receivedOnB.end(), data, data + length);
 
@@ -183,7 +198,7 @@ TEST_CASE("open_close")
 
     a->open(
         status_callback,
-        [&](uint8_t *data, size_t length) -> void
+        [&receivedOnA, &portAStats](uint8_t *data, size_t length) -> void
         {
             receivedOnA.insert(receivedOnA.end(), data, data + length);
 
@@ -207,6 +222,8 @@ TEST_CASE("open_close")
 
     // Let the data be sent between the serial ports before closing
     std::this_thread::sleep_until(system_clock::now() + std::chrono::seconds(1));
+
+    REQUIRE(error == false);
 
     b->close();
     a->close();

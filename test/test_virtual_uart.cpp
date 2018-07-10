@@ -19,9 +19,6 @@
 #pragma warning(disable: 4996)
 #endif
 
-using namespace std::chrono_literals;
-using std::chrono::system_clock;
-
 TEST_CASE("virtual_uart")
 {
     SECTION("open close")
@@ -39,22 +36,6 @@ TEST_CASE("virtual_uart")
         payload_t payloadFromB;
         payload_t payloadFromA;
 
-        auto statusCallback = [=](const std::string name)
-        {
-            return [=](sd_rpc_app_status_t code, const char *message) -> void
-            {
-                NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
-            };
-        };
-
-        auto logCallback = [=](const std::string name)
-        {
-            return [=](sd_rpc_log_severity_t severity, std::string &message) -> void
-            {
-                NRF_LOG("[" << name << "][log] severity: " << severity << " message: " << message);
-            };
-        };
-
         auto dataCallback = [](const std::string name, payload_t &payloadReceived)
         {
             return [name, &payloadReceived](uint8_t *data, size_t length) -> void
@@ -67,17 +48,29 @@ TEST_CASE("virtual_uart")
         const std::string uartAName = "uartA";
 
         uartA->open(
-            statusCallback(uartAName),
+            [&uartAName](sd_rpc_app_status_t code, const char *message) -> void
+            {
+                NRF_LOG("[" << uartAName << "][status] code: " << code << " message: " << message);
+            },
             dataCallback(uartAName, payloadFromB),
-            logCallback(uartAName)
+            [&uartAName](sd_rpc_log_severity_t severity, std::string message) -> void
+            {
+                NRF_LOG("[" << uartAName << "][log] severity: " << severity << " message: " << message);
+            }
         );
 
         const std::string uartBName = "uartB";
 
         uartB->open(
-            statusCallback(uartBName),
+            [&uartBName](sd_rpc_app_status_t code, const char *message) -> void
+            {
+                NRF_LOG("[" << uartBName << "][status] code: " << code << " message: " << message);
+            },
             dataCallback(uartBName, payloadFromA),
-            logCallback(uartBName)
+            [&uartBName](sd_rpc_log_severity_t severity, std::string message) -> void
+            {
+                NRF_LOG("[" << uartBName << "][log] severity: " << severity << " message: " << message);
+            }
         );
 
         auto payloadToB = payload_t{ 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa };
