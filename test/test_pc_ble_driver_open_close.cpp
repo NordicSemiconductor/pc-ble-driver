@@ -52,16 +52,6 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef _WIN32
-#define BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
-#endif
-#ifdef __APPLE__
-#define BAUD_RATE 115200 /**< Baud rate 1M is not supported on MacOS. */
-#endif
-#ifdef __linux__
-#define BAUD_RATE 1000000
-#endif
-
 #define SCAN_INTERVAL 0x00A0 /**< Determines scan interval in units of 0.625 milliseconds. */
 #define SCAN_WINDOW   0x0050 /**< Determines scan window in units of 0.625 milliseconds. */
 #define SCAN_TIMEOUT  0x0    /**< Scan timeout between 0x01 and 0xFFFF in seconds, 0x0 disables timeout. */
@@ -95,7 +85,6 @@ static const ble_gap_scan_params_t m_scan_param =
 
 /* Local function forward declarations */
 static uint32_t ble_stack_init();
-static std::string ble_address_to_string_convert(ble_gap_addr_t address);
 static bool error = false;
 
 static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message)
@@ -128,7 +117,7 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
 static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 {
     // Log the Bluetooth device address of advertisement packet received.
-    auto address = ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr);
+    auto address = testutil::ble_address_to_string_convert(p_ble_gap_evt->params.adv_report.peer_addr);
     NRF_LOG("Received advertisement report with device address: " << address);
 }
 
@@ -157,18 +146,6 @@ static adapter_t * adapter_init(const char * serial_port, uint32_t baud_rate)
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
     return sd_rpc_adapter_create(transport_layer);
-}
-
-static std::string ble_address_to_string_convert(ble_gap_addr_t address)
-{
-    std::stringstream retval;
-
-    for (int i = sizeof(address.addr) - 1; i >= 0; --i)
-    {
-        retval << std::hex << static_cast<unsigned int>(address.addr[i]);
-    }
-
-    return retval.str();
 }
 
 static uint32_t ble_stack_init()
@@ -275,16 +252,14 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 
 TEST_CASE("test_pc_ble_driver_open_close")
 {
-    uint32_t baudRate = BAUD_RATE;
-
     auto env = ::test::getEnvironment();
-    REQUIRE(env.serialPorts.size() > 0);
+    REQUIRE(!env.serialPorts.empty());
     auto serialPort = env.serialPorts.at(0);
-    auto numberOfIterations = env.numberOfIterations;
+    const auto numberOfIterations = env.numberOfIterations;
 
     SECTION("open_close_open_iterations")
     {
-        baudRate = serialPort.baudRate;
+        const auto baudRate = serialPort.baudRate;
 
         INFO("Serial port used: " << serialPort.port);
         INFO("Baud rate used: " << baudRate);
