@@ -145,7 +145,7 @@ private:
     void startStateMachine();
     void stopStateMachine();
 
-    std::map<h5_state_t, ExitCriterias*> exitCriterias;
+    std::map<h5_state_t, std::unique_ptr<ExitCriterias>> exitCriterias;
 
     void stateMachineWorker();
 
