@@ -52,6 +52,17 @@
 #include <condition_variable>
 #include <iostream>
 
+#ifdef _WIN32
+#define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
+#endif
+#ifdef __APPLE__
+#define DEFAULT_BAUD_RATE 115200 /**< Baud rate 1M is not supported on MacOS. */
+#endif
+#ifdef __linux__
+#define DEFAULT_BAUD_RATE 1000000
+#endif
+
+
 namespace test 
 {
     struct SerialPort
@@ -74,7 +85,7 @@ namespace test
     {
         Environment env;
 
-        auto baudRate = 1000000;
+        auto baudRate = DEFAULT_BAUD_RATE;
         auto envBaudRate = std::getenv("BLE_DRIVER_TEST_BAUD_RATE");
 
         if (envBaudRate != nullptr)
