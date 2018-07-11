@@ -55,14 +55,14 @@ public:
     virtual ~Transport();
     virtual uint32_t open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);
     virtual uint32_t close();
-    virtual uint32_t send(std::vector<uint8_t> &data) = 0;
+    virtual uint32_t send(const std::vector<uint8_t> &data) = 0;
 
 protected:
     Transport();
 
-    status_cb_t statusCallback;
-    data_cb_t dataCallback;
-    log_cb_t logCallback;
+    status_cb_t upperStatusCallback;
+    data_cb_t upperDataCallback;
+    log_cb_t upperLogCallback;
 };
 
 #endif //TRANSPORT_H
