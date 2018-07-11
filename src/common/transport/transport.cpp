@@ -55,9 +55,14 @@ Transport::~Transport()
 
 uint32_t Transport::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
 {
-    statusCallback = status_callback;
-    dataCallback = data_callback;
-    logCallback = log_callback;
+    if (status_callback == nullptr || data_callback == nullptr || log_callback == nullptr)
+    {
+        return NRF_ERROR_INTERNAL;
+    }
+
+    upperStatusCallback = status_callback;
+    upperDataCallback = data_callback;
+    upperLogCallback = log_callback;
 
     return NRF_SUCCESS;
 }

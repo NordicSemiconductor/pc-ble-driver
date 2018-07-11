@@ -57,15 +57,16 @@ typedef enum
 
 typedef enum
 {
-    CONTROL_PKT_RESET,
-    CONTROL_PKT_ACK,
-    CONTROL_PKT_SYNC,
-    CONTROL_PKT_SYNC_RESPONSE,
-    CONTROL_PKT_SYNC_CONFIG,
-    CONTROL_PKT_SYNC_CONFIG_RESPONSE,
+    CONTROL_PKT_RESET = 0,
+    CONTROL_PKT_ACK = 1,
+    CONTROL_PKT_SYNC = 2,
+    CONTROL_PKT_SYNC_RESPONSE = 3,
+    CONTROL_PKT_SYNC_CONFIG = 4,
+    CONTROL_PKT_SYNC_CONFIG_RESPONSE = 5,
+    CONTROL_PKT_LAST = 10
 } control_pkt_type;
 
-void h5_encode(std::vector<uint8_t> &in_packet,
+void h5_encode(const std::vector<uint8_t> &in_packet,
                std::vector<uint8_t> &out_packet,
                uint8_t seq_num,
                uint8_t ack_num,
