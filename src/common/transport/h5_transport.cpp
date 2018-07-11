@@ -765,12 +765,6 @@ void H5Transport::startStateMachine()
         std::cerr << __FILE__ << ":" << __LINE__ << " stateMachineThread exists, this should not happen. Terminating." << std::endl;
         std::terminate();
     }
-    else
-    {
-        // Terminate if the state machine already exists, this should not happen.
-        std::cerr << __FILE__ << ":" << __LINE__ << " stateMachineThread exists, this should not happen. Terminating." << std::endl;
-        std::terminate();
-    }
 }
 
 void H5Transport::stopStateMachine()

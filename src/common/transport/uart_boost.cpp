@@ -68,8 +68,6 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
 // https://svn.boost.org/trac10/ticket/10447
 UartBoost::~UartBoost()
 {
-<<<<<<< HEAD
-=======
     try
     {
         if (serialPort != nullptr)
@@ -101,7 +99,6 @@ UartBoost::~UartBoost()
         std::cerr << "Error in ~UartBoost::UartBoost" << e.what() << std::endl;
         std::terminate();
     }
->>>>>>> 807d64e... Fix H5Transport timeout issues (#116)
 }
 
 uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
@@ -235,15 +232,8 @@ uint32_t UartBoost::close()
 {
     try
     {
-<<<<<<< HEAD
-        serialPort.cancel();
-        serialPort.close();
-        ioService.stop();
-        ioWorkThread.join();
-=======
         serialPort->close();
         ioService->stop();
->>>>>>> 807d64e... Fix H5Transport timeout issues (#116)
 
         if (ioServiceThread != nullptr)
         {
