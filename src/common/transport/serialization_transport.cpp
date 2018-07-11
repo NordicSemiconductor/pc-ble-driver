@@ -54,18 +54,13 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     responseBuffer(nullptr), responseLength(nullptr),
     runEventThread(false)
 {
-    eventThread = nullptr;
-    nextTransportLayer = dataLinkLayer;
+    // SerializationTransport takes owership of dataLinkLayer provided object
+    nextTransportLayer = std::shared_ptr<Transport>(dataLinkLayer);
     responseTimeout = response_timeout;
 }
 
-
-SerializationTransport::SerializationTransport(): nextTransportLayer(nullptr), responseTimeout(0), rspReceived(false), responseBuffer(nullptr), responseLength(nullptr), runEventThread(false), eventThread(nullptr)
-{}
-
 SerializationTransport::~SerializationTransport()
 {
-    delete nextTransportLayer;
 }
 
 uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback)
@@ -74,7 +69,7 @@ uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t even
     eventCallback = event_callback;
     logCallback = log_callback;
 
-    data_cb_t dataCallback = std::bind(&SerializationTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
+    auto dataCallback = std::bind(&SerializationTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
 
     uint32_t errorCode = nextTransportLayer->open(status_callback, dataCallback, log_callback);
 
@@ -83,11 +78,15 @@ uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t even
         return errorCode;
     }
 
-    runEventThread = true;
-
-    if (eventThread == nullptr)
+    // Thread should not be running from before when calling this
+    if (!eventThread.joinable())
     {
-        eventThread = new std::thread(std::bind(&SerializationTransport::eventHandlingRunner, this));
+        runEventThread = true;
+        eventThread = std::thread(std::bind(&SerializationTransport::eventHandlingRunner, this));
+    }
+    else
+    {
+        return NRF_ERROR_INTERNAL;
     }
 
     return NRF_SUCCESS;
@@ -98,18 +97,15 @@ uint32_t SerializationTransport::close()
     runEventThread = false;
     eventWaitCondition.notify_all();
 
-    if (eventThread != nullptr)
+    if (eventThread.joinable())
     {
-        if (std::this_thread::get_id() == eventThread->get_id())
+        if (std::this_thread::get_id() == eventThread.get_id())
         {
             //log "ser_app_hal_pc_event_handling_stop was called from an event callback, causing the event thread to stop itself. This will cause a resource leak."
-            eventThread = nullptr;
             return NRF_ERROR_INTERNAL;
         }
 
-        eventThread->join();
-        delete eventThread;
-        eventThread = nullptr;
+        eventThread.join();
     }
 
     return nextTransportLayer->close();
@@ -163,17 +159,18 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
 void SerializationTransport::eventHandlingRunner()
 {
     while (runEventThread) {
+        std::unique_lock<std::mutex> eventLock(eventMutex);
+        eventWaitCondition.wait(eventLock);
 
         while (!eventQueue.empty())
         {
             eventData_t eventData = eventQueue.front();
             eventQueue.pop();
-            // Allocate memory to store decoded event including an unknown quantity of padding
+            eventLock.unlock();
 
             // Set security context
             BLESecurityContext context(this);
 
-            // max event length selected freely to fit an event with max ATT MTU with good margin
             uint32_t possibleEventLength = 700;
             std::unique_ptr<ble_evt_t> event(static_cast<ble_evt_t*>(std::malloc(possibleEventLength)));
             uint32_t errCode = ble_event_dec(eventData.data, eventData.dataLength, event.get(), &possibleEventLength);
@@ -191,25 +188,11 @@ void SerializationTransport::eventHandlingRunner()
             }
 
             free(eventData.data);
+            eventLock.lock();
         }
-
-        std::unique_lock<std::mutex> eventLock(eventMutex);
-
-        if (!runEventThread)
-        {
-            break;
-        }
-
-        if (!eventQueue.empty())
-        {
-            continue;
-        }
-
-        eventWaitCondition.wait(eventLock);
     }
 }
 
-// Read Thread
 void SerializationTransport::readHandler(uint8_t *data, size_t length)
 {
     auto eventType = static_cast<serialization_pkt_type_t>(data[0]);

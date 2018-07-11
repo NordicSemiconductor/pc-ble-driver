@@ -51,8 +51,8 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS   ON)
 
 # Find the necessary boost components on the system.
-# Minimum version required is 1.54.0
-find_package ( Boost 1.54.0 REQUIRED COMPONENTS thread system regex date_time chrono )
+# Minimum version required is 1.67.0
+find_package ( Boost 1.67.0 REQUIRED COMPONENTS thread system regex date_time chrono )
 
 # Add or remove SD API versions here
 set(SD_API_VER_NUMS 2 3)
