@@ -110,7 +110,7 @@ void add_crc16(std::vector<uint8_t> &out_packet)
     out_packet.push_back((crc16 >> 8) & 0xFF);
 }
 
-void h5_encode(std::vector<uint8_t> &in_packet,
+void h5_encode(const std::vector<uint8_t> &in_packet,
                std::vector<uint8_t> &out_packet,
                    uint8_t seq_num,
                    uint8_t ack_num,

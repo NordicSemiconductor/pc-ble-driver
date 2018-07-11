@@ -47,7 +47,10 @@
     | 15   | WAKEUP MESSAGE  | 0x05 0xfa
     | 15   | WOKEN MESSAGE   | 0x06 0xf9
     | 15   | SLEEP MESSAGE   | 0x07 0x78
+
 */
+
+#include <iostream>
 
 #include "h5_transport.h"
 #include "sd_rpc_types.h"
@@ -80,11 +83,12 @@ H5Transport::H5Transport(Transport *_nextTransportLayer, uint32_t retransmission
     : Transport(),
     seqNum(0), ackNum(0), c0Found(false),
     unprocessedData(), incomingPacketCount(0), outgoingPacketCount(0),
-    errorPacketCount(0), currentState(STATE_START), stateMachineThread(nullptr)
+    errorPacketCount(0),
+    currentState(STATE_START),
+    stateMachineReady(false)
 {
     this->nextTransportLayer = _nextTransportLayer;
     retransmissionInterval = std::chrono::milliseconds(retransmission_interval);
-
     setupStateMachine();
 }
 
@@ -102,15 +106,17 @@ std::map<h5_state_t, std::string> H5Transport::stateString{
     { STATE_ACTIVE, "STATE_ACTIVE" },
     { STATE_FAILED, "STATE_FAILED" },
     { STATE_RESET, "STATE_RESET" },
-    { STATE_INITIALIZED, "STATE_INITIALIZED" }
+    { STATE_INITIALIZED, "STATE_INITIALIZED" },
+    { STATE_CLOSED, "STATE_CLOSED" },
+    { STATE_NO_RESPONSE, "STATE_NO_RESPONSE" },
 };
 
 std::map<control_pkt_type, std::vector<uint8_t>> H5Transport::pkt_pattern = {
     { CONTROL_PKT_RESET, {} },
-    { CONTROL_PKT_SYNC, { syncFirstByte, syncSecondByte } },
-    { CONTROL_PKT_SYNC_RESPONSE, { syncRspFirstByte, syncRspSecondByte } },
-    { CONTROL_PKT_SYNC_CONFIG, { syncConfigFirstByte, syncConfigSecondByte, syncConfigField } },
-    { CONTROL_PKT_SYNC_CONFIG_RESPONSE, { syncConfigRspFirstByte, syncConfigRspSecondByte, syncConfigField } }
+    { CONTROL_PKT_SYNC, { SyncFirstByte, SyncSecondByte } },
+    { CONTROL_PKT_SYNC_RESPONSE, { SyncRspFirstByte, SyncRspSecondByte } },
+    { CONTROL_PKT_SYNC_CONFIG, { SyncConfigFirstByte, SyncConfigSecondByte, SyncConfigField } },
+    { CONTROL_PKT_SYNC_CONFIG_RESPONSE, { SyncConfigRspFirstByte, SyncConfigRspSecondByte, SyncConfigField } }
 };
 
 std::map<h5_pkt_type_t, std::string> H5Transport::pktTypeString{
@@ -126,40 +132,54 @@ std::map<h5_pkt_type_t, std::string> H5Transport::pktTypeString{
 
 #pragma endregion
 
-uint32_t H5Transport::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
+uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
 {
+    auto errorCode = Transport::open(status_callback, data_callback, log_callback);
+
+    if (errorCode != NRF_SUCCESS)
+    {
+        return errorCode;
+    }
+
     if (currentState != STATE_START)
     {
         log("Not able to open, current state is not valid");
         return NRF_ERROR_INTERNAL;
     }
 
+    // State machine starts in a separate thread.
+    // Wait for the state machine to be ready
     startStateMachine();
-    auto _exitCriterias = dynamic_cast<StartExitCriterias*>(exitCriterias[STATE_START]);
 
-    auto errorCode = Transport::open(status_callback, data_callback, log_callback);
+    auto _exitCriterias = dynamic_cast<StartExitCriterias*>(exitCriterias[currentState]);
     lastPacket.clear();
 
+    statusCallback = std::bind(&H5Transport::statusHandler, this, std::placeholders::_1, std::placeholders::_2);
+    dataCallback = std::bind(&H5Transport::dataHandler, this, std::placeholders::_1, std::placeholders::_2);
+
+    errorCode = nextTransportLayer->open(
+        statusCallback,
+        dataCallback,
+        upperLogCallback);
+
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+
     if (errorCode != NRF_SUCCESS)
     {
         _exitCriterias->ioResourceError = true;
-        syncWaitCondition.notify_all();
-        return errorCode;
+    }
+    else
+    {
+        _exitCriterias->isOpened = true;
     }
 
-    status_callback = std::bind(&H5Transport::statusHandler, this, std::placeholders::_1, std::placeholders::_2);
-    data_callback = std::bind(&H5Transport::dataHandler, this, std::placeholders::_1, std::placeholders::_2);
-    errorCode = nextTransportLayer->open(status_callback, data_callback, log_callback);
+    stateMachineLock.unlock();
+    stateMachineChange.notify_all();
 
     if (errorCode != NRF_SUCCESS)
     {
-        _exitCriterias->ioResourceError = true;
-        syncWaitCondition.notify_all();
         return NRF_ERROR_INTERNAL;
     }
-
-    _exitCriterias->isOpened = true;
-    syncWaitCondition.notify_all();
 
     if (waitForState(STATE_ACTIVE, OPEN_WAIT_TIMEOUT))
     {
@@ -167,18 +187,42 @@ uint32_t H5Transport::open(status_cb_t status_callback, data_cb_t data_callback,
     }
     else
     {
-        return NRF_ERROR_TIMEOUT;
+        switch (state())
+        {
+        case STATE_START:
+        case STATE_RESET:
+        case STATE_UNINITIALIZED:
+        case STATE_INITIALIZED:
+        case STATE_NO_RESPONSE:
+            // There are two situations on can get timeout:
+            // 1) there is no response from the device
+            // 2) non failing state transitions from STATE_START to STATE_ACTIVE did not happen in time period OPEN_WAIT_TIMEOUT
+            return NRF_ERROR_TIMEOUT;
+        case STATE_FAILED:
+            return NRF_ERROR_INTERNAL;
+        case STATE_CLOSED:
+            return NRF_ERROR_RESOURCES;
+        case STATE_ACTIVE:
+            return NRF_SUCCESS;
+        default:
+            return NRF_ERROR_INTERNAL;
+        }
     }
 }
 
 uint32_t H5Transport::close()
 {
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
     auto exitCriteria = exitCriterias[currentState];
-    
+
     if (exitCriteria != nullptr)
     {
         exitCriteria->close = true;
     }
+
+    // Notify about the change in the state machine
+    stateMachineLock.unlock();
+    stateMachineChange.notify_all();
 
     stopStateMachine();
 
@@ -195,14 +239,15 @@ uint32_t H5Transport::close()
     }
 }
 
-uint32_t H5Transport::send(std::vector<uint8_t> &data)
+uint32_t H5Transport::send(const std::vector<uint8_t> &data)
 {
-    if (currentState != STATE_ACTIVE) {
+    if (currentState != STATE_ACTIVE)
+    {
         return NRF_ERROR_INVALID_STATE;
     }
 
     // max theoretical length of encoded packet, aditional 6 bytes h5 encoding and all bytes escaped + 2 packet encapsuling
-    std::vector<uint8_t> h5EncodedPacket;
+    payload_t h5EncodedPacket;
 
     h5_encode(data,
               h5EncodedPacket,
@@ -212,7 +257,7 @@ uint32_t H5Transport::send(std::vector<uint8_t> &data)
               true,
               VENDOR_SPECIFIC_PACKET);
 
-    std::vector<uint8_t> encodedPacket;
+    payload_t encodedPacket;
     slip_encode(h5EncodedPacket, encodedPacket);
 
     auto remainingRetransmissions = PACKET_RETRANSMISSIONS;
@@ -227,30 +272,44 @@ uint32_t H5Transport::send(std::vector<uint8_t> &data)
         logPacket(true, h5EncodedPacket);
         nextTransportLayer->send(lastPacket);
 
-        auto status = ackWaitCondition.wait_for(ackGuard, std::chrono::milliseconds(retransmissionInterval));
+        const uint8_t seqNumBefore = seqNum;
 
-        if (status == std::cv_status::no_timeout)
-        {
-            lastPacket.clear();
-            return NRF_SUCCESS;
-        }
+        // Checking for timeout. Also checking against spurios wakeup by making sure the sequence
+        // number has actually increased. If the sequence number has not increased, we have not
+        // received an ACK packet, and should not exit the loop (unless timeout).
+        // Ref. spurious wakeup:
+        // http://en.cppreference.com/w/cpp/thread/condition_variable
+        // https://en.wikipedia.org/wiki/Spurious_wakeup
+        if (ackWaitCondition.wait_for(
+            ackGuard,
+            std::chrono::milliseconds(retransmissionInterval),
+            [&] { return seqNum != seqNumBefore; }))
+         {
+             lastPacket.clear();
+             return NRF_SUCCESS;
+         }
     }
 
     lastPacket.clear();
-
     return NRF_ERROR_TIMEOUT;
 }
+
+h5_state_t H5Transport::state() const
+{
+    return currentState;
+}
+
 #pragma endregion Public methods
 
 #pragma region Processing incoming data from UART
-void H5Transport::processPacket(std::vector<uint8_t> &packet)
+void H5Transport::processPacket(payload_t &packet)
 {
     uint8_t seq_num;
     uint8_t ack_num;
     bool reliable_packet;
     h5_pkt_type_t packet_type;
 
-    std::vector<uint8_t> slipPayload;
+    payload_t slipPayload;
     auto err_code = slip_decode(packet, slipPayload);
 
     if (err_code != NRF_SUCCESS)
@@ -261,10 +320,10 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
 
     logPacket(false, slipPayload);
 
-    std::vector<uint8_t> h5Payload;
+    payload_t h5Payload;
 
     err_code = h5_decode(
-        slipPayload, 
+        slipPayload,
         h5Payload,
         &seq_num,
         &ack_num,
@@ -283,25 +342,22 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
     if (currentState == STATE_RESET)
     {
         // Ignore packets packets received in this state.
-        syncWaitCondition.notify_all();
+        stateMachineChange.notify_all();
         return;
     }
 
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+
     if (packet_type == LINK_CONTROL_PACKET)
     {
-        auto isSyncPacket = h5Payload[0] == syncFirstByte && h5Payload[1] == syncSecondByte;
-        auto isSyncResponsePacket = h5Payload[0] == syncRspFirstByte && h5Payload[1] == syncRspSecondByte;
-        auto isSyncConfigPacket = h5Payload[0] == syncConfigFirstByte && h5Payload[1] == syncConfigSecondByte;
-        auto isSyncConfigResponsePacket = h5Payload[0] == syncConfigRspFirstByte && h5Payload[1] == syncConfigRspSecondByte;
-
         if (currentState == STATE_UNINITIALIZED)
         {
-            if (isSyncResponsePacket) {
+            if (H5Transport::isSyncResponsePacket(h5Payload))
+            {
                 dynamic_cast<UninitializedExitCriterias*>(exitCriterias[currentState])->syncRspReceived = true;
-                syncWaitCondition.notify_all();
             }
-
-            if (isSyncPacket) {
+            else if (H5Transport::isSyncPacket(h5Payload))
+            {
                 sendControlPacket(CONTROL_PKT_SYNC_RESPONSE);
             }
         }
@@ -309,34 +365,28 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
         {
             auto exit = dynamic_cast<InitializedExitCriterias*>(exitCriterias[currentState]);
 
-            if (isSyncConfigResponsePacket) {
+            if (H5Transport::isSyncConfigResponsePacket(h5Payload))
+            {
                 exit->syncConfigRspReceived = true;
-                syncWaitCondition.notify_all();
             }
-
-            if (isSyncConfigPacket)
+            else if (H5Transport::isSyncConfigPacket(h5Payload))
             {
                 sendControlPacket(CONTROL_PKT_SYNC_CONFIG_RESPONSE);
-                syncWaitCondition.notify_all();
             }
-
-            if (isSyncPacket)
+            else if (H5Transport::isSyncPacket(h5Payload))
             {
                 sendControlPacket(CONTROL_PKT_SYNC_RESPONSE);
-                syncWaitCondition.notify_all();
             }
         }
         else if (currentState == STATE_ACTIVE)
         {
             auto exit = dynamic_cast<ActiveExitCriterias*>(exitCriterias[currentState]);
 
-            if (isSyncPacket)
+            if (H5Transport::isSyncPacket(h5Payload))
             {
                 exit->syncReceived = true;
-                syncWaitCondition.notify_all();
             }
-
-            if (isSyncConfigPacket)
+            else if (H5Transport::isSyncConfigPacket(h5Payload))
             {
                 sendControlPacket(CONTROL_PKT_SYNC_CONFIG_RESPONSE);
             }
@@ -352,7 +402,7 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
                 {
                     incrementAckNum();
                     sendControlPacket(CONTROL_PKT_ACK);
-                    dataCallback(h5Payload.data(), h5Payload.size());
+                    upperDataCallback(h5Payload.data(), h5Payload.size());
                 }
                 else
                 {
@@ -377,31 +427,38 @@ void H5Transport::processPacket(std::vector<uint8_t> &packet)
         else
         {
             dynamic_cast<ActiveExitCriterias*>(exitCriterias[currentState])->irrecoverableSyncError = true;
-            syncWaitCondition.notify_all();
         }
     }
+
+    stateMachineLock.unlock();
+    stateMachineChange.notify_all();
 }
 
 void H5Transport::statusHandler(sd_rpc_app_status_t code, const char * error)
 {
     if (code == IO_RESOURCES_UNAVAILABLE)
     {
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exitCriteria = exitCriterias[currentState];
 
         if (exitCriteria != nullptr)
         {
             exitCriteria->ioResourceError = true;
         }
-        
-        syncWaitCondition.notify_all();
+
+        stateMachineLock.unlock();
+        stateMachineChange.notify_all();
     }
 
-    statusCallback(code, error);
+    if (upperStatusCallback != nullptr)
+    {
+        upperStatusCallback(code, error);
+    }
 }
 
 void H5Transport::dataHandler(uint8_t *data, size_t length)
 {
-    std::vector<uint8_t> packet;
+    payload_t packet;
 
     // Check if we have any data from before that has not been processed.
     // If so add the remaining data from previous callback(s) to this packet
@@ -470,147 +527,212 @@ void H5Transport::incrementAckNum()
 #pragma region  State machine
 void H5Transport::setupStateMachine()
 {
-    stateActions[STATE_START] = [&]() -> h5_state_t {
+    // All states lock on mutex stateMachineMutex.
+    // The lock is released when values are ready to be updated and when the states goes out of scope.
+    stateActions[STATE_START] = [this]() -> h5_state_t {
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<StartExitCriterias*>(exitCriterias[STATE_START]);
-        exit->reset();
 
-        std::unique_lock<std::mutex> syncGuard(syncMutex);
+        stateMachineReady = true;
 
-        while (!exit->isFullfilled())
-        {
-            syncWaitCondition.wait(syncGuard);
-        }
+        // Notify other threads that the state machine is ready
+        stateMachineLock.unlock();
+        stateMachineChange.notify_all();
+        stateMachineLock.lock();
 
+        // Wait for notification of a stateMachineChange that exists the state
+        stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
+
+        // Order is of importance when returning state
         if (exit->ioResourceError)
         {
             return STATE_FAILED;
         }
-        else if (exit->isOpened)
+
+        if (exit->close)
+        {
+            return STATE_CLOSED;
+        }
+
+        if (exit->isOpened)
         {
             return STATE_RESET;
         }
-        else
-        {
-            return STATE_FAILED;
-        }
+
+        return STATE_FAILED;
     };
 
-    stateActions[STATE_RESET] = [&]() -> h5_state_t {
+    stateActions[STATE_RESET] = [this]() -> h5_state_t {
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<ResetExitCriterias*>(exitCriterias[STATE_RESET]);
-        exit->reset();
 
-        std::unique_lock<std::mutex> syncGuard(syncMutex);
+        // Send the reset packet, and wait for the device to reboot and ready for receiving commands
+        sendControlPacket(CONTROL_PKT_RESET);
 
-        while (!exit->isFullfilled())
+        if (statusCallback != nullptr)
         {
-            sendControlPacket(CONTROL_PKT_RESET);
             statusCallback(RESET_PERFORMED, "Target Reset performed");
-            exit->resetSent = true;
-            syncWaitCondition.wait_for(syncGuard, RESET_WAIT_DURATION);
         }
 
-        if (!exit->isFullfilled())
+        exit->resetSent = true;
+        stateMachineChange.wait_for(stateMachineLock, RESET_WAIT_DURATION, [&exit] { return exit->isFullfilled(); });
+        exit->resetWait = true;
+
+        // Order is of importance when returning state
+        if (exit->ioResourceError)
         {
             return STATE_FAILED;
         }
-        else
+
+        if (exit->close)
+        {
+            return STATE_CLOSED;
+        }
+
+        if (exit->resetSent && exit->resetWait)
         {
             return STATE_UNINITIALIZED;
         }
+
+        return STATE_FAILED;
     };
 
-    stateActions[STATE_UNINITIALIZED] = [&]() -> h5_state_t
+    stateActions[STATE_UNINITIALIZED] = [this]() -> h5_state_t
     {
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<UninitializedExitCriterias*>(exitCriterias[STATE_UNINITIALIZED]);
-        exit->reset();
-
         uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
-        std::unique_lock<std::mutex> syncGuard(syncMutex);
 
         while (!exit->isFullfilled() && syncRetransmission > 0)
         {
             sendControlPacket(CONTROL_PKT_SYNC);
             exit->syncSent = true;
-            syncWaitCondition.wait_for(syncGuard, NON_ACTIVE_STATE_TIMEOUT);
+            stateMachineChange.wait_for(stateMachineLock, NON_ACTIVE_STATE_TIMEOUT, [&exit] { return exit->isFullfilled(); });
             syncRetransmission--;
         }
 
-        if (exit->isFullfilled())
-        {
-            return STATE_INITIALIZED;
-        }
-        else
+        // Order is of importance when returning state
+        if (exit->ioResourceError)
         {
             return STATE_FAILED;
         }
+
+        if (exit->close)
+        {
+            return STATE_CLOSED;
+        }
+
+        if (exit->syncSent && exit->syncRspReceived)
+        {
+            return STATE_INITIALIZED;
+        }
+
+        if (syncRetransmission == 0)
+        {
+            std::stringstream status;
+            status << "No response from device. Tried to send packet " << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
+            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+            return STATE_NO_RESPONSE;
+        }
+
+        return STATE_FAILED;
     };
 
-    stateActions[STATE_INITIALIZED] = [&]() -> h5_state_t
+    stateActions[STATE_INITIALIZED] = [this]() -> h5_state_t
     {
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<InitializedExitCriterias*>(exitCriterias[STATE_INITIALIZED]);
-        exit->reset();
-
         uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
-        std::unique_lock<std::mutex> syncGuard(syncMutex);
 
         // Send a package immediately
-
         while (!exit->isFullfilled() && syncRetransmission > 0)
         {
             sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
             exit->syncConfigSent = true;
-            syncWaitCondition.wait_for(syncGuard, NON_ACTIVE_STATE_TIMEOUT);
+
+            stateMachineChange.wait_for(
+                stateMachineLock,
+                NON_ACTIVE_STATE_TIMEOUT,
+                [&exit]{ return exit->isFullfilled(); }
+            );
+
             syncRetransmission--;
+        }
+
+        // Order is of importance when returning state
+        if (exit->ioResourceError)
+        {
+            return STATE_FAILED;
+        }
+
+        if (exit->close)
+        {
+            return STATE_CLOSED;
         }
 
         if (exit->syncConfigSent && exit->syncConfigRspReceived)
         {
             return STATE_ACTIVE;
         }
-        else
+
+        if (syncRetransmission == 0)
         {
-            return STATE_FAILED;
+            std::stringstream status;
+            status << "No response from device. Tried to send packet " << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
+            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+            return STATE_NO_RESPONSE;
         }
+
+        return STATE_FAILED;
     };
 
-    stateActions[STATE_ACTIVE] = [&]() -> h5_state_t
+    stateActions[STATE_ACTIVE] = [this]() -> h5_state_t
     {
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+        auto exit = dynamic_cast<ActiveExitCriterias*>(exitCriterias[STATE_ACTIVE]);
+
         seqNum = 0;
         ackNum = 0;
 
-        std::unique_lock<std::mutex> syncGuard(syncMutex);
-        auto exit = dynamic_cast<ActiveExitCriterias*>(exitCriterias[STATE_ACTIVE]);
-        exit->reset();
-
         statusHandler(CONNECTION_ACTIVE, "Connection active");
+        stateMachineChange.wait(stateMachineLock, [this, &exit] {
+            return exit->isFullfilled();
+        });
 
-        while (!exit->isFullfilled())
+        if (exit->ioResourceError)
         {
-            syncWaitCondition.wait(syncGuard);
+            return STATE_FAILED;
+        }
+
+        if (exit->close)
+        {
+            return STATE_CLOSED;
         }
 
         if (exit->syncReceived || exit->irrecoverableSyncError)
         {
             return STATE_RESET;
         }
-        else if (exit->close)
-        {
-            return STATE_START;
-        }
-        else if (exit->ioResourceError)
-        {
-            return STATE_FAILED;
-        }
-        else
-        {
-            return STATE_FAILED;
-        }
+
+        return STATE_FAILED;
     };
 
-    stateActions[STATE_FAILED] = [&]() -> h5_state_t
+    stateActions[STATE_FAILED] = [this]() -> h5_state_t
     {
-        log("Giving up! I can not provide you a way of your failed state!");
+        log("Entered state failed. No exit exists from this state.");
         return STATE_FAILED;
+    };
+
+    stateActions[STATE_CLOSED] = [this]() -> h5_state_t
+    {
+        log("Entered state closed.");
+        return STATE_CLOSED;
+    };
+
+    stateActions[STATE_NO_RESPONSE] = [this]() -> h5_state_t
+    {
+        log("No response to data sent to device.");
+        return STATE_NO_RESPONSE;
     };
 
     // Setup exit criterias
@@ -623,48 +745,80 @@ void H5Transport::setupStateMachine()
 
 void H5Transport::startStateMachine()
 {
-    runStateMachine = true;
     currentState = STATE_START;
 
-    if (stateMachineThread == nullptr)
+    if (!stateMachineThread.joinable())
     {
-        stateMachineThread = new std::thread(std::bind(&H5Transport::stateMachineWorker, this));
+        // Lock the stateMachineMutex and let stateMachineThread notify
+        // when the state machine is ready to process states
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+        stateMachineThread = std::thread([this] { stateMachineWorker(); });
+
+        // Wait for the state machine to be ready
+        stateMachineChange.wait(stateMachineLock, [this]() {
+            return stateMachineReady;
+        });
+    }
+    else
+    {
+        // Terminate if the state machine thread is joinable (already runs), this should not happen.
+        std::cerr << __FILE__ << ":" << __LINE__ << " stateMachineThread exists, this should not happen. Terminating." << std::endl;
+        std::terminate();
     }
 }
 
 void H5Transport::stopStateMachine()
 {
-    runStateMachine = false;
-    syncWaitCondition.notify_all(); // Notify state machine thread
-
-    if (stateMachineThread != nullptr)
+    if (stateMachineThread.joinable())
     {
-        // Check if stateMachineThread is stopping itself
-        if (std::this_thread::get_id() == stateMachineThread->get_id())
-        {
-            stateMachineThread = nullptr;
-            return;
-        }
-
-        stateMachineThread->join();
-        delete stateMachineThread;
-        stateMachineThread = nullptr;
+        stateMachineThread.join();
     }
 }
 
-// Event Thread
+// State machine thread
 void H5Transport::stateMachineWorker()
 {
-    h5_state_t nextState;
-
-    while (currentState != STATE_FAILED && runStateMachine == true)
+    while (currentState != STATE_FAILED && currentState != STATE_CLOSED && currentState != STATE_NO_RESPONSE)
     {
-        nextState = stateActions[currentState]();
-        logStateTransition(currentState, nextState);
+        auto nextState = stateActions[currentState]();
 
-        currentState = nextState;
+        // Make sure that state is not changed when assigning a new current state
+        {
+            std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+            logStateTransition(currentState, nextState);
 
-        // Inform interested parties that new state is about to be entered
+            // Reset the next states variables before starting to use them.
+            switch (nextState)
+            {
+                case STATE_START:
+                    dynamic_cast<StartExitCriterias*>(exitCriterias[STATE_START])->reset();
+                    break;
+                case STATE_RESET:
+                    dynamic_cast<ResetExitCriterias*>(exitCriterias[STATE_RESET])->reset();
+                    break;
+                case STATE_UNINITIALIZED:
+                    dynamic_cast<UninitializedExitCriterias*>(exitCriterias[STATE_UNINITIALIZED])->reset();
+                    break;
+                case STATE_INITIALIZED:
+                    dynamic_cast<InitializedExitCriterias*>(exitCriterias[STATE_INITIALIZED])->reset();
+                    break;
+                case STATE_ACTIVE:
+                    dynamic_cast<ActiveExitCriterias*>(exitCriterias[STATE_ACTIVE])->reset();
+                    break;
+                case STATE_FAILED:
+                case STATE_CLOSED:
+                case STATE_NO_RESPONSE:
+                    // These are terminal states that do not have exit criterias associated with them
+                    break;
+                case STATE_UNKNOWN:
+                    // Not used
+                    break;
+            }
+
+            currentState = nextState;
+        }
+
+        // Inform interested parties that new current state is set and ready
         stateWaitCondition.notify_all();
     }
 }
@@ -672,16 +826,7 @@ void H5Transport::stateMachineWorker()
 bool H5Transport::waitForState(h5_state_t state, std::chrono::milliseconds timeout)
 {
     std::unique_lock<std::mutex> lock(stateMutex);
-    stateWaitCondition.wait_for(lock, timeout, [&] { return currentState == state; });
-
-    if (currentState != state)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    return stateWaitCondition.wait_for(lock, timeout, [&state, this] { return currentState == state; });
 }
 
 #pragma endregion State machine related methods
@@ -711,7 +856,7 @@ void H5Transport::sendControlPacket(control_pkt_type type)
     }
 
     auto payload = pkt_pattern[type];
-    std::vector<uint8_t> h5Packet;
+    payload_t h5Packet;
 
     h5_encode(payload,
         h5Packet,
@@ -721,7 +866,7 @@ void H5Transport::sendControlPacket(control_pkt_type type)
         false,
         h5_packet);
 
-    std::vector<uint8_t> slipPacket;
+    payload_t slipPacket;
     slip_encode(h5Packet, slipPacket);
 
     logPacket(true, h5Packet);
@@ -742,7 +887,7 @@ std::string H5Transport::pktTypeToString(h5_pkt_type_t pktType)
     return pktTypeString[pktType];
 }
 
-std::string H5Transport::asHex(std::vector<uint8_t> &packet) const
+std::string H5Transport::asHex(payload_t &packet) const
 {
     std::stringstream hex;
 
@@ -753,7 +898,7 @@ std::string H5Transport::asHex(std::vector<uint8_t> &packet) const
     return hex.str();
 }
 
-std::string H5Transport::hciPacketLinkControlToString(std::vector<uint8_t> payload) const
+std::string H5Transport::hciPacketLinkControlToString(payload_t payload) const
 {
     std::stringstream retval;
 
@@ -771,21 +916,39 @@ std::string H5Transport::hciPacketLinkControlToString(std::vector<uint8_t> paylo
     {
         retval << "[";
 
-        if (payload[0] == syncFirstByte && payload[1] == syncSecondByte) retval << "SYNC";
-        if (payload[0] == syncRspFirstByte && payload[1] == syncRspSecondByte) retval << "SYNC_RESP";
-
-        if (payload[0] == syncConfigFirstByte && payload[1] == syncConfigSecondByte && payload.size() == 3)
+        if (isSyncPacket(payload))
+        {
+            retval << "SYNC";
+        }
+        else if (isSyncResponsePacket(payload))
+        {
+            retval << "SYNC_RESP";
+        }
+        else if (isSyncConfigPacket(payload))
         {
             retval << "CONFIG [" << configToString(payload[2]) << "]";
         }
-        if (payload[0] == syncConfigRspFirstByte && payload[1] == syncConfigRspSecondByte)
+        else if (isSyncConfigResponsePacket(payload))
         {
             retval << "CONFIG_RESP [" << configToString(payload[2]) << "]";
         }
+        else
+        {
+            if (payload[0] == 0x05 && payload[1] == 0xfa)
+            {
+                retval << "WAKEUP";
+            }
 
-        if (payload[0] == 0x05 && payload[1] == 0xfa) retval << "WAKEUP";
-        if (payload[0] == 0x06 && payload[1] == 0xf9) retval << "WOKEN";
-        if (payload[0] == 0x07 && payload[1] == 0x78) retval << "SLEEP";
+            if (payload[0] == 0x06 && payload[1] == 0xf9)
+            {
+                retval << "WOKEN";
+            }
+
+            if (payload[0] == 0x07 && payload[1] == 0x78)
+            {
+                retval << "SLEEP";
+            }
+        }
 
         retval << "]";
     }
@@ -793,9 +956,9 @@ std::string H5Transport::hciPacketLinkControlToString(std::vector<uint8_t> paylo
     return retval.str();
 }
 
-std::string H5Transport::h5PktToString(bool out, std::vector<uint8_t> &h5Packet) const
+std::string H5Transport::h5PktToString(bool out, payload_t &h5Packet) const
 {
-    std::vector<uint8_t> payload;
+    payload_t payload;
 
     uint8_t seq_num;
     uint8_t ack_num;
@@ -806,7 +969,7 @@ std::string H5Transport::h5PktToString(bool out, std::vector<uint8_t> &h5Packet)
     uint8_t header_checksum;
 
     auto err_code = h5_decode(
-        h5Packet, 
+        h5Packet,
         payload,
         &seq_num,
         &ack_num,
@@ -852,7 +1015,7 @@ std::string H5Transport::h5PktToString(bool out, std::vector<uint8_t> &h5Packet)
     return retval.str();
 }
 
-void H5Transport::logPacket(bool outgoing, std::vector<uint8_t> &packet)
+void H5Transport::logPacket(bool outgoing, payload_t &packet)
 {
     if (outgoing)
     {
@@ -865,9 +1028,9 @@ void H5Transport::logPacket(bool outgoing, std::vector<uint8_t> &packet)
 
     std::string logLine = h5PktToString(outgoing, packet).c_str();
 
-    if (this->logCallback != nullptr)
+    if (upperLogCallback != nullptr)
     {
-        this->logCallback(SD_RPC_LOG_DEBUG, logLine);
+        upperLogCallback(SD_RPC_LOG_DEBUG, logLine);
     }
     else
     {
@@ -877,9 +1040,9 @@ void H5Transport::logPacket(bool outgoing, std::vector<uint8_t> &packet)
 
 void H5Transport::log(std::string &logLine) const
 {
-    if (this->logCallback != nullptr)
+    if (upperLogCallback != nullptr)
     {
-        this->logCallback(SD_RPC_LOG_DEBUG, logLine);
+        upperLogCallback(SD_RPC_LOG_DEBUG, logLine);
     }
     else
     {
@@ -898,9 +1061,9 @@ void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
     std::stringstream logLine;
     logLine << "State change: " << stateToString(from) << " -> " << stateToString(to) << std::endl;
 
-    if (this->logCallback != nullptr)
+    if (upperLogCallback != nullptr)
     {
-        this->logCallback(SD_RPC_LOG_DEBUG, logLine.str());
+        upperLogCallback(SD_RPC_LOG_DEBUG, logLine.str());
     }
     else
     {
@@ -909,3 +1072,53 @@ void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
 }
 
 #pragma endregion Debugging related methods
+
+
+#pragma region Test related methods
+bool H5Transport::checkPattern(const payload_t &packet, const uint8_t offset, const payload_t &pattern)
+{
+    if (offset >= packet.size()) return false;
+
+    auto packetItr = packet.begin() + offset;
+
+    for (auto patternEntry : pattern)
+    {
+        if (packetItr == packet.end())
+        {
+            return false;
+        }
+
+        if (*packetItr++ != patternEntry)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool H5Transport::isSyncPacket(const payload_t &packet, const uint8_t offset)
+{
+    return checkPattern(packet, offset, payload_t{ SyncFirstByte, SyncSecondByte });
+}
+
+bool H5Transport::isSyncResponsePacket(const payload_t &packet, const uint8_t offset)
+{
+    return checkPattern(packet, offset, payload_t { SyncRspFirstByte, SyncRspSecondByte });
+}
+
+bool H5Transport::isSyncConfigPacket(const payload_t &packet, const uint8_t offset)
+{
+    return checkPattern(packet, offset, payload_t { SyncConfigFirstByte, SyncConfigSecondByte });
+}
+
+bool H5Transport::isSyncConfigResponsePacket(const payload_t &packet, const uint8_t offset)
+{
+    return checkPattern(packet, offset, payload_t { SyncConfigRspFirstByte, SyncConfigRspSecondByte });
+}
+
+bool H5Transport::isResetPacket(const payload_t &packet, const uint8_t offset)
+{
+    return checkPattern(packet, offset, payload_t { 0x05 });
+}
+#pragma endregion Test related methods

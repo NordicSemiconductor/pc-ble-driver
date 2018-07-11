@@ -67,22 +67,25 @@ typedef enum
 
 class SerializationTransport {
 public:
+    SerializationTransport() = delete;
     SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
     ~SerializationTransport();
+    
     uint32_t open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback);
     uint32_t close();
     uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength);
 
 private:
-    SerializationTransport();
     void readHandler(uint8_t *data, size_t length);
     void eventHandlingRunner();
 
     status_cb_t statusCallback;
     evt_cb_t eventCallback;
     log_cb_t logCallback;
+    
+    data_cb_t dataCallback;
 
-    Transport *nextTransportLayer;
+    std::shared_ptr<Transport> nextTransportLayer;
     uint32_t responseTimeout;
 
     bool rspReceived;
@@ -97,7 +100,7 @@ private:
     bool runEventThread; // Variable to control if thread shall run, used in thread to exit/keep running inthread
     std::mutex eventMutex;
     std::condition_variable eventWaitCondition;
-    std::thread * eventThread;
+    std::thread eventThread;
     std::queue<eventData_t> eventQueue;
 };
 
