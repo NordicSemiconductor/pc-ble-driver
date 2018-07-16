@@ -10,6 +10,8 @@
 #include "ble.h"
 #include "sd_rpc.h"
 
+#include <cstring>
+
 namespace testutil
 {
     using LogCallback = std::function<void(const sd_rpc_log_severity_t severity, const std::string &log_message)>;
@@ -449,7 +451,7 @@ namespace testutil
         {
             // Setup scratchpad with default values
 #if NRF_SD_BLE_API <= 3
-            memset(&scratchpad.ble_enable_params, 0, sizeof(scratchpad.ble_enable_params));
+            std::memset(&scratchpad.ble_enable_params, 0, sizeof(scratchpad.ble_enable_params));
 #endif
 
 #if NRF_SD_BLE_API == 3
