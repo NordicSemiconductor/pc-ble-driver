@@ -9,8 +9,6 @@
 #include "catch2/catch.hpp"
 
 #include "transport.h"
-#include "h5_transport.h"
-#include "h5.h"
 #include "nrf_error.h"
 #include "virtual_uart.h"
 
@@ -36,12 +34,12 @@ TEST_CASE("virtual_uart")
         payload_t payloadFromB;
         payload_t payloadFromA;
 
-        auto dataCallback = [](const std::string name, payload_t &payloadReceived)
+        const auto dataCallback = [](const std::string name, payload_t &payloadReceived)
         {
             return [name, &payloadReceived](uint8_t *data, size_t length) -> void
             {
                 payloadReceived.assign(data, data + length);
-                NRF_LOG("[" << name << "][data]<- " << testutil::convertToString(payloadReceived) << " length: " << length);
+                NRF_LOG("[" << name << "][data]<- " << testutil::asHex(payloadReceived) << " length: " << length);
             };
         };
 

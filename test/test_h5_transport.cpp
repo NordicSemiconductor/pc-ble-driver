@@ -49,16 +49,11 @@
 
 #include "test_setup.h"
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <cstdlib>
 #include <thread>
-#include <random>
 #include <iomanip>
-#include <fstream>
-#include <exception>
 #include <chrono>
 
 #if defined(_MSC_VER)
@@ -76,7 +71,7 @@ public:
         );
     }
 
-    void statusCallback(sd_rpc_app_status_t code, const char *message)
+    void statusCallback(sd_rpc_app_status_t code, const char *message) const
     {
         NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
     }
@@ -84,10 +79,10 @@ public:
     void dataCallback(uint8_t *data, size_t length)
     {
         incoming.assign(data, data + length);
-        NRF_LOG("[" << name << "][data]<- " << testutil::convertToString(incoming) << " length: " << length);
+        NRF_LOG("[" << name << "][data]<- " << testutil::asHex(incoming) << " length: " << length);
     }
 
-    void logCallback(sd_rpc_log_severity_t severity, std::string message)
+    void logCallback(sd_rpc_log_severity_t severity, std::string message) const
     {
         NRF_LOG("[" << name << "][log] severity: " << severity << " message: " << message);
     }
@@ -101,12 +96,12 @@ public:
         );
     }
 
-    std::shared_ptr<test::H5TransportWrapper> get()
+    std::shared_ptr<test::H5TransportWrapper> get() const
     {
         return transport;
     }
 
-    uint32_t wait()
+    uint32_t wait() const
     {
         return transport->waitForResult();
     }
@@ -122,7 +117,7 @@ public:
         return transport->close();
     }
 
-    payload_t in()
+    payload_t in() const
     {
         return incoming;
     }
@@ -174,7 +169,7 @@ TEST_CASE("H5Transport")
 {
     SECTION("fail_open_invalid_inbound")
     {
-        auto lowerTransport = new test::VirtualTransportSendSync();
+        const auto lowerTransport = new test::VirtualTransportSendSync();
         H5TransportTestSetup transportUnderTest("transportUnderTest", lowerTransport);
         transportUnderTest.setup();
 
@@ -293,10 +288,10 @@ TEST_CASE("H5Transport")
         REQUIRE(std::equal(payloadToB.begin(), payloadToB.end(), h5TransportB.in().begin()) == true);
         REQUIRE(std::equal(payloadToA.begin(), payloadToA.end(), h5TransportA.in().begin()) == true);
 
-        h5TransportA.close();
+        REQUIRE(h5TransportA.close() == NRF_SUCCESS);
         REQUIRE(h5TransportA.state() == STATE_CLOSED);
 
-        h5TransportB.close();
+        REQUIRE(h5TransportB.close() == NRF_SUCCESS);
         REQUIRE(h5TransportB.state() == STATE_CLOSED);
     }
 }
