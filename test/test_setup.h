@@ -197,7 +197,7 @@ namespace test
 
         uint32_t send(const std::vector<uint8_t> &data)
         {
-            NRF_LOG("->" << testutil::convertToString(data) << " length: " << data.size());
+            NRF_LOG("->" << testutil::asHex(data) << " length: " << data.size());
             return NRF_SUCCESS;
         }
 
