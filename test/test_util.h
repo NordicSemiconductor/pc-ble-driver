@@ -9,6 +9,8 @@
 
 #include <random>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 namespace testutil
 {
