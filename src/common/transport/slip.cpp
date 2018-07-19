@@ -45,32 +45,32 @@
 #define SLIP_ESC_END 0xDC
 #define SLIP_ESC_ESC 0xDD
 
-void slip_encode(std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet)
+void slip_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet)
 {
     out_packet.push_back(SLIP_END);
 
-    for (size_t i = 0; i < in_packet.size(); i++)
+    for (unsigned char i : in_packet)
     {
-        if (in_packet[i] == SLIP_END)
+        if (i == SLIP_END)
         {
             out_packet.push_back(SLIP_ESC);
             out_packet.push_back(SLIP_ESC_END);
         }
-        else if (in_packet[i] == SLIP_ESC)
+        else if (i == SLIP_ESC)
         {
             out_packet.push_back(SLIP_ESC);
             out_packet.push_back(SLIP_ESC_ESC);
         }
         else
         {
-            out_packet.push_back(in_packet[i]);
+            out_packet.push_back(i);
         }
     }
 
     out_packet.push_back(SLIP_END);
 }
 
-uint32_t slip_decode(std::vector<uint8_t> &packet, std::vector<uint8_t> &out_packet)
+uint32_t slip_decode(const std::vector<uint8_t> &packet, std::vector<uint8_t> &out_packet)
 {
     for (size_t i = 0; i < packet.size(); i++)
     {

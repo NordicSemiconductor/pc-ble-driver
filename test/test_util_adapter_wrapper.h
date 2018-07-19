@@ -77,8 +77,11 @@ namespace testutil
         // The service used by the test
         uint16_t service_handle = BLE_GATT_HANDLE_INVALID;
         
-        // The characteristic used by the test
-        uint16_t characteristic_handle = BLE_GATT_HANDLE_INVALID;
+        // The characteristic declaration handle used by the test
+        uint16_t characteristic_decl_handle = BLE_GATT_HANDLE_INVALID;
+
+        // The characteristic value handle used by the test
+        uint16_t characteristic_value_handle = BLE_GATT_HANDLE_INVALID;
 
         // The descriptor used by the test
         uint16_t descriptor_handle = BLE_GATT_HANDLE_INVALID;
@@ -256,13 +259,13 @@ namespace testutil
             ble_gattc_handle_range_t handle_range;
             NRF_LOG(role() << " Discovering characteristic's descriptors");
 
-            if (scratchpad.characteristic_handle == 0)
+            if (scratchpad.characteristic_decl_handle == 0)
             {
                 NRF_LOG(role() << " No characteristic handle specified.");
                 return NRF_ERROR_INVALID_STATE;
             }
 
-            handle_range.start_handle = scratchpad.characteristic_handle;
+            handle_range.start_handle = scratchpad.characteristic_decl_handle;
             handle_range.end_handle = scratchpad.service_end_handle;
 
             return sd_ble_gattc_descriptors_discover(m_adapter, scratchpad.connection_handle, &handle_range);
@@ -336,42 +339,82 @@ namespace testutil
         {
             auto eventId = p_ble_evt->header.evt_id;
 
+            const auto logGenericUnprocessed = [this, &eventId]()
+            {
+                NRF_LOG(role() << " Unprocessed event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+            };
+
             if (eventId >= BLE_GAP_EVT_BASE && eventId <= BLE_GAP_EVT_LAST)
             {
+                const auto logUnprocessed = [this, &eventId]()
+                {
+                    NRF_LOG(role() << " Unprocessed GAP event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                };
+
                 if (m_gapEventCallback != nullptr)
                 {
                     if (!m_gapEventCallback(eventId, &(p_ble_evt->evt.gap_evt)))
                     {
-                        NRF_LOG(role() << " Unprocessed GAP event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                        logUnprocessed();
                     }
+                }
+                else
+                {
+                    logUnprocessed();
                 }
             }
             else if (eventId >= BLE_GATTC_EVT_BASE && eventId <= BLE_GATTC_EVT_LAST)
             {
+                const auto logUnprocessed = [this, &eventId]()
+                {
+                    NRF_LOG(role() << " Unprocessed GATTC event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                };
+
                 if (m_gattcEventCallback != nullptr)
                 {
                     if (!m_gattcEventCallback(eventId, &(p_ble_evt->evt.gattc_evt)))
                     {
-                        NRF_LOG(role() <<  " Unprocessed GATTC event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                        logUnprocessed();
                     }
+                }
+                else
+                {
+                    logUnprocessed();
                 }
             }
             else if (eventId >= BLE_GATTS_EVT_BASE && eventId <= BLE_GATTS_EVT_LAST)
             {
+                const auto logUnprocessed = [this, &eventId]()
+                {
+                    NRF_LOG(role() << " Unprocessed GATTS event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                };
+
                 if (m_gattsEventCallback != nullptr)
                 {
                     if (!m_gattsEventCallback(eventId, &(p_ble_evt->evt.gatts_evt)))
                     {
-                        NRF_LOG(role() << " Unprocessed GATTS event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                        logUnprocessed();
                     }
                 }
-            }
-            else if (m_eventCallback != nullptr)
-            {
-                if (!m_eventCallback(p_ble_evt))
+                else
                 {
-                    NRF_LOG(role() << " Unprocessed event: 0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)eventId);
+                    logUnprocessed();
                 }
+            }
+            else
+            {
+                if (m_eventCallback != nullptr)
+                {
+                    if (!m_eventCallback(p_ble_evt))
+                    {
+                        logGenericUnprocessed();
+                    }
+                }
+                else
+                {
+                    logGenericUnprocessed();
+                }
+
             }
         }
 

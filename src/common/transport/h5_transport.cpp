@@ -99,7 +99,7 @@ H5Transport::~H5Transport()
 
 #pragma region Static initializers
 
-std::map<h5_state_t, std::string> H5Transport::stateString{
+const std::map<const h5_state_t, const std::string> H5Transport::stateString{
     { STATE_UNKNOWN, "STATE_UNKNOWN" },
     { STATE_START, "STATE_START" },
     { STATE_UNINITIALIZED, "STATE_UNINITIALIZED" },
@@ -111,15 +111,16 @@ std::map<h5_state_t, std::string> H5Transport::stateString{
     { STATE_NO_RESPONSE, "STATE_NO_RESPONSE" },
 };
 
-std::map<control_pkt_type, std::vector<uint8_t>> H5Transport::pkt_pattern = {
+const std::map<const control_pkt_type, const std::vector<uint8_t>> H5Transport::pkt_pattern = {
     { CONTROL_PKT_RESET, {} },
+    { CONTROL_PKT_ACK, {} },
     { CONTROL_PKT_SYNC, { SyncFirstByte, SyncSecondByte } },
     { CONTROL_PKT_SYNC_RESPONSE, { SyncRspFirstByte, SyncRspSecondByte } },
     { CONTROL_PKT_SYNC_CONFIG, { SyncConfigFirstByte, SyncConfigSecondByte, SyncConfigField } },
     { CONTROL_PKT_SYNC_CONFIG_RESPONSE, { SyncConfigRspFirstByte, SyncConfigRspSecondByte, SyncConfigField } }
 };
 
-std::map<h5_pkt_type_t, std::string> H5Transport::pktTypeString{
+const std::map<const h5_pkt_type_t, const std::string> H5Transport::pktTypeString = {
     { ACK_PACKET, "ACK" },
     { HCI_COMMAND_PACKET, "HCI_COMMAND_PACKET" },
     { ACL_DATA_PACKET, "ACL_DATA_PACKET" },
@@ -302,7 +303,7 @@ h5_state_t H5Transport::state() const
 #pragma endregion Public methods
 
 #pragma region Processing incoming data from UART
-void H5Transport::processPacket(payload_t &packet)
+void H5Transport::processPacket(const payload_t &packet)
 {
     uint8_t seq_num;
     uint8_t ack_num;
@@ -833,7 +834,7 @@ bool H5Transport::waitForState(h5_state_t state, std::chrono::milliseconds timeo
 
 #pragma region Sending packet types
 
-void H5Transport::sendControlPacket(control_pkt_type type)
+void H5Transport::sendControlPacket(const control_pkt_type type)
 {
     h5_pkt_type_t h5_packet;
 
@@ -855,16 +856,37 @@ void H5Transport::sendControlPacket(control_pkt_type type)
         h5_packet = LINK_CONTROL_PACKET;
     }
 
-    auto payload = pkt_pattern[type];
     payload_t h5Packet;
 
-    h5_encode(payload,
-        h5Packet,
-        0,
-        type == CONTROL_PKT_ACK ? ackNum : 0,
-        false,
-        false,
-        h5_packet);
+    try
+    {
+        const auto payload = pkt_pattern.at(type);
+
+        h5_encode(payload,
+            h5Packet,
+            0,
+            type == CONTROL_PKT_ACK ? ackNum : 0,
+            false,
+            false,
+            h5_packet);
+    } 
+    catch(const std::out_of_range &e)
+    {
+        std::stringstream logLine;
+
+        logLine << "Trying to send unknown control packet to device. " << e.what() << ". Aborting.";
+
+        if (upperLogCallback != nullptr)
+        {
+            upperLogCallback(SD_RPC_LOG_INFO, logLine.str());
+        }
+        else
+        {
+            std::clog << logLine.str() << std::endl;
+        }
+
+        std::terminate();
+    }
 
     payload_t slipPacket;
     slip_encode(h5Packet, slipPacket);
@@ -877,17 +899,35 @@ void H5Transport::sendControlPacket(control_pkt_type type)
 #pragma endregion Methods related to sending packet types defined in the Three Wire Standard
 
 #pragma region Debugging
-std::string H5Transport::stateToString(h5_state_t state)
+std::string H5Transport::stateToString(const h5_state_t state)
 {
-    return stateString[state];
+    try
+    {
+        return stateString.at(state);
+    }
+    catch (const std::out_of_range &e)
+    {
+        std::stringstream ss;
+        ss << "UNKNOWN state " << e.what();
+        return ss.str();
+    }
 }
 
-std::string H5Transport::pktTypeToString(h5_pkt_type_t pktType)
+std::string H5Transport::pktTypeToString(const h5_pkt_type_t pktType)
 {
-    return pktTypeString[pktType];
+    try
+    {
+        return pktTypeString.at(pktType);
+    }
+    catch (const std::out_of_range &e)
+    {
+        std::stringstream ss;
+        ss << "UNKNOWN pktType " << e.what();
+        return ss.str();
+    }
 }
 
-std::string H5Transport::asHex(payload_t &packet) const
+std::string H5Transport::asHex(const payload_t &packet)
 {
     std::stringstream hex;
 
@@ -898,11 +938,11 @@ std::string H5Transport::asHex(payload_t &packet) const
     return hex.str();
 }
 
-std::string H5Transport::hciPacketLinkControlToString(payload_t payload) const
+std::string H5Transport::hciPacketLinkControlToString(const payload_t &payload)
 {
     std::stringstream retval;
 
-    auto configToString = [](uint8_t config)
+    const auto configToString = [](uint8_t config)
     {
         std::stringstream info;
         info << " sliding-window-size:" << (config & 0x07);
@@ -956,7 +996,7 @@ std::string H5Transport::hciPacketLinkControlToString(payload_t payload) const
     return retval.str();
 }
 
-std::string H5Transport::h5PktToString(bool out, payload_t &h5Packet) const
+std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet) const
 {
     payload_t payload;
 
@@ -968,7 +1008,7 @@ std::string H5Transport::h5PktToString(bool out, payload_t &h5Packet) const
     uint16_t payload_length;
     uint8_t header_checksum;
 
-    auto err_code = h5_decode(
+    const auto err_code = h5_decode(
         h5Packet,
         payload,
         &seq_num,
@@ -1015,7 +1055,7 @@ std::string H5Transport::h5PktToString(bool out, payload_t &h5Packet) const
     return retval.str();
 }
 
-void H5Transport::logPacket(bool outgoing, payload_t &packet)
+void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
 {
     if (outgoing)
     {
@@ -1026,7 +1066,7 @@ void H5Transport::logPacket(bool outgoing, payload_t &packet)
         incomingPacketCount++;
     }
 
-    std::string logLine = h5PktToString(outgoing, packet).c_str();
+    const std::string logLine = h5PktToString(outgoing, packet).c_str();
 
     if (upperLogCallback != nullptr)
     {

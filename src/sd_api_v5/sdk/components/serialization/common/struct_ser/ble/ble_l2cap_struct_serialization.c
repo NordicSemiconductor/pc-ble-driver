@@ -44,6 +44,66 @@
 #include "cond_field_serialization.h"
 #include <string.h>
 
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 4
+uint32_t ble_l2cap_header_t_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_l2cap_header_t);
+
+    SER_PUSH_uint16(&p_struct->len);
+    SER_PUSH_uint16(&p_struct->cid);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_l2cap_header_t_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_l2cap_header_t);
+
+    SER_PULL_uint16(&p_struct->len);
+    SER_PULL_uint16(&p_struct->cid);
+
+    SER_STRUCT_DEC_END;
+}
+
+uint32_t ble_l2cap_evt_rx_t_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_l2cap_evt_rx_t);
+
+    SER_PUSH_FIELD(&p_struct->header, ble_l2cap_header_t_enc);
+    SER_PUSH_uint8array(p_struct->data, p_struct->header.len);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_l2cap_evt_rx_t_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                uint32_t * const      p_ext_len,
+                                void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_l2cap_evt_rx_t);
+
+    SER_PULL_FIELD(&p_struct->header, ble_l2cap_header_t_dec);
+
+    uint32_t data_len = (SUB1(p_struct->header.len));
+    SER_ASSERT_LENGTH_LEQ(data_len, *p_ext_len);
+
+    SER_PULL_uint8array(p_struct->data, p_struct->header.len);
+
+    *p_ext_len = data_len;
+    SER_STRUCT_DEC_END;
+}
+#endif
+
 #if NRF_SD_BLE_API_VERSION >= 5
 uint32_t ble_l2cap_conn_cfg_t_enc(void const * const p_void_struct,
                                   uint8_t * const    p_buf,

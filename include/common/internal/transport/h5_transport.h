@@ -64,6 +64,16 @@ typedef enum
     STATE_UNKNOWN
 } h5_state_t;
 
+constexpr uint8_t SyncFirstByte = 0x01;
+constexpr uint8_t SyncSecondByte = 0x7E;
+constexpr uint8_t SyncRspFirstByte = 0x02;
+constexpr uint8_t SyncRspSecondByte = 0x7D;
+constexpr uint8_t SyncConfigFirstByte = 0x03;
+constexpr uint8_t SyncConfigSecondByte = 0xFC;
+constexpr uint8_t SyncConfigRspFirstByte = 0x04;
+constexpr uint8_t SyncConfigRspSecondByte = 0x7B;
+constexpr uint8_t SyncConfigField = 0x11;
+
 using state_action_t = std::function<h5_state_t()>;
 using payload_t = std::vector<uint8_t>;
 
@@ -89,7 +99,7 @@ public:
 private:
     void dataHandler(uint8_t *data, size_t length);
     void statusHandler(sd_rpc_app_status_t code, const char * error);
-    void processPacket(payload_t &packet);
+    void processPacket(const payload_t &packet);
 
     void sendControlPacket(control_pkt_type type);
 
@@ -124,15 +134,15 @@ private:
     uint32_t outgoingPacketCount;
     uint32_t errorPacketCount;
 
-    void logPacket(bool outgoing, payload_t &packet);
+    void logPacket(const bool outgoing, const payload_t &packet);
     void log(std::string &logLine) const;
     void log(char const *logLine) const;
-    void logStateTransition(h5_state_t from, h5_state_t to) const;
-    static std::string stateToString(h5_state_t state);
-    std::string asHex(payload_t &packet) const;
-    std::string hciPacketLinkControlToString(payload_t  payload) const;
-    std::string h5PktToString(bool out, payload_t  &h5Packet) const;
-    static std::string pktTypeToString(h5_pkt_type_t pktType);
+    void logStateTransition(const h5_state_t from, const h5_state_t to) const;
+    static std::string stateToString(const h5_state_t state);
+    static std::string asHex(const payload_t &packet);
+    static std::string hciPacketLinkControlToString(const payload_t  &payload);
+    std::string h5PktToString(const bool out, const payload_t  &h5Packet) const;
+    static std::string pktTypeToString(const h5_pkt_type_t pktType);
 
     // State machine related
     h5_state_t currentState;
@@ -153,19 +163,9 @@ private:
     bool waitForState(h5_state_t state, std::chrono::milliseconds timeout);
     std::condition_variable stateWaitCondition;
 
-    static std::map<control_pkt_type, payload_t> pkt_pattern;
-    static std::map<h5_state_t, std::string> stateString;
-    static std::map<h5_pkt_type_t, std::string> pktTypeString;
-
-    static const uint8_t SyncFirstByte = 0x01;
-    static const uint8_t SyncSecondByte = 0x7E;
-    static const uint8_t SyncRspFirstByte = 0x02;
-    static const uint8_t SyncRspSecondByte = 0x7D;
-    static const uint8_t SyncConfigFirstByte = 0x03;
-    static const uint8_t SyncConfigSecondByte = 0xFC;
-    static const uint8_t SyncConfigRspFirstByte = 0x04;
-    static const uint8_t SyncConfigRspSecondByte = 0x7B;
-    static const uint8_t SyncConfigField = 0x11;
+    static const std::map<const control_pkt_type, const payload_t> pkt_pattern;
+    static const std::map<const h5_state_t, const std::string> stateString;
+    static const std::map<const h5_pkt_type_t, const std::string> pktTypeString;
 };
 
 #endif //H5_TRANSPORT_H
