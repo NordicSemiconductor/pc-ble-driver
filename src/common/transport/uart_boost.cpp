@@ -160,7 +160,7 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
 
         ioServiceThread = new std::thread([&]() {
             try {
-                auto count = ioService->run();
+                const auto count = ioService->run();
                 std::stringstream message;
                 message << "serial io_context executed " << count << " handlers.";
                 upperLogCallback(SD_RPC_LOG_TRACE, message.str());
@@ -336,7 +336,7 @@ void UartBoost::startRead()
 
 void UartBoost::asyncRead()
 {
-    auto mutableReadBuffer = boost::asio::buffer(readBuffer, BUFFER_SIZE);
+    const auto mutableReadBuffer = boost::asio::buffer(readBuffer, BUFFER_SIZE);
     serialPort->async_read_some(mutableReadBuffer, callbackReadHandle);
 }
 

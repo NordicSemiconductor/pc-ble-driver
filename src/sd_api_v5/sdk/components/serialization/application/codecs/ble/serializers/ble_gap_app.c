@@ -555,7 +555,7 @@ uint32_t ble_gap_rssi_get_rsp_dec(uint8_t const * const p_buf,
                                   uint32_t * const      p_result_code)
 {
     SER_RSP_DEC_BEGIN(SD_BLE_GAP_RSSI_GET);
-    SER_PULL_uint8(p_rssi);
+    SER_PULL_COND(&p_rssi, uint8_t_dec);
     SER_RSP_DEC_END;
 }
 

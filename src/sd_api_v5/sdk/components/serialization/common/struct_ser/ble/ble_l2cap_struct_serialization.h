@@ -46,6 +46,29 @@
 extern "C" {
 #endif
 
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 4
+uint32_t ble_l2cap_header_t_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index);
+
+uint32_t ble_l2cap_header_t_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                void * const          p_void_struct);
+
+uint32_t ble_l2cap_evt_rx_t_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index);
+
+uint32_t ble_l2cap_evt_rx_t_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                uint32_t * const      p_ext_len,
+                                void * const          p_void_struct);
+#endif
+
 #if NRF_SD_BLE_API_VERSION >= 5
 uint32_t ble_l2cap_conn_cfg_t_enc(void const * const p_void_struct,
                                   uint8_t * const    p_buf,
@@ -87,9 +110,7 @@ uint32_t ble_l2cap_ch_tx_params_t_dec(uint8_t const * const p_buf,
                                       uint32_t * const      p_index,
                                       void * const          p_void_struct);
 #endif
-
 #ifdef __cplusplus
 }
 #endif
-
-#endif /*BLE_L2CAP_STRUCT_SERIALIZATION_H*/
+#endif

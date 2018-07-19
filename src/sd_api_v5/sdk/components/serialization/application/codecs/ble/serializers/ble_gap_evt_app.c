@@ -364,4 +364,4 @@ uint32_t ble_gap_evt_data_length_update_dec(uint8_t const * const p_buf,
 
     SER_EVT_DEC_END;
 }
-#endif
+#endif //NRF_SD_BLE_API_VERSION >= 4

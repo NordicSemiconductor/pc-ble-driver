@@ -162,7 +162,11 @@ function sdk_download () {
     fi
 
     echo "> Unzipping SDK..."
-    unzip -q $DL_LOCATION/$SDK_FILE -d $DL_LOCATION/$SDK_NAME
+    # Disable globbing of files/directories we do not want to extract from the ZIP file
+    set -f
+    ZIP_EXCLUDE_LIST="**/*.msi **/external/cifra_AES128-EAX/** **/external/cJSON/** **/external/fatfs/** **/external/fnmatch/** **/external/freertos/** **/external/infineon/** **/external/licenses_external.txt** **/external/lwip/** **/external/mbedtls/** **/external/micro-ecc/** **/external/nano/** **/external/nano-pb/** **/external/nfc_adafruit_library/** **/external/nrf_cc310/** **/external/nrf_cc310_bl/** **/external/nrf_oberon/** **/external/nrf_tls/** **/external/protothreads/** **/external/thedotfactory_fonts/** **/components/802_15_4/** **/components/ant/** **/components/drivers_ext/** **/components/iot/** **/components/nfc/** **/components/proprietary_rf/** **/components/softdevice/s112/** **/components/softdevice/s140/** **/components/softdevice/s212/** **/examples/802_15_4/** **/examples/ant/** **/examples/ble_** **/examples/usb_** **/examples/iot/** **/examples/peripheral/** **/examples/proprietary_rf/** **/examples/dfu/** **/examples/crypto/** **/examples/nfc/** **/examples/dtm/** **/examples/multiprotocol/** **/examples/connectivity/experimental_ant/** **/examples/connectivity/ble_connectivity/**/ser_s*_spi*/** **/examples/connectivity/ble_connectivity/**/ser_s*_uart/** **/examples/connectivity/ble_connectivity/pca10040e/** **/documentation/**"
+    unzip -n -q $DL_LOCATION/$SDK_FILE -d $DL_LOCATION -x $ZIP_EXCLUDE_LIST
+    set +f
 
     err_code=$?
     if [ "$err_code" != "0" ]; then

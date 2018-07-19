@@ -53,11 +53,9 @@ const uint16_t payloadLengthFirstNibbleMask = 0x000F;
 const uint16_t payloadLengthSecondNibbleMask = 0x0FF0;
 const uint8_t payloadLengthOffset = 4;
 
-uint8_t calculate_header_checksum(std::vector<uint8_t> &header)
+uint8_t calculate_header_checksum(const std::vector<uint8_t> &header)
 {
-    uint16_t checksum;
-
-    checksum  = header[0];
+    uint16_t checksum = header[0];
     checksum += header[1];
     checksum += header[2];
     checksum &= 0xFFu;
@@ -66,11 +64,11 @@ uint8_t calculate_header_checksum(std::vector<uint8_t> &header)
     return static_cast<uint8_t>(checksum);
 }
 
-uint16_t calculate_crc16_checksum(std::vector<uint8_t>::iterator start, std::vector<uint8_t>::iterator end)
+uint16_t calculate_crc16_checksum(const std::vector<uint8_t>::const_iterator &start, const std::vector<uint8_t>::const_iterator &end)
 {
     uint16_t crc = 0xFFFF;
 
-    std::for_each(start, end, [&crc](uint8_t data) {
+    std::for_each(start, end, [&crc](const uint8_t data) {
         crc = (crc >> 8) | (crc << 8);
         crc ^= data;
         crc ^= (crc & 0xFF) >> 4;
@@ -82,12 +80,12 @@ uint16_t calculate_crc16_checksum(std::vector<uint8_t>::iterator start, std::vec
 }
 
 void add_h5_header(std::vector<uint8_t> &out_packet,
-                 uint8_t seq_num,
-                 uint8_t ack_num,
-                 bool crc_present,
-                 bool reliable_packet,
-                 uint8_t packet_type,
-                 uint16_t payload_length)
+                   const uint8_t seq_num,
+                   const uint8_t ack_num,
+                   const bool crc_present,
+                   const bool reliable_packet,
+                   const uint8_t packet_type,
+                   const uint16_t payload_length)
 {
     out_packet.push_back(
         (seq_num & seqNumMask)
@@ -105,18 +103,18 @@ void add_h5_header(std::vector<uint8_t> &out_packet,
 
 void add_crc16(std::vector<uint8_t> &out_packet)
 {
-    uint16_t crc16 = calculate_crc16_checksum(out_packet.begin(), out_packet.end());
+    const auto crc16 = calculate_crc16_checksum(out_packet.begin(), out_packet.end());
     out_packet.push_back(crc16 & 0xFF);
     out_packet.push_back((crc16 >> 8) & 0xFF);
 }
 
 void h5_encode(const std::vector<uint8_t> &in_packet,
                std::vector<uint8_t> &out_packet,
-                   uint8_t seq_num,
-                   uint8_t ack_num,
-                   bool crc_present,
-                   bool reliable_packet,
-                   h5_pkt_type_t packet_type)
+               const uint8_t seq_num,
+               const uint8_t ack_num,
+               const bool crc_present,
+               const bool reliable_packet,
+               const h5_pkt_type_t packet_type)
 {
     add_h5_header(
         out_packet,
@@ -136,7 +134,7 @@ void h5_encode(const std::vector<uint8_t> &in_packet,
     }
 }
 
-uint32_t h5_decode(std::vector<uint8_t> &slipPayload,
+uint32_t h5_decode(const std::vector<uint8_t> &slipPayload,
                    std::vector<uint8_t> &h5Payload,
                    uint8_t *seq_num,
                    uint8_t *ack_num,
@@ -146,8 +144,6 @@ uint32_t h5_decode(std::vector<uint8_t> &slipPayload,
                    bool *reliable_packet,
                    h5_pkt_type_t *packet_type)
 {
-    uint16_t payload_length;
-
     if (slipPayload.size() < 4)
     {
         return NRF_ERROR_INVALID_LENGTH;
@@ -155,14 +151,14 @@ uint32_t h5_decode(std::vector<uint8_t> &slipPayload,
 
     *seq_num = slipPayload[0] & seqNumMask;
     *ack_num = (slipPayload[0] >> ackNumPos) & ackNumMask;
-    auto crc_present = static_cast<bool>(((slipPayload[0] >> crcPresentPos) & crcPresentMask) != 0);
+    const auto crc_present = static_cast<bool>(((slipPayload[0] >> crcPresentPos) & crcPresentMask) != 0);
     *reliable_packet = static_cast<bool>(((slipPayload[0] >> reliablePacketPos) & reliablePacketMask) != 0);
     *packet_type = static_cast<h5_pkt_type_t>(slipPayload[1] & packetTypeMask);
-    payload_length = ((slipPayload[1] >> payloadLengthOffset) & payloadLengthFirstNibbleMask) + (static_cast<uint16_t>(slipPayload[2]) << payloadLengthOffset);
-    auto header_checksum = slipPayload[3];
+    const uint16_t payload_length = ((slipPayload[1] >> payloadLengthOffset) & payloadLengthFirstNibbleMask) + (static_cast<uint16_t>(slipPayload[2]) << payloadLengthOffset);
+    const auto header_checksum = slipPayload[3];
 
     // Check if received packet size matches the packet size stated in header
-    auto calculatedPayloadSize = payload_length + H5_HEADER_LENGTH + (crc_present ? 2 : 0);
+    const auto calculatedPayloadSize = payload_length + H5_HEADER_LENGTH + (crc_present ? 2 : 0);
 
     if (slipPayload.size() != calculatedPayloadSize)
     {
@@ -173,7 +169,7 @@ uint32_t h5_decode(std::vector<uint8_t> &slipPayload,
     if (_data_integrity != nullptr) *_data_integrity = crc_present;
     if (_header_checksum != nullptr) *_header_checksum = header_checksum;
 
-    auto calculated_header_checksum = calculate_header_checksum(slipPayload);
+    const auto calculated_header_checksum = calculate_header_checksum(slipPayload);
 
     if (header_checksum != calculated_header_checksum)
     {
@@ -182,8 +178,8 @@ uint32_t h5_decode(std::vector<uint8_t> &slipPayload,
 
     if (crc_present)
     {
-        uint16_t packet_checksum = slipPayload[payload_length + H5_HEADER_LENGTH] + (slipPayload[payload_length + H5_HEADER_LENGTH + 1] << 8);
-        auto calculated_packet_checksum = calculate_crc16_checksum(slipPayload.begin(), slipPayload.begin() + payload_length + H5_HEADER_LENGTH);
+        const uint16_t packet_checksum = slipPayload[payload_length + H5_HEADER_LENGTH] + (slipPayload[payload_length + H5_HEADER_LENGTH + 1] << 8);
+        const auto calculated_packet_checksum = calculate_crc16_checksum(slipPayload.begin(), slipPayload.begin() + payload_length + H5_HEADER_LENGTH);
 
         if (packet_checksum != calculated_packet_checksum)
         {
@@ -193,7 +189,7 @@ uint32_t h5_decode(std::vector<uint8_t> &slipPayload,
 
     if (payload_length > 0)
     {
-        auto payloadIterator = slipPayload.begin() + 4;
+        const auto payloadIterator = slipPayload.begin() + 4;
         h5Payload.insert(h5Payload.begin(), payloadIterator, payloadIterator + payload_length);
     }
 
