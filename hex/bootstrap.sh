@@ -33,6 +33,11 @@ function set_dl_location () {
     DL_LOCATION="$ABS_PATH/$1"
 }
 
+# Legacy SDK's (versions up to and include 13 did not have a root directory)
+function set_legacy_sdk_zipfile_layout () {
+    LEGACY_SDK_ZIPFILE_LAYOUT=1
+}
+
 # Configuration of the patch file name (relative path from this script)
 function set_patch_file () {
     PATCH_FILE="$ABS_PATH/$1"
@@ -41,9 +46,10 @@ function set_patch_file () {
 function usage () {
     echo "Usage: bootstrap -l link -d destination -p patch [-h]"
     echo
-    echo " -l, --link   SDK download link"
-    echo " -d, --dest   Destination folder of the downloaded SDK"
-    echo " -p, --patch  Patch file to apply to the downloaded SDK"
+    echo " -l, --link    SDK download link"
+    echo " -d, --dest    Destination folder of the downloaded SDK"
+    echo " -p, --patch   Patch file to apply to the downloaded SDK"
+    echo " -o, --old-sdk Old SDKs (<14) does not contain a root directory, specify root name here"
     echo
     echo " -h, --help   Show this help message"
 }
@@ -165,7 +171,15 @@ function sdk_download () {
     # Disable globbing of files/directories we do not want to extract from the ZIP file
     set -f
     ZIP_EXCLUDE_LIST="**/*.msi **/external/cifra_AES128-EAX/** **/external/cJSON/** **/external/fatfs/** **/external/fnmatch/** **/external/freertos/** **/external/infineon/** **/external/licenses_external.txt** **/external/lwip/** **/external/mbedtls/** **/external/micro-ecc/** **/external/nano/** **/external/nano-pb/** **/external/nfc_adafruit_library/** **/external/nrf_cc310/** **/external/nrf_cc310_bl/** **/external/nrf_oberon/** **/external/nrf_tls/** **/external/protothreads/** **/external/thedotfactory_fonts/** **/components/802_15_4/** **/components/ant/** **/components/drivers_ext/** **/components/iot/** **/components/nfc/** **/components/proprietary_rf/** **/components/softdevice/s112/** **/components/softdevice/s140/** **/components/softdevice/s212/** **/examples/802_15_4/** **/examples/ant/** **/examples/ble_** **/examples/usb_** **/examples/iot/** **/examples/peripheral/** **/examples/proprietary_rf/** **/examples/dfu/** **/examples/crypto/** **/examples/nfc/** **/examples/dtm/** **/examples/multiprotocol/** **/examples/connectivity/experimental_ant/** **/examples/connectivity/ble_connectivity/**/ser_s*_spi*/** **/examples/connectivity/ble_connectivity/**/ser_s*_uart/** **/examples/connectivity/ble_connectivity/pca10040e/** **/documentation/**"
-    unzip -n -q $DL_LOCATION/$SDK_FILE -d $DL_LOCATION -x $ZIP_EXCLUDE_LIST
+    TARGET_DIR="$DL_LOCATION"
+
+    if [ "$LEGACY_SDK_ZIPFILE_LAYOUT" == "1" ]; then
+        TARGET_DIR="$TARGET_DIR/$SDK_NAME"
+    fi
+    
+    echo "> Extracting to directory ${TARGET_DIR}."
+    unzip -n -q $DL_LOCATION/$SDK_FILE -d $TARGET_DIR -x $ZIP_EXCLUDE_LIST
+
     set +f
 
     err_code=$?
@@ -215,6 +229,8 @@ function main() {
                            ;;
             -p | --patch ) shift
                            set_patch_file $1
+                           ;;
+            -o | --old-sdk ) set_legacy_sdk_zipfile_layout
                            ;;
             -h | --help )  usage
                            exit
