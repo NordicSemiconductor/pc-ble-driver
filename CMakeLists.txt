@@ -138,3 +138,7 @@ endforeach(SD_API_VER)
 
 # Add tests
 add_subdirectory(test)
+
+
+include (cmake/clang-dev-tools.cmake)
+
