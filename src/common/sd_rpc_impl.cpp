@@ -56,26 +56,26 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
         return NRF_ERROR_NULL;
     }
 
-    std::list<SerialPortDesc> descs = EnumSerialPorts();
+    const std::list<SerialPortDesc>& descs = EnumSerialPorts();
 
     if(descs.size() > *size)
     {
         return NRF_ERROR_DATA_SIZE;
     }
 
-	  *size = static_cast<uint32_t>(descs.size());
+	*size = static_cast<uint32_t>(descs.size());
 
     int i = 0;
     for(auto & desc : descs)
     {
-			strncpy(serial_port_descs[i].port, desc.comName.c_str(), SD_RPC_MAXPATHLEN);
-			strncpy(serial_port_descs[i].manufacturer, desc.manufacturer.c_str(), SD_RPC_MAXPATHLEN);
-			strncpy(serial_port_descs[i].serialNumber, desc.serialNumber.c_str(), SD_RPC_MAXPATHLEN);
-			strncpy(serial_port_descs[i].pnpId, desc.pnpId.c_str(), SD_RPC_MAXPATHLEN);
-			strncpy(serial_port_descs[i].locationId, desc.locationId.c_str(), SD_RPC_MAXPATHLEN);
-			strncpy(serial_port_descs[i].vendorId, desc.vendorId.c_str(), SD_RPC_MAXPATHLEN);
-			strncpy(serial_port_descs[i].productId, desc.productId.c_str(), SD_RPC_MAXPATHLEN);
-      ++i;
+        strncpy(serial_port_descs[i].port, desc.comName.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].manufacturer, desc.manufacturer.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].serialNumber, desc.serialNumber.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].pnpId, desc.pnpId.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].locationId, desc.locationId.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].vendorId, desc.vendorId.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].productId, desc.productId.c_str(), SD_RPC_MAXPATHLEN);
+        ++i;
     }
 
     return NRF_SUCCESS;
