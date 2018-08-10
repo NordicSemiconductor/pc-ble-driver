@@ -71,7 +71,7 @@ public:
         );
     }
 
-    void statusCallback(sd_rpc_app_status_t code, const char *message) const
+    void statusCallback(sd_rpc_app_status_t code, const std::string& message) const
     {
         NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
     }
@@ -82,7 +82,7 @@ public:
         NRF_LOG("[" << name << "][data]<- " << testutil::asHex(incoming) << " length: " << length);
     }
 
-    void logCallback(sd_rpc_log_severity_t severity, std::string message) const
+    void logCallback(sd_rpc_log_severity_t severity, const std::string& message) const
     {
         NRF_LOG("[" << name << "][log] severity: " << severity << " message: " << message);
     }

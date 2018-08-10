@@ -39,13 +39,13 @@
 
 #include <functional>
 #include "adapter.h"
-#include <stdint.h>
+#include <cstdint>
 #include "app_ble_gap_sec_keys.h"
 
 typedef std::function<uint32_t(uint8_t*, uint32_t*)> encode_function_t;
 typedef std::function<uint32_t(uint8_t*, uint32_t, uint32_t*)> decode_function_t;
 
-uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, decode_function_t decode_function);
+uint32_t encode_decode(adapter_t *adapter, const encode_function_t& encode_function, const decode_function_t& decode_function);
 
 /*
  * We do not want to change the codecs provided by the SDK too much. The BLESecurityContext provides a way to set the root
@@ -67,7 +67,11 @@ public:
     {
         app_ble_gap_sec_context_root_release();
     }
+
+    BLESecurityContext(const BLESecurityContext &) = delete;
+    BLESecurityContext& operator=(const BLESecurityContext &) = delete;
+    BLESecurityContext(BLESecurityContext &&) = delete;
+    BLESecurityContext& operator=(BLESecurityContext &&) = delete;
 };
 
 #endif
-

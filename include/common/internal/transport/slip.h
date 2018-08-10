@@ -38,7 +38,7 @@
 #ifndef SLIP_H
 #define SLIP_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 void slip_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet);

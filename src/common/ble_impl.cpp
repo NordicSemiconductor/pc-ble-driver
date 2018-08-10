@@ -41,7 +41,7 @@
 #include "ble.h"
 #include "ble_app.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 uint32_t sd_ble_uuid_encode(adapter_t* adapter, ble_uuid_t const * const p_uuid,
     uint8_t * const          p_uuid_le_len,
@@ -197,7 +197,7 @@ uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_t const *p_
 }
 
 #if NRF_SD_BLE_API_VERSION >= 5
-uint32_t sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const * p_cfg, uint32_t app_ram_base)
+uint32_t sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const * p_cfg, uint32_t /* app_ram_base */)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_cfg_set_req_enc(
@@ -221,7 +221,7 @@ uint32_t sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const * p
 uint32_t sd_ble_enable(
     adapter_t *adapter,
 #if NRF_SD_BLE_API_VERSION < 4
-    ble_enable_params_t * p_params,
+    ble_enable_params_t * p_ble_enable_params,
 #endif
     uint32_t *p_app_ram_base)
 {
@@ -230,7 +230,7 @@ uint32_t sd_ble_enable(
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_enable_req_enc(
 #if NRF_SD_BLE_API_VERSION < 4
-            p_params,
+            p_ble_enable_params,
 #endif
             buffer,
             length);

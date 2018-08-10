@@ -35,7 +35,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
+#include <cstdint>
 
 // C++ code
 #include "adapter.h"
@@ -181,17 +181,17 @@ uint32_t sd_ble_gatts_sys_attr_set(adapter_t *adapter, uint16_t conn_handle, uin
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uint8_t *p_sys_attr_data, uint16_t *p_len, uint32_t flags)
+uint32_t sd_ble_gatts_sys_attr_get(adapter_t *adapter, uint16_t conn_handle, uint8_t *p_sys_attr_data, uint16_t *p_sys_attr_data_len, uint32_t flags)
 {
     encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gatts_sys_attr_get_req_enc(conn_handle, p_sys_attr_data, p_len, flags, buffer, length);
+        return ble_gatts_sys_attr_get_req_enc(conn_handle, p_sys_attr_data, p_sys_attr_data_len, flags, buffer, length);
     };
 
     decode_function_t decode_function = [&] (uint8_t *buffer, uint32_t length, uint32_t *result) -> uint32_t {
 #if NRF_SD_BLE_API_VERSION == 2
-        return ble_gatts_sys_attr_get_rsp_dec(buffer, length, p_sys_attr_data, p_len, result);
+        return ble_gatts_sys_attr_get_rsp_dec(buffer, length, p_sys_attr_data, p_sys_attr_data_len, result);
 #else
-        return ble_gatts_sys_attr_get_rsp_dec(buffer, length, &p_sys_attr_data, &p_len, result);
+        return ble_gatts_sys_attr_get_rsp_dec(buffer, length, &p_sys_attr_data, &p_sys_attr_data_len, result);
 #endif
     };
 
@@ -222,7 +222,7 @@ uint32_t sd_ble_gatts_attr_get(adapter_t *adapter, uint16_t handle, ble_uuid_t *
     };
 
     return encode_decode(adapter, encode_function, decode_function);
-}     
+}
 
 #if NRF_SD_BLE_API_VERSION >= 3
 uint32_t sd_ble_gatts_exchange_mtu_reply(adapter_t *adapter, uint16_t conn_handle, uint16_t server_rx_mtu)

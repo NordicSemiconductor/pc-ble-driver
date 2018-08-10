@@ -49,7 +49,7 @@
 //TODO: Find a way to support multiple adapters
 #include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
 
-#include <stdint.h>
+#include <cstdint>
 
 uint32_t sd_ble_gap_adv_start(
     adapter_t *adapter,
@@ -80,12 +80,12 @@ uint32_t sd_ble_gap_adv_start(
 }
 
 
-uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t * const p_dev_name, uint16_t * const p_len)
+uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t * const p_dev_name, uint16_t * const p_dev_name_len)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_device_name_get_req_enc(
             p_dev_name,
-            p_len,
+            p_dev_name_len,
             buffer,
             length);
     };
@@ -95,7 +95,7 @@ uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t * const p_dev_na
             buffer,
             length,
             p_dev_name,
-            p_len,
+            p_dev_name_len,
             result);
     };
 
@@ -181,13 +181,13 @@ uint32_t sd_ble_gap_ppcp_set(adapter_t *adapter, ble_gap_conn_params_t const * c
 }
 
 
-uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const * const p_data,
+uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const * const p_adv_data,
     uint8_t               dlen,
     uint8_t const * const p_sr_data,
     uint8_t               srdlen)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gap_adv_data_set_req_enc(p_data,
+        return ble_gap_adv_data_set_req_enc(p_adv_data,
             dlen,
             p_sr_data,
             srdlen,
@@ -295,7 +295,7 @@ uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t * const p_add
         return ble_gap_address_get_rsp_dec(
             buffer,
             length,
-            (ble_gap_addr_t *)p_addr,
+            p_addr,
             result);
     };
 
@@ -337,7 +337,7 @@ uint32_t sd_ble_gap_addr_get(adapter_t *adapter, ble_gap_addr_t * const p_addr)
         return ble_gap_addr_get_rsp_dec(
             buffer,
             length,
-            (ble_gap_addr_t *)p_addr,
+            p_addr,
             result);
     };
 
@@ -466,13 +466,13 @@ uint32_t sd_ble_gap_adv_stop(adapter_t *adapter)
 
 uint32_t sd_ble_gap_auth_key_reply(adapter_t *adapter, uint16_t conn_handle,
     uint8_t               key_type,
-    uint8_t const * const key)
+    uint8_t const * const p_key)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_auth_key_reply_req_enc(
             conn_handle,
             key_type,
-            key,
+            p_key,
             buffer,
             length);
     };
@@ -521,7 +521,7 @@ uint32_t sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle, ble_g
         return ble_gap_conn_sec_get_rsp_dec(
             buffer,
             length,
-            (ble_gap_conn_sec_t * * const)&p_conn_sec,
+            const_cast<ble_gap_conn_sec_t**>(&p_conn_sec),
             result);
     };
 
@@ -606,7 +606,7 @@ uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
 }
 
 uint32_t sd_ble_gap_connect(adapter_t *adapter,
-    ble_gap_addr_t const * const        p_addr,
+    ble_gap_addr_t const * const        p_peer_addr,
     ble_gap_scan_params_t const * const p_scan_params,
     ble_gap_conn_params_t const * const p_conn_params
 #if NRF_SD_BLE_API_VERSION >= 4
@@ -616,7 +616,7 @@ uint32_t sd_ble_gap_connect(adapter_t *adapter,
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_connect_req_enc(
-            p_addr,
+            p_peer_addr,
             p_scan_params,
             p_conn_params,
 #if NRF_SD_BLE_API_VERSION >= 4
@@ -715,7 +715,7 @@ uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t  conn_handle,
         return ble_gap_rssi_get_rsp_dec(
             buffer,
             length,
-            (int8_t *)p_rssi,
+            p_rssi,
             result);
     };
 
@@ -770,7 +770,7 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
         return err_code;
     }
 
-    if (p_sec_keyset)
+    if (p_sec_keyset != nullptr)
     {
 #if NRF_SD_BLE_API_VERSION < 4
         std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));

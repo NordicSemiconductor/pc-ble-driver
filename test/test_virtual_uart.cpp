@@ -46,12 +46,12 @@ TEST_CASE("virtual_uart")
         const std::string uartAName = "uartA";
 
         uartA->open(
-            [&uartAName](sd_rpc_app_status_t code, const char *message) -> void
+            [&uartAName](sd_rpc_app_status_t code, const std::string& message) -> void
             {
                 NRF_LOG("[" << uartAName << "][status] code: " << code << " message: " << message);
             },
             dataCallback(uartAName, payloadFromB),
-            [&uartAName](sd_rpc_log_severity_t severity, std::string message) -> void
+            [&uartAName](sd_rpc_log_severity_t severity, const std::string& message) -> void
             {
                 NRF_LOG("[" << uartAName << "][log] severity: " << severity << " message: " << message);
             }
@@ -60,12 +60,12 @@ TEST_CASE("virtual_uart")
         const std::string uartBName = "uartB";
 
         uartB->open(
-            [&uartBName](sd_rpc_app_status_t code, const char *message) -> void
+            [&uartBName](sd_rpc_app_status_t code, const std::string& message) -> void
             {
                 NRF_LOG("[" << uartBName << "][status] code: " << code << " message: " << message);
             },
             dataCallback(uartBName, payloadFromA),
-            [&uartBName](sd_rpc_log_severity_t severity, std::string message) -> void
+            [&uartBName](sd_rpc_log_severity_t severity, const std::string& message) -> void
             {
                 NRF_LOG("[" << uartBName << "][log] severity: " << severity << " message: " << message);
             }

@@ -59,11 +59,8 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     responseTimeout = response_timeout;
 }
 
-SerializationTransport::~SerializationTransport()
-{
-}
 
-uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback)
+uint32_t SerializationTransport::open(const status_cb_t& status_callback, const evt_cb_t& event_callback, const log_cb_t& log_callback)
 {
     statusCallback = status_callback;
     eventCallback = event_callback;
@@ -187,7 +184,7 @@ void SerializationTransport::eventHandlingRunner()
             {
                 std::stringstream logMessage;
                 logMessage << "Failed to decode event, error code is " << errCode << "." << std::endl;
-                logCallback(SD_RPC_LOG_ERROR, logMessage.str().c_str());
+                logCallback(SD_RPC_LOG_ERROR, logMessage.str());
             }
 
             free(eventData.data);
@@ -205,7 +202,7 @@ void SerializationTransport::readHandler(uint8_t *data, size_t length)
 
     if (eventType == SERIALIZATION_RESPONSE) {
         memcpy(responseBuffer, data, length);
-        *responseLength = (uint32_t) length;
+        *responseLength = static_cast<uint32_t>(length);
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
         rspReceived = true;
@@ -213,10 +210,10 @@ void SerializationTransport::readHandler(uint8_t *data, size_t length)
     }
     else if (eventType == SERIALIZATION_EVENT)
     {
-        eventData_t eventData;
+        eventData_t eventData = {};
         eventData.data = static_cast<uint8_t *>(malloc(length));
         memcpy(eventData.data, data, length);
-        eventData.dataLength = (uint32_t) length;
+        eventData.dataLength = static_cast<uint32_t>(length);
 
         std::lock_guard<std::mutex> eventLock(eventMutex);
         eventQueue.push(eventData);

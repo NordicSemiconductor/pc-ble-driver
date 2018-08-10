@@ -45,33 +45,26 @@
 
 #include "serial_port_enum.h"
 
-using namespace std;
-
-typedef struct serial_device_t {
-    char port[MAXPATHLEN];
-    char locationId[MAXPATHLEN];
-    char vendorId[MAXPATHLEN];
-    char productId[MAXPATHLEN];
-    char manufacturer[MAXPATHLEN];
-    char serialNumber[MAXPATHLEN];
-} serial_device_t;
-
 const char* SEGGER_VENDOR_ID = "1366";
 const char* NXP_VENDOR_ID = "0d28";
 
-typedef vector<serial_device_t*> adapter_list_t;
+std::string to_str(const char* s)
+{
+    // NOLINTNEXTLINE(modernize-use-nullptr)
+    return (s != NULL) ? std::string(s) : std::string();
+}
 
-static adapter_list_t* GetAdapters()
+std::list<SerialPortDesc> EnumSerialPorts()
 {
     // Setup return value
-    adapter_list_t* devices = new adapter_list_t();
+    std::list<SerialPortDesc> devices;
 
     // Setup udev related variables
     struct udev *udev_ctx = udev_new();
-    assert(udev_ctx != NULL);
+    assert(udev_ctx != NULL); // NOLINT(modernize-use-nullptr)
 
     struct udev_enumerate *udev_enum = udev_enumerate_new(udev_ctx);
-    assert(udev_enum != NULL);
+    assert(udev_enum != NULL); // NOLINT(modernize-use-nullptr)
 
     udev_enumerate_add_match_subsystem(udev_enum, "tty");
     udev_enumerate_scan_devices(udev_enum);
@@ -93,22 +86,28 @@ static adapter_list_t* GetAdapters()
             "usb_device"
         );
 
-        const char *idVendor = udev_device_get_sysattr_value(udev_usb_dev, "idVendor");
+        std::string idVendor = to_str(udev_device_get_sysattr_value(udev_usb_dev, "idVendor"));
+        std::string manufacturer = to_str(udev_device_get_sysattr_value(udev_usb_dev,"manufacturer"));
 
-        // Only add SEGGER and ARM (even though VENDOR_ID is NXPs...) devices to list
-        if(idVendor != NULL && ((strcmp(idVendor, SEGGER_VENDOR_ID) == 0) || (strcmp(idVendor, NXP_VENDOR_ID) == 0)))
+        if(
+          ((idVendor == SEGGER_VENDOR_ID) || (idVendor == NXP_VENDOR_ID))
+          && ((manufacturer == "SEGGER")
+              || (strncasecmp(manufacturer.c_str(), "arm", 3) == 0)
+              || (strncasecmp(manufacturer.c_str(), "mbed", 4) == 0))
+          )
         {
-            serial_device_t *serial_device = (serial_device_t*)malloc(sizeof(serial_device_t));
-            memset(serial_device, 0, sizeof(serial_device_t));
+            std::string serialNumber = to_str(udev_device_get_sysattr_value(udev_usb_dev, "serial"));
+            std::string idProduct = to_str(udev_device_get_sysattr_value(udev_usb_dev, "idProduct"));
 
-            strcpy(serial_device->vendorId, idVendor);
-            strcpy(serial_device->port, devname);
-            strcpy(serial_device->locationId, path);
-            strcpy(serial_device->productId, udev_device_get_sysattr_value(udev_usb_dev, "idProduct"));
-            strcpy(serial_device->manufacturer, udev_device_get_sysattr_value(udev_usb_dev,"manufacturer"));
-            strcpy(serial_device->serialNumber, udev_device_get_sysattr_value(udev_usb_dev, "serial"));
-
-            devices->push_back(serial_device);
+            devices.push_back(SerialPortDesc {
+              devname,
+              manufacturer,
+              serialNumber,
+              "",
+              path,
+              idVendor,
+              idProduct
+            });
         }
 
         udev_device_unref(udev_tty_dev);
@@ -118,50 +117,4 @@ static adapter_list_t* GetAdapters()
     udev_unref(udev_ctx);
 
     return devices;
-}
-uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
-{
-
-    adapter_list_t* devices = GetAdapters();
-
-    for(auto device : *devices)
-    {
-        if((strcmp(device->manufacturer,"SEGGER") == 0)
-            || (strcasecmp(device->manufacturer, "arm") == 0)
-            || (strcasecmp(device->manufacturer, "mbed") == 0))
-        {
-            SerialPortDesc* resultItem = new SerialPortDesc();
-
-            resultItem->comName = device->port;
-
-            if (device->locationId != NULL) {
-                resultItem->locationId = device->locationId;
-            }
-
-            if (device->vendorId != NULL) {
-                resultItem->vendorId = device->vendorId;
-            }
-
-            if (device->productId != NULL) {
-                resultItem->productId = device->productId;
-            }
-
-            if (device->manufacturer != NULL) {
-                resultItem->manufacturer = device->manufacturer;
-            }
-
-            if (device->serialNumber != NULL) {
-                resultItem->serialNumber = device->serialNumber;
-            }
-
-            descs.push_back(resultItem);
-        }
-
-        free(device);
-    }
-
-    devices->clear();
-    delete devices;
-    
-    return 0;
 }

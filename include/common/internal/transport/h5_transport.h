@@ -45,7 +45,7 @@
 
 #include <vector>
 
-#include <stdint.h>
+#include <cstdint>
 #include <map>
 #include <thread>
 #include "h5.h"
@@ -80,25 +80,30 @@ using payload_t = std::vector<uint8_t>;
 class H5Transport : public Transport {
 public:
     H5Transport() = delete;
+    H5Transport(const H5Transport &) = delete;
+    H5Transport& operator=(const H5Transport &) = delete;
+    H5Transport(H5Transport &&) = delete;
+    H5Transport& operator=(H5Transport &&) = delete;
+
     H5Transport(Transport *nextTransportLayer, uint32_t retransmission_interval);
-    ~H5Transport();
-    
-    uint32_t open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback) override;
+    ~H5Transport() override;
+
+    uint32_t open(const status_cb_t& status_callback, const data_cb_t& data_callback, const log_cb_t& log_callback) override;
     uint32_t close() override;
     uint32_t send(const std::vector<uint8_t> &data) override;
 
     h5_state_t state() const;
 
-    static bool isSyncPacket(const payload_t &packet, const uint8_t offset = 0);
-    static bool isSyncResponsePacket(const payload_t &packet, const uint8_t offset = 0);
-    static bool isSyncConfigPacket(const payload_t &packet, const uint8_t offset = 0);
-    static bool isSyncConfigResponsePacket(const payload_t &packet, const uint8_t offset = 0);
-    static bool isResetPacket(const payload_t &packet, const uint8_t offset = 0);
-    static bool checkPattern(const payload_t  &packet, const uint8_t offset, const payload_t &pattern);
+    static bool isSyncPacket(const payload_t &packet, uint8_t offset = 0);
+    static bool isSyncResponsePacket(const payload_t &packet, uint8_t offset = 0);
+    static bool isSyncConfigPacket(const payload_t &packet, uint8_t offset = 0);
+    static bool isSyncConfigResponsePacket(const payload_t &packet, uint8_t offset = 0);
+    static bool isResetPacket(const payload_t &packet, uint8_t offset = 0);
+    static bool checkPattern(const payload_t  &packet, uint8_t offset, const payload_t &pattern);
 
 private:
     void dataHandler(uint8_t *data, size_t length);
-    void statusHandler(sd_rpc_app_status_t code, const char * error);
+    void statusHandler(sd_rpc_app_status_t code, const std::string& error);
     void processPacket(const payload_t &packet);
 
     void sendControlPacket(control_pkt_type type);
@@ -135,7 +140,7 @@ private:
     uint32_t errorPacketCount;
 
     void logPacket(const bool outgoing, const payload_t &packet);
-    void log(std::string &logLine) const;
+    void log(const std::string &logLine) const;
     void log(char const *logLine) const;
     void logStateTransition(const h5_state_t from, const h5_state_t to) const;
     static std::string stateToString(const h5_state_t state);

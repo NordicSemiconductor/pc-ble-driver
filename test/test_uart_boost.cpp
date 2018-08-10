@@ -131,7 +131,7 @@ TEST_CASE("open_close")
     std::generate(sendOnB.begin(), sendOnB.end(), std::rand);
     std::generate(sendOnA.begin(), sendOnA.end(), std::rand);
 
-    auto status_callback = [&error](sd_rpc_app_status_t code, const char *message) -> void
+    auto status_callback = [&error](sd_rpc_app_status_t code, const std::string& message) -> void
     {
         NRF_LOG("code: " << code << " message: " << message);
         if (code != NRF_SUCCESS)
@@ -141,7 +141,7 @@ TEST_CASE("open_close")
         }
     };
 
-    auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity, std::string message) -> void
+    auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity, const std::string& message) -> void
     {
         NRF_LOG("severity: " << severity << " message: " << message);
 

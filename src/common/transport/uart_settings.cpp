@@ -57,11 +57,8 @@ UartSettings::UartSettings(const UartCommunicationParameters &communicationParam
 {
 }
 
-UartSettings::~UartSettings()
-{
-}
 
-void UartSettings::setPortName(const std::string value)
+void UartSettings::setPortName(const std::string& value)
 {
     portName = value;
 }

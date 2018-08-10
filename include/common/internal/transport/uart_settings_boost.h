@@ -50,7 +50,7 @@ class UartSettingsBoost : public UartSettings
 public:
 
     /*@brief Default contructor. */
-    UartSettingsBoost();
+    UartSettingsBoost() = default;
 
     /*@brief Constructor that initializes with communication parameters. */
     UartSettingsBoost(const UartCommunicationParameters &communicationParameters);

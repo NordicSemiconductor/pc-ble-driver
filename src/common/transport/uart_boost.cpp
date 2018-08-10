@@ -48,14 +48,7 @@
 #include <mutex>
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
-    : Transport(),
-      readBuffer(),
-      writeBufferVector(),
-      writeQueue(),
-      queueMutex(),
-      callbackReadHandle(),
-      callbackWriteHandle(),
-      uartSettingsBoost(communicationParameters),
+    : uartSettingsBoost(communicationParameters),
       asyncWriteInProgress(false),
       ioServiceThread(nullptr)
 {
@@ -101,7 +94,7 @@ UartBoost::~UartBoost()
     }
 }
 
-uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
+uint32_t UartBoost::open(const status_cb_t& status_callback, const data_cb_t& data_callback, const log_cb_t& log_callback)
 {
     Transport::open(status_callback, data_callback, log_callback);
 
@@ -111,7 +104,7 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
     {
         serialPort->open(portName);
 
-        // Wait a bit before making the device available since there are problems 
+        // Wait a bit before making the device available since there are problems
         // if data is sent right after open.
         //
         // Not sure if this is an OS issue or if it is an issue with the device USB stack.
@@ -136,7 +129,7 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
     {
         std::stringstream message;
         message << "Error setting up serial port " << uartSettingsBoost.getPortName() << ". " << ex.what();
-        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str());
         return NRF_ERROR_INTERNAL;
     }
 
@@ -177,7 +170,7 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
     {
         std::stringstream message;
         message << "Error starting serial port work thread. " << ex.what() << " on serial port " << uartSettingsBoost.getPortName() << ".";
-        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str());
         return NRF_ERROR_INTERNAL;
     }
 
@@ -296,12 +289,12 @@ void UartBoost::readHandler(const boost::system::error_code& errorCode, const si
         std::stringstream message;
         message << "serial port read failed on port " << uartSettingsBoost.getPortName() << ". ";
         message << "Error: " << errorCode.message() << " [" << errorCode.value() << "]";
-        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
+        upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str());
         // TODO: handle this case in upper layers
     }
 }
 
-void UartBoost::writeHandler (const boost::system::error_code& errorCode, const size_t bytesTransferred)
+void UartBoost::writeHandler (const boost::system::error_code& errorCode, const size_t /* bytesTransferred */)
 {
     if (errorCode == boost::system::errc::success)
     {

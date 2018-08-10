@@ -38,7 +38,7 @@
 #ifndef UART_SETTINGS_H
 #define UART_SETTINGS_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 /*@brief Flow control modes. */
@@ -100,10 +100,10 @@ public:
     UartSettings(const UartCommunicationParameters &communicationParameters);
 
     /*@brief Destructor. */
-    virtual ~UartSettings();
+    virtual ~UartSettings() = default;
 
     /*@brief Sets the name of the serial port. */
-    void setPortName(const std::string value);
+    void setPortName(const std::string& value);
 
     /*@brief Sets the baud rate. */
     void setBaudRate(const uint32_t value);

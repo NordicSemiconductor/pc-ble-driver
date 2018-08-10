@@ -43,7 +43,7 @@ public:
         stopAtPktType = stopAtPktType_;
     }
 
-    uint32_t open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback) override
+    uint32_t open(const status_cb_t& status_callback, const data_cb_t& data_callback, const log_cb_t& log_callback) override
     {
         Transport::open(status_callback, data_callback, log_callback);
 

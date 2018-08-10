@@ -47,7 +47,7 @@
 #include <condition_variable>
 
 #include <queue>
-#include <stdint.h>
+#include <cstdint>
 
 typedef uint32_t(*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
 typedef std::function<void(ble_evt_t * p_ble_evt)> evt_cb_t;
@@ -67,11 +67,15 @@ typedef enum
 
 class SerializationTransport {
 public:
-    SerializationTransport() = delete;
-    SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
-    ~SerializationTransport();
-    
-    uint32_t open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback);
+    SerializationTransport(const SerializationTransport &) = delete;
+    SerializationTransport& operator=(const SerializationTransport &) = delete;
+    SerializationTransport(SerializationTransport &&) = delete;
+    SerializationTransport& operator=(SerializationTransport &&) = delete;
+
+    explicit SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
+    ~SerializationTransport() = default;
+
+    uint32_t open(const status_cb_t& status_callback, const evt_cb_t& event_callback, const log_cb_t& log_callback);
     uint32_t close();
     uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength);
 
@@ -82,7 +86,7 @@ private:
     status_cb_t statusCallback;
     evt_cb_t eventCallback;
     log_cb_t logCallback;
-    
+
     data_cb_t dataCallback;
 
     std::shared_ptr<Transport> nextTransportLayer;

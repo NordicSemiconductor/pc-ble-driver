@@ -44,12 +44,15 @@
 #include "nrf_error.h"
 #include "ser_config.h"
 
-uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, decode_function_t decode_function)
+uint32_t encode_decode(adapter_t *adapter, const encode_function_t& encode_function, const decode_function_t& decode_function)
 {
     uint32_t tx_buffer_length = SER_HAL_TRANSPORT_MAX_PKT_SIZE;
     uint32_t rx_buffer_length = 0;
 
+    // warning: do not manage memory manually; consider a container or a smart pointer
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,hicpp-no-malloc)
     std::unique_ptr<uint8_t> tx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,hicpp-no-malloc)
     std::unique_ptr<uint8_t> rx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
 
     std::stringstream error_message;
@@ -58,10 +61,10 @@ uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, de
 
     uint32_t err_code = encode_function(tx_buffer.get(), &tx_buffer_length);
 
-    if (_adapter->isInternalError(err_code))
+    if (AdapterInternal::isInternalError(err_code))
     {
         error_message << "Not able to encode packet. Code #" << err_code;
-        _adapter->statusHandler(PKT_ENCODE_ERROR, error_message.str().c_str());
+        _adapter->statusHandler(PKT_ENCODE_ERROR, error_message.str());
         return NRF_ERROR_INTERNAL;
     }
 
@@ -82,10 +85,10 @@ uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, de
             &rx_buffer_length);
     }
 
-    if (_adapter->isInternalError(err_code))
+    if (AdapterInternal::isInternalError(err_code))
     {
         error_message << "Error sending packet to target. Code #" << err_code;
-        _adapter->statusHandler(PKT_SEND_ERROR, error_message.str().c_str());
+        _adapter->statusHandler(PKT_SEND_ERROR, error_message.str());
         return NRF_ERROR_INTERNAL;
     }
 
@@ -96,10 +99,10 @@ uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, de
         err_code = decode_function(rx_buffer.get(), rx_buffer_length, &result_code);
     }
 
-    if (_adapter->isInternalError(err_code))
+    if (AdapterInternal::isInternalError(err_code))
     {
         error_message << "Not able to decode packet. Code #" << err_code;
-        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str().c_str());
+        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str());
         return NRF_ERROR_INTERNAL;
     }
 

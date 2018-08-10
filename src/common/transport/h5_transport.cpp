@@ -59,7 +59,7 @@
 #include "h5.h"
 #include "slip.h"
 
-#include <stdint.h>
+#include <cstdint>
 #include <chrono>
 #include <iostream>
 #include <algorithm>
@@ -79,16 +79,15 @@ const auto OPEN_WAIT_TIMEOUT = std::chrono::milliseconds(2000);   // Duration to
 const auto RESET_WAIT_DURATION = std::chrono::milliseconds(300);  // Duration to wait before continuing UART communication after reset is sent to target
 
 #pragma region Public methods
-H5Transport::H5Transport(Transport *_nextTransportLayer, uint32_t retransmission_interval)
-    : Transport(),
+H5Transport::H5Transport(Transport *nextTransportLayer, uint32_t retransmission_interval)
+    : nextTransportLayer(nextTransportLayer),
     seqNum(0), ackNum(0), c0Found(false),
-    unprocessedData(), incomingPacketCount(0), outgoingPacketCount(0),
+    retransmissionInterval(std::chrono::milliseconds(retransmission_interval)),
+    incomingPacketCount(0), outgoingPacketCount(0),
     errorPacketCount(0),
     currentState(STATE_START),
     stateMachineReady(false)
 {
-    this->nextTransportLayer = _nextTransportLayer;
-    retransmissionInterval = std::chrono::milliseconds(retransmission_interval);
     setupStateMachine();
 }
 
@@ -133,7 +132,7 @@ const std::map<const h5_pkt_type_t, const std::string> H5Transport::pktTypeStrin
 
 #pragma endregion
 
-uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
+uint32_t H5Transport::open(const status_cb_t& status_callback, const data_cb_t& data_callback, const log_cb_t& log_callback)
 {
     auto errorCode = Transport::open(status_callback, data_callback, log_callback);
 
@@ -268,7 +267,7 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data)
 
     std::unique_lock<std::mutex> ackGuard(ackMutex);
 
-    while (remainingRetransmissions--)
+    while (remainingRetransmissions-- != 0u)
     {
         logPacket(true, h5EncodedPacket);
         nextTransportLayer->send(lastPacket);
@@ -414,7 +413,7 @@ void H5Transport::processPacket(const payload_t &packet)
     }
     else if (packet_type == ACK_PACKET)
     {
-        if (ack_num == ((seqNum + 1) & 0x07))
+        if (ack_num == ((seqNum + 1) & 0x07u))
         {
             // Received a packet with valid ack_num, inform threads that wait the command is received on the other end
             std::lock_guard<std::mutex> ackGuard(ackMutex);
@@ -435,7 +434,7 @@ void H5Transport::processPacket(const payload_t &packet)
     stateMachineChange.notify_all();
 }
 
-void H5Transport::statusHandler(sd_rpc_app_status_t code, const char * error)
+void H5Transport::statusHandler(sd_rpc_app_status_t code, const std::string& error)
 {
     if (code == IO_RESOURCES_UNAVAILABLE)
     {
@@ -513,14 +512,14 @@ void H5Transport::dataHandler(uint8_t *data, size_t length)
 
 void H5Transport::incrementSeqNum()
 {
-    seqNum++;
-    seqNum = seqNum & 0x07;
+    ++seqNum;
+    seqNum = seqNum & 0x07u;
 }
 
 void H5Transport::incrementAckNum()
 {
-    ackNum++;
-    ackNum = ackNum & 0x07;
+    ++ackNum;
+    ackNum = ackNum & 0x07u;
 }
 
 #pragma endregion Processing of incoming packets from UART
@@ -632,7 +631,7 @@ void H5Transport::setupStateMachine()
         {
             std::stringstream status;
             status << "No response from device. Tried to send packet " << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
-            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str());
             return STATE_NO_RESPONSE;
         }
 
@@ -680,7 +679,7 @@ void H5Transport::setupStateMachine()
         {
             std::stringstream status;
             status << "No response from device. Tried to send packet " << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
-            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str());
             return STATE_NO_RESPONSE;
         }
 
@@ -696,7 +695,7 @@ void H5Transport::setupStateMachine()
         ackNum = 0;
 
         statusHandler(CONNECTION_ACTIVE, "Connection active");
-        stateMachineChange.wait(stateMachineLock, [this, &exit] {
+        stateMachineChange.wait(stateMachineLock, [&exit] {
             return exit->isFullfilled();
         });
 
@@ -860,7 +859,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type)
 
     try
     {
-        const auto payload = pkt_pattern.at(type);
+        const auto & payload = pkt_pattern.at(type);
 
         h5_encode(payload,
             h5Packet,
@@ -869,7 +868,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type)
             false,
             false,
             h5_packet);
-    } 
+    }
     catch(const std::out_of_range &e)
     {
         std::stringstream logLine;
@@ -945,10 +944,10 @@ std::string H5Transport::hciPacketLinkControlToString(const payload_t &payload)
     const auto configToString = [](uint8_t config)
     {
         std::stringstream info;
-        info << " sliding-window-size:" << (config & 0x07);
-        info << " out-of-frame:" << ((config & 0x08) ? "1" : "0");
-        info << " data-integrity-check-type:" << ((config & 0x0f) ? "1" : "0");
-        info << " version-number:" << ((config & 0x0e) >> 5) << " ";
+        info << " sliding-window-size:" << (config & 0x07u);
+        info << " out-of-frame:" << ((config & 0x08u) != 0u ? "1" : "0");
+        info << " data-integrity-check-type:" << ((config & 0x0fu) != 0u ? "1" : "0");
+        info << " version-number:" << ((config & 0x0eu) >> 5) << " ";
         return info.str();
     };
 
@@ -1066,7 +1065,7 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
         incomingPacketCount++;
     }
 
-    const std::string logLine = h5PktToString(outgoing, packet).c_str();
+    const std::string logLine = h5PktToString(outgoing, packet);
 
     if (upperLogCallback != nullptr)
     {
@@ -1078,7 +1077,7 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
     }
 }
 
-void H5Transport::log(std::string &logLine) const
+void H5Transport::log(const std::string &logLine) const
 {
     if (upperLogCallback != nullptr)
     {
@@ -1092,8 +1091,7 @@ void H5Transport::log(std::string &logLine) const
 
 void H5Transport::log(char const *logLine) const
 {
-    auto _logLine = std::string(logLine);
-    log(_logLine);
+    log(std::string(logLine));
 }
 
 void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
@@ -1117,7 +1115,9 @@ void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
 #pragma region Test related methods
 bool H5Transport::checkPattern(const payload_t &packet, const uint8_t offset, const payload_t &pattern)
 {
-    if (offset >= packet.size()) return false;
+    if (offset >= packet.size()) {
+      return false;
+    }
 
     auto packetItr = packet.begin() + offset;
 
@@ -1137,27 +1137,27 @@ bool H5Transport::checkPattern(const payload_t &packet, const uint8_t offset, co
     return true;
 }
 
-bool H5Transport::isSyncPacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncPacket(const payload_t &packet, uint8_t offset)
 {
     return checkPattern(packet, offset, payload_t{ SyncFirstByte, SyncSecondByte });
 }
 
-bool H5Transport::isSyncResponsePacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncResponsePacket(const payload_t &packet, uint8_t offset)
 {
     return checkPattern(packet, offset, payload_t { SyncRspFirstByte, SyncRspSecondByte });
 }
 
-bool H5Transport::isSyncConfigPacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncConfigPacket(const payload_t &packet, uint8_t offset)
 {
     return checkPattern(packet, offset, payload_t { SyncConfigFirstByte, SyncConfigSecondByte });
 }
 
-bool H5Transport::isSyncConfigResponsePacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncConfigResponsePacket(const payload_t &packet, uint8_t offset)
 {
     return checkPattern(packet, offset, payload_t { SyncConfigRspFirstByte, SyncConfigRspSecondByte });
 }
 
-bool H5Transport::isResetPacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isResetPacket(const payload_t &packet, uint8_t offset)
 {
     return checkPattern(packet, offset, payload_t { 0x05 });
 }

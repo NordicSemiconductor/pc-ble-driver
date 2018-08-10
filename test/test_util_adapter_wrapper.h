@@ -39,8 +39,8 @@ namespace testutil
     //
     // It will only contain information about one connection, service, characteristic and CCCD
     //
-    // NOTICE: 
-    //    this struct is not thread safe, the implementer of the test 
+    // NOTICE:
+    //    this struct is not thread safe, the implementer of the test
     //    must take that into account when using this scratchpad
     struct AdapterWrapperScratchpad
     {
@@ -69,14 +69,14 @@ namespace testutil
 
         uint16_t service_start_handle = 0;
         uint16_t service_end_handle = 0;
-        
+
         // Handle to Client Characterstic Configuration Descriptor
         // Can be set during discovery of services
         uint16_t cccd_handle = BLE_GATT_HANDLE_INVALID;
-        
+
         // The service used by the test
         uint16_t service_handle = BLE_GATT_HANDLE_INVALID;
-        
+
         // The characteristic declaration handle used by the test
         uint16_t characteristic_decl_handle = BLE_GATT_HANDLE_INVALID;
 
@@ -102,7 +102,7 @@ namespace testutil
         bool advertisement_timed_out = false;
 
         uint16_t mtu = DEFAULT_MTU_SIZE; // See #define DEFAULT_MTU_SIZE above
-        
+
         // Newer versions of SoftDevice API supports multiple configurations
         uint32_t config_id = 1;
 
@@ -114,10 +114,11 @@ namespace testutil
     class AdapterWrapper
     {
     public:
-        AdapterWrapper(const Role &role, const std::string &port, const uint32_t baudRate) : m_role(role), m_port(port)
+        AdapterWrapper(const Role &role, const std::string &port, const uint32_t baudRate)
+        : m_adapter(adapterInit(port.c_str(), baudRate))
+        , m_port(port)
+        , m_role(role)
         {
-            m_adapter = adapterInit(port.c_str(), baudRate);
-
             // Setup scratchpad with default values
             setupScratchpad();
         }
@@ -150,7 +151,7 @@ namespace testutil
                 return error_code;
             }
 #endif
-            
+
             return error_code;
         }
 
@@ -282,7 +283,7 @@ namespace testutil
             write_params.write_op = BLE_GATT_OP_WRITE_REQ;
             write_params.offset = 0;
 
-            NRF_LOG(role() << " Writing to connection " 
+            NRF_LOG(role() << " Writing to connection "
                 << testutil::asText(scratchpad.connection_handle)
                 << " CCCD handle: "
                 << testutil::asText(cccdHandle)
@@ -461,9 +462,9 @@ namespace testutil
         // Public data members used during testing
     public:
         // Scratchpad for values related to SoftDevice API.
-        
+
         // The scratchpad is used by methods in this class and by implementers of test.
-        
+
         // There is no encapsulation of the values in the scratchpad and the scratchpad is not
         // thread safe.
         AdapterWrapperScratchpad scratchpad;
@@ -486,7 +487,7 @@ namespace testutil
         GattsEventCallback m_gattsEventCallback;
         GattcEventCallback m_gattcEventCallback;
 
-        // The role given in the test. The SoftDevice supports multi-role, but for 
+        // The role given in the test. The SoftDevice supports multi-role, but for
         // simplicity in the tests we try to keep then to one role.
         Role m_role;
 
@@ -637,12 +638,10 @@ namespace testutil
 
     std::ostream& operator<< (std::ostream &s, const ble_gap_addr_t *address)
     {
-        const int address_length = 6;
-
         for (int i = sizeof(address->addr) - 1; i >= 0; --i)
         {
             s << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(address->addr[i]);
-            
+
             if (i < 5)
             {
                 s << ":";
