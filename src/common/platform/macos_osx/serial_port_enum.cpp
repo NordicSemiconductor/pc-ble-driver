@@ -386,24 +386,25 @@ static adapter_list_t* GetAdapters()
     return devices;
 }
 
-uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
+std::list<SerialPortDesc> EnumSerialPorts()
 {
+    std::list<SerialPortDesc> descs;
     adapter_list_t* devices = GetAdapters();
 
     for(auto device : *devices)
     {
-        if((strcmp(device->manufacturer,"SEGGER") == 0)
-            || (strcasecmp(device->manufacturer, "arm") == 0)
-            || (strcasecmp(device->manufacturer, "mbed") == 0))
+        if((strncmp(device->manufacturer, "SEGGER", 6) == 0)
+            || (strncasecmp(device->manufacturer, "arm", 3) == 0)
+            || (strncasecmp(device->manufacturer, "mbed", 4) == 0))
         {
-            SerialPortDesc* resultItem = new SerialPortDesc();
+            SerialPortDesc resultItem = {};
 
-            resultItem->comName = device->port;
-            resultItem->locationId = device->locationId;
-            resultItem->vendorId = device->vendorId;
-            resultItem->productId = device->productId;
-            resultItem->manufacturer = device->manufacturer;
-            resultItem->serialNumber = device->serialNumber;
+            resultItem.comName = device->port;
+            resultItem.locationId = device->locationId;
+            resultItem.vendorId = device->vendorId;
+            resultItem.productId = device->productId;
+            resultItem.manufacturer = device->manufacturer;
+            resultItem.serialNumber = device->serialNumber;
 
             descs.push_back(resultItem);
         }
@@ -414,5 +415,5 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
     devices->clear();
     delete devices;
 
-    return 0;
+    return descs;
 }
