@@ -21,6 +21,14 @@ else()
 		# This will create build/compile_commands.json
 		set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+		message("Call `make pre-tidy-clean` to filter out sdk sources from tidy compile commands.")
+		set(json_filter [=[
+			const;fs=require('fs')\;\
+			const;s=JSON.stringify(JSON.parse(fs.readFileSync('compile_commands.json')).filter(v=>v.file.includes('/src/common/')))\;\
+			fs.writeFileSync('compile_commands.json',s)\;\
+		]=])
+		add_custom_target(pre-tidy-clean COMMAND node -e \"${json_filter}\")
+
 		set(CLANG_TIDY_CHECKS "*")
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-llvm-header-guard")
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-llvm-include-order")
@@ -28,8 +36,10 @@ else()
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-readability-else-after-return")
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-misc-macro-parentheses")
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-clang-analyzer-alpha.core.CastToStruct")
+		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-fuchsia-default-arguments")
 		# Modernize
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-modernize-raw-string-literal")
+		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-modernize-use-using")
 		# CPP Core Guidelines
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-cppcoreguidelines-pro-bounds-array-to-pointer-decay")
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-cppcoreguidelines-pro-bounds-constant-array-index")
@@ -45,10 +55,11 @@ else()
 		set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-google-runtime-references")
 		set(CLANG_TIDY_CHECKS "-checks='${CLANG_TIDY_CHECKS}'")
 
+		# set(HEADER_FILTER "-header-filter=.*")
+		set(HEADER_FILTER "-header-filter='.*/\(?!sdk\)/.*'")
+
 		add_custom_target(tidy
-			COMMAND ${CLANG_TIDY} ${CLANG_TIDY_CHECKS}
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
+			COMMAND ${CLANG_TIDY} ${HEADER_FILTER} -extra-arg=-Wno-unknown-warning-option ${CLANG_TIDY_CHECKS}
 		)
 	endif()
 endif()
-
