@@ -32,7 +32,11 @@ copy _build\nrf52840_xxaa.hex %rootpath%\sdk\connectivity_%CONN_VERSION%_usb_for
 @ECHO Merge hex
 "c:\Program Files (x86)\Nordic Semiconductor\nrf5x\bin\mergehex.exe" -m _build\nrf52840_xxaa.hex %rootpath%\hex\sd_api_v3\s132_nrf52_3.1.0_softdevice.hex -o %rootpath%\sdk\connectivity_%CONN_VERSION%_usb_with_s132_3.1.hex
 
+REM @ECHO Generate dfu zip package
+REM nrfutil pkg generate --application connectivity_%CONN_VERSION%_usb_for_s132_3.hex --hw-version 52 --sd-req 0 --sd-id 0x0091 --debug-mode --softdevice s132_nrf52_3.1.0_softdevice.hex connectivity_%CONN_VERSION%_usb_dfu_pkg.zip
+
 @ECHO Checking that the output files exist
 @IF NOT EXIST %rootpath%\sdk\connectivity_%CONN_VERSION%_usb_for_s132_3.hex EXIT /b 1
 @IF NOT EXIST %rootpath%\sdk\connectivity_%CONN_VERSION%_usb_with_s132_3.1.hex EXIT /b 1
+REM @IF NOT EXIST %scriptpath%\connectivity_%CONN_VERSION%_usb_dfu_pkg.zip EXIT /b 1
 @ECHO Success
