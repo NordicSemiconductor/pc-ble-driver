@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nordic Semiconductor ASA
+ * Copyright (c) 2016-2018 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -42,20 +42,16 @@
 #include "uart_settings_boost.h"
 #include "uart_defines.h"
 
-#include <boost/array.hpp>
-#include <boost/thread.hpp>
+#include "asio.hpp"
 
+#include <array>
 #include <deque>
 #include <mutex>
 #include <thread>
 
 #include <stdint.h>
 
-#if BOOST_VERSION >= 106600
-typedef boost::asio::io_context asio_io_context;
-#else
-typedef boost::asio::io_service asio_io_context;
-#endif
+typedef asio::io_service asio_io_context;
 
 /**
  * @brief The UartBoost class opens, reads and writes a serial port using the boost asio library
@@ -86,11 +82,11 @@ private:
 
     /**@brief Called when background thread receives bytes from uart.
      */
-    void readHandler(const boost::system::error_code &errorCode, const size_t bytesTransferred);
+    void readHandler(const asio::error_code &errorCode, const size_t bytesTransferred);
 
     /**@brief Called when write is finished doing asynchronous write.
      */
-    void writeHandler(const boost::system::error_code &errorCode, const size_t);
+    void writeHandler(const asio::error_code &errorCode, const size_t);
 
     /**@brief Starts asynchronous read on a background thread.
      */
@@ -104,20 +100,20 @@ private:
      */
     void asyncWrite();
 
-    boost::array<uint8_t, BUFFER_SIZE> readBuffer;
+    std::array<uint8_t, BUFFER_SIZE> readBuffer;
     std::vector<uint8_t> writeBufferVector;
     std::deque<uint8_t> writeQueue;
     std::mutex queueMutex;
 
-    boost::function<void(const boost::system::error_code, const size_t)> callbackReadHandle;
-    boost::function<void(const boost::system::error_code, const size_t)> callbackWriteHandle;
+    std::function<void(const asio::error_code, const size_t)> callbackReadHandle;
+    std::function<void(const asio::error_code, const size_t)> callbackWriteHandle;
 
     UartSettingsBoost uartSettingsBoost;
     bool asyncWriteInProgress;
     std::thread *ioServiceThread;
 
     asio_io_context* ioService;
-    boost::asio::serial_port* serialPort;
+    asio::serial_port* serialPort;
 
     asio_io_context::work* workNotifier;
 };
