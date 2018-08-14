@@ -498,7 +498,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
 +    .revision_hash      = 0,
 +    .version_major      = 1,
 +    .version_minor      = 2,
-+    .version_patch      = 2,
++    .version_patch      = 3,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = 2,
 +    .transport_type     = 1,
