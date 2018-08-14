@@ -156,7 +156,7 @@ index d4a4883..346093a 100644
 +    .revision_hash      = 0,
 +    .version_major      = 1,
 +    .version_minor      = 2,
-+    .version_patch      = 3
++    .version_patch      = 3,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
 +    .transport_type     = 1,
