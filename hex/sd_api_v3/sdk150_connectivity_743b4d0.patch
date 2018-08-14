@@ -9,7 +9,7 @@
 -    .version_patch      = 1,
 +    .version_major      = 1,
 +    .version_minor      = 2,
-+    .version_patch      = 2,
++    .version_patch      = 3,
      .rfu1               = 0xFF,
      .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
      .transport_type     = 1,
