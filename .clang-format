@@ -1,0 +1,20 @@
+---
+BasedOnStyle: Mozilla
+AlignOperands: false
+AllowShortFunctionsOnASingleLine: InlineOnly
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+BinPackArguments: true
+BinPackParameters: true
+IndentWidth: 4
+BraceWrapping:
+  AfterClass:      true
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterStruct:     true
+  AfterUnion:      true
+BreakBeforeBraces: Custom
+ColumnLimit: 120
+IndentPPDirectives: AfterHash
+SortUsingDeclarations: false
+SpaceAfterTemplateKeyword: true
