@@ -80,7 +80,7 @@ using payload_t = std::vector<uint8_t>;
 class H5Transport : public Transport {
 public:
     H5Transport() = delete;
-    H5Transport(Transport *nextTransportLayer, uint32_t retransmission_interval);
+    H5Transport(Transport *nextTransportLayer, const uint32_t retransmission_interval);
     ~H5Transport();
     
     uint32_t open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback) override;

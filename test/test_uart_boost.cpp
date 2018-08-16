@@ -64,13 +64,13 @@ using std::chrono::system_clock;
 
 struct PortStats {
     uint32_t pktCount;
-    uint32_t pktMinSize;
-    uint32_t pktMaxSize;
+    size_t pktMinSize;
+    size_t pktMaxSize;
 
     PortStats() : pktCount(0), pktMinSize(std::numeric_limits<uint32_t>::max()), pktMaxSize(0) {}
 };
 
-std::ostream& operator<<(std::ostream &out, PortStats stats)
+std::ostream& operator<<(std::ostream &out, const PortStats &stats)
 {
     out << "pkt_count: " << stats.pktCount
         << " pkt_max_size: " << stats.pktMaxSize

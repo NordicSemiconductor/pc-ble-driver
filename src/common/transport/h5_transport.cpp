@@ -79,10 +79,10 @@ const auto OPEN_WAIT_TIMEOUT = std::chrono::milliseconds(2000);   // Duration to
 const auto RESET_WAIT_DURATION = std::chrono::milliseconds(300);  // Duration to wait before continuing UART communication after reset is sent to target
 
 #pragma region Public methods
-H5Transport::H5Transport(Transport *_nextTransportLayer, uint32_t retransmission_interval)
+H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransmission_interval)
     : Transport(),
     seqNum(0), ackNum(0), c0Found(false),
-    unprocessedData(), incomingPacketCount(0), outgoingPacketCount(0),
+    incomingPacketCount(0), outgoingPacketCount(0),
     errorPacketCount(0),
     currentState(STATE_START),
     stateMachineReady(false)
@@ -152,7 +152,7 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
     // Wait for the state machine to be ready
     startStateMachine();
 
-    auto _exitCriterias = dynamic_cast<StartExitCriterias*>(exitCriterias[currentState].get());
+    const auto _exitCriterias = dynamic_cast<StartExitCriterias*>(exitCriterias[currentState].get());
     lastPacket.clear();
 
     statusCallback = std::bind(&H5Transport::statusHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -214,7 +214,7 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
 uint32_t H5Transport::close()
 {
     std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-    auto exitCriteria = exitCriterias[currentState].get();
+    const auto exitCriteria = exitCriterias[currentState].get();
 
     if (exitCriteria != nullptr)
     {
@@ -227,8 +227,8 @@ uint32_t H5Transport::close()
 
     stopStateMachine();
 
-    auto errorCode1 = nextTransportLayer->close();
-    auto errorCode2 = Transport::close();
+    const auto errorCode1 = nextTransportLayer->close();
+    const auto errorCode2 = Transport::close();
 
     if (errorCode1 != NRF_SUCCESS)
     {
@@ -364,7 +364,7 @@ void H5Transport::processPacket(const payload_t &packet)
         }
         else if (currentState == STATE_INITIALIZED)
         {
-            auto exit = dynamic_cast<InitializedExitCriterias*>(exitCriterias[currentState].get());
+            const auto exit = dynamic_cast<InitializedExitCriterias*>(exitCriterias[currentState].get());
 
             if (H5Transport::isSyncConfigResponsePacket(h5Payload))
             {
@@ -381,7 +381,7 @@ void H5Transport::processPacket(const payload_t &packet)
         }
         else if (currentState == STATE_ACTIVE)
         {
-            auto exit = dynamic_cast<ActiveExitCriterias*>(exitCriterias[currentState].get());
+            const auto exit = dynamic_cast<ActiveExitCriterias*>(exitCriterias[currentState].get());
 
             if (H5Transport::isSyncPacket(h5Payload))
             {
@@ -440,7 +440,7 @@ void H5Transport::statusHandler(sd_rpc_app_status_t code, const char * error)
     if (code == IO_RESOURCES_UNAVAILABLE)
     {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        auto exitCriteria = exitCriterias[currentState].get();
+        const auto exitCriteria = exitCriterias[currentState].get();
 
         if (exitCriteria != nullptr)
         {
@@ -781,7 +781,7 @@ void H5Transport::stateMachineWorker()
 {
     while (currentState != STATE_FAILED && currentState != STATE_CLOSED && currentState != STATE_NO_RESPONSE)
     {
-        auto nextState = stateActions[currentState]();
+        const auto nextState = stateActions[currentState]();
 
         // Make sure that state is not changed when assigning a new current state
         {

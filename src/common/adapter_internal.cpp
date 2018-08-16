@@ -63,9 +63,9 @@ uint32_t AdapterInternal::open(const sd_rpc_status_handler_t status_callback, co
     eventCallback = event_callback;
     logCallback = log_callback;
 
-    auto boundStatusHandler = std::bind(&AdapterInternal::statusHandler, this, std::placeholders::_1, std::placeholders::_2);
-    auto boundEventHandler = std::bind(&AdapterInternal::eventHandler, this, std::placeholders::_1);
-    auto boundLogHandler = std::bind(&AdapterInternal::logHandler, this, std::placeholders::_1, std::placeholders::_2);
+    const auto boundStatusHandler = std::bind(&AdapterInternal::statusHandler, this, std::placeholders::_1, std::placeholders::_2);
+    const auto boundEventHandler = std::bind(&AdapterInternal::eventHandler, this, std::placeholders::_1);
+    const auto boundLogHandler = std::bind(&AdapterInternal::logHandler, this, std::placeholders::_1, std::placeholders::_2);
     return transport->open(boundStatusHandler, boundEventHandler, boundLogHandler);
 }
 
@@ -74,45 +74,38 @@ uint32_t AdapterInternal::close() const
     return transport->close();
 }
 
-void AdapterInternal::statusHandler(sd_rpc_app_status_t code, const char * message)
+void AdapterInternal::statusHandler(const sd_rpc_app_status_t code, const std::string &message)
 {
-    adapter_t adapter;
+    adapter_t adapter = {};
     adapter.internal = static_cast<void *>(this);
-    statusCallback(&adapter, code, message);
+    statusCallback(&adapter, code, message.c_str());
 }
 
 void AdapterInternal::eventHandler(ble_evt_t *event)
 {
     // Event Thread
-    adapter_t adapter;
+    adapter_t adapter = {};
     adapter.internal = static_cast<void *>(this);
     eventCallback(&adapter, event);
 }
 
-void AdapterInternal::logHandler(sd_rpc_log_severity_t severity, std::string log_message)
+void AdapterInternal::logHandler(const sd_rpc_log_severity_t severity, const std::string &log_message)
 {
-    adapter_t adapter;
+    adapter_t adapter = {};
     adapter.internal = static_cast<void *>(this);
 
-    if((uint32_t) severity >= (uint32_t) logSeverityFilter)
+    if(static_cast<uint32_t>(severity) >= static_cast<uint32_t>(logSeverityFilter))
     {
         logCallback(&adapter, severity, log_message.c_str());
     }
 }
 
 bool AdapterInternal::isInternalError(const uint32_t error_code) {
-    if (error_code != NRF_SUCCESS) {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return error_code != NRF_SUCCESS;
 }
 
-uint32_t AdapterInternal::logSeverityFilterSet(sd_rpc_log_severity_t severity_filter)
+uint32_t AdapterInternal::logSeverityFilterSet(const sd_rpc_log_severity_t severity_filter)
 {
     logSeverityFilter = severity_filter;
     return NRF_SUCCESS;
 }
-

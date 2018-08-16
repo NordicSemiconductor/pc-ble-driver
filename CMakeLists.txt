@@ -23,10 +23,14 @@ else()
 endif()
 
 # SDK source files, different per API version
+
+# Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
+file(GLOB_RECURSE LIB_NEWER_SDK_API_COMMON_C_SRC_FILES "src/sd_api_common/sdk/*.c")
+
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_C_SRC_FILES "src/${SD_API_VER_L}/sdk/*.c")
-    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_CPP_SRC_FILES "src/${SD_API_VER_L}/sdk/*.cpp")
+    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_CPP_SRC_FILES "src/${SD_API_VER_L}/*.cpp")
 endforeach(SD_API_VER)
 
 # Set C, CPP and platform source file groups and properties
@@ -36,10 +40,18 @@ foreach(SD_API_VER ${SD_API_VERS})
                         ${LIB_TRANSPORT_C_SRC_FILES}
     )
 
+    if(SD_API_VER STRGREATER "SD_API_V2")
+        list(APPEND LIB_${SD_API_VER}_C_SRC_FILES ${LIB_NEWER_SDK_API_COMMON_C_SRC_FILES})
+    endif()
+
+    # message(STATUS "${LIB_${SD_API_VER}_C_SRC_FILES}")
+
     set(LIB_${SD_API_VER}_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
                           ${LIB_SDK_${SD_API_VER}_CPP_SRC_FILES}
                           ${LIB_TRANSPORT_CPP_SRC_FILES}
     )
+
+    message(STATUS "SD: ${SD_API_VER}: ${LIB_${SD_API_VER}_CPP_SRC_FILES}")
 
     # Force .c files to be compiled with the C++ compiler
     if(NOT APPLE)
@@ -98,18 +110,31 @@ include_directories(
 # Set per-SD API version include directories and compiler definitions
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
-        src/${SD_API_VER_L}/sdk/components/libraries/util
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
-        src/${SD_API_VER_L}/sdk/components/serialization/common
-        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
-        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s132
-        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/ble
-        src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
-    )
+
+    # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
+    if(SD_API_VER STRGREATER "SD_API_V2")
+        target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
+            src/sd_api_common/sdk/components/libraries/util
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
+            src/sd_api_common/sdk/components/serialization/common
+            src/sd_api_common/sdk/components/serialization/common/struct_ser/ble
+            src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
+            src/${SD_API_VER_L}
+        )
+    else()
+        target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
+            src/${SD_API_VER_L}/sdk/components/libraries/util
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
+            src/${SD_API_VER_L}/sdk/components/serialization/common
+            src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
+            # S132 and S130 headers are the same
+            src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
+        )
+    endif()
+
     # Provide the NRF_SD_BLE_API_VERSION macro to each variant
     string(REGEX MATCH "[0-9]+$" _SD_API_VER_NUM "${SD_API_VER}")
     set(SD_API_VER_COMPILER_DEF_NUM "-D${SD_API_VER_COMPILER_DEF}=${_SD_API_VER_NUM}")

@@ -52,12 +52,12 @@ class AdapterInternal {
         ~AdapterInternal();
         uint32_t open(const sd_rpc_status_handler_t status_callback, const sd_rpc_evt_handler_t event_callback, const sd_rpc_log_handler_t log_callback);
         uint32_t close() const;
-        uint32_t logSeverityFilterSet(sd_rpc_log_severity_t severity_filter);
+        uint32_t logSeverityFilterSet(const sd_rpc_log_severity_t severity_filter);
         static bool isInternalError(const uint32_t error_code);
 
-        void statusHandler(sd_rpc_app_status_t code, const char * error);
+        void statusHandler(const sd_rpc_app_status_t code, const std::string &error);
         void eventHandler(ble_evt_t *event);
-        void logHandler(sd_rpc_log_severity_t severity, std::string log_message);
+        void logHandler(const sd_rpc_log_severity_t severity, const std::string &log_message);
 
         SerializationTransport *transport;
 

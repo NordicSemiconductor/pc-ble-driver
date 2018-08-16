@@ -51,6 +51,7 @@
 #include "nrf_error.h"
 
 // C++ code
+
 #include <map>
 #include <mutex>
 
@@ -79,7 +80,7 @@ uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, ser_ble_gap_app_ke
 {
     if (current_context == nullptr) return NRF_ERROR_INVALID_DATA;
 
-    const auto tempRootContext = m_app_keys_table.find(current_context);
+    auto tempRootContext = m_app_keys_table.find(current_context);
 
     auto keyset = new ser_ble_gap_app_keyset_t();
 
@@ -114,7 +115,7 @@ uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, ser_ble_gap_app_ke
 
 uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
 {
-    const auto tempAdapter = m_app_keys_table.find(current_context);
+    auto tempAdapter = m_app_keys_table.find(current_context);
     if (tempAdapter == m_app_keys_table.end()) return NRF_ERROR_NOT_FOUND;
 
     auto connHandleMap = tempAdapter->second;
@@ -129,11 +130,11 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
 
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, ser_ble_gap_app_keyset_t **pp_gap_app_keyset)
 {
-    const auto tempAdapter = m_app_keys_table.find(current_context);
+    auto tempAdapter = m_app_keys_table.find(current_context);
     if (tempAdapter == m_app_keys_table.end()) return NRF_ERROR_NOT_FOUND;
 
     auto connHandleMap = tempAdapter->second;
-    const auto connHandle = connHandleMap->find(conn_handle);
+    auto connHandle = connHandleMap->find(conn_handle);
 
     if (connHandle == connHandleMap->end()) return NRF_ERROR_NOT_FOUND;
     *pp_gap_app_keyset = connHandle->second;
