@@ -181,11 +181,16 @@ uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_s
     return adapterLayer->logSeverityFilterSet(severity_filter);
 }
 
-uint32_t sd_rpc_conn_reset(adapter_t *adapter)
+uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
 {
-    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return conn_systemreset_enc(buffer, length);
-    };
+    auto adapterLayer = static_cast<AdapterInternal*>(adapter->internal);
 
-    return encode_decode(adapter, encode_function, nullptr);
+    uint32_t tx_buffer_length = 1; // This command has 1 byte payload, hence length 1
+    uint32_t rx_buffer_length = 0; // This command does not generate a response, hence length 0
+
+    std::vector<uint8_t> tx_buffer_vector(tx_buffer_length);
+    tx_buffer_vector[0] = static_cast<uint8_t>(reset_mode);
+
+    return adapterLayer->transport->send(&tx_buffer_vector[0], tx_buffer_length, nullptr,
+        &rx_buffer_length, SERIALIZATION_RESET_CMD);
 }

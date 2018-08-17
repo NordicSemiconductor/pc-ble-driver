@@ -44,7 +44,6 @@
 #include "ble_common.h"
 
 #include <memory>
-#include <iostream>
 #include <sstream>
 #include <cstring> // Do not remove! Required by gcc.
 
@@ -59,19 +58,15 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     responseTimeout = response_timeout;
 }
 
-SerializationTransport::~SerializationTransport()
-{
-}
-
-uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback)
+uint32_t SerializationTransport::open(const status_cb_t &status_callback, const evt_cb_t &event_callback, const log_cb_t &log_callback)
 {
     statusCallback = status_callback;
     eventCallback = event_callback;
     logCallback = log_callback;
 
-    auto dataCallback = std::bind(&SerializationTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
+    const auto dataCallback = std::bind(&SerializationTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
 
-    uint32_t errorCode = nextTransportLayer->open(status_callback, dataCallback, log_callback);
+    const auto errorCode = nextTransportLayer->open(status_callback, dataCallback, log_callback);
 
     if (errorCode != NRF_SUCCESS)
     {
@@ -111,8 +106,7 @@ uint32_t SerializationTransport::close()
     return nextTransportLayer->close();
 }
 
-uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength)
-{
+uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength, serialization_pkt_type_t pktType) {
     // Mutex to avoid multiple threads sending commands at the same time.
     std::lock_guard<std::mutex> sendGuard(sendMutex);
     rspReceived = false;
@@ -120,10 +114,10 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
     responseLength = rspLength;
 
     std::vector<uint8_t> commandBuffer(cmdLength + 1);
-    commandBuffer[0] = SERIALIZATION_COMMAND;
-    memcpy(&commandBuffer[1], cmdBuffer, cmdLength * sizeof(uint8_t));
+    commandBuffer[0] = pktType;
+    std::memcpy(&commandBuffer[1], cmdBuffer, cmdLength * sizeof(uint8_t));
 
-    auto errCode = nextTransportLayer->send(commandBuffer);
+    const auto errCode = nextTransportLayer->send(commandBuffer);
 
     if (errCode != NRF_SUCCESS) {
         return errCode;
@@ -176,7 +170,7 @@ void SerializationTransport::eventHandlingRunner()
 
             uint32_t possibleEventLength = 700;
             std::unique_ptr<ble_evt_t> event(static_cast<ble_evt_t*>(std::malloc(possibleEventLength)));
-            uint32_t errCode = ble_event_dec(eventData.data, eventData.dataLength, event.get(), &possibleEventLength);
+            const auto errCode = ble_event_dec(eventData.data, eventData.dataLength, event.get(), &possibleEventLength);
 
             if (eventCallback != nullptr && errCode == NRF_SUCCESS)
             {
@@ -199,13 +193,13 @@ void SerializationTransport::eventHandlingRunner()
 
 void SerializationTransport::readHandler(uint8_t *data, size_t length)
 {
-    auto eventType = static_cast<serialization_pkt_type_t>(data[0]);
+    const auto eventType = static_cast<serialization_pkt_type_t>(data[0]);
     data += 1;
     length -= 1;
 
     if (eventType == SERIALIZATION_RESPONSE) {
-        memcpy(responseBuffer, data, length);
-        *responseLength = (uint32_t) length;
+        std::memcpy(responseBuffer, data, length);
+        *responseLength = static_cast<uint32_t>(length);
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
         rspReceived = true;
@@ -213,10 +207,10 @@ void SerializationTransport::readHandler(uint8_t *data, size_t length)
     }
     else if (eventType == SERIALIZATION_EVENT)
     {
-        eventData_t eventData;
+        eventData_t eventData = {};
         eventData.data = static_cast<uint8_t *>(malloc(length));
-        memcpy(eventData.data, data, length);
-        eventData.dataLength = (uint32_t) length;
+        std::memcpy(eventData.data, data, length);
+        eventData.dataLength = static_cast<uint32_t>(length);
 
         std::lock_guard<std::mutex> eventLock(eventMutex);
         eventQueue.push(eventData);

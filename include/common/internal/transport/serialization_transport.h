@@ -47,7 +47,7 @@
 #include <condition_variable>
 
 #include <queue>
-#include <stdint.h>
+#include <cstdint>
 
 typedef uint32_t(*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
 typedef std::function<void(ble_evt_t * p_ble_evt)> evt_cb_t;
@@ -62,18 +62,26 @@ typedef enum
 {
     SERIALIZATION_COMMAND = 0,
     SERIALIZATION_RESPONSE = 1,
-    SERIALIZATION_EVENT = 2
+    SERIALIZATION_EVENT = 2,
+    SERIALIZATION_DTM_CMD = 3,      // Direct test mode command
+    SERIALIZATION_DTM_RESP = 4,     // Direct test mode response
+    SERIALIZATION_RESET_CMD = 5
 } serialization_pkt_type_t;
 
 class SerializationTransport {
 public:
-    SerializationTransport() = delete;
+    SerializationTransport(const SerializationTransport &) = delete;
+    SerializationTransport& operator=(const SerializationTransport &) = delete;
+    SerializationTransport(SerializationTransport &&) = delete;
+    SerializationTransport& operator=(SerializationTransport &&) = delete;
+
     SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
-    ~SerializationTransport();
+    ~SerializationTransport() = default;
     
-    uint32_t open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback);
+    uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback, const log_cb_t &log_callback);
     uint32_t close();
-    uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength);
+    uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength,
+        serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
 
 private:
     void readHandler(uint8_t *data, size_t length);
