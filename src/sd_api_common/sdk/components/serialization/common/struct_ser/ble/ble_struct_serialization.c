@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 - 2017, Nordic Semiconductor ASA
+ * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
  * 
  * All rights reserved.
  * 
@@ -46,6 +46,9 @@
 #include "ble_types.h"
 #include "ble.h"
 #include "cond_field_serialization.h"
+#ifdef SER_CONNECTIVITY
+#include "conn_ble_gap_sec_keys.h"
+#endif
 #include <string.h>
 
 

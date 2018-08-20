@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 - 2017, Nordic Semiconductor ASA
+ * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
  * 
  * All rights reserved.
  * 
@@ -40,6 +40,7 @@
 #ifndef BLE_L2CAP_STRUCT_SERIALIZATION_H
 #define BLE_L2CAP_STRUCT_SERIALIZATION_H
 
+#ifndef S112
 #include "ble_l2cap.h"
 
 #ifdef __cplusplus
@@ -110,7 +111,9 @@ uint32_t ble_l2cap_ch_tx_params_t_dec(uint8_t const * const p_buf,
                                       uint32_t * const      p_index,
                                       void * const          p_void_struct);
 #endif
+#endif
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /*BLE_L2CAP_STRUCT_SERIALIZATION_H*/

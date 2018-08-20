@@ -1,30 +1,30 @@
 /**
  * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- *
+ * 
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- *
+ * 
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- *
+ * 
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- *
+ * 
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * 
  */
 #include "ble_gap_struct_serialization.h"
 #include "ble_struct_serialization.h"
@@ -45,13 +45,28 @@
 #include "string.h"
 #include "ble_gatts.h"
 
+#ifndef S112
 uint32_t ble_gap_evt_adv_report_t_enc(void const * const p_void_struct,
                                       uint8_t * const    p_buf,
                                       uint32_t           buf_len,
                                       uint32_t * const   p_index)
 {
     SER_STRUCT_ENC_BEGIN(ble_gap_evt_adv_report_t);
-
+#if NRF_SD_BLE_API_VERSION > 5
+    SER_PUSH_FIELD(&p_struct->type, ble_gap_adv_report_type_t_enc);
+    SER_PUSH_FIELD(&p_struct->peer_addr, ble_gap_addr_t_enc);
+    SER_PUSH_FIELD(&p_struct->direct_addr, ble_gap_addr_t_enc);
+    SER_PUSH_uint8(&p_struct->primary_phy);
+    SER_PUSH_uint8(&p_struct->secondary_phy);
+    SER_PUSH_int8(&p_struct->tx_power);
+    SER_PUSH_int8(&p_struct->rssi);
+    SER_PUSH_uint8(&p_struct->ch_index);
+    SER_PUSH_uint8(&p_struct->set_id);
+    uint16_t temp = p_struct->data_id;
+    SER_PUSH_uint16(&temp);
+    SER_PUSH_FIELD(&p_struct->data, ble_data_t_enc);
+    SER_PUSH_FIELD(&p_struct->aux_pointer, ble_gap_aux_pointer_t_enc);
+#else
     uint8_t ser_data = (p_struct->scan_rsp & 0x01)
                        | ((p_struct->type & 0x03) << 1);
     uint8_t data_len = (p_struct->dlen & 0x1F);
@@ -60,7 +75,7 @@ uint32_t ble_gap_evt_adv_report_t_enc(void const * const p_void_struct,
     SER_PUSH_int8(&p_struct->rssi);
     SER_PUSH_uint8(&ser_data);
     SER_PUSH_len8data(p_struct->data, data_len);
-
+#endif
     SER_STRUCT_ENC_END;
 }
 
@@ -71,6 +86,22 @@ uint32_t ble_gap_evt_adv_report_t_dec(uint8_t const * const p_buf,
 {
     SER_STRUCT_DEC_BEGIN(ble_gap_evt_adv_report_t);
 
+#if NRF_SD_BLE_API_VERSION > 5
+    SER_PULL_FIELD(&p_struct->type, ble_gap_adv_report_type_t_dec);
+    SER_PULL_FIELD(&p_struct->peer_addr, ble_gap_addr_t_dec);
+    SER_PULL_FIELD(&p_struct->direct_addr, ble_gap_addr_t_dec);
+    SER_PULL_uint8(&p_struct->primary_phy);
+    SER_PULL_uint8(&p_struct->secondary_phy);
+    SER_PULL_int8(&p_struct->tx_power);
+    SER_PULL_int8(&p_struct->rssi);
+    SER_PULL_uint8(&p_struct->ch_index);
+    SER_PULL_uint8(&p_struct->set_id);
+    uint16_t temp;
+    SER_PULL_uint16(&temp);
+    p_struct->data_id = temp & 0x0FFF;
+    SER_PULL_FIELD(&p_struct->data, ble_data_t_dec);
+    SER_PULL_FIELD(&p_struct->aux_pointer, ble_gap_aux_pointer_t_dec);
+#else
     uint8_t ser_data;
     uint8_t data_len = BLE_GAP_ADV_MAX_SIZE;
     uint8_t * p_field_data = p_struct->data;
@@ -83,9 +114,10 @@ uint32_t ble_gap_evt_adv_report_t_dec(uint8_t const * const p_buf,
     p_struct->scan_rsp = ser_data & 0x01;
     p_struct->type     = (ser_data >> 1) & 0x03;
     p_struct->dlen     = data_len;
-
+#endif
     SER_STRUCT_DEC_END;
 }
+#endif
 
 uint32_t ble_gap_irk_t_enc(void const * const p_void_struct,
                            uint8_t * const    p_buf,
@@ -420,6 +452,11 @@ uint32_t ble_gap_evt_connected_t_enc(void const * const p_void_struct,
     SER_PUSH_FIELD(&p_struct->peer_addr, ble_gap_addr_t_enc);
     SER_PUSH_uint8(&p_struct->role);
     SER_PUSH_FIELD(&p_struct->conn_params, ble_gap_conn_params_t_enc);
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+    SER_PUSH_uint8(&p_struct->adv_handle);
+    SER_PUSH_uint16(&p_struct->adv_data.adv_data.len);
+    SER_PUSH_uint16(&p_struct->adv_data.scan_rsp_data.len);
+#endif
 
     SER_STRUCT_ENC_END;
 }
@@ -434,6 +471,11 @@ uint32_t ble_gap_evt_connected_t_dec(uint8_t const * const p_buf,
     SER_PULL_FIELD(&p_struct->peer_addr, ble_gap_addr_t_dec);
     SER_PULL_uint8(&p_struct->role);
     SER_PULL_FIELD(&p_struct->conn_params, ble_gap_conn_params_t_dec);
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+    SER_PULL_uint8(&p_struct->adv_handle);
+    SER_PULL_uint16(&p_struct->adv_data.adv_data.len);
+    SER_PULL_uint16(&p_struct->adv_data.scan_rsp_data.len);
+#endif
 
     SER_STRUCT_DEC_END;
 }
@@ -523,6 +565,7 @@ uint32_t ble_gap_evt_conn_param_update_t_dec(uint8_t const * const p_buf,
     SER_STRUCT_DEC_END;
 }
 
+#ifndef S112
 uint32_t ble_gap_evt_conn_param_update_request_t_enc(void const * const p_void_struct,
                                                      uint8_t * const    p_buf,
                                                      uint32_t           buf_len,
@@ -542,6 +585,7 @@ uint32_t ble_gap_evt_conn_param_update_request_t_dec(uint8_t const * const p_buf
     SER_PULL_FIELD(&(p_struct->conn_params), ble_gap_conn_params_t_dec);
     SER_STRUCT_DEC_END;
 }
+#endif //!S112
 
 uint32_t ble_gap_conn_params_t_enc(void const * const p_void_struct,
                                    uint8_t * const    p_buf,
@@ -615,24 +659,35 @@ uint32_t ble_gap_master_id_t_dec(uint8_t const * const p_buf,
     SER_STRUCT_DEC_END;
 }
 
+#ifndef S112
 uint32_t ble_gap_scan_params_t_enc(void const * const p_void_struct,
                                    uint8_t * const    p_buf,
                                    uint32_t           buf_len,
                                    uint32_t * const   p_index)
 {
     SER_STRUCT_ENC_BEGIN(ble_gap_scan_params_t);
-
-    uint8_t ser_data = (p_struct->active & 0x01)
-                       | ((p_struct->use_whitelist & 0x01) << 1)
-                       | ((p_struct->adv_dir_report & 0x01) << 2);
+    uint8_t ser_data;
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 6
+    ser_data = (p_struct->active & 0x01)
+             | ((p_struct->use_whitelist & 0x01) << 1)
+             | ((p_struct->adv_dir_report & 0x01) << 2);
     SER_PUSH_uint8(&ser_data);
+#else
+    ser_data =
+            ((p_struct->extended & 0x01)               << 0) |
+            ((p_struct->report_incomplete_evts & 0x01) << 1) |
+            ((p_struct->active & 0x01)                 << 2) |
+            ((p_struct->filter_policy & 0x03)          << 3);
+    SER_PUSH_uint8(&ser_data);
+    SER_PUSH_uint8(&p_struct->scan_phys);
+    SER_PUSH_buf(p_struct->channel_mask, 5);
+#endif
     SER_PUSH_uint16(&p_struct->interval);
     SER_PUSH_uint16(&p_struct->window);
     SER_PUSH_uint16(&p_struct->timeout);
 
     SER_STRUCT_ENC_END;
 }
-
 uint32_t ble_gap_scan_params_t_dec(uint8_t const * const p_buf,
                                    uint32_t              buf_len,
                                    uint32_t * const      p_index,
@@ -641,17 +696,29 @@ uint32_t ble_gap_scan_params_t_dec(uint8_t const * const p_buf,
     SER_STRUCT_DEC_BEGIN(ble_gap_scan_params_t);
 
     uint8_t ser_data;
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 6
     SER_PULL_uint8(&ser_data);
     p_struct->active         = ser_data & 0x01;
     p_struct->use_whitelist  = (ser_data >> 1) & 0x01;
     p_struct->adv_dir_report = (ser_data >> 2) & 0x01;
+#else
+    SER_PULL_uint8(&ser_data);
+    p_struct->extended               = ser_data & 0x01;
+    p_struct->report_incomplete_evts = (ser_data >> 1) & 0x01;
+    p_struct->active                 = (ser_data >> 2) & 0x01;
+    p_struct->filter_policy          = (ser_data >> 3) & 0x03;
 
+    SER_PULL_uint8(&p_struct->scan_phys);
+    uint8_t * p_channel_mask = (uint8_t *)p_struct->channel_mask;
+    SER_PULL_buf(&p_channel_mask, 5, 5);
+#endif
     SER_PULL_uint16(&p_struct->interval);
     SER_PULL_uint16(&p_struct->window);
     SER_PULL_uint16(&p_struct->timeout);
 
     SER_STRUCT_DEC_END;
 }
+#endif //!S112
 
 uint32_t ble_gap_enc_key_t_enc(void const * const p_void_struct,
                                uint8_t * const    p_buf,
@@ -870,7 +937,7 @@ uint32_t ble_gap_opt_passkey_t_dec(uint8_t const * const p_buf,
     SER_PULL_buf((uint8_t**)&p_struct->p_passkey, BLE_GAP_PASSKEY_LEN, BLE_GAP_PASSKEY_LEN);
     SER_STRUCT_DEC_END;
 }
-
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 6
 uint32_t ble_gap_opt_scan_req_report_t_enc(void const * const p_void_struct,
                                            uint8_t * const    p_buf,
                                            uint32_t           buf_len,
@@ -897,6 +964,7 @@ uint32_t ble_gap_opt_scan_req_report_t_dec(uint8_t const * const p_buf,
 
     SER_STRUCT_DEC_END;
 }
+#endif
 
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 4
 uint32_t ble_gap_opt_compat_mode_t_enc(void const * const p_void_struct,
@@ -927,6 +995,7 @@ uint32_t ble_gap_opt_compat_mode_t_dec(uint8_t const * const p_buf,
 }
 #endif
 
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 6
 uint32_t ble_gap_adv_ch_mask_t_enc(void const * const p_void_struct,
                                    uint8_t * const    p_buf,
                                    uint32_t           buf_len,
@@ -957,6 +1026,7 @@ uint32_t ble_gap_adv_ch_mask_t_dec(uint8_t const * const p_buf,
 
     SER_STRUCT_DEC_END;
 }
+#endif
 
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 4
 uint32_t ble_gap_enable_params_t_enc(void const * const p_void_struct,
@@ -1064,14 +1134,27 @@ uint32_t ble_gap_adv_params_t_enc(void const * const p_void_struct,
                                  uint32_t * const   p_index)
 {
     SER_STRUCT_ENC_BEGIN(ble_gap_adv_params_t);
-
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 6
     SER_PUSH_uint8(&p_struct->type);
     SER_PUSH_COND(p_struct->p_peer_addr, ble_gap_addr_t_enc);
     SER_PUSH_uint8(&p_struct->fp);
     SER_PUSH_uint16(&p_struct->interval);
     SER_PUSH_uint16(&p_struct->timeout);
     SER_PUSH_FIELD(&p_struct->channel_mask, ble_gap_adv_ch_mask_t_enc);
+#else
+    SER_PUSH_FIELD(&p_struct->properties, ble_gap_adv_properties_t_enc);
+    SER_PUSH_COND(p_struct->p_peer_addr, ble_gap_addr_t_enc);
+    SER_PUSH_uint32(&p_struct->interval);
+    SER_PUSH_uint16(&p_struct->duration);
+    SER_PUSH_uint8(&p_struct->max_adv_evts);
+    SER_PUSH_buf(p_struct->channel_mask, 5);
+    SER_PUSH_uint8(&p_struct->filter_policy);
+    SER_PUSH_uint8(&p_struct->primary_phy);
+    SER_PUSH_uint8(&p_struct->secondary_phy);
+    uint8_t temp = p_struct->set_id | (p_struct->scan_req_notification << 4);
+    SER_PUSH_uint8(&temp);
 
+#endif
     SER_STRUCT_ENC_END;
 }
 
@@ -1082,12 +1165,31 @@ uint32_t ble_gap_adv_params_t_dec(uint8_t const * const p_buf,
 {
     SER_STRUCT_DEC_BEGIN(ble_gap_adv_params_t);
 
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 6
     SER_PULL_uint8(&p_struct->type);
     SER_PULL_COND(&p_struct->p_peer_addr, ble_gap_addr_t_dec);
     SER_PULL_uint8(&p_struct->fp);
     SER_PULL_uint16(&p_struct->interval);
     SER_PULL_uint16(&p_struct->timeout);
     SER_PULL_FIELD(&p_struct->channel_mask, ble_gap_adv_ch_mask_t_dec);
+#else
+    SER_PULL_FIELD(&p_struct->properties, ble_gap_adv_properties_t_dec);
+    SER_PULL_COND(&p_struct->p_peer_addr, ble_gap_addr_t_dec);
+    SER_PULL_uint32(&p_struct->interval);
+    SER_PULL_uint16(&p_struct->duration);
+    SER_PULL_uint8(&p_struct->max_adv_evts);
+    uint8_t * p_channel_mask = p_struct->channel_mask;
+    SER_PULL_buf((uint8_t **)&p_channel_mask, 5, 5);
+    SER_PULL_uint8(&p_struct->filter_policy);
+    SER_PULL_uint8(&p_struct->primary_phy);
+    SER_PULL_uint8(&p_struct->secondary_phy);
+
+    uint8_t temp;
+    SER_PULL_uint8(&temp);
+    p_struct->set_id = temp & 0x0F;
+    p_struct->scan_req_notification = (temp & 0x10) ? 1 : 0;
+
+#endif
 
     SER_STRUCT_DEC_END;
 }
@@ -1235,6 +1337,7 @@ uint32_t ble_gap_privacy_params_t_dec(uint8_t const * const p_buf,
 
 
 #if NRF_SD_BLE_API_VERSION >= 4
+#ifndef S112
 uint32_t ble_gap_opt_compat_mode_1_t_enc(void const * const p_void_struct,
                                       uint8_t * const    p_buf,
                                       uint32_t           buf_len,
@@ -1261,6 +1364,7 @@ uint32_t ble_gap_opt_compat_mode_1_t_dec(uint8_t const * const p_buf,
 
     SER_STRUCT_DEC_END;
 }
+#endif //!S112
 
 uint32_t ble_gap_opt_slave_latency_disable_t_enc(void const * const p_void_struct,
                                       uint8_t * const    p_buf,
@@ -1325,9 +1429,17 @@ uint32_t ble_gap_cfg_role_count_t_enc(void const * const p_void_struct,
     SER_STRUCT_ENC_BEGIN(ble_gap_cfg_role_count_t);
 
     SER_PUSH_uint8(&p_struct->periph_role_count);
+#ifndef S112
     SER_PUSH_uint8(&p_struct->central_role_count);
     SER_PUSH_uint8(&p_struct->central_sec_count);
-
+#endif //!S112
+#if NRF_SD_BLE_API_VERSION > 5
+    SER_PUSH_uint8(&p_struct->adv_set_count);
+#ifndef S112
+    uint32_t temp = p_struct->qos_channel_survey_role_available;
+    SER_PUSH_uint8(&temp);
+#endif //!S112
+#endif
     SER_STRUCT_ENC_END;
 }
 
@@ -1339,12 +1451,22 @@ uint32_t ble_gap_cfg_role_count_t_dec(uint8_t const * const p_buf,
     SER_STRUCT_DEC_BEGIN(ble_gap_cfg_role_count_t);
 
     SER_PULL_uint8(&p_struct->periph_role_count);
+#ifndef S112
     SER_PULL_uint8(&p_struct->central_role_count);
     SER_PULL_uint8(&p_struct->central_sec_count);
-
+#endif //!S112
+#if NRF_SD_BLE_API_VERSION > 5
+    SER_PULL_uint8(&p_struct->adv_set_count);
+#ifndef S112
+    uint8_t temp;
+    SER_PULL_uint8(&temp);
+    p_struct->qos_channel_survey_role_available = temp;
+#endif //!S112
+#endif
     SER_STRUCT_DEC_END;
 }
 
+#ifndef S112
 uint32_t ble_gap_data_length_params_t_enc(void const * const p_void_struct,
                                       uint8_t * const    p_buf,
                                       uint32_t           buf_len,
@@ -1402,6 +1524,7 @@ uint32_t ble_gap_data_length_limitation_t_dec(uint8_t const * const p_buf,
 
     SER_STRUCT_DEC_END;
 }
+#endif //!S112
 #endif
 
 #if NRF_SD_BLE_API_VERSION == 4
@@ -1458,6 +1581,168 @@ uint32_t ble_gap_phys_t_dec(uint8_t const * const p_buf,
 
     SER_PULL_uint8(&p_struct->tx_phys);
     SER_PULL_uint8(&p_struct->rx_phys);
+
+    SER_STRUCT_DEC_END;
+}
+#endif
+
+#if NRF_SD_BLE_API_VERSION > 5
+uint32_t ble_gap_adv_properties_t_enc(void const * const p_void_struct,
+                                      uint8_t * const    p_buf,
+                                      uint32_t           buf_len,
+                                      uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_gap_adv_properties_t);
+
+    SER_PUSH_uint8(&p_struct->type);
+    uint8_t temp = p_struct->anonymous | (p_struct->include_tx_power << 1);
+    SER_PUSH_uint8(&temp);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_gap_adv_properties_t_dec(uint8_t const * const p_buf,
+                                      uint32_t              buf_len,
+                                      uint32_t * const      p_index,
+                                      void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_gap_adv_properties_t);
+
+    SER_PULL_uint8(&p_struct->type);
+    uint8_t temp;
+    SER_PULL_uint8(&temp);
+    p_struct->anonymous        = temp & 0x01;
+    p_struct->include_tx_power = (temp & 0x02) ? 1 : 0;
+
+    SER_STRUCT_DEC_END;
+}
+
+#ifndef S112
+uint32_t ble_gap_adv_report_type_t_enc(void const * const p_void_struct,
+                                      uint8_t * const    p_buf,
+                                      uint32_t           buf_len,
+                                      uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_gap_adv_report_type_t);
+
+    uint16_t temp =
+            (p_struct->connectable   << 0) |
+            (p_struct->scannable     << 1) |
+            (p_struct->directed      << 2) |
+            (p_struct->scan_response << 3) |
+            (p_struct->extended_pdu  << 4) |
+            (p_struct->status        << 5) |
+            (p_struct->reserved      << 7);
+    SER_PUSH_uint16(&temp);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_gap_adv_report_type_t_dec(uint8_t const * const p_buf,
+                                      uint32_t              buf_len,
+                                      uint32_t * const      p_index,
+                                      void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_gap_adv_report_type_t);
+
+    uint16_t temp;
+    SER_PULL_uint16(&temp);
+    p_struct->connectable   =  (temp >> 0) & 0x01;
+    p_struct->scannable     =  (temp >> 1) & 0x01;
+    p_struct->directed      =  (temp >> 2) & 0x01;
+    p_struct->scan_response =  (temp >> 3) & 0x01;
+    p_struct->extended_pdu  =  (temp >> 4) & 0x01;
+    p_struct->status        =  (temp >> 5) & 0x03;
+    p_struct->reserved      =  (temp >> 7) & 0x1FF;
+
+    SER_STRUCT_DEC_END;
+}
+
+uint32_t ble_gap_aux_pointer_t_enc(void const * const p_void_struct,
+                                   uint8_t * const    p_buf,
+                                   uint32_t           buf_len,
+                                   uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_gap_aux_pointer_t);
+
+    SER_PUSH_uint16(&p_struct->aux_offset);
+    SER_PUSH_uint8(&p_struct->aux_phy);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_gap_aux_pointer_t_dec(uint8_t const * const p_buf,
+                                   uint32_t              buf_len,
+                                   uint32_t * const      p_index,
+                                   void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_gap_aux_pointer_t);
+
+    SER_PULL_uint16(&p_struct->aux_offset);
+    SER_PULL_uint8(&p_struct->aux_phy);
+
+    SER_STRUCT_DEC_END;
+}
+#endif //!S112
+
+uint32_t ble_gap_adv_data_t_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_gap_adv_data_t);
+
+    SER_PUSH_FIELD(&p_struct->adv_data, ble_data_t_enc);
+    SER_PUSH_FIELD(&p_struct->scan_rsp_data, ble_data_t_enc);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_gap_adv_data_t_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_gap_adv_data_t);
+
+    SER_PULL_FIELD(&p_struct->adv_data, ble_data_t_dec);
+    SER_PULL_FIELD(&p_struct->scan_rsp_data, ble_data_t_dec);
+
+    SER_STRUCT_DEC_END;
+}
+
+uint32_t ble_gap_evt_adv_set_terminated_t_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_gap_evt_adv_set_terminated_t);
+
+    SER_PUSH_uint8(&p_struct->reason);
+    SER_PUSH_uint8(&p_struct->adv_handle);
+    SER_PUSH_uint8(&p_struct->num_completed_adv_events);
+    SER_PUSH_uint16(&p_struct->adv_data.adv_data.len);
+    SER_PUSH_COND(&p_struct->adv_data.adv_data.p_data, NULL);
+    SER_PUSH_uint16(&p_struct->adv_data.scan_rsp_data.len);
+    SER_PUSH_COND(&p_struct->adv_data.scan_rsp_data.p_data, NULL);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_gap_evt_adv_set_terminated_t_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_gap_evt_adv_set_terminated_t);
+
+    SER_PULL_uint8(&p_struct->reason);
+    SER_PULL_uint8(&p_struct->adv_handle);
+    SER_PULL_uint8(&p_struct->num_completed_adv_events);
+    SER_PULL_uint16(&p_struct->adv_data.adv_data.len);
+    SER_PULL_COND(&p_struct->adv_data.adv_data.p_data, NULL);
+    SER_PULL_uint16(&p_struct->adv_data.scan_rsp_data.len);
+    SER_PULL_COND(&p_struct->adv_data.scan_rsp_data.p_data, NULL);
 
     SER_STRUCT_DEC_END;
 }
