@@ -983,7 +983,7 @@ typedef struct
 typedef struct
 {
   uint16_t conn_handle;                                     /**< Connection Handle on which event occurred. */
-  union gap_evt_params_union                                /**< union alternative identified by evt_id in enclosing struct. */
+  union                                                     /**< union alternative identified by evt_id in enclosing struct. */
   {
     ble_gap_evt_connected_t                   connected;                    /**< Connected Event Parameters. */
     ble_gap_evt_disconnected_t                disconnected;                 /**< Disconnected Event Parameters. */

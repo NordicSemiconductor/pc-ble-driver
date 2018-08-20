@@ -170,7 +170,7 @@ typedef struct
 typedef struct
 {
   uint16_t      handle;                /**< Attribute handle. */
-  union gattc_attr_info_union
+  union
   {
     ble_uuid_t    uuid16;              /**< 16-bit Attribute UUID. */
     ble_uuid128_t uuid128;             /**< 128-bit Attribute UUID. */
@@ -287,7 +287,7 @@ typedef struct
   uint16_t            conn_handle;                /**< Connection Handle on which event occured. */
   uint16_t            gatt_status;                /**< GATT status code for the operation, see @ref BLE_GATT_STATUS_CODES. */
   uint16_t            error_handle;               /**< In case of error: The handle causing the error. In all other cases @ref BLE_GATT_HANDLE_INVALID. */
-  union gattc_evt_params_union
+  union
   {
     ble_gattc_evt_prim_srvc_disc_rsp_t          prim_srvc_disc_rsp;         /**< Primary Service Discovery Response Event Parameters. */
     ble_gattc_evt_rel_disc_rsp_t                rel_disc_rsp;               /**< Relationship Discovery Response Event Parameters. */
