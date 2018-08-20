@@ -6,6 +6,10 @@ _build
 **/build
 /sdk/
 
+# Temporary files
+*.bak
+*.TMP
+
 # Object files
 *.o
 *.ko
