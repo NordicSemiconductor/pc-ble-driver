@@ -1,0 +1,207 @@
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+index 3bb176a..e420377 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+@@ -8,6 +8,8 @@
+ #endif
+ // <h> nRF_BLE
+
++#define NRF_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+ 
+@@ -191,7 +191,7 @@
+ 
+ 
+ #ifndef APP_SCHEDULER_WITH_PROFILER
+-#define APP_SCHEDULER_WITH_PROFILER 0
++#define APP_SCHEDULER_WITH_PROFILER 1
+ #endif
+
+ #endif //APP_SCHEDULER_ENABLED
+diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
+index 1b31fcb..9cc334e 100644
+--- a/components/serialization/common/ser_config.h
++++ b/components/serialization/common/ser_config.h
+@@ -40,6 +40,6 @@ 
+ /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
+  *  packet length). */
+-#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (uint32_t)(384)
+-#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (uint32_t)(384)
++#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (uint32_t)(500)
++#define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (uint32_t)(500)
+
+ #define SER_HAL_TRANSPORT_MAX_PKT_SIZE ((SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE) >= \
+@@ -70,7 +70,7 @@ extern "C" {
+ 
+ /** UART transmission parameters */
+ #define SER_PHY_UART_FLOW_CTRL          APP_UART_FLOW_CONTROL_ENABLED
+-#define SER_PHY_UART_PARITY             true
++#define SER_PHY_UART_PARITY             false
+ #define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
+ 
+ /** Find UART baud rate value based on the chosen register setting. */
+@@ -114,6 +114,8 @@ extern "C" {
+
+ #define SER_MAX_CONNECTIONS 8
+
++#define HCI_LINK_CONTROL
++
+
+ #ifdef __cplusplus
+ }
+diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+index 5d413ce..2517c43 100644
+--- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
++++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+@@ -38,10 +38,10 @@ extern "C" {
+ /* UART configuration */
+ #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOW
+ 
+-#define SER_PHY_UART_RX                         SER_CON_RX_PIN
+-#define SER_PHY_UART_TX                         SER_CON_TX_PIN
+-#define SER_PHY_UART_CTS                        SER_CON_CTS_PIN
+-#define SER_PHY_UART_RTS                        SER_CON_RTS_PIN
++#define SER_PHY_UART_RX                         RX_PIN_NUMBER
++#define SER_PHY_UART_TX                         TX_PIN_NUMBER
++#define SER_PHY_UART_CTS                        CTS_PIN_NUMBER
++#define SER_PHY_UART_RTS                        RTS_PIN_NUMBER
+ 
+ 
+ #ifdef __cplusplus
+diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+index 216ed97..147d7d5 100644
+--- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+@@ -39,6 +39,8 @@
+                                  (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
+ #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
+
++#define PKT_TYPE_RESET 5
++
+ #define TX_EVT_QUEUE_SIZE            16
+ #define RX_EVT_QUEUE_SIZE            16
+ #define PKT_TYPE_VENDOR_SPECIFIC     14                                                /**< Packet type vendor specific. */
+@@ -50,7 +52,7 @@
+ #define INITIAL_SEQ_NUMBER           INITIAL_ACK_NUMBER_EXPECTED                       /**< Initial acknowledge number transmitted. */
+ #define INVALID_PKT_TYPE             0xFFFFFFFFu                                       /**< Internal invalid packet type value. */
+ #define MAX_TRANSMISSION_TIME_ms     (MAX_PACKET_SIZE_IN_BITS * BAUD_TIME_us / 1000uL) /**< Max transmission time of a single application packet over UART in units of mseconds. */
+-#define RETRANSMISSION_TIMEOUT_IN_ms (10uL * MAX_TRANSMISSION_TIME_ms)                 /**< Retransmission timeout for application packet in units of mseconds. */
++#define RETRANSMISSION_TIMEOUT_IN_ms (50uL * MAX_TRANSMISSION_TIME_ms)                /**< Retransmission timeout for application packet in units of mseconds. */
+
+ #ifdef  HCI_LINK_CONTROL
+ #define HCI_PKT_SYNC        0x7E01u                                                    /**< Link Control Packet: type SYNC */
+@@ -770,6 +772,10 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
+
+         NRF_LOG_DEBUG("EVT_PKT_RECEIVED 0x%X/%u\r\n", packet_type,
+             p_event->evt_params.received_pkt.num_of_bytes);
++        if (packet_type == PKT_TYPE_RESET)
++        {
++            NVIC_SystemReset();
++        }
+
+         if (packet_type == PKT_TYPE_ACK )
+         {
+diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/components/serialization/connectivity/ser_conn_error_handling.c
+index 2fdd1e6..adb53cc 100644
+--- a/components/serialization/connectivity/ser_conn_error_handling.c
++++ b/components/serialization/connectivity/ser_conn_error_handling.c
+@@ -74,7 +74,7 @@ void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
+ 
+         /* ble_debug_assert_handler(error_code, line_num, p_file_name); */
+ 
+-#if 0
++#if 1
+         /* Reset the chip. Should be used in the release version. */
+         NVIC_SystemReset();
+ #else   /* Debug version. */
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+index d4a4883..346093a 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+@@ -28,6 +28,7 @@
+ #include "ser_hal_transport.h"
+ #include "ser_conn_handlers.h"
+ #include "boards.h"
++#include "ser_config.h"
+
+ #define NRF_LOG_MODULE_NAME "CONN"
+ #include "nrf_log.h"
+@@ -35,6 +36,39 @@
+
+ #include "ser_phy_debug_comm.h"
+
++#if defined ( __CC_ARM )
++typedef struct __attribute__((packed))
++{
++        uint32_t    magic_number;               /* Magic number to verify the presence of this structure in memory */
++        uint32_t    struct_version     : 8;     /* Version of this struct format */
++        uint32_t    rfu0               : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    revision_hash;              /* Unique revision identifier */
++        uint32_t    version_major      : 8;     /* Major version number */
++        uint32_t    version_minor      : 8;     /* Minor version number */
++        uint32_t    version_patch      : 8;     /* Patch version number */
++        uint32_t    rfu1               : 8;     /* Reserved for future use, shall be 0xFF */
++        uint32_t    sd_ble_api_version : 8;     /* SoftDevice BLE API version number */
++        uint32_t    transport_type     : 8;     /* Connectivity transport type, 1 = UART HCI */
++        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
++        uint32_t    baud_rate;                  /* UART transport baud rate */
++} version_info_t;
++
++static const version_info_t version_info __attribute__((at(0x20000))) = {
++    .magic_number       = 0x46D8A517,
++    .struct_version     = 2,
++    .rfu0               = 0xFFFFFF,
++    .revision_hash      = 0,
++    .version_major      = 1,
++    .version_minor      = 2,
++    .version_patch      = 3,
++    .rfu1               = 0xFF,
++    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
++    .transport_type     = 1,
++    .rfu2               = 0xFFFF,
++    .baud_rate          = SER_PHY_UART_BAUDRATE_VAL,
++};
++#endif
++
+ /**@brief Main function of the connectivity application. */
+ int main(void)
+ {
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx b//examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
+index 0f597ba..2f6bfb4 100644
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/arm5_no_packs/ble_connectivity_s132_hci_pca10040.uvprojx
+@@ -329,8 +329,8 @@
+               </OCR_RVCT8>
+               <OCR_RVCT9>
+                 <Type>0</Type>
+-                <StartAddress>0x20005cc0</StartAddress>
+-                <Size>0xa340</Size>
++                <StartAddress>0x2000bcc0</StartAddress>
++                <Size>0x4340</Size>
+               </OCR_RVCT9>
+               <OCR_RVCT10>
+                 <Type>0</Type>
+@@ -361,7 +361,7 @@
+             <vShortEn>0</vShortEn>
+             <vShortWch>0</vShortWch>
+             <VariousControls>
+-              <MiscControls></MiscControls>
++              <MiscControls>--reduce-paths</MiscControls>
+               <Define> HCI_TIMER2 BLE_STACK_SUPPORT_REQD __STACK_SIZE=2048 __HEAP_SIZE=1024 BOARD_PCA10040 NRF52_PAN_12 NRF52_PAN_15 NRF52_PAN_20 NRF52_PAN_31 CONFIG_GPIO_AS_PINRESET NRF52_PAN_36 NRF52_PAN_51 NRF52_PAN_54 NRF52_PAN_55 NRF52_PAN_58 NRF52_PAN_64 S132 NRF_SD_BLE_API_VERSION=3 SER_CONNECTIVITY BSP_DEFINES_ONLY NRF52832 NRF52 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
+               <Undefine></Undefine>
+               <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\boards;..\..\..\..\..\..\components\drivers_nrf\clock;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\serialization\common;..\..\..\..\..\..\components\serialization\common\struct_ser\s132;..\..\..\..\..\..\components\serialization\common\transport;..\..\..\..\..\..\components\serialization\common\transport\ser_phy;..\..\..\..\..\..\components\serialization\common\transport\ser_phy\config;..\..\..\..\..\..\components\serialization\connectivity;..\..\..\..\..\..\components\serialization\connectivity\codecs\common;..\..\..\..\..\..\components\serialization\connectivity\codecs\s132\middleware;..\..\..\..\..\..\components\serialization\connectivity\codecs\s132\serializers;..\..\..\..\..\..\components\serialization\connectivity\hal;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s132\headers;..\..\..\..\..\..\components\softdevice\s132\headers\nrf52;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\..\external\segger_rtt;..\config</IncludePath>
+diff --git a/components/serialization/common/ble_serialization.h b/components/serialization/common/ble_serialization.h
+index a339754..8fb049b 100644
+--- a/components/serialization/common/ble_serialization.h
++++ b/components/serialization/common/ble_serialization.h
+@@ -122,7 +122,7 @@
+
+ /** Maximum length of p_value in \ref ble_gattc_write_params_t. See Bluetooth 4.0 spec: 3.4.5.1 and
+  *  3.4.5.3. */
+-#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (GATT_MTU_SIZE_DEFAULT - 3)
++#define BLE_GATTC_WRITE_P_VALUE_LEN_MAX    (247 - 3)
+
+ /** See Bluetooth 4.0 spec: 3.4.4.7. */ 
+ #define BLE_GATTC_HANDLE_COUNT_LEN_MAX     ((GATT_MTU_SIZE_DEFAULT - 1) / 2)

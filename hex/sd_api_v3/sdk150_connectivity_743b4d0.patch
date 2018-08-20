@@ -1,0 +1,32 @@
+--- "a/examples/connectivity/ble_connectivity/main.c"
++++ "b/examples/connectivity/ble_connectivity/main.c"
+@@ -161,9 +161,9 @@
+     .struct_version     = 2,
+     .rfu0               = 0xFFFFFF,
+     .revision_hash      = 0,
+-    .version_major      = 2,
+-    .version_minor      = 0,
+-    .version_patch      = 1,
++    .version_major      = 1,
++    .version_minor      = 2,
++    .version_patch      = 3,
+     .rfu1               = 0xFF,
+     .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
+     .transport_type     = 1,
+--- a/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
++++ b/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
+@@ -7,7 +7,6 @@
+ #include "ble_serialization.h"
+ #include "nrf_log.h"
+ #include "ser_conn_handlers.h"
+-#include "ser_hal_transport.h"
+ static bool m_reset_ongoing;
+
+ static void sd_start_from_app_sched(void * p_event_data, uint16_t event_size)
+@@ -39,7 +38,6 @@ bool soft_reset_trigger(void)
+     }
+
+     m_reset_ongoing = true;
+-    ser_hal_transport_reset();
+     nrf_sdh_disable_request();
+ #ifdef BLE_STACK_SUPPORT_REQD
