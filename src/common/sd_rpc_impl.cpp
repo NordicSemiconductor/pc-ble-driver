@@ -48,59 +48,44 @@
 
 #include <cstdlib>
 
+
 uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size)
 {
-    std::list<SerialPortDesc*> descs;
-
-    if(!size)
+    if(size == nullptr)
     {
         return NRF_ERROR_NULL;
     }
 
-    auto ret = EnumSerialPorts(descs);
-
-    if(ret != NRF_SUCCESS)
-    {
-        return ret;
-    }
+    const std::list<SerialPortDesc> &descs = EnumSerialPorts();
 
     if(descs.size() > *size)
     {
-        ret = NRF_ERROR_DATA_SIZE;
+        return NRF_ERROR_DATA_SIZE;
     }
 
     *size = static_cast<uint32_t>(descs.size());
 
-    if(ret == NRF_SUCCESS)
-    {
-        auto i = 0;
-        for(auto it = descs.begin(); it != descs.end(); ++it)
+    int i = 0;
+    for(auto &desc : descs)
         {
-			strcpy_s(serial_port_descs[i].port, SD_RPC_MAXPATHLEN, (*it)->comName.c_str());
-			strcpy_s(serial_port_descs[i].manufacturer, SD_RPC_MAXPATHLEN, (*it)->manufacturer.c_str());
-			strcpy_s(serial_port_descs[i].serialNumber, SD_RPC_MAXPATHLEN, (*it)->serialNumber.c_str());
-			strcpy_s(serial_port_descs[i].pnpId, SD_RPC_MAXPATHLEN, (*it)->pnpId.c_str());
-			strcpy_s(serial_port_descs[i].locationId, SD_RPC_MAXPATHLEN, (*it)->locationId.c_str());
-			strcpy_s(serial_port_descs[i].vendorId, SD_RPC_MAXPATHLEN, (*it)->vendorId.c_str());
-			strcpy_s(serial_port_descs[i].productId, SD_RPC_MAXPATHLEN, (*it)->productId.c_str());
-
-            ++i;
-        }
+        strncpy(serial_port_descs[i].port, desc.comName.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].manufacturer, desc.manufacturer.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].serialNumber, desc.serialNumber.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].pnpId, desc.pnpId.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].locationId, desc.locationId.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].vendorId, desc.vendorId.c_str(), SD_RPC_MAXPATHLEN);
+        strncpy(serial_port_descs[i].productId, desc.productId.c_str(), SD_RPC_MAXPATHLEN);
+        ++i;
     }
 
-    for(auto it = descs.begin(); it != descs.end(); ++it)
-    {
-       delete *it;
-    }
-
-    return ret;
+    return NRF_SUCCESS;
 }
 
 physical_layer_t *sd_rpc_physical_layer_create_uart(const char * port_name, uint32_t baud_rate, sd_rpc_flow_control_t flow_control, sd_rpc_parity_t parity)
 {
     const auto physicalLayer = static_cast<physical_layer_t *>(malloc(sizeof(physical_layer_t)));
 
-    UartCommunicationParameters uartSettings;
+    UartCommunicationParameters uartSettings = {};
     uartSettings.portName = port_name;
     uartSettings.baudRate = baud_rate;
 
