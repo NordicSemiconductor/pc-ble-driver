@@ -43,17 +43,6 @@ else()
     include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 endif()
 
-# Use multithreaded Boost libraries
-set(Boost_USE_MULTITHREADED ON)
-
-# Use static boost libraries so the dynamic library 
-# can run anywhere
-set(Boost_USE_STATIC_LIBS   ON)
-
-# Find the necessary boost components on the system.
-# Minimum version required is 1.67.0
-find_package ( Boost 1.67.0 REQUIRED COMPONENTS thread system regex date_time chrono )
-
 # Add or remove SD API versions here
 set(SD_API_VER_NUMS 2 3 5 6)
 list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
@@ -149,8 +138,6 @@ function(build_metadata dir dst)
     string(CONCAT str ${str} "* C Compiler: " "${CMAKE_C_COMPILER_ID} (${ARCH_BITS}-bit)" "\n") 
     string(CONCAT str ${str} "* C++ Compiler: " "${CMAKE_CXX_COMPILER_ID} (${ARCH_BITS}-bit)" "\n") 
     string(CONCAT str ${str} "* CMake version: " ${CMAKE_VERSION} "\n") 
-    string(CONCAT str ${str} "* Boost version: " ${Boost_MAJOR_VERSION} "." ${Boost_MINOR_VERSION} "." ${Boost_SUBMINOR_VERSION} "\n") 
-    string(CONCAT str ${str} "* Boost libs: " ${Boost_LIBRARY_DIRS} "\n") 
     string(CONCAT str ${str} "* SD API Versions:") 
     foreach(SD_API_VER ${SD_API_VERS})
         string(CONCAT str ${str} " <${SD_API_VER}>") 
