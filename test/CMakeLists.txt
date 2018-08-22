@@ -29,6 +29,7 @@ foreach(SD_API_VER ${SD_API_VER_NUMS})
         add_executable(${test_name} ${test_src})
         target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER} -DNRF_LOG_FILENAME="${test_name}.txt")
         target_include_directories(${test_name} PRIVATE ../src/sd_api_v${SD_API_VER}/sdk/components/softdevice/s132/headers)
+        target_include_directories(${test_name} PRIVATE ../src/sd_api_v${SD_API_VER}/sdk/components/softdevice/s140/headers)
 
         if(WIN32)
             target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${SD_API_VER})

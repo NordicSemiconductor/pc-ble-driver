@@ -44,14 +44,14 @@ foreach(SD_API_VER ${SD_API_VERS})
         list(APPEND LIB_${SD_API_VER}_C_SRC_FILES ${LIB_NEWER_SDK_API_COMMON_C_SRC_FILES})
     endif()
 
-    # message(STATUS "${LIB_${SD_API_VER}_C_SRC_FILES}")
+    message(STATUS "SD: ${SD_API_VER}: C_SRC: ${LIB_${SD_API_VER}_C_SRC_FILES}")
 
     set(LIB_${SD_API_VER}_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
                           ${LIB_SDK_${SD_API_VER}_CPP_SRC_FILES}
                           ${LIB_TRANSPORT_CPP_SRC_FILES}
     )
 
-    message(STATUS "SD: ${SD_API_VER}: ${LIB_${SD_API_VER}_CPP_SRC_FILES}")
+    message(STATUS "SD: ${SD_API_VER}: CPP_SRC: ${LIB_${SD_API_VER}_CPP_SRC_FILES}")
 
     # Force .c files to be compiled with the C++ compiler
     if(NOT APPLE)
@@ -121,6 +121,7 @@ foreach(SD_API_VER ${SD_API_VERS})
             src/sd_api_common/sdk/components/serialization/common
             src/sd_api_common/sdk/components/serialization/common/struct_ser/ble
             src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
+            src/${SD_API_VER_L}/sdk/components/softdevice/s140/headers
             src/${SD_API_VER_L}
         )
     else()

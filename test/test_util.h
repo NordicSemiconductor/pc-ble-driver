@@ -108,7 +108,18 @@ namespace testutil
     static bool findAdvName(const ble_gap_evt_adv_report_t *p_adv_report, const std::string &name_to_find)
     {
         std::vector<uint8_t> advData;
-        advData.assign((uint8_t *)p_adv_report->data, (uint8_t *)p_adv_report->data + p_adv_report->dlen);
+
+        uint8_t *data;
+        uint16_t data_len;
+
+#if NRF_SD_BLE_API >= 6
+        data = (uint8_t*)p_adv_report->data.p_data;
+        data_len = p_adv_report->data.len;
+#else
+        data = (uint8_t*)p_adv_report->data;
+        data_len = p_adv_report->dlen;
+#endif
+        advData.assign(data, data + data_len);
 
         std::vector<uint8_t> advTypeData;
         std::vector<uint8_t> nameToFind;

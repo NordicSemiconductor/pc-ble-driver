@@ -1,0 +1,203 @@
+diff -r -u -w a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
+--- a/components/serialization/common/ser_config.h
++++ b/components/serialization/common/ser_config.h
+@@ -99,7 +99,7 @@
+ 
+ /** UART transmission parameters */
+ #define SER_PHY_UART_FLOW_CTRL          NRF_UART_HWFC_ENABLED
+-#define SER_PHY_UART_PARITY             NRF_UART_PARITY_INCLUDED
++#define SER_PHY_UART_PARITY             NRF_UART_PARITY_EXCLUDED
+ #define SER_PHY_UART_BAUDRATE_VAL       1000000
+ 
+ #define SER_PHY_UART_BAUDRATE CONCAT_2(NRF_UART_BAUDRATE_,SER_PHY_UART_BAUDRATE_VAL)
+@@ -110,6 +110,8 @@
+ 
+ #define SER_MAX_CONNECTIONS 8
+ 
++#define HCI_LINK_CONTROL
++
+ #ifndef SER_MAX_ADV_DATA
+ #define SER_MAX_ADV_DATA 256
+ #endif
+diff -r -u -w a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+--- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
++++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+@@ -69,10 +69,10 @@
+ /* UART configuration */
+ #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOWEST
+ 
+-#define SER_PHY_UART_RX                         SER_CON_RX_PIN
+-#define SER_PHY_UART_TX                         SER_CON_TX_PIN
+-#define SER_PHY_UART_CTS                        SER_CON_CTS_PIN
+-#define SER_PHY_UART_RTS                        SER_CON_RTS_PIN
++#define SER_PHY_UART_RX                         RX_PIN_NUMBER
++#define SER_PHY_UART_TX                         TX_PIN_NUMBER
++#define SER_PHY_UART_CTS                        CTS_PIN_NUMBER
++#define SER_PHY_UART_RTS                        RTS_PIN_NUMBER
+ 
+ 
+ #ifdef __cplusplus
+diff -r -u -w a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+--- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+@@ -67,6 +67,8 @@
+                                  (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
+ #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
+ 
++#define PKT_TYPE_RESET 5
++
+ #define TX_EVT_QUEUE_SIZE            16
+ #define RX_EVT_QUEUE_SIZE            16
+ #define PKT_TYPE_VENDOR_SPECIFIC     14                                                /**< Packet type vendor specific. */
+diff -r -u -w a/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c b/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
+--- a/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
++++ b/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
+@@ -67,10 +67,10 @@
+ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
+                                     app_usbd_cdc_acm_user_event_t event);
+ 
+-#define CDC_ACM_COMM_INTERFACE  0
++#define CDC_ACM_COMM_INTERFACE  1
+ #define CDC_ACM_COMM_EPIN       NRF_DRV_USBD_EPIN2
+ 
+-#define CDC_ACM_DATA_INTERFACE  1
++#define CDC_ACM_DATA_INTERFACE  2
+ #define CDC_ACM_DATA_EPIN       NRF_DRV_USBD_EPIN1
+ #define CDC_ACM_DATA_EPOUT      NRF_DRV_USBD_EPOUT1
+ 
+diff -r -u -w a/examples/connectivity/ble_connectivity/main.c b/examples/connectivity/ble_connectivity/main.c
+--- a/examples/connectivity/ble_connectivity/main.c
++++ b/examples/connectivity/ble_connectivity/main.c
+@@ -57,6 +57,7 @@
+ #include "ser_conn_handlers.h"
+ #include "boards.h"
+ #include "nrf_drv_clock.h"
++#include "ser_config.h"
+ 
+ #include "nrf_log.h"
+ #include "nrf_log_ctrl.h"
+@@ -64,6 +65,38 @@
+ 
+ #include "ser_phy_debug_comm.h"
+ 
++#if defined ( __CC_ARM )
++typedef struct __attribute__((packed))
++{
++        uint32_t    magic_number;               /* Magic number to verify the presence of this structure in memory */
++        uint32_t    struct_version     : 8;     /* Version of this struct format */
++        uint32_t    rfu0               : 24;    /* Reserved for future use, shall be 0xFFFFFF */
++        uint32_t    revision_hash;              /* Unique revision identifier */
++        uint32_t    version_major      : 8;     /* Major version number */
++        uint32_t    version_minor      : 8;     /* Minor version number */
++        uint32_t    version_patch      : 8;     /* Patch version number */
++        uint32_t    rfu1               : 8;     /* Reserved for future use, shall be 0xFF */
++        uint32_t    sd_ble_api_version : 8;     /* SoftDevice BLE API version number */
++        uint32_t    transport_type     : 8;     /* Connectivity transport type, 1 = UART HCI */
++        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
++        uint32_t    baud_rate;                  /* UART transport baud rate */
++} version_info_t;
++static const version_info_t version_info __attribute__((at(0x30000))) = {
++    .magic_number       = 0x46D8A517,
++    .struct_version     = 2,
++    .rfu0               = 0xFFFFFF,
++    .revision_hash      = 0,
++    .version_major      = 2,
++    .version_minor      = 0,
++    .version_patch      = 1,
++    .rfu1               = 0xFF,
++    .sd_ble_api_version = NRF_SD_BLE_API_VERSION,
++    .transport_type     = 1,
++    .rfu2               = 0xFFFF,
++    .baud_rate          = SER_PHY_UART_BAUDRATE_VAL,
++};
++#endif
++
+ #if defined(APP_USBD_ENABLED) && APP_USBD_ENABLED
+ #include "app_usbd_serial_num.h"
+ #ifdef BOARD_PCA10059
+@@ -146,12 +179,6 @@
+         /* Nothing to do */
+     }
+ #endif
+-    if (!NRF_LOG_PROCESS())
+-    {
+-        /* Sleep waiting for an application event. */
+-        uint32_t err_code = sd_app_evt_wait();
+-        APP_ERROR_CHECK(err_code);
+-    }
+ }
+ 
+ /**@brief Main function of the connectivity application. */
+@@ -196,14 +223,14 @@
+     usbd_init();
+ #endif
+ 
+-    /* Open serialization HAL Transport layer and subscribe for HAL Transport events. */
+-    err_code = ser_hal_transport_open(ser_conn_hal_transport_event_handle);
+-    APP_ERROR_CHECK(err_code);
+-
+ #if defined(APP_USBD_ENABLED) && APP_USBD_ENABLED
+     usbd_enable();
+ #endif
+ 
++    /* Open serialization HAL Transport layer and subscribe for HAL Transport events. */
++    err_code = ser_hal_transport_open(ser_conn_hal_transport_event_handle);
++    APP_ERROR_CHECK(err_code);
++
+     err_code = nrf_sdh_enable_request();
+     APP_ERROR_CHECK(err_code);
+ 
+diff -r -u -w a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+--- a/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
++++ b/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+@@ -48,6 +48,8 @@
+ #endif
+ // <h> nRF_BLE 
+ 
++#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+  
+diff -r -u -w a/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
+--- a/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h   2018-04-10 15:22:40.825481300 +0200
++++ b/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h   2018-04-13 15:13:18.704945900 +0200
+@@ -48,6 +48,8 @@
+ #endif
+ // <h> nRF_BLE 
+ 
++#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+  
+diff -r -u -w a/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h b/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
+--- a/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
++++ b/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
+@@ -133,7 +133,7 @@
+ // <i> gaps. Tailor this value to adhere to this limitation.
+ 
+ #ifndef NRF_DFU_TRIGGER_USB_INTERFACE_NUM
+-#define NRF_DFU_TRIGGER_USB_INTERFACE_NUM 2
++#define NRF_DFU_TRIGGER_USB_INTERFACE_NUM 0
+ #endif
+ 
+ // </h> 
+@@ -144,6 +144,8 @@
+ 
+ // <h> nRF_BLE 
+ 
++#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 250
++
+ //==========================================================
+ // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+  
+@@ -964,7 +966,7 @@
+ 
+ // <i> Selected Product ID
+ #ifndef APP_USBD_PID
+-#define APP_USBD_PID 0x521B
++#define APP_USBD_PID 0xC00A
+ #endif
+ 
+ // <o> APP_USBD_DEVICE_VER_MAJOR - Device version, major part  <0-99> 

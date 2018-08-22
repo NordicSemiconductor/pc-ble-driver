@@ -67,11 +67,11 @@ bool error = false;
 // Set to true when the test is complete
 bool testComplete = false;
 
-uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p, const std::string &advertisingNme, const std::vector<uint8_t> &initialCharaciteristicValue, const uint16_t characteristicValueMaxLength)
+uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p, const std::string &advertisingName, const std::vector<uint8_t> &initialCharaciteristicValue, const uint16_t characteristicValueMaxLength)
 {
     // Setup the advertisement data
     std::vector<uint8_t> advertisingData;
-    testutil::appendAdvertisingName(advertisingData, advertisingNme);
+    testutil::appendAdvertisingName(advertisingData, advertisingName);
     advertisingData.push_back(3); // Length of upcoming advertisement type
     advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
 
@@ -79,15 +79,7 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p, con
     advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
     advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
 
-    const uint8_t * sr_data = nullptr;
-    const uint8_t   sr_data_length = 0;
-
-    auto err_code = sd_ble_gap_adv_data_set(
-        p->unwrap(),
-        advertisingData.data(),
-        static_cast<uint8_t>(advertisingData.size()),
-        sr_data,
-        sr_data_length);
+    auto err_code = p->setAdvertisingData(advertisingData);
     if (err_code != NRF_SUCCESS) return err_code;
 
     // Setup service, use service UUID specified in scratchpad.target_service
@@ -152,8 +144,8 @@ TEST_CASE("test_issue_gh_112")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
-    auto central = env.serialPorts.at(0);
-    auto peripheral = env.serialPorts.at(1);
+    const auto central = env.serialPorts.at(0);
+    const auto peripheral = env.serialPorts.at(1);
 
     SECTION("reproduce_error")
     {
@@ -167,11 +159,11 @@ TEST_CASE("test_issue_gh_112")
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::shared_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Central, central.port.c_str(), baudRate));
+            new testutil::AdapterWrapper(testutil::Central, central.port, baudRate, 150));
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::shared_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Peripheral, peripheral.port.c_str(), baudRate)
+            new testutil::AdapterWrapper(testutil::Peripheral, peripheral.port, baudRate, 150)
         );
 
         // Use Heart rate service and characteristics as target for testing but
@@ -234,6 +226,12 @@ TEST_CASE("test_issue_gh_112")
                         }
                     }
                 }
+#if NRF_SD_BLE_API == 6
+                else
+                {
+                    c->startScan(true);
+                }
+#endif
                 return true;
             case BLE_GAP_EVT_TIMEOUT:
                 if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
@@ -398,7 +396,7 @@ TEST_CASE("test_issue_gh_112")
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG(c->role() << " MTU exchange request reply failed, err_code: " << err_code);
+                    NRF_LOG(c->role() << " MTU exchange request failed, err_code: " << err_code);
                     error = true;
                 }
             }
@@ -462,10 +460,10 @@ TEST_CASE("test_issue_gh_112")
             }
         });
 
-        c->setEventCallback([](const ble_evt_t * p_ble_evt) -> bool
+        c->setEventCallback([&c](const ble_evt_t * p_ble_evt) -> bool
         {
             const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG("Received an un-handled event with ID: " << eventId);
+            NRF_LOG(c->role() << " Received an un-handled event with ID: " << eventId);
             return true;
         });
 
@@ -548,6 +546,12 @@ TEST_CASE("test_issue_gh_112")
             }
         });
 
+        p->setEventCallback([&p](const ble_evt_t* p_ble_evt) -> bool {
+            const auto eventId = p_ble_evt->header.evt_id;
+            NRF_LOG(p->role() << " Received an un-handled event with ID: " << eventId);
+            return true;
+        });
+
         // Open the adapters
         REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler, testutil::logHandler) == NRF_SUCCESS);
         REQUIRE(sd_rpc_open(p->unwrap(), testutil::statusHandler, testutil::eventHandler, testutil::logHandler) == NRF_SUCCESS);
@@ -562,7 +566,7 @@ TEST_CASE("test_issue_gh_112")
         REQUIRE(p->startAdvertising() == NRF_SUCCESS);
 
         // Wait for the test to complete
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::seconds(3));
 
         REQUIRE(error == false);
         REQUIRE(testComplete == true);
