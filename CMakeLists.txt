@@ -98,13 +98,14 @@ foreach(SD_API_VER ${SD_API_VERS})
 endforeach(SD_API_VER)
 
 # Set common include directories
+find_path(ASIO_INCLUDE_DIR asio.hpp)
+
 include_directories(
         include/common
         include/common/sdk_compat
         include/common/internal
         include/common/internal/transport
-        # Include boost as a system include so that the compiler doesn't nag about issues in boost header files
-        SYSTEM ${Boost_INCLUDE_DIRS}
+        SYSTEM ${ASIO_INCLUDE_DIR}
 )
 
 # Set per-SD API version include directories and compiler definitions
