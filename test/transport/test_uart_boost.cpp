@@ -43,7 +43,7 @@
 #include "catch2/catch.hpp"
 
 #include "uart_boost.h"
-#include "test_setup.h"
+#include "../test_setup.h"
 
 #include <iostream>
 #include <string>

@@ -47,7 +47,7 @@
 #include "h5.h"
 #include "nrf_error.h"
 
-#include "test_setup.h"
+#include "../test_setup.h"
 
 #include <sstream>
 #include <string>

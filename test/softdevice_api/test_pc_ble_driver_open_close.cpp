@@ -42,7 +42,7 @@
  // Logging support
 #include "internal/log.h"
 
-#include "test_setup.h"
+#include "../test_setup.h"
 
 #include "ble.h"
 #include "sd_rpc.h"

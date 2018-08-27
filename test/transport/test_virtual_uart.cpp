@@ -1,8 +1,8 @@
 // Logging support
 #include "internal/log.h"
 
-#include "test_setup.h"
-#include "test_util.h"
+#include "../test_setup.h"
+#include "../test_util.h"
 
 // Test framework
 #define CATCH_CONFIG_MAIN
@@ -10,7 +10,7 @@
 
 #include "transport.h"
 #include "nrf_error.h"
-#include "virtual_uart.h"
+#include "../virtual_uart.h"
 
 #if defined(_MSC_VER)
 // Disable warning "This function or variable may be unsafe. Consider using _dupenv_s instead."
