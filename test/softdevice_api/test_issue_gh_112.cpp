@@ -208,11 +208,8 @@ TEST_CASE("test_issue_gh_112")
                 c->startServiceDiscovery(BLE_UUID_TYPE_BLE, BLE_UUID_HEART_RATE_SERVICE);
                 return true;
             case BLE_GAP_EVT_DISCONNECTED:
-                NRF_LOG(c->role() << " disconnected, reason: " << std::hex << gapEvent->params.disconnected.reason);
                 return true;
             case BLE_GAP_EVT_ADV_REPORT:
-                NRF_LOG(c->role() << " Received advertisement report from device: " << testutil::asText(gapEvent->params.adv_report.peer_addr));
-
                 if (testutil::findAdvName(&(gapEvent->params.adv_report), peripheralAdvName))
                 {
                     if (!c->scratchpad.connection_in_progress)

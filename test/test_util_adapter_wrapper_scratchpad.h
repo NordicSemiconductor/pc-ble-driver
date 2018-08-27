@@ -7,7 +7,7 @@
 #include "ble.h"
 
 #if NRF_SD_BLE_API == 4 || NRF_SD_BLE_API > 6
-#    error "wrapper does not take into account this version of the SoftDevice API."
+#error "wrapper does not take into account this version of the SoftDevice API."
 #endif
 
 namespace testutil {
@@ -33,9 +33,9 @@ struct AdapterWrapperScratchpad
 #endif // NRF_SD_BLE_API
 
 #if NRF_SD_BLE_API < 5
-#    define DEFAULT_MTU_SIZE GATT_MTU_SIZE_DEFAULT
+#define DEFAULT_MTU_SIZE GATT_MTU_SIZE_DEFAULT
 #else
-#    define DEFAULT_MTU_SIZE BLE_GATT_ATT_MTU_DEFAULT
+#define DEFAULT_MTU_SIZE BLE_GATT_ATT_MTU_DEFAULT
 #endif
 
 #if NRF_SD_BLE_API <= 3
@@ -46,8 +46,12 @@ struct AdapterWrapperScratchpad
     // Connect handle to connection under test
     uint16_t connection_handle = BLE_CONN_HANDLE_INVALID;
 
+    // Security related values
+    uint8_t key_type;
+    uint8_t key[16];
+
     uint16_t service_start_handle = 0;
-    uint16_t service_end_handle = 0;
+    uint16_t service_end_handle   = 0;
 
     // Handle to Client Characterstic Configuration Descriptor
     // Can be set during discovery of services
@@ -77,7 +81,7 @@ struct AdapterWrapperScratchpad
     // The GATT server side representation of the characteristic used by the test
     ble_gatts_char_handles_t gatts_characteristic_handle;
 
-    bool send_notifications = false;
+    bool send_notifications      = false;
     bool advertisement_timed_out = false;
 
     uint16_t mtu = DEFAULT_MTU_SIZE; // See #define DEFAULT_MTU_SIZE above
@@ -94,11 +98,12 @@ struct AdapterWrapperScratchpad
 
     // Data members related to sending advertisement reports
     uint8_t adv_handle;
-    ble_gap_adv_data_t adv_report_data;      // Data used for advertising
-    ble_data_t adv_report_adv_data;          // Advertisement data
-    uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE]; // Advertisement data buffer // TODO: declare magic number
-    ble_data_t adv_report_scan_rsp_data;     // Scan report data
-    ble_gap_adv_properties_t adv_properties; // Properties used for advertising
+    ble_gap_adv_data_t adv_report_data;                       // Data used for advertising
+    ble_data_t adv_report_adv_data;                           // Advertisement data
+    uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE]; // Advertisement data buffer // TODO:
+                                                              // declare magic number
+    ble_data_t adv_report_scan_rsp_data;                      // Scan report data
+    ble_gap_adv_properties_t adv_properties;                  // Properties used for advertising
 #endif
 
     ble_gap_adv_params_t adv_params; // Parameters used for advertising

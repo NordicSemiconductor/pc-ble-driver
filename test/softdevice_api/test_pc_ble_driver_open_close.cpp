@@ -1,45 +1,45 @@
 /*
-* Copyright (c) 2018 Nordic Semiconductor ASA
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without modification,
-* are permitted provided that the following conditions are met:
-*
-*   1. Redistributions of source code must retain the above copyright notice, this
-*   list of conditions and the following disclaimer.
-*
-*   2. Redistributions in binary form must reproduce the above copyright notice, this
-*   list of conditions and the following disclaimer in the documentation and/or
-*   other materials provided with the distribution.
-*
-*   3. Neither the name of Nordic Semiconductor ASA nor the names of other
-*   contributors to this software may be used to endorse or promote products
-*   derived from this software without specific prior written permission.
-*
-*   4. This software must only be used in or with a processor manufactured by Nordic
-*   Semiconductor ASA, or in or with a processor manufactured by a third party that
-*   is used in combination with a processor manufactured by Nordic Semiconductor.
-*
-*   5. Any software provided in binary or object form under this license must not be
-*   reverse engineered, decompiled, modified and/or disassembled.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-* ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *   1. Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ *   2. Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ *
+ *   3. Neither the name of Nordic Semiconductor ASA nor the names of other
+ *   contributors to this software may be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ *
+ *   4. This software must only be used in or with a processor manufactured by Nordic
+ *   Semiconductor ASA, or in or with a processor manufactured by a third party that
+ *   is used in combination with a processor manufactured by Nordic Semiconductor.
+ *
+ *   5. Any software provided in binary or object form under this license must not be
+ *   reverse engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
- // Test framework
+// Test framework
 #define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
- // Logging support
+// Logging support
 #include "internal/log.h"
 
 #include "../test_setup.h"
@@ -47,24 +47,22 @@
 #include "ble.h"
 #include "sd_rpc.h"
 
+#include <sstream>
 #include <string>
 #include <thread>
-#include <sstream>
 
 // Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has occurred in a
-// callback.
+// The test framework is not thread safe so this variable is used to communicate that an issues has
+// occurred in a callback.
 bool error = false;
 
-TEST_CASE("test_pc_ble_driver_open_close")
-{
+TEST_CASE("test_pc_ble_driver_open_close") {
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
-    const auto serialPort = env.serialPorts.at(0);
+    const auto serialPort         = env.serialPorts.at(0);
     const auto numberOfIterations = env.numberOfIterations;
 
-    SECTION("open_close_open_iterations")
-    {
+    SECTION("open_close_open_iterations") {
         const auto baudRate = serialPort.baudRate;
 
         INFO("Serial port used: " << serialPort.port);
@@ -73,36 +71,36 @@ TEST_CASE("test_pc_ble_driver_open_close")
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
             auto c = std::unique_ptr<testutil::AdapterWrapper>(
-              new testutil::AdapterWrapper(
-                  testutil::Central,
-                  serialPort.port,
-                  baudRate));
+                new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
 
-            REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
+            REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
+                    NRF_SUCCESS);
 
-            c->setGapEventCallback(
-            [&c](const uint16_t eventId, const ble_gap_evt_t* gapEvent) -> bool {
-                switch (eventId) {
-                  case BLE_GAP_EVT_ADV_REPORT:
-                      NRF_LOG(c->role() << " Received advertisement report from device: "
-                                        << testutil::asText(gapEvent->params.adv_report.peer_addr));
-                      return true;
-                  case BLE_GAP_EVT_TIMEOUT:
-                    if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN) {
-                          const auto err_code = c->startScan();
+            c->setGapEventCallback([&c](const uint16_t eventId,
+                                        const ble_gap_evt_t *gapEvent) -> bool {
+                switch (eventId)
+                {
+                    case BLE_GAP_EVT_ADV_REPORT:
+                        return true;
+                    case BLE_GAP_EVT_TIMEOUT:
+                        if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
+                        {
+                            const auto err_code = c->startScan();
 
-                          if (err_code != NRF_SUCCESS) {
-                              NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
-                              error = true;
-                          }
-                      }
-                      return true;
-                  default:
-                      return false;
+                            if (err_code != NRF_SUCCESS)
+                            {
+                                NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
+                                error = true;
+                            }
+                        }
+                        return true;
+                    default:
+                        return false;
                 }
             });
 
-            REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler, testutil::logHandler) == NRF_SUCCESS);
+            REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
+                                testutil::logHandler) == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
             REQUIRE(c->startScan() == NRF_SUCCESS);
 
