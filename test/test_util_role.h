@@ -2,6 +2,7 @@
 #define TEST_UTIL_ROLE_H__
 
 #include "ble.h"
+#include <iostream>
 
 namespace testutil {
 enum Role { Central = BLE_GAP_ROLE_CENTRAL, Peripheral = BLE_GAP_ROLE_PERIPH };

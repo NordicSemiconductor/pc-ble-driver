@@ -2,6 +2,7 @@
 #define TEST_UTIL_CONVERSION_H__
 
 #include "ble.h"
+#include "ble_hci.h"
 
 namespace testutil {
 /**
@@ -113,6 +114,28 @@ static std::string ioCapsToString(const uint8_t code) {
     return retval.str();
 }
 
+static std::string roleToString(const uint8_t role) {
+    std::stringstream retval;
+
+    switch (role)
+    {
+        case BLE_GAP_ROLE_INVALID:
+            retval << "BLE_GAP_ROLE_INVALID";
+            break;
+        case BLE_GAP_ROLE_PERIPH:
+            retval << "BLE_GAP_ROLE_PERIPH";
+            break;
+        case BLE_GAP_ROLE_CENTRAL:
+            retval << "BLE_GAP_ROLE_CENTRAL";
+            break;
+        default:
+            retval << "UNKNOWN";
+            break;
+    }
+
+    return retval.str();
+}
+
 static std::string gattAuthErrorSrcToString(const uint8_t errorSrc) {
     std::stringstream retval;
 
@@ -207,6 +230,107 @@ static std::string gattAuthStatusToString(const uint8_t authStatus) {
     return retval.str();
 }
 
+static std::string hciStatusCodeToString(const uint8_t hciStatusCode) {
+    std::stringstream retval;
+
+    switch (hciStatusCode)
+    {
+        case BLE_HCI_STATUS_CODE_SUCCESS:
+            retval << "BLE_HCI_STATUS_CODE_SUCCESS";
+            break;
+        case BLE_HCI_STATUS_CODE_UNKNOWN_BTLE_COMMAND:
+            retval << "BLE_HCI_STATUS_CODE_UNKNOWN_BTLE_COMMAND";
+            break;
+        case BLE_HCI_STATUS_CODE_UNKNOWN_CONNECTION_IDENTIFIER:
+            retval << "BLE_HCI_STATUS_CODE_UNKNOWN_CONNECTION_IDENTIFIER";
+            break;
+        case BLE_HCI_AUTHENTICATION_FAILURE:
+            retval << "BLE_HCI_AUTHENTICATION_FAILURE";
+            break;
+        case BLE_HCI_STATUS_CODE_PIN_OR_KEY_MISSING:
+            retval << "BLE_HCI_STATUS_CODE_PIN_OR_KEY_MISSING";
+            break;
+        case BLE_HCI_MEMORY_CAPACITY_EXCEEDED:
+            retval << "BLE_HCI_MEMORY_CAPACITY_EXCEEDED";
+            break;
+        case BLE_HCI_CONNECTION_TIMEOUT:
+            retval << "BLE_HCI_CONNECTION_TIMEOUT";
+            break;
+        case BLE_HCI_STATUS_CODE_COMMAND_DISALLOWED:
+            retval << "BLE_HCI_STATUS_CODE_COMMAND_DISALLOWED";
+            break;
+        case BLE_HCI_STATUS_CODE_INVALID_BTLE_COMMAND_PARAMETERS:
+            retval << "BLE_HCI_STATUS_CODE_INVALID_BTLE_COMMAND_PARAMETERS";
+            break;
+        case BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION:
+            retval << "BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION";
+            break;
+        case BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_LOW_RESOURCES:
+            retval << "BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_LOW_RESOURCES";
+            break;
+        case BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_POWER_OFF:
+            retval << "BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_POWER_OFF";
+            break;
+        case BLE_HCI_LOCAL_HOST_TERMINATED_CONNECTION:
+            retval << "BLE_HCI_LOCAL_HOST_TERMINATED_CONNECTION";
+            break;
+        case BLE_HCI_UNSUPPORTED_REMOTE_FEATURE:
+            retval << "BLE_HCI_UNSUPPORTED_REMOTE_FEATURE";
+            break;
+        case BLE_HCI_STATUS_CODE_INVALID_LMP_PARAMETERS:
+            retval << "BLE_HCI_STATUS_CODE_INVALID_LMP_PARAMETERS";
+            break;
+        case BLE_HCI_STATUS_CODE_UNSPECIFIED_ERROR:
+            retval << "BLE_HCI_STATUS_CODE_UNSPECIFIED_ERROR";
+            break;
+        case BLE_HCI_STATUS_CODE_LMP_RESPONSE_TIMEOUT:
+            retval << "BLE_HCI_STATUS_CODE_LMP_RESPONSE_TIMEOUT";
+            break;
+#if NRF_SD_BLE_API > 3
+        case BLE_HCI_STATUS_CODE_LMP_ERROR_TRANSACTION_COLLISION:
+            retval << "BLE_HCI_STATUS_CODE_LMP_ERROR_TRANSACTION_COLLISION";
+            break;
+#endif
+        case BLE_HCI_STATUS_CODE_LMP_PDU_NOT_ALLOWED:
+            retval << "BLE_HCI_STATUS_CODE_LMP_PDU_NOT_ALLOWED";
+            break;
+        case BLE_HCI_INSTANT_PASSED:
+            retval << "BLE_HCI_INSTANT_PASSED";
+            break;
+        case BLE_HCI_PAIRING_WITH_UNIT_KEY_UNSUPPORTED:
+            retval << "BLE_HCI_PAIRING_WITH_UNIT_KEY_UNSUPPORTED";
+            break;
+        case BLE_HCI_DIFFERENT_TRANSACTION_COLLISION:
+            retval << "BLE_HCI_DIFFERENT_TRANSACTION_COLLISION";
+            break;
+#if NRF_SD_BLE_API > 3
+        case BLE_HCI_PARAMETER_OUT_OF_MANDATORY_RANGE:
+            retval << "BLE_HCI_PARAMETER_OUT_OF_MANDATORY_RANGE";
+            break;
+#endif
+        case BLE_HCI_CONTROLLER_BUSY:
+            retval << "BLE_HCI_CONTROLLER_BUSY";
+            break;
+        case BLE_HCI_CONN_INTERVAL_UNACCEPTABLE:
+            retval << "BLE_HCI_CONN_INTERVAL_UNACCEPTABLE";
+            break;
+        case BLE_HCI_DIRECTED_ADVERTISER_TIMEOUT:
+            retval << "BLE_HCI_DIRECTED_ADVERTISER_TIMEOUT";
+            break;
+        case BLE_HCI_CONN_TERMINATED_DUE_TO_MIC_FAILURE:
+            retval << "BLE_HCI_CONN_TERMINATED_DUE_TO_MIC_FAILURE";
+            break;
+        case BLE_HCI_CONN_FAILED_TO_BE_ESTABLISHED:
+            retval << "BLE_HCI_CONN_FAILED_TO_BE_ESTABLISHED";
+            break;
+        default:
+            retval << "UNKNOWN";
+            break;
+    }
+
+    return retval.str();
+}
+
 static std::string asText(const ble_gap_evt_passkey_display_t &passkeyDisplay) {
     std::stringstream retval;
     std::stringstream passkey;
@@ -218,6 +342,62 @@ static std::string asText(const ble_gap_evt_passkey_display_t &passkeyDisplay) {
 
     retval << "passkey: '" << passkey.str() << "'";
     retval << " match_request:" << (passkeyDisplay.match_request ? "yes" : "no");
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_enc_info_t &encryptionInfo) {
+    std::stringstream retval;
+    std::vector<uint8_t> key(encryptionInfo.ltk, encryptionInfo.ltk + encryptionInfo.ltk_len);
+
+    retval << "ltk:" << asHex(key) << " ";
+    retval << "lesc:" << (encryptionInfo.lesc ? "yes" : "no") << " ";
+    retval << "auth:" << (encryptionInfo.auth ? "yes" : "no") << " ";
+    retval << "ltk_len:" << static_cast<uint32_t>(encryptionInfo.ltk_len);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_conn_params_t &connectionParams) {
+    std::stringstream retval;
+
+    retval << "conn_sup_timeout:" << static_cast<uint32_t>(connectionParams.conn_sup_timeout)
+           << " ";
+    retval << "max_conn_interval:" << static_cast<uint32_t>(connectionParams.max_conn_interval)
+           << " ";
+    retval << "min_conn_interval:" << static_cast<uint32_t>(connectionParams.min_conn_interval)
+           << " ";
+    retval << "slave_latency:" << static_cast<uint32_t>(connectionParams.slave_latency);
+
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_connected_t &connected) {
+    std::stringstream retval;
+
+    retval << "peer_addr:[" << asText(connected.peer_addr) << "] ";
+#if NRF_SD_BLE_API == 2
+    retval << "own_addr:[" << asText(connected.own_addr) << "] ";
+#endif // NRF_SD_BLE_API == 2
+    retval << "role:" << roleToString(connected.role) << " ";
+#if NRF_SD_BLE_API == 2
+    retval << "irk_match:" << (connected.irk_match ? "yes" : "no") << " ";
+    retval << "irk_match_idx:" << static_cast<uint8_t>(connected.irk_match_idx) << " ";
+#endif // NRF_SD_BLE_API == 2
+    retval << "conn_params:[" << asText(connected.conn_params) << "]";
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_disconnected_t &disconnected) {
+    std::stringstream retval;
+
+    retval << "reason:" << hciStatusCodeToString(disconnected.reason);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_scan_req_report_t &scanReqReport) {
+    std::stringstream retval;
+
+    retval << "peer_addr:[" << asText(scanReqReport.peer_addr) << "]";
+    retval << " rssi:" << static_cast<uint32_t>(scanReqReport.rssi);
     return retval.str();
 }
 
@@ -312,6 +492,78 @@ static std::string asText(const ble_gap_conn_sec_t &connSec) {
     std::stringstream retval;
     retval << "sec_mode:[" << asText(connSec.sec_mode) << "] ";
     retval << "encr_key_size:" << static_cast<uint32_t>(connSec.encr_key_size);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_rssi_changed_t &rssiChanged) {
+    std::stringstream retval;
+    retval << "rssi:" << static_cast<uint32_t>(rssiChanged.rssi) << "dBm";
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_lesc_p256_pk_t &lsecP256Pk) {
+    std::stringstream retval;
+    std::vector<uint8_t> key(lsecP256Pk.pk, lsecP256Pk.pk + 64);
+    retval << "key:" << asHex(key);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_key_pressed_t &keyPressed) {
+    std::stringstream retval;
+    retval << "pk_not:" << keyPressed.kp_not; // TODO: convert to string
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_timeout_t &timeout) {
+    std::stringstream retval;
+    retval << "src:" << timeout.src; // TODO: convert to string
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_adv_report_t &advReport) {
+#if NRF_SD_BLE_API < 6
+    std::stringstream retval;
+    std::vector<uint8_t> data(advReport.data, advReport.data + advReport.dlen);
+
+    retval << "peer_addr:[" << asText(advReport.peer_addr) << "]";
+    retval << " data:" << asHex(data);
+    retval << " rssi:" << static_cast<uint32_t>(advReport.rssi) << "dBm";
+    retval << " scan_rsp:" << (advReport.scan_rsp ? "yes" : "no");
+    retval << " type:" << advReport.type; // TODO: convert to string
+    return retval.str();
+#else
+    return "asText for ble_gap_evt_adv_report_t not supported on SD API v6";
+#endif
+}
+
+static std::string asText(const ble_gap_evt_lesc_dhkey_request_t &dhkeyRequest) {
+    std::stringstream retval;
+    retval << "p_pk_peer:["
+           << ((dhkeyRequest.p_pk_peer != nullptr) ? asText(*dhkeyRequest.p_pk_peer) : "NULL")
+           << "]";
+    retval << " oobd_req:" << (dhkeyRequest.oobd_req ? "yes" : "no");
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_master_id_t &masterId) {
+    std::stringstream retval;
+    std::vector<uint8_t> rand(masterId.rand, masterId.rand + sizeof(masterId.rand));
+    retval << "ediv:" << asHex(masterId.ediv);
+    retval << " rand:" << asHex(rand);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_sec_info_request_t &secInfoRequest) {
+    std::stringstream retval;
+    retval << "peer_addr:[" << asText(secInfoRequest.peer_addr) << "]";
+    retval << " enc_info:" << (secInfoRequest.enc_info ? "required" : "not_required");
+    retval << " id_info:"
+           << (secInfoRequest.id_info ? "identity_information_required"
+                                      : "identity_information_not_required");
+    retval << " master_id:[" << asText(secInfoRequest.master_id) << "]";
+    retval << " sign_info:" << secInfoRequest.sign_info
+           << (secInfoRequest.sign_info ? "signing_information_required"
+                                        : "signing_information_not_required");
     return retval.str();
 }
 

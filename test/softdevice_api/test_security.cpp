@@ -65,6 +65,13 @@ bool error = false;
 // Set to true when the test is complete
 bool testComplete = false;
 
+enum AuthenticationType {
+    LEGACY_PASSKEY,
+    LEGACY_OOB,
+};
+
+AuthenticationType authType;
+
 uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
                          const std::string &advertisingName,
                          const std::vector<uint8_t> &initialCharaciteristicValue,
@@ -154,11 +161,11 @@ TEST_CASE("test_security") {
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::shared_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Central, central.port, baudRate, 150));
+            new testutil::AdapterWrapper(testutil::Central, central.port, baudRate));
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::shared_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Peripheral, peripheral.port, baudRate, 150));
+            new testutil::AdapterWrapper(testutil::Peripheral, peripheral.port, baudRate));
 
         // Use Heart rate service and characteristics as target for testing but
         // the values sent are not according to the Heart Rate service
@@ -198,10 +205,8 @@ TEST_CASE("test_security") {
             {
                 case BLE_GAP_EVT_CONNECTED:
                 {
-                    c->scratchpad.connection_handle      = gapEvent->conn_handle;
-                    c->scratchpad.connection_in_progress = false;
-
-                    const auto err_code = c->startAuthentication();
+                    authType            = LEGACY_PASSKEY;
+                    const auto err_code = c->startAuthentication(true, true, false, true);
 
                     if (err_code != NRF_SUCCESS)
                     {
@@ -235,11 +240,7 @@ TEST_CASE("test_security") {
 #endif
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
-                    if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
-                    {
-                        c->scratchpad.connection_in_progress = false;
-                    }
-                    else if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
+                    if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
                     {
                         const auto err_code = c->startScan();
 
@@ -499,16 +500,13 @@ TEST_CASE("test_security") {
             return true;
         });
 
-        p->setGapEventCallback([&p](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
+        p->setGapEventCallback([&p, &c](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
-                { p->scratchpad.connection_handle = gapEvent->conn_handle; }
                     return true;
                 case BLE_GAP_EVT_DISCONNECTED:
                 {
-                    p->scratchpad.connection_handle = BLE_CONN_HANDLE_INVALID;
-
                     // Use scratchpad defaults when advertising
                     NRF_LOG(p->role() << " Starting advertising.");
                     const auto err_code = p->startAdvertising();
@@ -519,7 +517,6 @@ TEST_CASE("test_security") {
                 }
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
-                    p->scratchpad.advertisement_timed_out = true;
                     return true;
                 case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
                 {
@@ -540,13 +537,13 @@ TEST_CASE("test_security") {
                 case BLE_GAP_EVT_SEC_REQUEST:
                     return true;
                 case BLE_GAP_EVT_AUTH_KEY_REQUEST:
-                    p->scratchpad.key_type = gapEvent->params.auth_key_request.key_type;
                     return true;
                 case BLE_GAP_EVT_CONN_SEC_UPDATE:
                     return true;
                 case BLE_GAP_EVT_AUTH_STATUS:
                     if (gapEvent->params.auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS)
                     {
+                        // Move on to the next type of bonding/pairing
                         testComplete = true;
                     }
                     else

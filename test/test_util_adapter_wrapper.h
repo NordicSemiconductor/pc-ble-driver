@@ -412,49 +412,93 @@ class AdapterWrapper
         {
             case BLE_GAP_EVT_CONNECTED:
                 NRF_LOG(role() << " BLE_GAP_EVT_CONNECTED ["
-                               << "conn_handle: " << testutil::asText(gapEvent.conn_handle) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " connected:[" << testutil::asText(gapEvent.params.connected)
+                               << "]]");
                 break;
             case BLE_GAP_EVT_DISCONNECTED:
                 NRF_LOG(role() << " BLE_GAP_EVT_DISCONNECTED ["
-                               << "conn_handle: " << testutil::asText(gapEvent.conn_handle)
-                               << " disconnected.reason: "
-                               << testutil::asHex(gapEvent.params.disconnected.reason) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " disconnected:[" << testutil::asText(gapEvent.params.disconnected)
+                               << "]]");
                 break;
             case BLE_GAP_EVT_TIMEOUT:
                 NRF_LOG(role() << " BLE_GAP_EVT_TIMEOUT ["
-                               << "src:" << testutil::asText(gapEvent.params.timeout.src) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " timeout:[" << testutil::asText(gapEvent.params.timeout)
+                               << "]]");
                 break;
             case BLE_GAP_EVT_ADV_REPORT:
                 NRF_LOG(role() << " BLE_GAP_EVT_ADV_REPORT ["
-                               << "peer_addr:"
-                               << testutil::asText(gapEvent.params.adv_report.peer_addr) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " adv_report:[" << testutil::asText(gapEvent.params.adv_report)
+                               << "]]");
                 break;
             case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-
                 NRF_LOG(role() << " BLE_GAP_EVT_SEC_PARAMS_REQUEST ["
-                               << "sec_params_request:["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " sec_params_request:["
                                << testutil::asText(gapEvent.params.sec_params_request) << "]]");
+                break;
+            case BLE_GAP_EVT_SEC_INFO_REQUEST:
+                NRF_LOG(role() << " BLE_GAP_EVT_SEC_INFO_REQUEST ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " sec_info_request:["
+                               << testutil::asText(gapEvent.params.sec_info_request) << "]]");
                 break;
             case BLE_GAP_EVT_PASSKEY_DISPLAY:
                 NRF_LOG(role() << " BLE_GAP_EVT_PASSKEY_DISPLAY ["
-                               << testutil::asText(gapEvent.params.passkey_display) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " passkey_display:["
+                               << testutil::asText(gapEvent.params.passkey_display) << "]]");
+                break;
+            case BLE_GAP_EVT_KEY_PRESSED:
+                NRF_LOG(role() << " BLE_GAP_EVT_KEY_PRESSED ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " key_pressed:[" << testutil::asText(gapEvent.params.key_pressed)
+                               << "]]");
                 break;
             case BLE_GAP_EVT_SEC_REQUEST:
                 NRF_LOG(role() << " BLE_GAP_EVT_SEC_REQUEST ["
-                               << testutil::asText(gapEvent.params.sec_request) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " sec_request:[" << testutil::asText(gapEvent.params.sec_request)
+                               << "]]");
                 break;
             case BLE_GAP_EVT_AUTH_KEY_REQUEST:
                 NRF_LOG(role() << " BLE_GAP_EVT_AUTH_KEY_REQUEST ["
-                               << testutil::asText(gapEvent.params.auth_key_request) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " auth_key_request:["
+                               << testutil::asText(gapEvent.params.auth_key_request) << "]]");
+                break;
+            case BLE_GAP_EVT_LESC_DHKEY_REQUEST:
+                NRF_LOG(role() << " BLE_GAP_EVT_LESC_DHKEY_REQUEST ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " lesc_dhkey_request:["
+                               << testutil::asText(gapEvent.params.lesc_dhkey_request) << "]]");
                 break;
             case BLE_GAP_EVT_CONN_SEC_UPDATE:
                 NRF_LOG(role() << " BLE_GAP_EVT_CONN_SEC_UPDATE ["
-                               << testutil::asText(gapEvent.params.conn_sec_update) << "]");
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " conn_sec_update:["
+                               << testutil::asText(gapEvent.params.conn_sec_update) << "]]");
                 break;
             case BLE_GAP_EVT_AUTH_STATUS:
                 NRF_LOG(role() << " BLE_GAP_EVT_AUTH_STATUS ["
-                               << "auth_status:[" << testutil::asText(gapEvent.params.auth_status)
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " auth_status:[" << testutil::asText(gapEvent.params.auth_status)
                                << "]]");
+                break;
+            case BLE_GAP_EVT_RSSI_CHANGED:
+                NRF_LOG(role() << " BLE_GAP_EVT_RSSI_CHANGED ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " rssi_changed:["
+                               << testutil::asText(gapEvent.params.rssi_changed) << "]]");
+                break;
+            case BLE_GAP_EVT_SCAN_REQ_REPORT:
+                NRF_LOG(role() << " BLE_GAP_EVT_SCAN_REQ_REPORT ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.scan_req_report) << "]]");
                 break;
         }
     }
@@ -470,6 +514,29 @@ class AdapterWrapper
         if (eventId >= BLE_GAP_EVT_BASE && eventId <= BLE_GAP_EVT_LAST)
         {
             logEvent(eventId, p_ble_evt->evt.gap_evt);
+
+            switch (eventId)
+            {
+                case BLE_GAP_EVT_CONNECTED:
+                    scratchpad.connection_handle      = p_ble_evt->evt.gap_evt.conn_handle;
+                    scratchpad.connection_in_progress = false;
+                    break;
+                case BLE_GAP_EVT_DISCONNECTED:
+                    scratchpad.connection_handle = BLE_CONN_HANDLE_INVALID;
+                    break;
+                case BLE_GAP_EVT_TIMEOUT:
+                    scratchpad.advertisement_timed_out = true;
+                    if (p_ble_evt->evt.gap_evt.params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
+                    {
+                        scratchpad.connection_in_progress = false;
+                    }
+                    break;
+                case BLE_GAP_EVT_AUTH_KEY_REQUEST:
+                    scratchpad.key_type = p_ble_evt->evt.gap_evt.params.auth_key_request.key_type;
+                    break;
+                default:
+                    break;
+            }
 
             const auto logUnprocessed = [this, &eventId]() {
                 NRF_LOG(role() << " Unprocessed GAP event: 0x" << std::setfill('0') << std::setw(2)
