@@ -40,7 +40,7 @@
 
 #include "uart_settings.h"
 
-#include <boost/asio/serial_port.hpp>
+#include <asio/serial_port.hpp>
 
 /**
  * @brief Extension class to UartSettings. Extra functions for returning Boost variables.
@@ -56,19 +56,19 @@ public:
     UartSettingsBoost(const UartCommunicationParameters &communicationParameters);
 
     /*@brief Returns baud rate readable by Boost. */
-    boost::asio::serial_port::baud_rate getBoostBaudRate() const;
+    asio::serial_port::baud_rate getBoostBaudRate() const;
 
     /*@brief Returns flow control in Boost format. */
-    boost::asio::serial_port::flow_control getBoostFlowControl() const;
+    asio::serial_port::flow_control getBoostFlowControl() const;
 
     /*@brief Returns parity in Boost format. */
-    boost::asio::serial_port::parity getBoostParity() const;
+    asio::serial_port::parity getBoostParity() const;
 
     /*@brief Returns stop bits in Boost format. */
-    boost::asio::serial_port::stop_bits getBoostStopBits() const;
+    asio::serial_port::stop_bits getBoostStopBits() const;
 
     /*@brief Returns character size in Boost format. */
-    boost::asio::serial_port::character_size getBoostCharacterSize() const;
+    asio::serial_port::character_size getBoostCharacterSize() const;
 
 };
 

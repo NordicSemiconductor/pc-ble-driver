@@ -40,12 +40,12 @@
 #include "nrf_error.h"
 
 #include <functional>
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
-
 #include <iostream>
 #include <sstream>
 #include <mutex>
+#include <system_error>
+
+#include <asio.hpp>
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport(),
@@ -59,9 +59,9 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
       asyncWriteInProgress(false),
       ioServiceThread(nullptr)
 {
-    ioService = new asio_io_context();
-    serialPort = new boost::asio::serial_port(*ioService);
-    workNotifier = new asio_io_context::work(*ioService);
+    ioService = new asio::io_service();
+    serialPort = new asio::serial_port(*ioService);
+    workNotifier = new asio::io_service::work(*ioService);
 }
 
 // The order of destructor invocation is important here. See:
@@ -143,13 +143,13 @@ uint32_t UartBoost::open(status_cb_t status_callback, data_cb_t data_callback, l
     try
     {
         // boost::bind not compatible with std::bind
-        callbackReadHandle = boost::bind(&UartBoost::readHandler, this,
-                                  boost::asio::placeholders::error,
-                                  boost::asio::placeholders::bytes_transferred);
+        callbackReadHandle = std::bind(&UartBoost::readHandler, this,
+                                  std::placeholders::_1,
+                                  std::placeholders::_2);
 
-        callbackWriteHandle = boost::bind(&UartBoost::writeHandler, this,
-                                   boost::asio::placeholders::error,
-                                   boost::asio::placeholders::bytes_transferred);
+        callbackWriteHandle = std::bind(&UartBoost::writeHandler, this,
+                                  std::placeholders::_1,
+                                  std::placeholders::_2);
 
         // run execution of io_service handlers in a separate thread
         if (ioServiceThread != nullptr)
@@ -276,15 +276,15 @@ uint32_t UartBoost::send(const std::vector<uint8_t> &data)
     return NRF_SUCCESS;
 }
 
-void UartBoost::readHandler(const boost::system::error_code& errorCode, const size_t bytesTransferred)
+void UartBoost::readHandler(const asio::error_code& errorCode, const size_t bytesTransferred)
 {
-    if (errorCode == boost::system::errc::success)
+    if (!errorCode)
     {
         auto readBufferData = readBuffer.data();
         upperDataCallback(readBufferData, bytesTransferred);
         asyncRead(); // Initiate a new read
     }
-    else if (errorCode == boost::asio::error::operation_aborted)
+    else if (errorCode == asio::error::operation_aborted)
     {
         std::stringstream message;
         message << "serial port read on port " << uartSettingsBoost.getPortName() << " aborted.";
@@ -301,13 +301,13 @@ void UartBoost::readHandler(const boost::system::error_code& errorCode, const si
     }
 }
 
-void UartBoost::writeHandler (const boost::system::error_code& errorCode, const size_t bytesTransferred)
+void UartBoost::writeHandler(const asio::error_code& errorCode, const size_t bytesTransferred)
 {
-    if (errorCode == boost::system::errc::success)
+    if (!errorCode)
     {
         asyncWrite();
     }
-    else if (errorCode == boost::asio::error::operation_aborted)
+    else if (errorCode == asio::error::operation_aborted)
     {
         std::stringstream message;
         message << "serial port write operation on port " << uartSettingsBoost.getPortName() << " aborted.";
@@ -336,7 +336,7 @@ void UartBoost::startRead()
 
 void UartBoost::asyncRead()
 {
-    const auto mutableReadBuffer = boost::asio::buffer(readBuffer, BUFFER_SIZE);
+    const auto mutableReadBuffer = asio::buffer(readBuffer, BUFFER_SIZE);
     serialPort->async_read_some(mutableReadBuffer, callbackReadHandle);
 }
 
@@ -361,6 +361,6 @@ void UartBoost::asyncWrite()
         writeQueue.clear();
     }
 
-    auto buffer = boost::asio::buffer(writeBufferVector, writeBufferVector.size());
-    boost::asio::async_write(*serialPort, buffer, callbackWriteHandle);
+    auto buffer = asio::buffer(writeBufferVector, writeBufferVector.size());
+    asio::async_write(*serialPort, buffer, callbackWriteHandle);
 }

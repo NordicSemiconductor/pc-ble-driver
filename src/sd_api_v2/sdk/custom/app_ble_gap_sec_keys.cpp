@@ -54,8 +54,6 @@
 #include <map>
 #include <mutex>
 
-#include <boost/thread/tss.hpp>
-
 typedef std::map<uint16_t, ser_ble_gap_app_keyset_t*> connhandle_keyset_t;
 
 // Map with context, each with a set of conn_handle and each conn_handle a ser_ble_gap_app_keyset_t*
