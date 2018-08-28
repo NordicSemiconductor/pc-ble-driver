@@ -65,24 +65,15 @@ endforeach(SD_API_VER)
 
 set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
 
-if(WIN32)
-    # Disable CRT Warnings with Visual Studio
-    set_source_files_properties(
-        ${LIB_PLATFORM_C_SRC_FILES}
-        PROPERTIES
-        COMPILE_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
-    )
-    set_source_files_properties(
-        ${LIB_PLATFORM_CPP_SRC_FILES}
-        PROPERTIES
-        COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
-    )
-endif()
 # Add common compiler definitions
 add_definitions(
     -DSD_RPC_EXPORTS
     -DHCI_LINK_CONTROL # Adds support for Link Control packets according to the HCI standard
 )
+
+if(WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
 
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
