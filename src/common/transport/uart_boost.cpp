@@ -45,7 +45,7 @@
 #include <mutex>
 #include <system_error>
 
-#include "asio.hpp"
+#include <asio.hpp>
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport(),
@@ -59,9 +59,9 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
       asyncWriteInProgress(false),
       ioServiceThread(nullptr)
 {
-    ioService = new asio_io_context();
+    ioService = new asio::io_service();
     serialPort = new asio::serial_port(*ioService);
-    workNotifier = new asio_io_context::work(*ioService);
+    workNotifier = new asio::io_service::work(*ioService);
 }
 
 // The order of destructor invocation is important here. See:

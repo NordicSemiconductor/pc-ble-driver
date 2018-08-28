@@ -51,8 +51,6 @@
 
 #include <stdint.h>
 
-typedef asio::io_service asio_io_context;
-
 /**
  * @brief The UartBoost class opens, reads and writes a serial port using the boost asio library
  */
@@ -112,10 +110,10 @@ private:
     bool asyncWriteInProgress;
     std::thread *ioServiceThread;
 
-    asio_io_context* ioService;
+    asio::io_service* ioService;
     asio::serial_port* serialPort;
 
-    asio_io_context::work* workNotifier;
+    asio::io_service::work* workNotifier;
 };
 
 #endif //UART_BOOST_H
