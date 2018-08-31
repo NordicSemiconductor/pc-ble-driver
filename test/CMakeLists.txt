@@ -1,8 +1,3 @@
-enable_testing()
-
-# Use the latest SoftDevice API version in the tests
-#list(GET SD_API_VER_NUMS -1 SD_API_VER)
-
 if(MSVC)
     add_definitions(-DPC_BLE_DRIVER_STATIC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -15,14 +10,259 @@ include_directories (
     ../include/common/internal/transport
 )
 
-function(setup_test source_file softdevice_api_ver)
+set(TESTS_SOFTDEVICE_V2 )
+set(TESTS_SOFTDEVICE_V3 )
+set(TESTS_SOFTDEVICE_V5 )
+set(TESTS_SOFTDEVICE_V6 )
+
+set(CONNFW_ROOT "${CMAKE_SOURCE_DIR}/hex")
+find_program(NRFJPROG "nrfjprog")
+
+if(NOT NRFJPROG)
+    message(STATUS "nrfjprog not found, tests will not be ran.")
+endif()
+
+set(BUILD_TYPE )
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "CMAKE_BUILD_TYPE not set, probably because it is running in a multi target environment. Setting it to Debug.")
+    set(BUILD_TYPE "Debug")
+else()
+    set(BUILD_TYPE "${CMAKE_BUILD_TYPE}")
+endif()
+
+# TODO: when connectivity firmware version numbers are aligned, use the same version number for all hex files
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v2/connectivity_1.2.3_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_1m_with_s132_3.1.hex" SD_API_V3_S132_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_usb_with_s132_3.1.hex" SD_API_V3_S132_PCA10056_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v5/connectivity_0.0.0_1m_with_s132_5.0.hex" SD_API_V5_S132_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s132_6.0.hex" SD_API_V6_S132_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s140_usb_6.0.hex" SD_API_V6_S140_PCA10056_HEX)
+
+function(parse_device_id device_id parse_error segger_sn serial_port)
+    set(INVALID_FORMAT_MESSAGE "Device id ${device_id} is in an invalid format, must be <SEGGER_SERIAL_NUMBER>:<SERIAL_PORT>")
+
+    string(REPLACE ":" " " DEVICE_INFO ${device_id})
+    separate_arguments(DEVICE_INFO)
+    list(LENGTH DEVICE_INFO DEVICE_INFO_COUNT)
+    if(NOT DEVICE_INFO_COUNT EQUAL 2)
+        set(${parse_error} ${INVALID_FORMAT_MESSAGE} PARENT_SCOPE)
+        return()
+    endif()
+
+    list(GET DEVICE_INFO 0 DEVICE_SEGGER_SN)
+    list(GET DEVICE_INFO 1 DEVICE_SERIAL_PORT)
+    if(NOT DEVICE_SEGGER_SN OR NOT DEVICE_SERIAL_PORT)
+        set(${parse_error} ${INVALID_FORMAT_MESSAGE} PARENT_SCOPE)
+        return()
+    endif()
+
+    set(${segger_sn} ${DEVICE_SEGGER_SN} PARENT_SCOPE)
+    set(${serial_port} ${DEVICE_SERIAL_PORT} PARENT_SCOPE)
+endfunction()
+
+function(add_softdevice_test target_name device_a device_b connfw tests_reporter tests)
+    # Basic sanity checks
+    if(NOT NRFJPROG)
+        return()
+    endif()
+
+    if(NOT device_a OR NOT device_b)
+        message(STATUS "Devices(s) missing for running tests in target ${target_name}")
+        return()
+    endif()
+
+    set(COMMAND_NAME "${target_name}_CMD")
+
+    set(DEVICE_A_SEGGER_SN )
+    set(DEVICE_A_SERIAL_PORT )
+    set(PARSE_ERROR )
+
+    parse_device_id(${device_a} PARSE_ERROR DEVICE_A_SEGGER_SN DEVICE_A_SERIAL_PORT)
+
+    if(PARSE_ERROR)
+        message(WARNING "${PARSE_ERROR}")
+        return()
+    endif()
+
+    parse_device_id(${device_b} PARSE_ERROR DEVICE_B_SEGGER_SN DEVICE_B_SERIAL_PORT)
+    if(PARSE_ERROR)
+        message(STATUS "${PARSE_ERROR}")
+        return()
+    endif()
+
+    set(TEST_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${BUILD_TYPE}")
+
+    message(STATUS "TARGET: ${target_name} uses:")
+    message(STATUS "DEVICE_A: SN:${DEVICE_A_SEGGER_SN} PORT:${DEVICE_A_SERIAL_PORT}")
+    message(STATUS "DEVICE_B: SN:${DEVICE_B_SEGGER_SN} PORT:${DEVICE_B_SERIAL_PORT}")
+    message(STATUS "TESTS: ${tests}")
+    message(STATUS "REPORTER: ${tests_reporter}")
+
+    add_custom_command(
+        OUTPUT ${COMMAND_NAME}
+
+        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --eraseall
+        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --program ${connfw}
+        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --reset
+
+        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall
+        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --program ${connfw}
+        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset
+        WORKING_DIRECTORY "${TEST_WORKING_DIRECTORY}"
+    )
+
+    if(BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS)
+        set(OPENCLOSE_ITERATIONS ${BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS})
+    else()
+        set(OPENCLOSE_ITERATIONS 10)
+    endif()
+
+    set(define_env )
+    list(APPEND define_env "BLE_DRIVER_TEST_SERIAL_PORT_A=${DEVICE_A_SERIAL_PORT}")
+    list(APPEND define_env "BLE_DRIVER_TEST_SERIAL_PORT_B=${DEVICE_B_SERIAL_PORT}")
+    list(APPEND define_env "BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS=${OPENCLOSE_ITERATIONS}")
+    list(APPEND define_env "BLE_DRIVER_TEST_LOGLEVEL=trace")
+
+    if(APPLE)
+        list(APPEND define_env "BLE_DRIVER_TEST_BAUD_RATE=115200")
+    endif()
+
+    #message(STATUS "define_env ${define_env}")
+
+    file(MAKE_DIRECTORY "${TEST_WORKING_DIRECTORY}/test-reports")
+
+    foreach(integration_test IN LISTS tests)
+        file(TO_NATIVE_PATH "test-reports/${target_name}-${integration_test}.xml" TEST_REPORT_FILE)
+
+        add_custom_command(
+            OUTPUT ${COMMAND_NAME}
+            APPEND COMMAND ${CMAKE_COMMAND} -E env ${define_env}
+            "${integration_test}"
+            --reporter ${tests_reporter} 
+            --out "${TEST_REPORT_FILE}"
+            COMMENT "Running test ${integration_test}"
+            DEPENDS ${integration_test}
+        )
+    endforeach()
+
+    add_custom_target("${target_name}" DEPENDS ${COMMAND_NAME})
+endfunction()
+
+function(add_run_test_targets)
+    # SoftDevice API version -> SoftDevice version -> PCBA
+    #
+    # SDv6:
+    #    S132: PCA10040
+    #    S140: PCA10056
+
+    # SDv5:
+    #    S132: PCA10040
+
+    # SDv3:
+    #    S132: PCA10040
+    #    S132: PCA10056
+
+    # SDv2:
+    #    S130: PCA10028
+    #    S130: PCA10031
+    set(test_run_targets )
+    set(TEST_REPORTER "junit")
+
+    if(BLE_DRIVER_TEST_PCA10028_A AND BLE_DRIVER_TEST_PCA10028_B)
+        # SDv2
+        if(2 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv2_s130_pca10028
+                "${BLE_DRIVER_TEST_PCA10028_A}"
+                "${BLE_DRIVER_TEST_PCA10028_B}"
+                "${SD_API_V2_S130_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V2}"
+            )
+        endif()
+    endif()
+
+    if(BLE_DRIVER_TEST_PCA10031_A AND BLE_DRIVER_TEST_PCA10031_B)
+        # SDv2
+        if(2 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv2_s130_pca10031
+                "${BLE_DRIVER_TEST_PCA10031_A}"
+                "${BLE_DRIVER_TEST_PCA10031_B}"
+                "${SD_API_V2_S130_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V2}"
+            )
+        endif()
+    endif()
+
+    if(BLE_DRIVER_TEST_PCA10040_A AND BLE_DRIVER_TEST_PCA10040_B)
+        # SDv3
+        if(3 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv3_s132_pca10040
+                "${BLE_DRIVER_TEST_PCA10040_A}"
+                "${BLE_DRIVER_TEST_PCA10040_B}"
+                "${SD_API_V3_S132_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V3}"
+            )
+        endif()
+
+        # SDv5
+        if(5 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv5_s132_pca10040
+                "${BLE_DRIVER_TEST_PCA10040_A}"
+                "${BLE_DRIVER_TEST_PCA10040_B}"
+                "${SD_API_V5_S132_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V5}"
+            )
+        endif()
+    endif()
+
+    if(BLE_DRIVER_TEST_PCA10056_A AND BLE_DRIVER_TEST_PCA10056_B)
+        # SDv3
+        if(3 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv3_s132_pca10056
+                "${BLE_DRIVER_TEST_PCA10056_A}"
+                "${BLE_DRIVER_TEST_PCA10056_B}"
+                "${SD_API_V3_S132_PCA10056_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V3}"
+            )
+        endif()
+
+        # SDv6
+        if(6 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv6_s140_pca10056
+                "${BLE_DRIVER_TEST_PCA10056_A}"
+                "${BLE_DRIVER_TEST_PCA10056_B}"
+                "${SD_API_V6_S140_PCA10056_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V6}"
+            )
+        endif()
+    endif()
+
+    list(LENGTH test_run_targets test_run_targets_length)
+
+    if(test_run_targets_length GREATER 0)
+        add_custom_target(test_run_all DEPENDS ${test_run_targets})
+    endif()
+endfunction(add_run_test_targets)
+
+function(setup_test source_file softdevice_api_ver test_list)
     get_filename_component(test_name ${source_file} NAME_WE)
     set(test_name "${test_name}_v${softdevice_api_ver}")
 
     # Build executable
     add_executable(${test_name} ${source_file})
 
-    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver} -DNRF_LOG_FILENAME="${test_name}.txt")
+    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver})
     target_include_directories(${test_name} PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s132/headers)
     target_include_directories(${test_name} PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s140/headers)
 
@@ -35,9 +275,11 @@ function(setup_test source_file softdevice_api_ver)
         target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} "pthread")
     endif()
 
-    add_test(NAME ${test_name} COMMAND ${test_name})
-
-    message(STATUS "Added test ${source_file}, with test name ${test_name}.")
+    if(NOT ${test_name} STREQUAL "test_uart_boost_v2")
+        set(${test_list} ${${test_list}} ${test_name} PARENT_SCOPE)
+    else()
+        message(STATUS "${test_name} NOT ADDED to ${test_list} since the test is a serial port loopback test.")
+    endif()
 endfunction(setup_test)
 
 if(TEST_ALL)
@@ -48,19 +290,23 @@ endif()
 if(TEST_TRANSPORT)
     file(GLOB transport_tests_src "transport/test_*.cpp")
 
+    list(GET SD_API_VER_NUMS 0 ANY_SD_API_VERSION)
+    message(STATUS "Linking common code with SoftDevice API version ${ANY_SD_API_VERSION}")
+
     foreach(transport_test_src ${transport_tests_src})
-        setup_test(${transport_test_src} 2)
+        # Use any SD API version for linking object files common between SD API versions
+        setup_test(${transport_test_src} ${ANY_SD_API_VERSION} TESTS_SOFTDEVICE_${ANY_SD_API_VERSION})
     endforeach(transport_test_src)
 endif(TEST_TRANSPORT)
 
 if(TEST_SOFTDEVICE_API)
-    message(STATUS "Using SoftDevice API version ${SD_API_VER} in tests.")
-
     file(GLOB tests_src "softdevice_api/test_*.cpp")
 
     foreach(SD_API_VER ${SD_API_VER_NUMS})
         foreach(test_src ${tests_src})
-            setup_test(${test_src} ${SD_API_VER})
+            setup_test(${test_src} ${SD_API_VER} TESTS_SOFTDEVICE_V${SD_API_VER})
         endforeach(test_src)
     endforeach(SD_API_VER)
+
+    add_run_test_targets()
 endif(TEST_SOFTDEVICE_API)
