@@ -3,6 +3,8 @@ if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+find_package(Catch2 CONFIG REQUIRED)
+
 include_directories (
     ../3rdparty
     ../include/common/sdk_compat
@@ -127,12 +129,13 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
         list(APPEND define_env "BLE_DRIVER_TEST_BAUD_RATE=115200")
     endif()
 
-    #message(STATUS "define_env ${define_env}")
+    message(STATUS "Configuring target to run \"cmake -E env ${define_env}\" before running test.")
 
     file(MAKE_DIRECTORY "${TEST_WORKING_DIRECTORY}/test-reports")
 
     foreach(integration_test IN LISTS tests)
         file(TO_NATIVE_PATH "test-reports/${target_name}-${integration_test}.xml" TEST_REPORT_FILE)
+        message(STATUS "TEST_REPORT_FILE ${TEST_REPORT_FILE}")
 
         add_custom_command(
             OUTPUT ${COMMAND_NAME}
@@ -140,7 +143,6 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
             "${integration_test}"
             --reporter ${tests_reporter} 
             --out "${TEST_REPORT_FILE}"
-            COMMENT "Running test ${integration_test}"
             DEPENDS ${integration_test}
         )
     endforeach()
@@ -157,6 +159,7 @@ function(add_run_test_targets)
 
     # SDv5:
     #    S132: PCA10040
+    #    S132: PCA10056
 
     # SDv3:
     #    S132: PCA10040
@@ -235,6 +238,18 @@ function(add_run_test_targets)
             )
         endif()
 
+        # SDv5
+        if(5 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv5_s132_pca10056
+                "${BLE_DRIVER_TEST_PCA10056_A}"
+                "${BLE_DRIVER_TEST_PCA10056_B}"
+                "${SD_API_V5_S132_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V5}"
+            )
+        endif()
+
         # SDv6
         if(6 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
@@ -267,12 +282,12 @@ function(setup_test source_file softdevice_api_ver test_list)
     target_include_directories(${test_name} PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s140/headers)
 
     if(WIN32)
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver})
+        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} Catch2::Catch2)
     elseif(APPLE)
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver})
+        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} Catch2::Catch2)
     else()
         # Assume Linux
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} "pthread")
+        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} "pthread" Catch2::Catch2)
     endif()
 
     if(NOT ${test_name} STREQUAL "test_uart_boost_v2")
