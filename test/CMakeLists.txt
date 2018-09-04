@@ -35,10 +35,11 @@ endif()
 # TODO: when connectivity firmware version numbers are aligned, use the same version number for all hex files
 file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v2/connectivity_1.2.3_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
 file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_1m_with_s132_3.1.hex" SD_API_V3_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_usb_with_s132_3.1.hex" SD_API_V3_S132_PCA10056_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_usb_with_s132_3.1.hex" SD_API_V3_S132_PCA10056_USB_HEX)
 file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v5/connectivity_0.0.0_1m_with_s132_5.0.hex" SD_API_V5_S132_HEX)
 file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s132_6.0.hex" SD_API_V6_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s140_usb_6.0.hex" SD_API_V6_S140_PCA10056_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s140_6.0.hex" SD_API_V6_S140_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s140_usb_6.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
 
 function(parse_device_id device_id parse_error segger_sn serial_port)
     set(INVALID_FORMAT_MESSAGE "Device id ${device_id} is in an invalid format, must be <SEGGER_SERIAL_NUMBER>:<SERIAL_PORT>")
@@ -168,7 +169,6 @@ function(add_run_test_targets)
     # SDv2:
     #    S130: PCA10028
     #    S130: PCA10031
-    set(test_run_targets )
     set(TEST_REPORTER "junit")
 
     if(BLE_DRIVER_TEST_PCA10028_A AND BLE_DRIVER_TEST_PCA10028_B)
@@ -225,6 +225,32 @@ function(add_run_test_targets)
         endif()
     endif()
 
+    if(BLE_DRIVER_TEST_PCA10056_USB_A AND BLE_DRIVER_TEST_PCA10056_USB_B)
+        # SDv3
+        if(3 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv3_s132_pca10056_usb
+                "${BLE_DRIVER_TEST_PCA10056_USB_A}"
+                "${BLE_DRIVER_TEST_PCA10056_USB_B}"
+                "${SD_API_V3_S132_PCA10056_USB_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V3}"
+            )
+        endif()
+
+        # SDv6
+        if(6 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                test_run_sdv6_s140_pca10056_usb
+                "${BLE_DRIVER_TEST_PCA10056_USB_A}"
+                "${BLE_DRIVER_TEST_PCA10056_USB_B}"
+                "${SD_API_V6_S140_PCA10056_USB_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V6}"
+            )
+        endif()
+    endif()
+
     if(BLE_DRIVER_TEST_PCA10056_A AND BLE_DRIVER_TEST_PCA10056_B)
         # SDv3
         if(3 IN_LIST SD_API_VER_NUMS)
@@ -232,7 +258,7 @@ function(add_run_test_targets)
                 test_run_sdv3_s132_pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
-                "${SD_API_V3_S132_PCA10056_HEX}"
+                "${SD_API_V3_S132_HEX}"
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V3}"
             )
@@ -256,17 +282,11 @@ function(add_run_test_targets)
                 test_run_sdv6_s140_pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
-                "${SD_API_V6_S140_PCA10056_HEX}"
+                "${SD_API_V6_S140_HEX}"
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V6}"
             )
         endif()
-    endif()
-
-    list(LENGTH test_run_targets test_run_targets_length)
-
-    if(test_run_targets_length GREATER 0)
-        add_custom_target(test_run_all DEPENDS ${test_run_targets})
     endif()
 endfunction(add_run_test_targets)
 
