@@ -93,7 +93,7 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
         return()
     endif()
 
-    set(TEST_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${BUILD_TYPE}")
+    set(TEST_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
 
     message(STATUS "TARGET: ${target_name} uses:")
     message(STATUS "DEVICE_A: SN:${DEVICE_A_SEGGER_SN} PORT:${DEVICE_A_SERIAL_PORT}")
@@ -111,7 +111,7 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --program ${connfw}
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset
-        WORKING_DIRECTORY "${TEST_WORKING_DIRECTORY}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports"
     )
 
     if(BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS)
@@ -132,18 +132,13 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
 
     message(STATUS "Configuring target to run \"cmake -E env ${define_env}\" before running test.")
 
-    file(MAKE_DIRECTORY "${TEST_WORKING_DIRECTORY}/test-reports")
-
     foreach(integration_test IN LISTS tests)
-        file(TO_NATIVE_PATH "test-reports/${target_name}-${integration_test}.xml" TEST_REPORT_FILE)
-        message(STATUS "TEST_REPORT_FILE ${TEST_REPORT_FILE}")
-
         add_custom_command(
             OUTPUT ${COMMAND_NAME}
             APPEND COMMAND ${CMAKE_COMMAND} -E env ${define_env}
-            "${integration_test}"
+            "$<TARGET_FILE:${integration_test}>"
             --reporter ${tests_reporter} 
-            --out "${TEST_REPORT_FILE}"
+            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml"
             DEPENDS ${integration_test}
         )
     endforeach()
