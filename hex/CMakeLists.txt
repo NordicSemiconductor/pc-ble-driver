@@ -3,7 +3,7 @@ project(connectivity)
 
 #[[
     This CMake file uses directory structure conventions in the SDKs 
-    supported (v11 and v15) to supply information to target and create them
+    supported (v11 and v15) to supply information to targets and create them.
 ]]
 
 include(../cmake/nrf-download-distfile.cmake)
@@ -29,25 +29,45 @@ if(NOT NRFUTIL)
     message(FATAL_ERROR "nrfutil not found, not able to create DFU packages of connectivity firmware.")
 endif()
 
+function(nrf_configure_sdk_affected_files SDK_VERSION SDK_DIRECTORY SER_CONFIG_PATH MAIN_PATH)
+    if(SDK_VERSION EQUAL 11)
+        set(MAIN_PATH "${SDK_DIRECTORY}/examples/ble_central_and_peripheral/ble_connectivity/main.c" PARENT_SCOPE)
+    elseif(SDK_VERSION EQUAL 15)
+        set(MAIN_PATH "${SDK_DIRECTORY}/examples/connectivity/ble_connectivity/main.c" PARENT_SCOPE)
+    else()
+        message(STATUS "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown to me.")
+        return()
+    endif()
+
+    set(SER_CONFIG_PATH "${SDK_DIRECTORY}/components/serialization/common/ser_config.h" PARENT_SCOPE)
+endfunction()
+
+function(nrf_extract_version_number VERSION_NUMBER MAJOR MINOR PATCH)
+    string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" MATCHES ${VERSION_NUMBER})
+
+    if(VERSION)
+        set(MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set(MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
+        set(PATCH "${CMAKE_MATCH_3}" PARENT_SCOPE)
+    else()
+        message(FATAL_ERROR "Not able to parse version:${VERSION}")
+    endif()
+endfunction()
+
 function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
-    set(SER_CONFIG_PATH "${SDK_DIRECTORY}/components/serialization/common/ser_config.h")
+    #set(SER_CONFIG_PATH "${SDK_DIRECTORY}/components/serialization/common/ser_config.h")
+    set(SER_CONFIG_PATH)
+    set(MAIN_PATH)
+
+    nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_DIRECTORY} SER_CONFIG_PATH MAIN_PATH)
 
     if(NOT EXISTS ${SER_CONFIG_PATH})
         message("Not able to find ser_config.h in path ${SER_CONFIG_PATH}")
         return()
     endif()
 
-    if(SDK_VERSION STREQUAL "11")
-        set(MAIN_PATH "${SDK_DIRECTORY}/examples/ble_central_and_peripheral/ble_connectivity/main.c")
-    elseif(SDK_VERSION STREQUAL "15")
-        set(MAIN_PATH "${SDK_DIRECTORY}/examples/connectivity/ble_connectivity/main.c")
-    else()
-        message(STATUS "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown to me.")
-        return()
-    endif()
-
     if(NOT EXISTS ${MAIN_PATH})
-        message("Not able to find main.c in path ${MAIN_PATH}")
+        message("Not able to find main.c in path ${SER_CONFIG_PATH}")
         return()
     endif()
 
@@ -60,14 +80,13 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
         string(REGEX REPLACE "#define (SER_PHY_UART_BAUDRATE_VAL)(.+)1000000\n" "#cmakedefine \\1\\2@SER_PHY_UART_BAUDRATE_VAL@\n" SER_CONFIG_IN ${SER_CONFIG})
     endif()
 
-    # Version number is defined the same way in supported SDKS
-    # string(REGEX REPLACE "(\\.version_major += +)0xf1(,\n)" "\\1@VERSION_MAJOR@\\2" MAIN_IN ${MAIN})
-    # string(REGEX REPLACE "(\\.version_minor += +)0xf2(,\n)" "\\1@VERSION_MINOR@\\2" MAIN_IN ${MAIN_IN})
-    # string(REGEX REPLACE "(\\.version_patch += +)0xf3(,\n)" "\\1@VERSION_PATCH@\\2" MAIN_IN ${MAIN_IN})
-    # message(STATUS "MAIN/SDKv${SDK_VERSION}\n\n${MAIN_IN}\n\n\n")
-    # file(WRITE "${MAIN_PATH}.in" "${MAIN_IN}")
-
     file(WRITE "${SER_CONFIG_PATH}.in" "${SER_CONFIG_IN}")
+
+    # Version number is defined the same way in supported SDKS
+    string(REGEX REPLACE "(\\.version_major[ ]+\\=[ ]+)0xf1(,\n)" "\\1@VERSION_MAJOR@\\2" MAIN_IN "${MAIN}")
+    string(REGEX REPLACE "(\\.version_minor[ ]+\\=[ ]+)0xf2(,\n)" "\\1@VERSION_MINOR@\\2" MAIN_IN "${MAIN_IN}")
+    string(REGEX REPLACE "(\\.version_patch[ ]+\\=[ ]+)0xf3(,\n)" "\\1@VERSION_PATCH@\\2" MAIN_IN "${MAIN_IN}")
+    file(WRITE "${MAIN_PATH}.in" "${MAIN_IN}")
 endfunction()
 
 function(nrf_get_sdk_dir_root SDK_DIRECTORY)
@@ -160,14 +179,9 @@ if(KEIL_UV4)
 endif()
 
 function(nrf_extract_softdevice_info SOFTDEVICE_FILENAME SD_VERSION SOC_FAMILY SD_API_VERSION SD_ID)
-    #message("SOFTDEVICE_FILENAME: ${SOFTDEVICE_FILENAME}")
     string(REGEX MATCH "(s[0-9]+)_nrf(5[0-9]+)_([0-9].[0-9].[0-9])" MATCHES ${SOFTDEVICE_FILENAME})
 
     if(MATCHES)
-        #set(${SD_VERSION} "${CMAKE_MATCH_1}" PARENT_SCOPE)
-        #set(${SOC_FAMILY} "${CMAKE_MATCH_2}" PARENT_SCOPE)
-        #set(${SD_API_VERSION} "${CMAKE_MATCH_3}" PARENT_SCOPE)
-
         set(_SD_VERSION "${CMAKE_MATCH_1}")
         set(_SOC_FAMILY "${CMAKE_MATCH_2}")
         set(_SD_API_VERSION "${CMAKE_MATCH_3}")
@@ -226,7 +240,6 @@ function(nrf_extract_softdevice_info SOFTDEVICE_FILENAME SD_VERSION SOC_FAMILY S
     else()
         message(STATUS "No SoftDevice information available in filename.")
     endif()
-
 endfunction(nrf_extract_softdevice_info)
 
 function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDEVICE_HEX_PATH)
@@ -366,7 +379,7 @@ function(nrf_create_connectivity_compile_targets)
 
     foreach(PCA_PATH ${FOUND_PCA_PATHS})
         file(GLOB FOUND_PROJECTS "${PCA_PATH}/*_hci")
-        message(STATUS "Found projects: ${FOUND_PROJECTS}")
+        #message(STATUS "Found projects: ${FOUND_PROJECTS}")
 
         foreach(PROJECT ${FOUND_PROJECTS})
             set(PROJECT_NAME)
@@ -430,16 +443,31 @@ function(nrf_create_connectivity_compile_targets)
                             set(COMMAND_NAME "${TARGET_NAME}_cmd")
                             set(KEIL_PROJECT_FULL_PATH "${UV4_PROJECT}")
                             set(KEIL_LOGFILE "${KEIL_PROJECT_DIRECTORY}/${TARGET_NAME}-build.txt")
-                            
-                            set(SER_CONFIG_IN_PATH "${SDK_ROOT}/components/serialization/common/ser_config.h.in")
+
+                            set(SER_CONFIG_PATH)
+                            set(MAIN_PATH)
+                            nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_ROOT} SER_CONFIG_PATH MAIN_PATH)
+
+                            set(SER_CONFIG_IN_PATH "${SER_CONFIG_PATH}.in")
                             if(NOT EXISTS ${SER_CONFIG_IN_PATH})
                                 message(FATAL_ERROR "ser_config.h.in not found. The SDK needs to be prepared. Please delete the build folder and try again.")
+                            endif()
+
+                            set(MAIN_IN_PATH "${MAIN_PATH}.in")
+                            if(NOT EXISTS ${MAIN_IN_PATH})
+                                message(FATAL_ERROR "main.c.in not found. The SDK needs to be prepared. Please delete the build folder and try again.")
                             endif()
 
                             # Setup ser_config.h
                             add_custom_command(
                                 OUTPUT "${COMMAND_NAME}"
-                                COMMAND ${CMAKE_COMMAND} -DSDK_VERSION=${SDK_VERSION} -DSER_CONFIG_IN_PATH=${SER_CONFIG_IN_PATH} -DBAUD_RATE=${TRANSPORT} -P ${CMAKE_CURRENT_SOURCE_DIR}/ser_config.cmake
+                                COMMAND ${CMAKE_COMMAND} -DSDK_VERSION=${SDK_VERSION} -DSER_CONFIG_IN_PATH=${SER_CONFIG_IN_PATH} -DBAUD_RATE=${TRANSPORT} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_ser_config.cmake
+                            )
+
+                            # Setup main.c
+                            add_custom_command(
+                                OUTPUT "${COMMAND_NAME}"
+                                APPEND COMMAND ${CMAKE_COMMAND} -DMAIN_IN_PATH=${MAIN_IN_PATH} -DVERSION=${VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_main.cmake
                             )
 
                             # Compile project
@@ -457,10 +485,17 @@ function(nrf_create_connectivity_compile_targets)
                                 APPEND COMMAND ${MERGEHEX} -m "${APP_HEX_PATH}" "${SOFTDEVICE_HEX_PATH}" -o "${HEX_MERGED}"
                             )
 
+                            set(MAJOR)
+                            set(MINOR)
+                            set(PATCH)
+                            nrf_extract_version_number("${SD_API_VERSION}" MAJOR MINOR PATCH)
+                            set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/sd_api_v${MAJOR}")
+                            #message(STATUS "Storing files in ${OUTPUT_DIRECTORY}")
+
                             # Copy merged file to binary directory
                             add_custom_command(
                                 OUTPUT "${COMMAND_NAME}"
-                                APPEND COMMAND ${CMAKE_COMMAND} -E copy "${HEX_MERGED}" "${CMAKE_BINARY_DIR}"
+                                APPEND COMMAND ${CMAKE_COMMAND} -E copy "${HEX_MERGED}" "${OUTPUT_DIRECTORY}"
                             )
 
                             # Create a DFU package if it is a nRF52 device with USB support
@@ -475,7 +510,7 @@ function(nrf_create_connectivity_compile_targets)
 
                                     add_custom_command(
                                         OUTPUT "${COMMAND_NAME}"
-                                        APPEND COMMAND ${CMAKE_COMMAND} -E copy "${DFU_PKG}" "${CMAKE_BINARY_DIR}"
+                                        APPEND COMMAND ${CMAKE_COMMAND} -E copy "${DFU_PKG}" "${OUTPUT_DIRECTORY}"
                                     )
                                 endif()
                             endif()
@@ -493,22 +528,25 @@ function(nrf_create_connectivity_compile_targets)
 endfunction(nrf_create_connectivity_compile_targets)
 
 set(SDK_PATH )
-set(CONNECTIVITY_FIRMWARE_VERSION 1.2.3)
-set(CONNECTIVITY_FIRMWARE_PREFIX "connectivity")
+
+if(NOT DEFINED VERSION)
+    set(VERSION 0.0.0)
+    message(STATUS "VERSION not provided, setting VERSION to ${VERSION}.")
+endif()
 
 nrf_prepare_sdk(
     SDK_VERSION 11
     URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip"
     FILENAME "nRF5_SDK_11.0.0_89a8197.zip"
     SHA512 4fe84c4080e2eab664672366a5abfcd605777297835b7b864e0f51f376cd946a28178dfda7e6cefdd04b791058038711d78901ec5d260477a68eb5527c3b2c06
-    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/sd_api_v2/sdk110_connectivity.patch"
+    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/sdk110_connectivity.patch"
 )
 
 nrf_create_connectivity_compile_targets(
-    SDK_VERSION "11"
-    SDK_ROOT ${SDK_PATH}
+    SDK_VERSION 11
+    SDK_ROOT "${SDK_PATH}"
     PROJECT_DIRECTORY "examples/ble_central_and_peripheral/ble_connectivity"
-    VERSION ${CONNECTIVITY_FIRMWARE_VERSION}
+    VERSION "${VERSION}"
 )
 
 nrf_prepare_sdk(
@@ -520,8 +558,8 @@ nrf_prepare_sdk(
 )
 
 nrf_create_connectivity_compile_targets(
-    SDK_VERSION "15"
-    SDK_ROOT ${SDK_PATH}
+    SDK_VERSION 15
+    SDK_ROOT "${SDK_PATH}"
     PROJECT_DIRECTORY "examples/connectivity/ble_connectivity"
-    VERSION ${CONNECTIVITY_FIRMWARE_VERSION}
+    VERSION "${VERSION}"
 )
