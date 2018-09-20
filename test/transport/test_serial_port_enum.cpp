@@ -47,13 +47,6 @@
 
 #include "../test_setup.h"
 
-#include <sstream>
-#include <string>
-#include <vector>
-#include <thread>
-#include <iomanip>
-#include <chrono>
-
 #if defined(_MSC_VER)
 // Disable warning "This function or variable may be unsafe. Consider using _dupenv_s instead."
 #pragma warning(disable: 4996)
