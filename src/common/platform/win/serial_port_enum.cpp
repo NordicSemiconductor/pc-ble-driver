@@ -103,7 +103,7 @@ std::list<SerialPortDesc> EnumSerialPorts()
     dhToggleExceptions(FALSE);
 
     dhGetObject(L"winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2", nullptr, &wmiSvc);
-    dhGetValue(L"%o", &colDevices, wmiSvc, L".ExecQuery(%S)", L"Select * from Win32_PnPEntity");
+    dhGetValue(L"%o", &colDevices, wmiSvc, L".ExecQuery(%S)", L"Select * from Win32_PnPEntity WHERE Name LIKE '%COM%'");
 
     FOR_EACH(objDevice, colDevices, NULL) {
         char* name = nullptr;
