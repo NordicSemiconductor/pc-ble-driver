@@ -401,7 +401,7 @@ class AdapterWrapper
         NRF_LOG(role() << "[log] severity:" << testutil::asText(severity)
                        << " message:" << log_message);
 
-        if (m_logCallback != nullptr)
+        if (m_logCallback)
         {
             m_logCallback(severity, log_message);
         }
@@ -419,8 +419,8 @@ class AdapterWrapper
             case BLE_GAP_EVT_DISCONNECTED:
                 NRF_LOG(role() << " BLE_GAP_EVT_DISCONNECTED ["
                                << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                               << " disconnected:[" << testutil::asText(gapEvent.params.disconnected)
-                               << "]]");
+                               << " disconnected:["
+                               << testutil::asText(gapEvent.params.disconnected) << "]]");
                 break;
             case BLE_GAP_EVT_TIMEOUT:
                 NRF_LOG(role() << " BLE_GAP_EVT_TIMEOUT ["
@@ -543,7 +543,7 @@ class AdapterWrapper
                                << std::hex << (uint32_t)eventId);
             };
 
-            if (m_gapEventCallback != nullptr)
+            if (m_gapEventCallback)
             {
                 if (!m_gapEventCallback(eventId, &(p_ble_evt->evt.gap_evt)))
                 {
@@ -560,7 +560,7 @@ class AdapterWrapper
                                << std::setw(2) << std::hex << (uint32_t)eventId);
             };
 
-            if (m_gattcEventCallback != nullptr)
+            if (m_gattcEventCallback)
             {
                 if (!m_gattcEventCallback(eventId, &(p_ble_evt->evt.gattc_evt)))
                 {
@@ -577,7 +577,7 @@ class AdapterWrapper
                                << std::setw(2) << std::hex << (uint32_t)eventId);
             };
 
-            if (m_gattsEventCallback != nullptr)
+            if (m_gattsEventCallback)
             {
                 if (!m_gattsEventCallback(eventId, &(p_ble_evt->evt.gatts_evt)))
                 {
@@ -589,7 +589,7 @@ class AdapterWrapper
         }
         else
         {
-            if (m_eventCallback != nullptr)
+            if (m_eventCallback)
             {
                 if (!m_eventCallback(p_ble_evt))
                 {
@@ -604,7 +604,7 @@ class AdapterWrapper
     void processStatus(const sd_rpc_app_status_t code, const std::string &message) {
         NRF_LOG(role() << "[status] code:" << testutil::asText(code) << " message:" << message);
 
-        if (m_statusCallback != nullptr)
+        if (m_statusCallback)
         {
             m_statusCallback(code, message);
         }
@@ -689,7 +689,7 @@ class AdapterWrapper
         scratchpad.common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
         scratchpad.common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
         scratchpad.opt.common_opt                        = scratchpad.common_opt;
-        scratchpad.mtu                                   = mtu;
+        scratchpad.mtu                                   = mtu == 0 ? DEFAULT_MTU_SIZE : mtu;
 #endif
 
 #if NRF_SD_BLE_API == 3

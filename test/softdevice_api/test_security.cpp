@@ -88,14 +88,22 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
 
     auto err_code = p->setAdvertisingData(advertisingData);
     if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(p->role() << " Error setting advertising data, "
+                          << ", " << testutil::errorToString(err_code));
         return err_code;
+    }
 
     // Setup service, use service UUID specified in scratchpad.target_service
     err_code =
         sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
                                  &(p->scratchpad.target_service), &(p->scratchpad.service_handle));
     if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(p->role() << " Error adding GATTS service, "
+                          << ", " << testutil::errorToString(err_code));
         return err_code;
+    }
 
     // Setup characteristic, use characteristic UUID specified in scratchpad.target_characteristic
     ble_gatts_char_md_t char_md;
@@ -139,9 +147,14 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
     attr_char_value.max_len   = characteristicValueMaxLength;
     attr_char_value.p_value   = const_cast<uint8_t *>(initialCharaciteristicValue.data());
 
-    return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
-                                           &attr_char_value,
-                                           &(p->scratchpad.gatts_characteristic_handle));
+    err_code = sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
+                                               &attr_char_value,
+                                               &(p->scratchpad.gatts_characteristic_handle));
+
+    NRF_LOG(p->role() << " Error adding GATTS characteristic"
+                      << ", " << testutil::errorToString(err_code));
+
+    return err_code;
 }
 
 TEST_CASE("test_security") {
@@ -199,8 +212,8 @@ TEST_CASE("test_security") {
         REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        c->setGapEventCallback([&c, &p, &peripheralAdvName](const uint16_t eventId,
-                                                            const ble_gap_evt_t *gapEvent) -> bool {
+        c->setGapEventCallback([&c, &p, peripheralAdvName](const uint16_t eventId,
+                                                           const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -500,7 +513,7 @@ TEST_CASE("test_security") {
             return true;
         });
 
-        p->setGapEventCallback([&p, &c](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
+        p->setGapEventCallback([&p](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -592,7 +605,7 @@ TEST_CASE("test_security") {
         REQUIRE(p->startAdvertising() == NRF_SUCCESS);
 
         // Wait for the test to complete
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
 
         REQUIRE(error == false);
         REQUIRE(testComplete == true);
