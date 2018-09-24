@@ -1,14 +1,41 @@
-/* Copyright (c) 2015 Nordic Semiconductor. All Rights Reserved.
+/*
+ * Copyright (c) 2012 - 2018, Nordic Semiconductor ASA
+ * All rights reserved.
  *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
  *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
  *
+ * 2. Redistributions in binary form, except as embedded into a Nordic
+ *    Semiconductor ASA integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ *
+ * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * 4. This software, with or without modification, must only be used with a
+ *    Nordic Semiconductor ASA integrated circuit.
+ *
+ * 5. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**@example examples/heart_rate_monitor
  *
  * @brief Heart Rate Service Sample Application main file.
@@ -16,8 +43,18 @@
  * This file contains the source code for a sample application using the Heart Rate service.
  * This service exposes heart rate data from a Heart Rate Sensor intended for fitness applications.
  * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
+ * 
+ * Structure of this file
+ * - Includes
+ * - Definitions
+ * - Global variables
+ * - Global functions
+ * - Event functions
+ * - Event dispatcher
+ * - Main
  */
 
+/** Includes */
 #include "ble.h"
 #include "sd_rpc.h"
 
@@ -34,6 +71,8 @@
 #define Sleep(x) usleep((x)*1000)
 #endif
 
+
+/** Definitions */
 #ifdef _WIN32
 #define DEFAULT_UART_PORT_NAME "COM1"
 #define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
@@ -72,6 +111,8 @@
 #define GATT_MTU_SIZE_DEFAULT BLE_GATT_ATT_MTU_DEFAULT
 #endif
 
+
+/** Global variables */
 static uint16_t                 m_connection_handle             = BLE_CONN_HANDLE_INVALID;
 static uint16_t                 m_heart_rate_service_handle     = 0;
 static ble_gatts_char_handles_t m_heart_rate_measurement_handle;
@@ -80,8 +121,14 @@ static bool                     m_send_notifications            = false;
 static bool                     m_advertisement_timed_out       = false;
 static adapter_t *              m_adapter                       = NULL;
 static uint32_t                 m_config_id                     = 1;
+static uint8_t                  m_adv_handle                    = 0;
 
-static uint32_t advertising_start();
+#if NRF_SD_BLE_API >= 6
+static ble_gap_adv_params_t     m_adv_params;
+#endif
+
+
+/** Global functions */
 
 /**@brief Function for handling error message events from sd_rpc.
  *
@@ -127,105 +174,6 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
     }
 }
 
-/**@brief Function for handling the Application's BLE Stack events.
- *
- * @param[in] adapter The transport adapter.
- * @param[in] p_ble_evt Bluetooth stack event.
- */
-static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
-{
-    uint32_t err_code;
-
-    if (p_ble_evt == NULL)
-    {
-        printf("Received an empty BLE event\n");
-        fflush(stdout);
-        return;
-    }
-
-    switch (p_ble_evt->header.evt_id)
-    {
-        case BLE_GAP_EVT_CONNECTED:
-            m_connection_handle = p_ble_evt->evt.gap_evt.conn_handle;
-            printf("Connected, connection handle 0x%04X\n", m_connection_handle);
-            fflush(stdout);
-            break;
-
-        case BLE_GAP_EVT_DISCONNECTED:
-            printf("Disconnected\n");
-            fflush(stdout);
-            m_connection_handle = BLE_CONN_HANDLE_INVALID;
-            m_send_notifications = false;
-            advertising_start();
-            break;
-
-        case BLE_GAP_EVT_TIMEOUT:
-            printf("Advertisement timed out\n");
-            fflush(stdout);
-            m_advertisement_timed_out = true;
-            break;
-
-        case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-            err_code = sd_ble_gap_sec_params_reply(adapter, m_connection_handle,
-                                                   BLE_GAP_SEC_STATUS_SUCCESS, NULL, NULL);
-
-            if (err_code != NRF_SUCCESS)
-            {
-                printf("Failed reply with GAP security parameters. Error code: 0x%02X\n", err_code);
-                fflush(stdout);
-            }
-            break;
-
-        case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-            err_code = sd_ble_gatts_sys_attr_set(adapter, m_connection_handle, NULL, 0, 0);
-
-            if (err_code != NRF_SUCCESS)
-            {
-                printf("Failed updating persistent sys attr info. Error code: 0x%02X\n", err_code);
-                fflush(stdout);
-            }
-            break;
-
-        case BLE_GATTS_EVT_WRITE:
-            if (p_ble_evt->evt.gatts_evt.params.write.handle ==
-                    m_heart_rate_measurement_handle.cccd_handle)
-            {
-                uint8_t write_data = p_ble_evt->evt.gatts_evt.params.write.data[0];
-                m_send_notifications = write_data == BLE_GATT_HVX_NOTIFICATION;
-            }
-            break;
-
-#if NRF_SD_BLE_API >= 3
-        case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-            err_code = sd_ble_gatts_exchange_mtu_reply(adapter, m_connection_handle,
-                                                       GATT_MTU_SIZE_DEFAULT);
-
-            if (err_code != NRF_SUCCESS)
-            {
-                printf("MTU exchange request reply failed. Error code: 0x%02X\n", err_code);
-                fflush(stdout);
-            }
-            break;
-#endif
-
-#if NRF_SD_BLE_API <= 3
-        case BLE_EVT_TX_COMPLETE:
-#else
-        case BLE_GATTS_EVT_HVN_TX_COMPLETE:
-#endif
-#ifdef DEBUG
-            printf("Successfully transmitted a heart rate reading.");
-            fflush(stdout);
-#endif
-            break;
-
-        default:
-            printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id);
-            fflush(stdout);
-            break;
-        }
-}
-
 /**@brief Function for initializing serial communication with the target nRF5 Bluetooth slave.
  *
  * @param[in] serial_port The serial port the target nRF5 device is connected to.
@@ -238,7 +186,9 @@ static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
     data_link_layer_t * data_link_layer;
     transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
+    phy = sd_rpc_physical_layer_create_uart(serial_port,
+                                            baud_rate,
+                                            SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
     data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
     transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
@@ -260,18 +210,19 @@ static uint32_t ble_stack_init()
 #endif
 
 #if NRF_SD_BLE_API == 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+    ble_enable_params.gatt_enable_params.att_mtu            = GATT_MTU_SIZE_DEFAULT;
 #elif NRF_SD_BLE_API < 3
-    ble_enable_params.gatts_enable_params.attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    ble_enable_params.gatts_enable_params.service_changed = false;
-    ble_enable_params.gap_enable_params.periph_conn_count = 1;
-    ble_enable_params.gap_enable_params.central_conn_count = 0;
-    ble_enable_params.gap_enable_params.central_sec_count = 0;
+    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+    ble_enable_params.gatts_enable_params.service_changed   = false;
     ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count = 1;
+    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 #endif
 
 #if NRF_SD_BLE_API <= 3
+    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
+    ble_enable_params.gap_enable_params.central_conn_count  = 1;
+    ble_enable_params.gap_enable_params.central_sec_count   = 1;
+
     err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
 #else
     err_code = sd_ble_enable(m_adapter, app_ram_base);
@@ -294,6 +245,10 @@ static uint32_t ble_stack_init()
 }
 
 #if NRF_SD_BLE_API >= 5
+/**@brief Function for setting configuration for the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
 uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
 {
     const uint32_t ram_start = 0; // Value is not used by ble-driver
@@ -363,7 +318,44 @@ static uint32_t advertisement_data_set()
     const uint8_t * sr_data        = NULL;
     const uint8_t   sr_data_length = 0;
 
+#if NRF_SD_BLE_API <= 5
     error_code = sd_ble_gap_adv_data_set(m_adapter, data_buffer, index, sr_data, sr_data_length);
+#endif
+#if NRF_SD_BLE_API >= 6
+    ble_gap_adv_properties_t adv_properties;
+    adv_properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+    adv_properties.anonymous        = 0;
+    adv_properties.include_tx_power = 0;
+
+    m_adv_params.properties         = adv_properties;
+    m_adv_params.filter_policy      = BLE_GAP_ADV_FP_ANY;
+    m_adv_params.duration           = BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED;
+    m_adv_params.p_peer_addr        = NULL;
+    m_adv_params.interval           = ADVERTISING_INTERVAL_40_MS;
+    m_adv_params.max_adv_evts       = 0;
+    m_adv_params.primary_phy        = BLE_GAP_PHY_AUTO;
+    m_adv_params.secondary_phy      = BLE_GAP_PHY_AUTO;
+    m_adv_params.channel_mask[0]    = 0;
+    m_adv_params.channel_mask[1]    = 0;
+    m_adv_params.channel_mask[2]    = 0;
+    m_adv_params.channel_mask[3]    = 0;
+    m_adv_params.channel_mask[4]    = 0;
+
+    ble_gap_adv_data_t m_adv_data;
+
+    ble_data_t adv_data;
+    adv_data.p_data = data_buffer;
+    adv_data.len    = index;
+
+    ble_data_t scan_rsp_data;
+    scan_rsp_data.p_data = NULL;
+    scan_rsp_data.len    = 0;
+
+    m_adv_data.adv_data         = adv_data;
+    m_adv_data.scan_rsp_data    = scan_rsp_data;
+
+    error_code = sd_ble_gap_adv_set_configure(m_adapter, &m_adv_handle, &m_adv_data, &m_adv_params);
+#endif
 
     if (error_code != NRF_SUCCESS)
     {
@@ -385,20 +377,25 @@ static uint32_t advertising_start()
 {
     uint32_t             error_code;
     ble_gap_adv_params_t adv_params;
+    memset(&adv_params, 0, sizeof(adv_params));
 
-    adv_params.type        = BLE_GAP_ADV_TYPE_ADV_IND;
-    adv_params.p_peer_addr = NULL;                        // Undirected advertisement.
-    adv_params.fp          = BLE_GAP_ADV_FP_ANY;
-    adv_params.interval    = ADVERTISING_INTERVAL_40_MS;
-    adv_params.timeout     = ADVERTISING_TIMEOUT_3_MIN;
+#if NRF_SD_BLE_API <= 5
+    adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+    adv_params.fp = BLE_GAP_ADV_FP_ANY;
+    adv_params.timeout = ADVERTISING_TIMEOUT_3_MIN;
+#endif
 #if NRF_SD_BLE_API == 2
     adv_params.p_whitelist = NULL;
 #endif
 
+    adv_params.interval = ADVERTISING_INTERVAL_40_MS;
+
 #if NRF_SD_BLE_API <= 3
     error_code = sd_ble_gap_adv_start(m_adapter, &adv_params);
-#else
+#elif NRF_SD_BLE_API == 5
     error_code = sd_ble_gap_adv_start(m_adapter, &adv_params, m_config_id);
+#elif NRF_SD_BLE_API >= 6
+    error_code = sd_ble_gap_adv_start(m_adapter, m_adv_handle, m_config_id);
 #endif
 
     if (error_code != NRF_SUCCESS)
@@ -587,6 +584,102 @@ static uint32_t heart_rate_measurement_send()
     return NRF_SUCCESS;
 }
 
+
+/** Event functions */
+
+
+/** Event dispatcher */
+
+/**@brief Function for handling the Application's BLE Stack events.
+ *
+ * @param[in] adapter The transport adapter.
+ * @param[in] p_ble_evt Bluetooth stack event.
+ */
+static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
+{
+    uint32_t err_code;
+
+    if (p_ble_evt == NULL)
+    {
+        printf("Received an empty BLE event\n");
+        fflush(stdout);
+        return;
+    }
+
+    switch (p_ble_evt->header.evt_id)
+    {
+        case BLE_GAP_EVT_CONNECTED:
+            m_connection_handle = p_ble_evt->evt.gap_evt.conn_handle;
+            printf("Connected, connection handle 0x%04X\n", m_connection_handle);
+            fflush(stdout);
+            break;
+
+        case BLE_GAP_EVT_DISCONNECTED:
+            printf("Disconnected\n");
+            fflush(stdout);
+            m_connection_handle = BLE_CONN_HANDLE_INVALID;
+            m_send_notifications = false;
+            advertising_start();
+            break;
+
+        case BLE_GAP_EVT_TIMEOUT:
+            printf("Advertisement timed out\n");
+            fflush(stdout);
+            m_advertisement_timed_out = true;
+            break;
+
+        case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+            err_code = sd_ble_gatts_sys_attr_set(adapter, m_connection_handle, NULL, 0, 0);
+
+            if (err_code != NRF_SUCCESS)
+            {
+                printf("Failed updating persistent sys attr info. Error code: 0x%02X\n", err_code);
+                fflush(stdout);
+            }
+            break;
+
+        case BLE_GATTS_EVT_WRITE:
+            if (p_ble_evt->evt.gatts_evt.params.write.handle ==
+                    m_heart_rate_measurement_handle.cccd_handle)
+            {
+                uint8_t write_data = p_ble_evt->evt.gatts_evt.params.write.data[0];
+                m_send_notifications = write_data == BLE_GATT_HVX_NOTIFICATION;
+            }
+            break;
+
+#if NRF_SD_BLE_API >= 3
+        case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
+            err_code = sd_ble_gatts_exchange_mtu_reply(adapter, m_connection_handle,
+                                                       GATT_MTU_SIZE_DEFAULT);
+
+            if (err_code != NRF_SUCCESS)
+            {
+                printf("MTU exchange request reply failed. Error code: 0x%02X\n", err_code);
+                fflush(stdout);
+            }
+            break;
+#endif
+
+#if NRF_SD_BLE_API <= 3
+        case BLE_EVT_TX_COMPLETE:
+#else
+        case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+#endif
+#ifdef DEBUG
+            printf("Successfully transmitted a heart rate reading.");
+            fflush(stdout);
+#endif
+            break;
+
+        default:
+            printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id);
+            fflush(stdout);
+            break;
+        }
+}
+
+/** Main */
+
 /**@brief Function for application main entry.
  *
  * @param[in]   argc    Number of arguments (program expects 0 or 1 arguments).
@@ -637,7 +730,12 @@ int main(int argc, char * argv[])
     }
 
 #if NRF_SD_BLE_API >= 5
-    ble_cfg_set(m_config_id);
+    error_code = ble_cfg_set(m_config_id);
+
+    if (error_code != NRF_SUCCESS)
+    {
+        return error_code;
+    }
 #endif
 
     error_code = ble_stack_init();
