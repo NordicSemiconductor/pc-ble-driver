@@ -56,13 +56,51 @@
 // occurred in a callback.
 bool error = false;
 
-TEST_CASE("test_pc_ble_driver_open_close") {
+TEST_CASE("test_pc_ble_driver_open_close")
+{
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort         = env.serialPorts.at(0);
     const auto numberOfIterations = env.numberOfIterations;
 
-    SECTION("open_close_open_iterations") {
+    SECTION("open_already_opened_adapter")
+    {
+        const auto baudRate = serialPort.baudRate;
+
+        INFO("Serial port used: " << serialPort.port);
+        INFO("Baud rate used: " << baudRate);
+
+        auto c = std::unique_ptr<testutil::AdapterWrapper>(
+            new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
+
+        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
+                            testutil::logHandler) == NRF_SUCCESS);
+
+        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
+                            testutil::logHandler) == NRF_ERROR_INVALID_STATE);
+
+        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
+    }
+
+    SECTION("close_already_closed_adapter")
+    {
+        const auto baudRate = serialPort.baudRate;
+
+        INFO("Serial port used: " << serialPort.port);
+        INFO("Baud rate used: " << baudRate);
+
+        auto c = std::unique_ptr<testutil::AdapterWrapper>(
+            new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
+
+        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_ERROR_INVALID_STATE);
+        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
+                            testutil::logHandler) == NRF_SUCCESS);
+        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
+        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_ERROR_INVALID_STATE);
+    }
+
+    SECTION("open_close_open_iterations")
+    {
         const auto baudRate = serialPort.baudRate;
 
         INFO("Serial port used: " << serialPort.port);

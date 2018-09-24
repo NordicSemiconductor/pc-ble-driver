@@ -38,27 +38,26 @@
 #include "sd_rpc.h"
 
 #include "adapter_internal.h"
-#include "serialization_transport.h"
+#include "ble_common.h"
+#include "conn_systemreset_app.h"
 #include "h5_transport.h"
+#include "serial_port_enum.h"
+#include "serialization_transport.h"
 #include "uart_boost.h"
 #include "uart_settings_boost.h"
-#include "serial_port_enum.h"
-#include "conn_systemreset_app.h"
-#include "ble_common.h"
 
 #include <cstdlib>
 
-
 uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size)
 {
-    if(size == nullptr)
+    if (size == nullptr)
     {
         return NRF_ERROR_NULL;
     }
 
     const std::list<SerialPortDesc> &descs = EnumSerialPorts();
 
-    if(descs.size() > *size)
+    if (descs.size() > *size)
     {
         return NRF_ERROR_DATA_SIZE;
     }
@@ -66,8 +65,8 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
     *size = static_cast<uint32_t>(descs.size());
 
     int i = 0;
-    for(auto &desc : descs)
-        {
+    for (auto &desc : descs)
+    {
         strncpy(serial_port_descs[i].port, desc.comName.c_str(), SD_RPC_MAXPATHLEN);
         strncpy(serial_port_descs[i].manufacturer, desc.manufacturer.c_str(), SD_RPC_MAXPATHLEN);
         strncpy(serial_port_descs[i].serialNumber, desc.serialNumber.c_str(), SD_RPC_MAXPATHLEN);
@@ -81,13 +80,15 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
     return NRF_SUCCESS;
 }
 
-physical_layer_t *sd_rpc_physical_layer_create_uart(const char * port_name, uint32_t baud_rate, sd_rpc_flow_control_t flow_control, sd_rpc_parity_t parity)
+physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint32_t baud_rate,
+                                                    sd_rpc_flow_control_t flow_control,
+                                                    sd_rpc_parity_t parity)
 {
     const auto physicalLayer = static_cast<physical_layer_t *>(malloc(sizeof(physical_layer_t)));
 
     UartCommunicationParameters uartSettings = {};
-    uartSettings.portName = port_name;
-    uartSettings.baudRate = baud_rate;
+    uartSettings.portName                    = port_name;
+    uartSettings.baudRate                    = baud_rate;
 
     if (flow_control == SD_RPC_FLOW_CONTROL_NONE)
     {
@@ -110,65 +111,99 @@ physical_layer_t *sd_rpc_physical_layer_create_uart(const char * port_name, uint
     uartSettings.stopBits = UartStopBitsOne;
     uartSettings.dataBits = UartDataBitsEight;
 
-    const auto uart = new UartBoost(uartSettings);
+    const auto uart         = new UartBoost(uartSettings);
     physicalLayer->internal = static_cast<void *>(uart);
     return physicalLayer;
 }
 
-data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer, uint32_t retransmission_interval)
+data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer,
+                                                               uint32_t retransmission_interval)
 {
     const auto dataLinkLayer = static_cast<data_link_layer_t *>(malloc(sizeof(data_link_layer_t)));
     const auto physicalLayer = static_cast<Transport *>(physical_layer->internal);
-    const auto h5 = new H5Transport(physicalLayer, retransmission_interval);
-    dataLinkLayer->internal = static_cast<void *>(h5);
+    const auto h5            = new H5Transport(physicalLayer, retransmission_interval);
+    dataLinkLayer->internal  = static_cast<void *>(h5);
     return dataLinkLayer;
 }
 
-transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer, uint32_t response_timeout)
+transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer,
+                                                 uint32_t response_timeout)
 {
     const auto transportLayer = static_cast<transport_layer_t *>(malloc(sizeof(transport_layer_t)));
-    const auto dataLinkLayer = static_cast<Transport *>(data_link_layer->internal);
-    const auto serialization = new SerializationTransport(dataLinkLayer, response_timeout);
-    transportLayer->internal = serialization;
+    const auto dataLinkLayer  = static_cast<Transport *>(data_link_layer->internal);
+    const auto serialization  = new SerializationTransport(dataLinkLayer, response_timeout);
+    transportLayer->internal  = serialization;
     return transportLayer;
 }
 
-adapter_t *sd_rpc_adapter_create(transport_layer_t* transport_layer)
+adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer)
 {
-    const auto adapterLayer = static_cast<adapter_t *>(malloc(sizeof(adapter_t)));
+    const auto adapterLayer   = static_cast<adapter_t *>(malloc(sizeof(adapter_t)));
     const auto transportLayer = static_cast<SerializationTransport *>(transport_layer->internal);
-    const auto adapter = new AdapterInternal(transportLayer);
-    adapterLayer->internal = static_cast<void *>(adapter);
+    const auto adapter        = new AdapterInternal(transportLayer);
+    adapterLayer->internal    = static_cast<void *>(adapter);
     return adapterLayer;
 }
 
 void sd_rpc_adapter_delete(adapter_t *adapter)
 {
     const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+
+    if (adapterLayer == nullptr)
+    {
+        return;
+    }
+
     delete adapterLayer;
+    adapter->internal = nullptr;
 }
 
-uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler, sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler)
+uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
+                     sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler)
 {
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+
+    if (adapterLayer == nullptr)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
     return adapterLayer->open(status_handler, event_handler, log_handler);
 }
 
 uint32_t sd_rpc_close(adapter_t *adapter)
 {
-    const auto adapterLayer = static_cast<AdapterInternal*>(adapter->internal);
+    const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+
+    if (adapterLayer == nullptr)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
     return adapterLayer->close();
 }
 
-uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_severity_t severity_filter)
+uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
+                                                sd_rpc_log_severity_t severity_filter)
 {
-    auto adapterLayer = static_cast<AdapterInternal*>(adapter->internal);
+    auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+
+    if (adapterLayer == nullptr)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
     return adapterLayer->logSeverityFilterSet(severity_filter);
 }
 
 uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
 {
-    auto adapterLayer = static_cast<AdapterInternal*>(adapter->internal);
+    auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+
+    if (adapterLayer == nullptr)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
 
     uint32_t tx_buffer_length = 1; // This command has 1 byte payload, hence length 1
     uint32_t rx_buffer_length = 0; // This command does not generate a response, hence length 0
@@ -177,5 +212,5 @@ uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
     tx_buffer_vector[0] = static_cast<uint8_t>(reset_mode);
 
     return adapterLayer->transport->send(&tx_buffer_vector[0], tx_buffer_length, nullptr,
-        &rx_buffer_length, SERIALIZATION_RESET_CMD);
+                                         &rx_buffer_length, SERIALIZATION_RESET_CMD);
 }
