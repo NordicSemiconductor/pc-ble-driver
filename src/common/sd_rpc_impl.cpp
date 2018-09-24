@@ -48,7 +48,8 @@
 
 #include <cstdlib>
 
-uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size) {
+uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size)
+{
     if (size == nullptr)
     {
         return NRF_ERROR_NULL;
@@ -81,7 +82,8 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
 
 physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint32_t baud_rate,
                                                     sd_rpc_flow_control_t flow_control,
-                                                    sd_rpc_parity_t parity) {
+                                                    sd_rpc_parity_t parity)
+{
     const auto physicalLayer = static_cast<physical_layer_t *>(malloc(sizeof(physical_layer_t)));
 
     UartCommunicationParameters uartSettings = {};
@@ -93,14 +95,18 @@ physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint3
         uartSettings.flowControl = UartFlowControlNone;
     }
     else if (flow_control == SD_RPC_FLOW_CONTROL_HARDWARE)
-    { uartSettings.flowControl = UartFlowControlHardware; }
+    {
+        uartSettings.flowControl = UartFlowControlHardware;
+    }
 
     if (parity == SD_RPC_PARITY_NONE)
     {
         uartSettings.parity = UartParityNone;
     }
     else if (parity == SD_RPC_PARITY_EVEN)
-    { uartSettings.parity = UartParityEven; }
+    {
+        uartSettings.parity = UartParityEven;
+    }
 
     uartSettings.stopBits = UartStopBitsOne;
     uartSettings.dataBits = UartDataBitsEight;
@@ -111,7 +117,8 @@ physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint3
 }
 
 data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer,
-                                                               uint32_t retransmission_interval) {
+                                                               uint32_t retransmission_interval)
+{
     const auto dataLinkLayer = static_cast<data_link_layer_t *>(malloc(sizeof(data_link_layer_t)));
     const auto physicalLayer = static_cast<Transport *>(physical_layer->internal);
     const auto h5            = new H5Transport(physicalLayer, retransmission_interval);
@@ -120,7 +127,8 @@ data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t 
 }
 
 transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer,
-                                                 uint32_t response_timeout) {
+                                                 uint32_t response_timeout)
+{
     const auto transportLayer = static_cast<transport_layer_t *>(malloc(sizeof(transport_layer_t)));
     const auto dataLinkLayer  = static_cast<Transport *>(data_link_layer->internal);
     const auto serialization  = new SerializationTransport(dataLinkLayer, response_timeout);
@@ -128,7 +136,8 @@ transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_la
     return transportLayer;
 }
 
-adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer) {
+adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer)
+{
     const auto adapterLayer   = static_cast<adapter_t *>(malloc(sizeof(adapter_t)));
     const auto transportLayer = static_cast<SerializationTransport *>(transport_layer->internal);
     const auto adapter        = new AdapterInternal(transportLayer);
@@ -136,7 +145,8 @@ adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer) {
     return adapterLayer;
 }
 
-void sd_rpc_adapter_delete(adapter_t *adapter) {
+void sd_rpc_adapter_delete(adapter_t *adapter)
+{
     const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)
@@ -149,7 +159,8 @@ void sd_rpc_adapter_delete(adapter_t *adapter) {
 }
 
 uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
-                     sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler) {
+                     sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler)
+{
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)
@@ -160,7 +171,8 @@ uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
     return adapterLayer->open(status_handler, event_handler, log_handler);
 }
 
-uint32_t sd_rpc_close(adapter_t *adapter) {
+uint32_t sd_rpc_close(adapter_t *adapter)
+{
     const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)
@@ -172,7 +184,8 @@ uint32_t sd_rpc_close(adapter_t *adapter) {
 }
 
 uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
-                                                sd_rpc_log_severity_t severity_filter) {
+                                                sd_rpc_log_severity_t severity_filter)
+{
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)
@@ -183,7 +196,8 @@ uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
     return adapterLayer->logSeverityFilterSet(severity_filter);
 }
 
-uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode) {
+uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
+{
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)

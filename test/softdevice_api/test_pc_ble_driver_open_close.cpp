@@ -56,13 +56,15 @@
 // occurred in a callback.
 bool error = false;
 
-TEST_CASE("test_pc_ble_driver_open_close") {
+TEST_CASE("test_pc_ble_driver_open_close")
+{
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort         = env.serialPorts.at(0);
     const auto numberOfIterations = env.numberOfIterations;
 
-    SECTION("open_already_opened_adapter") {
+    SECTION("open_already_opened_adapter")
+    {
         const auto baudRate = serialPort.baudRate;
 
         INFO("Serial port used: " << serialPort.port);
@@ -80,7 +82,8 @@ TEST_CASE("test_pc_ble_driver_open_close") {
         REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
     }
 
-    SECTION("close_already_closed_adapter") {
+    SECTION("close_already_closed_adapter")
+    {
         const auto baudRate = serialPort.baudRate;
 
         INFO("Serial port used: " << serialPort.port);
@@ -96,7 +99,8 @@ TEST_CASE("test_pc_ble_driver_open_close") {
         REQUIRE(sd_rpc_close(c->unwrap()) == NRF_ERROR_INVALID_STATE);
     }
 
-    SECTION("open_close_open_iterations") {
+    SECTION("open_close_open_iterations")
+    {
         const auto baudRate = serialPort.baudRate;
 
         INFO("Serial port used: " << serialPort.port);

@@ -44,18 +44,23 @@
 #include <string>
 
 AdapterInternal::AdapterInternal(SerializationTransport *_transport)
-    : eventCallback(nullptr), statusCallback(nullptr), logCallback(nullptr),
-      logSeverityFilter(SD_RPC_LOG_TRACE), isOpen(false) {
-    this->transport = _transport;
-}
+    : eventCallback(nullptr)
+    , statusCallback(nullptr)
+    , logCallback(nullptr)
+    , logSeverityFilter(SD_RPC_LOG_TRACE)
+    , isOpen(false)
+    , transport(_transport)
+{}
 
-AdapterInternal::~AdapterInternal() {
+AdapterInternal::~AdapterInternal()
+{
     delete transport;
 }
 
 uint32_t AdapterInternal::open(const sd_rpc_status_handler_t status_callback,
                                const sd_rpc_evt_handler_t event_callback,
-                               const sd_rpc_log_handler_t log_callback) {
+                               const sd_rpc_log_handler_t log_callback)
+{
     if (isOpen)
     {
         return NRF_ERROR_INVALID_STATE;
@@ -81,7 +86,8 @@ uint32_t AdapterInternal::open(const sd_rpc_status_handler_t status_callback,
     return err;
 }
 
-uint32_t AdapterInternal::close() {
+uint32_t AdapterInternal::close()
+{
     if (!isOpen)
     {
         return NRF_ERROR_INVALID_STATE;
@@ -92,13 +98,15 @@ uint32_t AdapterInternal::close() {
     return transport->close();
 }
 
-void AdapterInternal::statusHandler(const sd_rpc_app_status_t code, const std::string &message) {
+void AdapterInternal::statusHandler(const sd_rpc_app_status_t code, const std::string &message)
+{
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
     statusCallback(&adapter, code, message.c_str());
 }
 
-void AdapterInternal::eventHandler(ble_evt_t *event) {
+void AdapterInternal::eventHandler(ble_evt_t *event)
+{
     // Event Thread
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
@@ -106,7 +114,8 @@ void AdapterInternal::eventHandler(ble_evt_t *event) {
 }
 
 void AdapterInternal::logHandler(const sd_rpc_log_severity_t severity,
-                                 const std::string &log_message) {
+                                 const std::string &log_message)
+{
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
 
@@ -116,11 +125,13 @@ void AdapterInternal::logHandler(const sd_rpc_log_severity_t severity,
     }
 }
 
-bool AdapterInternal::isInternalError(const uint32_t error_code) {
+bool AdapterInternal::isInternalError(const uint32_t error_code)
+{
     return error_code != NRF_SUCCESS;
 }
 
-uint32_t AdapterInternal::logSeverityFilterSet(const sd_rpc_log_severity_t severity_filter) {
+uint32_t AdapterInternal::logSeverityFilterSet(const sd_rpc_log_severity_t severity_filter)
+{
     logSeverityFilter = severity_filter;
     return NRF_SUCCESS;
 }
