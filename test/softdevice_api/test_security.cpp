@@ -74,7 +74,7 @@ AuthenticationType authType;
 
 uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
                          const std::string &advertisingName,
-                         const std::vector<uint8_t> &initialCharaciteristicValue,
+                         const std::vector<uint8_t> &initialCharacteristicValue,
                          const uint16_t characteristicValueMaxLength) {
     // Setup the advertisement data
     std::vector<uint8_t> advertisingData;
@@ -82,7 +82,7 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
     advertisingData.push_back(3); // Length of upcoming advertisement type
     advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
 
-    // Store BLE_UUID_HEART_RATE_SERVICE in little - endian format.
+    // Store BLE_UUID_HEART_RATE_SERVICE in little-endian format.
     advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
     advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
 
@@ -142,10 +142,10 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
 
     attr_char_value.p_uuid    = &(p->scratchpad.target_characteristic);
     attr_char_value.p_attr_md = &attr_md;
-    attr_char_value.init_len  = static_cast<uint16_t>(initialCharaciteristicValue.size());
+    attr_char_value.init_len  = static_cast<uint16_t>(initialCharacteristicValue.size());
     attr_char_value.init_offs = 0;
     attr_char_value.max_len   = characteristicValueMaxLength;
-    attr_char_value.p_value   = const_cast<uint8_t *>(initialCharaciteristicValue.data());
+    attr_char_value.p_value   = const_cast<uint8_t *>(initialCharacteristicValue.data());
 
     err_code = sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
                                                &attr_char_value,
