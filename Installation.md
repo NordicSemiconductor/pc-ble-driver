@@ -112,6 +112,7 @@ See the following sections for platform-specific instructions on the installatio
 Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
 
     > vcpkg install asio
+    > vcpkg install catch2
     > cd build
     > cmake -G "Visual Studio 14 <Win64>" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
     > msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
@@ -136,6 +137,7 @@ Then change to the root folder of the repository and issue the following command
 
     $ cd build
     $ vcpkg install asio
+    $ vcpkg install catch2
     $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake <-DCMAKE_BUILD_TYPE=<build_type>> <-DARCH=<x86_32,x86_64>>" ..
     $ make
 
@@ -152,6 +154,7 @@ Install cmake with Homebrew with the `brew` command on a terminal:
 Then change to the root folder of the repository and issue the following commands:
 
     $ vcpkg install asio
+    $ vcpkg install catch2
     $ cd build
     $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE= <build_type> ..
     $ make
