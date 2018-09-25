@@ -43,12 +43,12 @@
 #include "internal/log.h"
 
 #include "../test_setup.h"
+#include "../test_util.h"
 
 #include "ble.h"
 #include "sd_rpc.h"
 
 #include <sstream>
-#include <string>
 #include <thread>
 
 // Indicates if an error has occurred in a callback.
@@ -108,8 +108,9 @@ TEST_CASE("test_pc_ble_driver_open_close")
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            auto c = std::unique_ptr<testutil::AdapterWrapper>(
+            auto c = std::shared_ptr<testutil::AdapterWrapper>(
                 new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
+            testutil::adapters.push_back(c);
 
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);
@@ -147,6 +148,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
             REQUIRE(error == false);
 
             REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
+            testutil::adapters.clear();
             sd_rpc_adapter_delete(c->unwrap());
 
             NRF_LOG("Iteration #" << (i + 1) << " of " << numberOfIterations << " complete.");
