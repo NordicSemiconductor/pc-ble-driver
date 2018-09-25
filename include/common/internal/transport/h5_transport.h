@@ -79,7 +79,7 @@ using payload_t      = std::vector<uint8_t>;
 /**
  * \brief Singleton that contains data used in a multithreaded context from H5Transport
  *
- * Multi-threaded access to "global" data members requires that threads constructin a synchronized manner.
+ * Multi-threaded access to "global" data members requires that threads construct in a synchronized manner.
  *
  * This class uses the magic statics approach that is supported in C++11.
  *
