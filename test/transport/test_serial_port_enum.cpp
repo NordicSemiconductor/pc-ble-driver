@@ -56,13 +56,13 @@ TEST_CASE("SerialPortEnumeration")
 {
     SECTION("Array not large enough for devices found") {
         std::vector<sd_rpc_serial_port_desc_t> devices(0);
-        auto size = devices.capacity();
+        uint32_t size = devices.capacity();
         REQUIRE(sd_rpc_serial_port_enum(devices.data(), &size) == NRF_ERROR_DATA_SIZE);
     }
 
     SECTION("Array large enough for devices found") {
         std::vector<sd_rpc_serial_port_desc_t> devices(100);
-        auto size = devices.capacity();
+        uint32_t size = devices.capacity();
         REQUIRE(sd_rpc_serial_port_enum(devices.data(), &size) == NRF_SUCCESS);
         REQUIRE(size > 0);
         NRF_LOG("Found " << size << " devices.");
