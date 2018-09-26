@@ -36,7 +36,8 @@ using sd_api_time_unit_t = enum {
     UNIT_10_MS    = 10000 /**< Number of microseconds in 10 milliseconds. */
 };
 
-static uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit) {
+static uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit)
+{
     const auto microseconds = milliseconds * 1000;
     return (static_cast<uint16_t>(microseconds / timeunit));
 }
@@ -46,14 +47,17 @@ class AdapterWrapper
   public:
     AdapterWrapper(const Role &role, const std::string &port, const uint32_t baudRate,
                    const uint16_t mtu = 0)
-        : m_role(role), m_port(port) {
+        : m_role(role)
+        , m_port(port)
+    {
         m_adapter = adapterInit(port.c_str(), baudRate);
 
         // Setup scratchpad with default values
         setupScratchpad(mtu);
     }
 
-    uint32_t configure() {
+    uint32_t configure()
+    {
         uint32_t error_code;
 
 #if NRF_SD_BLE_API >= 5
@@ -84,7 +88,8 @@ class AdapterWrapper
         return error_code;
     }
 
-    uint32_t connect(const ble_gap_addr_t *address) {
+    uint32_t connect(const ble_gap_addr_t *address)
+    {
         const auto err_code = sd_ble_gap_connect(m_adapter, address, &(scratchpad.scan_param),
                                                  &(scratchpad.connection_param)
 #if NRF_SD_BLE_API >= 5
@@ -101,11 +106,13 @@ class AdapterWrapper
         return err_code;
     }
 
-    bool error() {
+    bool error()
+    {
         return m_async_error;
     }
 
-    uint32_t startScan(const bool resume = false) {
+    uint32_t startScan(const bool resume = false)
+    {
 #if NRF_SD_BLE_API == 6
         scratchpad.adv_report_receive_buffer.p_data = scratchpad.adv_report_data_received;
         scratchpad.adv_report_receive_buffer.len    = sizeof(scratchpad.adv_report_data_received);
@@ -126,7 +133,9 @@ class AdapterWrapper
             scanParams = nullptr;
         }
         else
-        { scanParams = &scratchpad.scan_param; }
+        {
+            scanParams = &scratchpad.scan_param;
+        }
 
         uint32_t error_code = sd_ble_gap_scan_start(m_adapter, scanParams
 #if NRF_SD_BLE_API == 6
@@ -142,15 +151,20 @@ class AdapterWrapper
                 NRF_LOG(role() << " Scan start failed");
             }
             else
-            { NRF_LOG(role() << " Scan resume failed"); }
+            {
+                NRF_LOG(role() << " Scan resume failed");
+            }
         }
         else
-        { NRF_LOG(role() << " Scan started"); }
+        {
+            NRF_LOG(role() << " Scan started");
+        }
 
         return error_code;
     }
 
-    uint32_t setAdvertisingData(const std::vector<uint8_t> &advertisingData) {
+    uint32_t setAdvertisingData(const std::vector<uint8_t> &advertisingData)
+    {
         const uint8_t *sr_data       = nullptr;
         const uint8_t sr_data_length = 0;
 
@@ -188,12 +202,15 @@ class AdapterWrapper
             NRF_LOG(role() << " Setting advertisement data failed.");
         }
         else
-        { NRF_LOG(role() << " Setting advertisement success."); }
+        {
+            NRF_LOG(role() << " Setting advertisement success.");
+        }
 
         return err_code;
     }
 
-    uint32_t startAdvertising() {
+    uint32_t startAdvertising()
+    {
         if (role() != Peripheral)
         {
             NRF_LOG(role() << " Wrong role, must be peripheral to advertise.");
@@ -219,7 +236,8 @@ class AdapterWrapper
         return err_code;
     }
 
-    uint32_t startServiceDiscovery(const uint8_t type, const uint16_t uuid) {
+    uint32_t startServiceDiscovery(const uint8_t type, const uint16_t uuid)
+    {
         uint16_t start_handle = 0x01;
         ble_uuid_t srvc_uuid;
 
@@ -245,7 +263,8 @@ class AdapterWrapper
                                  const bool lesc = false, const bool keypress = false,
                                  const uint8_t ioCaps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY,
                                  const bool oob = false, const uint8_t minKeySize = 7,
-                                 const uint8_t maxKeySize = 16) {
+                                 const uint8_t maxKeySize = 16)
+    {
         ble_gap_sec_params_t p_sec_params;
         memset(&p_sec_params, 0, sizeof(p_sec_params));
         p_sec_params.bond         = bond ? 1 : 0;
@@ -269,7 +288,8 @@ class AdapterWrapper
         return err_code;
     }
 
-    uint32_t authKeyReply(const uint8_t keyType, const uint8_t *key) {
+    uint32_t authKeyReply(const uint8_t keyType, const uint8_t *key)
+    {
         const auto err_code =
             sd_ble_gap_auth_key_reply(m_adapter, scratchpad.connection_handle, keyType, key);
         if (err_code != NRF_SUCCESS)
@@ -286,7 +306,8 @@ class AdapterWrapper
                                  const bool lesc = false, const bool keypress = false,
                                  const uint8_t ioCaps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY,
                                  const bool oob = false, const uint8_t minKeySize = 7,
-                                 const uint8_t maxKeySize = 16) {
+                                 const uint8_t maxKeySize = 16)
+    {
         ble_gap_sec_params_t secParams;
         memset(&secParams, 0, sizeof(secParams));
         secParams.bond         = bond ? 1 : 0;
@@ -309,7 +330,8 @@ class AdapterWrapper
         return err_code;
     }
 
-    uint32_t securityParamsReply(const ble_gap_sec_keyset_t &keyset) {
+    uint32_t securityParamsReply(const ble_gap_sec_keyset_t &keyset)
+    {
         const auto err_code = sd_ble_gap_sec_params_reply(
             m_adapter, scratchpad.connection_handle, BLE_GAP_SEC_STATUS_SUCCESS, nullptr, &keyset);
 
@@ -322,7 +344,8 @@ class AdapterWrapper
         return err_code;
     }
 
-    uint32_t startCharacteristicDiscovery() {
+    uint32_t startCharacteristicDiscovery()
+    {
         ble_gattc_handle_range_t handle_range;
 
         handle_range.start_handle = scratchpad.service_start_handle;
@@ -334,7 +357,8 @@ class AdapterWrapper
                                                      &handle_range);
     }
 
-    uint32_t startDescriptorDiscovery() {
+    uint32_t startDescriptorDiscovery()
+    {
         ble_gattc_handle_range_t handle_range;
         NRF_LOG(role() << " Discovering characteristic's descriptors");
 
@@ -351,7 +375,8 @@ class AdapterWrapper
                                                  &handle_range);
     }
 
-    uint32_t writeCCCDValue(const uint16_t cccdHandle, const uint8_t value) {
+    uint32_t writeCCCDValue(const uint16_t cccdHandle, const uint8_t value)
+    {
         ble_gattc_write_params_t write_params;
         uint8_t cccd_value[2] = {value, 0};
 
@@ -369,7 +394,8 @@ class AdapterWrapper
     }
 
     uint32_t writeCharacteristicValue(const uint16_t characteristicHandle,
-                                      const std::vector<uint8_t> &data) {
+                                      const std::vector<uint8_t> &data)
+    {
         ble_gattc_write_params_t write_params;
         write_params.handle   = characteristicHandle;
         write_params.len      = static_cast<uint16_t>(data.size());
@@ -385,19 +411,23 @@ class AdapterWrapper
         return sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
     }
 
-    adapter_t *unwrap() {
+    adapter_t *unwrap()
+    {
         return m_adapter;
     }
 
-    Role role() const {
+    Role role() const
+    {
         return m_role;
     }
 
-    std::string port() const {
+    std::string port() const
+    {
         return m_port;
     }
 
-    void processLog(const sd_rpc_log_severity_t severity, const std::string &log_message) {
+    void processLog(const sd_rpc_log_severity_t severity, const std::string &log_message)
+    {
         NRF_LOG(role() << "[log] severity:" << testutil::asText(severity)
                        << " message:" << log_message);
 
@@ -407,7 +437,8 @@ class AdapterWrapper
         }
     }
 
-    void logEvent(const uint16_t eventId, const ble_gap_evt_t &gapEvent) {
+    void logEvent(const uint16_t eventId, const ble_gap_evt_t &gapEvent)
+    {
         switch (eventId)
         {
             case BLE_GAP_EVT_CONNECTED:
@@ -503,7 +534,8 @@ class AdapterWrapper
         }
     }
 
-    void processEvent(const ble_evt_t *p_ble_evt) {
+    void processEvent(const ble_evt_t *p_ble_evt)
+    {
         auto eventId = p_ble_evt->header.evt_id;
 
         const auto logGenericUnprocessed = [this, &eventId]() {
@@ -551,7 +583,9 @@ class AdapterWrapper
                 }
             }
             else
-            { logUnprocessed(); }
+            {
+                logUnprocessed();
+            }
         }
         else if (eventId >= BLE_GATTC_EVT_BASE && eventId <= BLE_GATTC_EVT_LAST)
         {
@@ -568,7 +602,9 @@ class AdapterWrapper
                 }
             }
             else
-            { logUnprocessed(); }
+            {
+                logUnprocessed();
+            }
         }
         else if (eventId >= BLE_GATTS_EVT_BASE && eventId <= BLE_GATTS_EVT_LAST)
         {
@@ -585,7 +621,9 @@ class AdapterWrapper
                 }
             }
             else
-            { logUnprocessed(); }
+            {
+                logUnprocessed();
+            }
         }
         else
         {
@@ -597,11 +635,14 @@ class AdapterWrapper
                 }
             }
             else
-            { logGenericUnprocessed(); }
+            {
+                logGenericUnprocessed();
+            }
         }
     }
 
-    void processStatus(const sd_rpc_app_status_t code, const std::string &message) {
+    void processStatus(const sd_rpc_app_status_t code, const std::string &message)
+    {
         NRF_LOG(role() << "[status] code:" << testutil::asText(code) << " message:" << message);
 
         if (m_statusCallback)
@@ -610,27 +651,33 @@ class AdapterWrapper
         }
     }
 
-    void setStatusCallback(const StatusCallback &statusCallback) {
+    void setStatusCallback(const StatusCallback &statusCallback)
+    {
         m_statusCallback = statusCallback;
     }
 
-    void setLogCallback(const LogCallback &logCallback) {
+    void setLogCallback(const LogCallback &logCallback)
+    {
         m_logCallback = logCallback;
     }
 
-    void setEventCallback(const EventCallback &eventCallback) {
+    void setEventCallback(const EventCallback &eventCallback)
+    {
         m_eventCallback = eventCallback;
     }
 
-    void setGattcEventCallback(const GattcEventCallback &callback) {
+    void setGattcEventCallback(const GattcEventCallback &callback)
+    {
         m_gattcEventCallback = callback;
     }
 
-    void setGattsEventCallback(const GattsEventCallback &callback) {
+    void setGattsEventCallback(const GattsEventCallback &callback)
+    {
         m_gattsEventCallback = callback;
     }
 
-    void setGapEventCallback(const GapEventCallback &callback) {
+    void setGapEventCallback(const GapEventCallback &callback)
+    {
         m_gapEventCallback = callback;
     }
 
@@ -666,7 +713,8 @@ class AdapterWrapper
     // simplicity in the tests we try to keep then to one role.
     Role m_role;
 
-    void setupScratchpad(const uint16_t mtu = 0) {
+    void setupScratchpad(const uint16_t mtu = 0)
+    {
         // Setup scratchpad with default values, take role into account
 #if NRF_SD_BLE_API <= 3
         std::memset(&scratchpad.ble_enable_params, 0, sizeof(scratchpad.ble_enable_params));
@@ -684,7 +732,9 @@ class AdapterWrapper
             scratchpad.common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
         }
         else
-        { scratchpad.common_opt.conn_bw.role = BLE_GAP_ROLE_PERIPH; }
+        {
+            scratchpad.common_opt.conn_bw.role = BLE_GAP_ROLE_PERIPH;
+        }
 
         scratchpad.common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
         scratchpad.common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
@@ -768,7 +818,8 @@ class AdapterWrapper
 #endif
     }
 
-    uint32_t setBLEOptions() {
+    uint32_t setBLEOptions()
+    {
 #if NRF_SD_BLE_API <= 3
         return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &scratchpad.opt);
 #else
@@ -776,7 +827,8 @@ class AdapterWrapper
 #endif
     }
 
-    uint32_t initBLEStack() {
+    uint32_t initBLEStack()
+    {
         uint32_t err_code;
         uint32_t *app_ram_base = NULL;
 
@@ -803,7 +855,8 @@ class AdapterWrapper
     }
 
 #if NRF_SD_BLE_API >= 5
-    uint32_t setBLECfg(uint8_t conn_cfg_tag) {
+    uint32_t setBLECfg(uint8_t conn_cfg_tag)
+    {
         const uint32_t ram_start = 0; // Value is not used by ble-driver
         uint32_t error_code;
         ble_cfg_t ble_cfg;
@@ -844,7 +897,8 @@ class AdapterWrapper
     }
 #endif
 
-    adapter_t *adapterInit(const char *serial_port, uint32_t baud_rate) {
+    adapter_t *adapterInit(const char *serial_port, uint32_t baud_rate)
+    {
         physical_layer_t *phy;
         data_link_layer_t *data_link_layer;
         transport_layer_t *transport_layer;
@@ -857,7 +911,8 @@ class AdapterWrapper
     }
 };
 
-std::ostream &operator<<(std::ostream &s, const ble_gap_addr_t *address) {
+std::ostream &operator<<(std::ostream &s, const ble_gap_addr_t *address)
+{
     const int address_length = 6;
 
     for (int i = sizeof(address->addr) - 1; i >= 0; --i)
