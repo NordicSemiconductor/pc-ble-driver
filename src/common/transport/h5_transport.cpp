@@ -451,7 +451,8 @@ void H5Transport::processPacket(const payload_t &packet)
             try
             {
                 const auto currentExitCriteria = exitCriterias.at(currentState);
-                dynamic_cast<ActiveExitCriterias *>(currentExitCriteria.get())->irrecoverableSyncError = true;
+                dynamic_cast<ActiveExitCriterias *>(currentExitCriteria.get())
+                    ->irrecoverableSyncError = true;
             }
             catch (std::out_of_range &)
             {
@@ -475,7 +476,7 @@ void H5Transport::statusHandler(sd_rpc_app_status_t code, const char *error)
         {
             std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
             const auto currentExitCriteria = exitCriterias.at(currentState);
-            const auto exitCriteria = currentExitCriteria.get();
+            const auto exitCriteria        = currentExitCriteria.get();
 
             if (exitCriteria != nullptr)
             {
