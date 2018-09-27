@@ -76,7 +76,7 @@ public:
         NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
     }
 
-    void dataCallback(uint8_t *data, size_t length)
+    void dataCallback(const uint8_t *data, const size_t length)
     {
         incoming.assign(data, data + length);
         NRF_LOG("[" << name << "][data]<- " << testutil::asHex(incoming) << " length: " << length);

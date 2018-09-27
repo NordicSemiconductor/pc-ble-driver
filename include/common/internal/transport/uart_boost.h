@@ -39,8 +39,8 @@
 #define UART_BOOST_H
 
 #include "transport.h"
-#include "uart_settings_boost.h"
 #include "uart_defines.h"
+#include "uart_settings_boost.h"
 
 #include <asio.hpp>
 
@@ -56,45 +56,54 @@
  */
 class UartBoost : public Transport
 {
-public:
-
-    /**@brief Is called by app_uart_init() stores function pointers and sets up necessary boost variables.
+  public:
+    /**
+     *@brief Is called by app_uart_init() stores function pointers and sets up necessary boost
+     * variables.
      */
     UartBoost(const UartCommunicationParameters &communicationParameters);
 
     ~UartBoost();
 
-    /**@brief Setup of serial port service with parameter data.
+    /**
+     *@brief Setup of serial port service with parameter data.
      */
-    uint32_t open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);
+    uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                  const log_cb_t &log_callback) override;
 
-    /**@brief Closes the serial port service.
+    /**
+     *@brief Closes the serial port service.
      */
-    uint32_t close();
+    uint32_t close() override;
 
-    /**@brief sends data to serial port to write.
+    /**
+     *@brief sends data to serial port to write.
      */
-    uint32_t send(const std::vector<uint8_t> &data);
+    uint32_t send(const std::vector<uint8_t> &data) override;
 
-private:
-
-    /**@brief Called when background thread receives bytes from uart.
+  private:
+    /**
+     *@brief Called when background thread receives bytes from uart.
      */
     void readHandler(const asio::error_code &errorCode, const size_t bytesTransferred);
 
-    /**@brief Called when write is finished doing asynchronous write.
+    /**
+     *@brief Called when write is finished doing asynchronous write.
      */
     void writeHandler(const asio::error_code &errorCode, const size_t);
 
-    /**@brief Starts asynchronous read on a background thread.
+    /**
+     *@brief Starts asynchronous read on a background thread.
      */
     void startRead();
 
-    /**@brief Starts an asynchronous read.
+    /**
+     *@brief Starts an asynchronous read.
      */
     void asyncRead();
 
-    /**@brief Starts an asynchronous write.
+    /**
+     *@brief Starts an asynchronous write.
      */
     void asyncWrite();
 
@@ -110,10 +119,10 @@ private:
     bool asyncWriteInProgress;
     std::thread *ioServiceThread;
 
-    asio::io_service* ioService;
-    asio::serial_port* serialPort;
+    asio::io_service *ioService;
+    asio::serial_port *serialPort;
 
-    asio::io_service::work* workNotifier;
+    asio::io_service::work *workNotifier;
 };
 
-#endif //UART_BOOST_H
+#endif // UART_BOOST_H

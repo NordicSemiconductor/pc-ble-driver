@@ -36,7 +36,7 @@ TEST_CASE("virtual_uart")
 
         const auto dataCallback = [](const std::string name, payload_t &payloadReceived)
         {
-            return [name, &payloadReceived](uint8_t *data, size_t length) -> void
+            return [name, &payloadReceived](const uint8_t *data, const size_t length) -> void
             {
                 payloadReceived.assign(data, data + length);
                 NRF_LOG("[" << name << "][data]<- " << testutil::asHex(payloadReceived) << " length: " << length);
@@ -46,12 +46,12 @@ TEST_CASE("virtual_uart")
         const std::string uartAName = "uartA";
 
         uartA->open(
-            [&uartAName](sd_rpc_app_status_t code, const char *message) -> void
+            [&uartAName](const sd_rpc_app_status_t code, const char *message) -> void
             {
                 NRF_LOG("[" << uartAName << "][status] code: " << code << " message: " << message);
             },
             dataCallback(uartAName, payloadFromB),
-            [&uartAName](sd_rpc_log_severity_t severity, std::string message) -> void
+            [&uartAName](const sd_rpc_log_severity_t severity, const std::string &message) -> void
             {
                 NRF_LOG("[" << uartAName << "][log] severity: " << severity << " message: " << message);
             }

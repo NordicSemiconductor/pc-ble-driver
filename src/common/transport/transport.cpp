@@ -53,9 +53,9 @@ Transport::~Transport()
     /* Intentional empty */
 }
 
-uint32_t Transport::open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback)
+uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback, const log_cb_t &log_callback)
 {
-    if (status_callback == nullptr || data_callback == nullptr || log_callback == nullptr)
+    if (!status_callback || !data_callback || !log_callback)
     {
         return NRF_ERROR_INTERNAL;
     }

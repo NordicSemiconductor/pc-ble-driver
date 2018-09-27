@@ -79,7 +79,8 @@ using payload_t      = std::vector<uint8_t>;
 /**
  * \brief Singleton that contains data used in a multithreaded context from H5Transport
  *
- * Multi-threaded access to "global" data members requires that threads construct in a synchronized manner.
+ * Multi-threaded access to "global" data members requires that threads construct in a synchronized
+ * manner.
  *
  * This class uses the magic statics approach that is supported in C++11.
  *
@@ -113,8 +114,8 @@ class H5Transport : public Transport
     H5Transport(Transport *nextTransportLayer, const uint32_t retransmission_interval);
     ~H5Transport();
 
-    uint32_t open(status_cb_t status_callback, data_cb_t data_callback,
-                  log_cb_t log_callback) override;
+    uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                  const log_cb_t &log_callback) override;
     uint32_t close() override;
     uint32_t send(const std::vector<uint8_t> &data) override;
 
@@ -129,8 +130,8 @@ class H5Transport : public Transport
                              const payload_t &pattern);
 
   private:
-    void dataHandler(uint8_t *data, size_t length);
-    void statusHandler(sd_rpc_app_status_t code, const char *error);
+    void dataHandler(const uint8_t *data, const size_t length);
+    void statusHandler(const sd_rpc_app_status_t code, const char *error);
     void processPacket(const payload_t &packet);
 
     void sendControlPacket(control_pkt_type type);
@@ -168,8 +169,7 @@ class H5Transport : public Transport
     uint32_t errorPacketCount;
 
     void logPacket(const bool outgoing, const payload_t &packet);
-    void log(std::string &logLine) const;
-    void log(char const *logLine) const;
+    void log(const sd_rpc_log_severity_t &level, const std::string &logLine) const;
     void logStateTransition(const h5_state_t from, const h5_state_t to) const;
     static std::string stateToString(const h5_state_t state);
     static std::string asHex(const payload_t &packet);
@@ -188,7 +188,7 @@ class H5Transport : public Transport
     void startStateMachine();
     void stopStateMachine();
 
-    std::map<h5_state_t, std::unique_ptr<ExitCriterias>> exitCriterias;
+    std::map<h5_state_t, std::shared_ptr<ExitCriterias>> exitCriterias;
 
     void stateMachineWorker();
 

@@ -75,10 +75,11 @@ const uint8_t PACKET_RETRANSMISSIONS =
     6; // Number of times to send reliable packets before giving in
 
 // Other constants
-const auto OPEN_WAIT_TIMEOUT =
-    std::chrono::milliseconds(2000); // Duration to wait for state ACTIVE after open is called
-const auto RESET_WAIT_DURATION = std::chrono::milliseconds(
-    300); // Duration to wait before continuing UART communication after reset is sent to target
+
+// Duration to wait for state ACTIVE after open is called
+const auto OPEN_WAIT_TIMEOUT = std::chrono::milliseconds(2000);
+// Duration to wait before continuing UART communication after reset is sent to target
+const auto RESET_WAIT_DURATION = std::chrono::milliseconds(300);
 
 H5TransportSingleton::H5TransportSingleton()
 {
@@ -124,18 +125,17 @@ H5TransportSingleton &H5TransportSingleton::get()
 
 #pragma region Public methods
 H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransmission_interval)
-    : Transport()
+    : nextTransportLayer(_nextTransportLayer)
     , seqNum(0)
     , ackNum(0)
     , c0Found(false)
+    , retransmissionInterval(std::chrono::milliseconds(retransmission_interval))
     , incomingPacketCount(0)
     , outgoingPacketCount(0)
     , errorPacketCount(0)
     , currentState(STATE_START)
     , stateMachineReady(false)
 {
-    this->nextTransportLayer = _nextTransportLayer;
-    retransmissionInterval   = std::chrono::milliseconds(retransmission_interval);
     setupStateMachine();
 }
 
@@ -144,8 +144,8 @@ H5Transport::~H5Transport()
     delete nextTransportLayer;
 }
 
-uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_callback,
-                           log_cb_t log_callback)
+uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                           const log_cb_t &log_callback)
 {
     auto errorCode = Transport::open(status_callback, data_callback, log_callback);
 
@@ -156,7 +156,7 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
 
     if (currentState != STATE_START)
     {
-        log("Not able to open, current state is not valid");
+        log(SD_RPC_LOG_FATAL, std::string("Not able to open, current state is not valid"));
         return NRF_ERROR_INTERNAL;
     }
 
@@ -164,8 +164,6 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
     // Wait for the state machine to be ready
     startStateMachine();
 
-    const auto _exitCriterias =
-        dynamic_cast<StartExitCriterias *>(exitCriterias[currentState].get());
     lastPacket.clear();
 
     statusCallback =
@@ -175,19 +173,28 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
 
     errorCode = nextTransportLayer->open(statusCallback, dataCallback, upperLogCallback);
 
-    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-
-    if (errorCode != NRF_SUCCESS)
+    try
     {
-        _exitCriterias->ioResourceError = true;
-    }
-    else
-    {
-        _exitCriterias->isOpened = true;
-    }
+        const auto ec            = exitCriterias.at(currentState);
+        const auto _exitCriteria = dynamic_cast<StartExitCriterias *>(ec.get());
 
-    stateMachineLock.unlock();
-    stateMachineChange.notify_all();
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+
+        if (errorCode != NRF_SUCCESS)
+        {
+            _exitCriteria->ioResourceError = true;
+        }
+        else
+        {
+            _exitCriteria->isOpened = true;
+        }
+        stateMachineLock.unlock();
+        stateMachineChange.notify_all();
+    }
+    catch (std::out_of_range &)
+    {
+        errorCode = NRF_ERROR_INVALID_STATE;
+    }
 
     if (errorCode != NRF_SUCCESS)
     {
@@ -226,17 +233,29 @@ uint32_t H5Transport::open(const status_cb_t status_callback, data_cb_t data_cal
 
 uint32_t H5Transport::close()
 {
-    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-    const auto exitCriteria = exitCriterias[currentState].get();
-
-    if (exitCriteria != nullptr)
+    try
     {
-        exitCriteria->close = true;
-    }
+        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+        const auto ec           = exitCriterias.at(currentState);
+        const auto exitCriteria = ec.get();
 
-    // Notify about the change in the state machine
-    stateMachineLock.unlock();
-    stateMachineChange.notify_all();
+        if (exitCriteria != nullptr)
+        {
+            exitCriteria->close = true;
+        }
+
+        // Notify about the change in the state machine
+        stateMachineLock.unlock();
+        stateMachineChange.notify_all();
+    }
+    catch (std::out_of_range &)
+    {
+        std::stringstream ss;
+        ss << "State " << stateToString(currentState)
+           << " does not have exit criteria associated with it. Will continue to close the "
+              "H5Transport.";
+        log(SD_RPC_LOG_WARNING, ss.str());
+    }
 
     stopStateMachine();
 
@@ -429,8 +448,18 @@ void H5Transport::processPacket(const payload_t &packet)
         }
         else
         {
-            dynamic_cast<ActiveExitCriterias *>(exitCriterias[currentState].get())
-                ->irrecoverableSyncError = true;
+            try
+            {
+                const auto ec = exitCriterias.at(currentState);
+                dynamic_cast<ActiveExitCriterias *>(ec.get())->irrecoverableSyncError = true;
+            }
+            catch (std::out_of_range &)
+            {
+                std::stringstream ss;
+                ss << "State " << stateToString(currentState)
+                   << " does not have exit criteria associated with it. Ignoring packet.";
+                log(SD_RPC_LOG_WARNING, ss.str());
+            }
         }
     }
 
@@ -442,25 +471,36 @@ void H5Transport::statusHandler(sd_rpc_app_status_t code, const char *error)
 {
     if (code == IO_RESOURCES_UNAVAILABLE)
     {
-        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        const auto exitCriteria = exitCriterias[currentState].get();
-
-        if (exitCriteria != nullptr)
+        try
         {
-            exitCriteria->ioResourceError = true;
-        }
+            std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+            const auto ec = exitCriterias.at(currentState);
+            const auto exitCriteria = ec.get();
 
-        stateMachineLock.unlock();
-        stateMachineChange.notify_all();
+            if (exitCriteria != nullptr)
+            {
+                exitCriteria->ioResourceError = true;
+            }
+
+            stateMachineLock.unlock();
+            stateMachineChange.notify_all();
+        }
+        catch (std::out_of_range &)
+        {
+            std::stringstream ss;
+            ss << "State " << stateToString(currentState)
+               << " does not have criteria associated with it.";
+            log(SD_RPC_LOG_WARNING, ss.str());
+        }
     }
 
-    if (upperStatusCallback != nullptr)
+    if (upperStatusCallback)
     {
         upperStatusCallback(code, error);
     }
 }
 
-void H5Transport::dataHandler(uint8_t *data, size_t length)
+void H5Transport::dataHandler(const uint8_t *data, const size_t length)
 {
     payload_t packet;
 
@@ -576,7 +616,7 @@ void H5Transport::setupStateMachine()
         // Send the reset packet, and wait for the device to reboot and ready for receiving commands
         sendControlPacket(CONTROL_PKT_RESET);
 
-        if (statusCallback != nullptr)
+        if (statusCallback)
         {
             statusCallback(RESET_PERFORMED, "Target Reset performed");
         }
@@ -702,7 +742,7 @@ void H5Transport::setupStateMachine()
         ackNum = 0;
 
         statusHandler(CONNECTION_ACTIVE, "Connection active");
-        stateMachineChange.wait(stateMachineLock, [this, &exit] { return exit->isFullfilled(); });
+        stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
 
         if (exit->ioResourceError)
         {
@@ -723,28 +763,28 @@ void H5Transport::setupStateMachine()
     };
 
     stateActions[STATE_FAILED] = [this]() -> h5_state_t {
-        log("Entered state failed. No exit exists from this state.");
+        log(SD_RPC_LOG_FATAL, "Entered state failed. No exit exists from this state.");
         return STATE_FAILED;
     };
 
     stateActions[STATE_CLOSED] = [this]() -> h5_state_t {
-        log("Entered state closed.");
+        log(SD_RPC_LOG_DEBUG, "Entered state closed.");
         return STATE_CLOSED;
     };
 
     stateActions[STATE_NO_RESPONSE] = [this]() -> h5_state_t {
-        log("No response to data sent to device.");
+        log(SD_RPC_LOG_DEBUG, "No response to data sent to device.");
         return STATE_NO_RESPONSE;
     };
 
-    // Setup exit criterias
-    exitCriterias[STATE_START] = std::unique_ptr<ExitCriterias>(new StartExitCriterias());
-    exitCriterias[STATE_RESET] = std::unique_ptr<ExitCriterias>(new ResetExitCriterias());
+    // Setup exit criteria
+    exitCriterias[STATE_START] = std::shared_ptr<ExitCriterias>(new StartExitCriterias());
+    exitCriterias[STATE_RESET] = std::shared_ptr<ExitCriterias>(new ResetExitCriterias());
     exitCriterias[STATE_UNINITIALIZED] =
-        std::unique_ptr<ExitCriterias>(new UninitializedExitCriterias());
+        std::shared_ptr<ExitCriterias>(new UninitializedExitCriterias());
     exitCriterias[STATE_INITIALIZED] =
-        std::unique_ptr<ExitCriterias>(new InitializedExitCriterias());
-    exitCriterias[STATE_ACTIVE] = std::unique_ptr<ExitCriterias>(new ActiveExitCriterias());
+        std::shared_ptr<ExitCriterias>(new InitializedExitCriterias());
+    exitCriterias[STATE_ACTIVE] = std::shared_ptr<ExitCriterias>(new ActiveExitCriterias());
 }
 
 void H5Transport::startStateMachine()
@@ -816,7 +856,7 @@ void H5Transport::stateMachineWorker()
                 case STATE_FAILED:
                 case STATE_CLOSED:
                 case STATE_NO_RESPONSE:
-                    // These are terminal states that do not have exit criterias associated with
+                    // These are terminal states that do not have exit criteria associated with
                     // them
                     break;
                 case STATE_UNKNOWN:
@@ -880,7 +920,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type)
 
         logLine << "Trying to send unknown control packet to device. " << e.what() << ". Aborting.";
 
-        if (upperLogCallback != nullptr)
+        if (upperLogCallback)
         {
             upperLogCallback(SD_RPC_LOG_INFO, logLine.str());
         }
@@ -1062,7 +1102,7 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
 
     const std::string logLine = h5PktToString(outgoing, packet).c_str();
 
-    if (upperLogCallback != nullptr)
+    if (upperLogCallback)
     {
         upperLogCallback(SD_RPC_LOG_DEBUG, logLine);
     }
@@ -1072,22 +1112,16 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
     }
 }
 
-void H5Transport::log(std::string &logLine) const
+void H5Transport::log(const sd_rpc_log_severity_t &level, const std::string &logLine) const
 {
-    if (upperLogCallback != nullptr)
+    if (upperLogCallback)
     {
-        upperLogCallback(SD_RPC_LOG_DEBUG, logLine);
+        upperLogCallback(level, logLine);
     }
     else
     {
         std::clog << logLine << std::endl;
     }
-}
-
-void H5Transport::log(char const *logLine) const
-{
-    auto _logLine = std::string(logLine);
-    log(_logLine);
 }
 
 void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
@@ -1095,7 +1129,7 @@ void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
     std::stringstream logLine;
     logLine << "State change: " << stateToString(from) << " -> " << stateToString(to) << std::endl;
 
-    if (upperLogCallback != nullptr)
+    if (upperLogCallback)
     {
         upperLogCallback(SD_RPC_LOG_DEBUG, logLine.str());
     }

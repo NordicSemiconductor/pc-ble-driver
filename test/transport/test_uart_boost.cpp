@@ -177,7 +177,7 @@ TEST_CASE("open_close")
 
     b->open(
         status_callback,
-        [&receivedOnB, &portBStats](uint8_t *data, size_t length) -> void
+        [&receivedOnB, &portBStats](const uint8_t *data, const size_t length) -> void
         {
             receivedOnB.insert(receivedOnB.end(), data, data + length);
 
@@ -198,7 +198,7 @@ TEST_CASE("open_close")
 
     a->open(
         status_callback,
-        [&receivedOnA, &portAStats](uint8_t *data, size_t length) -> void
+        [&receivedOnA, &portAStats](const uint8_t *data, const size_t length) -> void
         {
             receivedOnA.insert(receivedOnA.end(), data, data + length);
 
