@@ -175,18 +175,18 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
 
     try
     {
-        const auto ec            = exitCriterias.at(currentState);
-        const auto _exitCriteria = dynamic_cast<StartExitCriterias *>(ec.get());
-
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+
+        const auto currentExitCriteria = exitCriterias.at(currentState);
+        const auto exitCriteria = dynamic_cast<StartExitCriterias *>(currentExitCriteria.get());
 
         if (errorCode != NRF_SUCCESS)
         {
-            _exitCriteria->ioResourceError = true;
+            exitCriteria->ioResourceError = true;
         }
         else
         {
-            _exitCriteria->isOpened = true;
+            exitCriteria->isOpened = true;
         }
         stateMachineLock.unlock();
         stateMachineChange.notify_all();
@@ -236,8 +236,8 @@ uint32_t H5Transport::close()
     try
     {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        const auto ec           = exitCriterias.at(currentState);
-        const auto exitCriteria = ec.get();
+        const auto currentExitCriteria = exitCriterias.at(currentState);
+        const auto exitCriteria        = currentExitCriteria.get();
 
         if (exitCriteria != nullptr)
         {
@@ -450,8 +450,8 @@ void H5Transport::processPacket(const payload_t &packet)
         {
             try
             {
-                const auto ec = exitCriterias.at(currentState);
-                dynamic_cast<ActiveExitCriterias *>(ec.get())->irrecoverableSyncError = true;
+                const auto currentExitCriteria = exitCriterias.at(currentState);
+                dynamic_cast<ActiveExitCriterias *>(currentExitCriteria.get())->irrecoverableSyncError = true;
             }
             catch (std::out_of_range &)
             {
@@ -474,8 +474,8 @@ void H5Transport::statusHandler(sd_rpc_app_status_t code, const char *error)
         try
         {
             std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-            const auto ec = exitCriterias.at(currentState);
-            const auto exitCriteria = ec.get();
+            const auto currentExitCriteria = exitCriterias.at(currentState);
+            const auto exitCriteria = currentExitCriteria.get();
 
             if (exitCriteria != nullptr)
             {
