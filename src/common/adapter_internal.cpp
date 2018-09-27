@@ -44,12 +44,12 @@
 #include <string>
 
 AdapterInternal::AdapterInternal(SerializationTransport *_transport)
-    : eventCallback(nullptr)
+    : transport(_transport)
+    , eventCallback(nullptr)
     , statusCallback(nullptr)
     , logCallback(nullptr)
     , logSeverityFilter(SD_RPC_LOG_TRACE)
     , isOpen(false)
-    , transport(_transport)
 {}
 
 AdapterInternal::~AdapterInternal()

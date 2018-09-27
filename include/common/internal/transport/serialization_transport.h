@@ -42,15 +42,15 @@
 
 #include "ble.h"
 
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <thread>
 
-#include <queue>
 #include <cstdint>
+#include <queue>
 
-typedef uint32_t(*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
-typedef std::function<void(ble_evt_t * p_ble_evt)> evt_cb_t;
+typedef uint32_t (*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
+typedef std::function<void(ble_evt_t *p_ble_evt)> evt_cb_t;
 
 struct eventData_t
 {
@@ -58,39 +58,40 @@ struct eventData_t
     uint32_t dataLength;
 };
 
-typedef enum
-{
-    SERIALIZATION_COMMAND = 0,
-    SERIALIZATION_RESPONSE = 1,
-    SERIALIZATION_EVENT = 2,
-    SERIALIZATION_DTM_CMD = 3,      // Direct test mode command
-    SERIALIZATION_DTM_RESP = 4,     // Direct test mode response
+typedef enum {
+    SERIALIZATION_COMMAND   = 0,
+    SERIALIZATION_RESPONSE  = 1,
+    SERIALIZATION_EVENT     = 2,
+    SERIALIZATION_DTM_CMD   = 3, // Direct test mode command
+    SERIALIZATION_DTM_RESP  = 4, // Direct test mode response
     SERIALIZATION_RESET_CMD = 5
 } serialization_pkt_type_t;
 
-class SerializationTransport {
-public:
+class SerializationTransport
+{
+  public:
     SerializationTransport(const SerializationTransport &) = delete;
-    SerializationTransport& operator=(const SerializationTransport &) = delete;
-    SerializationTransport(SerializationTransport &&) = delete;
-    SerializationTransport& operator=(SerializationTransport &&) = delete;
+    SerializationTransport &operator=(const SerializationTransport &) = delete;
+    SerializationTransport(SerializationTransport &&)                 = delete;
+    SerializationTransport &operator=(SerializationTransport &&) = delete;
 
     SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
     ~SerializationTransport() = default;
-    
-    uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback, const log_cb_t &log_callback);
+
+    uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback,
+                  const log_cb_t &log_callback);
     uint32_t close();
     uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength,
-        serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
+                  serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
 
-private:
-    void readHandler(uint8_t *data, size_t length);
+  private:
+    void readHandler(const uint8_t *data, const size_t length);
     void eventHandlingRunner();
 
     status_cb_t statusCallback;
     evt_cb_t eventCallback;
     log_cb_t logCallback;
-    
+
     data_cb_t dataCallback;
 
     std::shared_ptr<Transport> nextTransportLayer;
@@ -105,11 +106,12 @@ private:
     std::mutex responseMutex;
     std::condition_variable responseWaitCondition;
 
-    bool runEventThread; // Variable to control if thread shall run, used in thread to exit/keep running inthread
+    bool runEventThread; // Variable to control if thread shall run, used in thread to exit/keep
+                         // running inthread
     std::mutex eventMutex;
     std::condition_variable eventWaitCondition;
     std::thread eventThread;
     std::queue<eventData_t> eventQueue;
 };
 
-#endif //SERIALIZATION_TRANSPORT_H
+#endif // SERIALIZATION_TRANSPORT_H
