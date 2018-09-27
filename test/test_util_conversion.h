@@ -455,7 +455,7 @@ static std::string asText(const ble_gap_evt_auth_key_request_t &authKeyRequest) 
             retval << "BLE_GAP_AUTH_KEY_TYPE_OOB";
             break;
         default:
-            retval << asHex(authKeyRequest.key_type);
+            retval << "0x" << asHex(authKeyRequest.key_type);
             break;
     }
     return retval.str();
@@ -529,7 +529,7 @@ static std::string asText(const ble_gap_evt_adv_report_t &advReport) {
     retval << " data:" << asHex(data);
     retval << " rssi:" << static_cast<uint32_t>(advReport.rssi) << "dBm";
     retval << " scan_rsp:" << (advReport.scan_rsp ? "yes" : "no");
-    retval << " type:" << advReport.type; // TODO: convert to string
+    retval << " type:0x" << asHex(advReport.type); // TODO: convert to string
     return retval.str();
 #else
     return "asText for ble_gap_evt_adv_report_t not supported on SD API v6";
@@ -548,8 +548,8 @@ static std::string asText(const ble_gap_evt_lesc_dhkey_request_t &dhkeyRequest) 
 static std::string asText(const ble_gap_master_id_t &masterId) {
     std::stringstream retval;
     std::vector<uint8_t> rand(masterId.rand, masterId.rand + sizeof(masterId.rand));
-    retval << "ediv:" << asHex(masterId.ediv);
-    retval << " rand:" << asHex(rand);
+    retval << "ediv:0x" << asHex(masterId.ediv);
+    retval << " rand:0x" << asHex(rand);
     return retval.str();
 }
 

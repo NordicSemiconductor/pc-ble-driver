@@ -324,7 +324,7 @@ class AdapterWrapper
 
         if (err_code != NRF_SUCCESS)
         {
-            NRF_LOG(role() << " sd_ble_gap_sec_params_reply failed: " << asHex(err_code));
+            NRF_LOG(role() << " sd_ble_gap_sec_params_reply failed: 0x" << asHex(err_code));
         }
 
         return err_code;
@@ -406,7 +406,7 @@ class AdapterWrapper
         NRF_LOG(role() << " Writing to connection_handle: "
                        << testutil::asText(scratchpad.connection_handle)
                        << " characteristic_handle: " << testutil::asText(characteristicHandle)
-                       << " length: " << data.size() << " value: " << asHex(data));
+                       << " length: " << data.size() << " value: 0x" << asHex(data));
 
         return sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
     }
