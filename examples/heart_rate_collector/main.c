@@ -121,9 +121,13 @@ static uint16_t    m_hrm_char_handle            = 0;
 static uint16_t    m_hrm_cccd_handle            = 0;
 static bool        m_connection_is_in_progress  = false;
 static adapter_t * m_adapter                    = NULL;
+
+#if NRF_SD_BLE_API >= 5
 static uint32_t    m_config_id                  = 1;
-static uint8_t     mp_data[100]                 = { 0 };
+#endif
+
 #if NRF_SD_BLE_API >= 6
+static uint8_t     mp_data[100]                 = { 0 };
 static ble_data_t  m_adv_report_buffer;
 #endif
 
@@ -151,7 +155,7 @@ static const ble_gap_scan_params_t m_scan_param =
     (uint16_t)SCAN_WINDOW,
     (uint16_t)SCAN_TIMEOUT
 #if NRF_SD_BLE_API >= 6
-    , 0                      // Set chennel mask.
+    , { 0 }                  // Set chennel mask.
 #endif
 };
 

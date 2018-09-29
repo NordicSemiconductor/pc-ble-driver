@@ -55,6 +55,10 @@
  */
 
 /** Includes */
+#ifndef _WIN32
+#define _DEFAULT_SOURCE // Get rid of usleep warnings
+#endif
+
 #include "ble.h"
 #include "sd_rpc.h"
 
@@ -120,10 +124,13 @@ static uint8_t                  m_heart_rate                    = HEART_RATE_BAS
 static bool                     m_send_notifications            = false;
 static bool                     m_advertisement_timed_out       = false;
 static adapter_t *              m_adapter                       = NULL;
+
+#if NRF_SD_BLE_API >= 5
 static uint32_t                 m_config_id                     = 1;
-static uint8_t                  m_adv_handle                    = 0;
+#endif
 
 #if NRF_SD_BLE_API >= 6
+static uint8_t                  m_adv_handle                    = 0;
 static ble_gap_adv_params_t     m_adv_params;
 #endif
 
@@ -315,10 +322,11 @@ static uint32_t advertisement_data_set()
     data_buffer[index++] = (BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8;
 
     // No scan response.
+
+#if NRF_SD_BLE_API <= 5
     const uint8_t * sr_data        = NULL;
     const uint8_t   sr_data_length = 0;
 
-#if NRF_SD_BLE_API <= 5
     error_code = sd_ble_gap_adv_data_set(m_adapter, data_buffer, index, sr_data, sr_data_length);
 #endif
 #if NRF_SD_BLE_API >= 6
@@ -690,7 +698,6 @@ int main(int argc, char * argv[])
     uint32_t error_code;
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
-    uint8_t  cccd_value = 0;
 
     if (argc > 2)
     {
