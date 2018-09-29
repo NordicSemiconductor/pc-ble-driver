@@ -34,7 +34,6 @@ static std::string asHex(const uint16_t &data) {
  * @return string representation of provided address
  */
 static std::string asText(const ble_gap_addr_t &address) {
-    const int address_length = 6;
     std::stringstream retval;
 
     for (int i = sizeof(address.addr) - 1; i >= 0; --i)

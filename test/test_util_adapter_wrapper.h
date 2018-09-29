@@ -165,10 +165,10 @@ class AdapterWrapper
 
     uint32_t setAdvertisingData(const std::vector<uint8_t> &advertisingData)
     {
+#if NRF_SD_BLE_API <= 5
         const uint8_t *sr_data       = nullptr;
         const uint8_t sr_data_length = 0;
 
-#if NRF_SD_BLE_API <= 5
         auto err_code = sd_ble_gap_adv_data_set(m_adapter, advertisingData.data(),
                                                 static_cast<uint8_t>(advertisingData.size()),
                                                 sr_data, sr_data_length);
@@ -694,6 +694,11 @@ class AdapterWrapper
   private:
     // Adapter from pc-ble-driver
     adapter_t *m_adapter;
+
+    // The role given in the test. The SoftDevice supports multi-role, but for
+    // simplicity in the tests we try to keep then to one role.
+    const Role m_role;
+
     const std::string m_port;
 
     // Used to indicate that something went wrong in an async callback
@@ -708,10 +713,6 @@ class AdapterWrapper
     GapEventCallback m_gapEventCallback;
     GattsEventCallback m_gattsEventCallback;
     GattcEventCallback m_gattcEventCallback;
-
-    // The role given in the test. The SoftDevice supports multi-role, but for
-    // simplicity in the tests we try to keep then to one role.
-    Role m_role;
 
     void setupScratchpad(const uint16_t mtu = 0)
     {
@@ -911,44 +912,6 @@ class AdapterWrapper
     }
 };
 
-std::ostream &operator<<(std::ostream &s, const ble_gap_addr_t *address)
-{
-    const int address_length = 6;
-
-    for (int i = sizeof(address->addr) - 1; i >= 0; --i)
-    {
-        s << std::setfill('0') << std::setw(2) << std::hex
-          << static_cast<unsigned int>(address->addr[i]);
-
-        if (i < 5)
-        {
-            s << ":";
-        }
-    }
-
-    s << "/";
-
-    switch (address->addr_type)
-    {
-        case BLE_GAP_ADDR_TYPE_PUBLIC:
-            s << "PUBLIC";
-            break;
-        case BLE_GAP_ADDR_TYPE_RANDOM_STATIC:
-            s << "RANDOM_STATIC";
-            break;
-        case BLE_GAP_ADDR_TYPE_RANDOM_PRIVATE_RESOLVABLE:
-            s << "RANDOM_PRIVATE_RESOLVABLE";
-            break;
-        case BLE_GAP_ADDR_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE:
-            s << "RANDOM_PRIVATE_NON_RESOLVABLE";
-            break;
-        default:
-            s << "UNKNOWN";
-            break;
-    }
-
-    return s;
-}
 } //  namespace testutil
 
 #endif // TEST_UTIL_ADAPTER_WRAPPER_H__
