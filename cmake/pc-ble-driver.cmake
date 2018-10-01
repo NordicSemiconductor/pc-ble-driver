@@ -44,7 +44,10 @@ else()
 endif()
 
 # Add or remove SD API versions here
-set(SD_API_VER_NUMS 2 3 5 6)
+if(NOT SD_API_VER_NUMS)
+    set(SD_API_VER_NUMS 2 3 5 6)
+endif()
+
 list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
 
 set(SD_API_VER_PREFIX "SD_API_V")
