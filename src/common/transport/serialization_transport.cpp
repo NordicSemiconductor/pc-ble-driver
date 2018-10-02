@@ -86,7 +86,7 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
     }
     else
     {
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT;
     }
 
     return NRF_SUCCESS;
@@ -103,7 +103,7 @@ uint32_t SerializationTransport::close()
         {
             // log "ser_app_hal_pc_event_handling_stop was called from an event callback, causing
             // the event thread to stop itself. This will cause a resource leak."
-            return NRF_ERROR_INTERNAL;
+            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT;
         }
 
         eventThread.join();
@@ -147,7 +147,7 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
     if (!rspReceived)
     {
         logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_NO_RESPONSE;
     }
 
     return NRF_SUCCESS;

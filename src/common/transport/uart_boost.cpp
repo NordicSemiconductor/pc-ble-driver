@@ -139,7 +139,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         message << "Error setting up serial port " << uartSettingsBoost.getPortName() << ". "
                 << ex.what();
         upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SERIAL_PORT;
     }
 
     try
@@ -179,7 +179,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         message << "Error starting serial port work thread. " << ex.what() << " on serial port "
                 << uartSettingsBoost.getPortName() << ".";
         upperStatusCallback(IO_RESOURCES_UNAVAILABLE, message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SERIAL_PORT;
     }
 
     startRead();

@@ -65,7 +65,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
     {
         error_message << "Not able to encode packet. Code #" << err_code;
         _adapter->statusHandler(PKT_ENCODE_ERROR, error_message.str());
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_ENCODE;
     }
 
     if (decode_function != nullptr)
@@ -89,7 +89,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
     {
         error_message << "Error sending packet to target. Code #" << err_code;
         _adapter->statusHandler(PKT_SEND_ERROR, error_message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SEND;
     }
 
     uint32_t result_code = NRF_SUCCESS;
@@ -103,7 +103,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
     {
         error_message << "Not able to decode packet. Code #" << err_code;
         _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_DECODE;
     }
 
     return result_code;

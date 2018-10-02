@@ -157,7 +157,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
     if (currentState != STATE_START)
     {
         log(SD_RPC_LOG_FATAL, std::string("Not able to open, current state is not valid"));
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
 
     // State machine starts in a separate thread.
@@ -193,12 +193,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
     }
     catch (std::out_of_range &)
     {
-        errorCode = NRF_ERROR_INVALID_STATE;
-    }
-
-    if (errorCode != NRF_SUCCESS)
-    {
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
 
     if (waitForState(STATE_ACTIVE, OPEN_WAIT_TIMEOUT))
@@ -220,13 +215,12 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
                 // in time period OPEN_WAIT_TIMEOUT
                 return NRF_ERROR_TIMEOUT;
             case STATE_FAILED:
-                return NRF_ERROR_INTERNAL;
             case STATE_CLOSED:
-                return NRF_ERROR_RESOURCES;
+                return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
             case STATE_ACTIVE:
                 return NRF_SUCCESS;
             default:
-                return NRF_ERROR_INTERNAL;
+                return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
         }
     }
 }
