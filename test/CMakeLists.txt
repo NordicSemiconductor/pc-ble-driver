@@ -32,14 +32,15 @@ else()
     set(BUILD_TYPE "${CMAKE_BUILD_TYPE}")
 endif()
 
-# TODO: when connectivity firmware version numbers are aligned, use the same version number for all hex files
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v2/connectivity_1.2.3_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_1m_with_s132_3.1.hex" SD_API_V3_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_1.2.3_usb_with_s132_3.1.hex" SD_API_V3_S132_PCA10056_USB_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v5/connectivity_0.0.0_1m_with_s132_5.0.hex" SD_API_V5_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s132_6.0.hex" SD_API_V6_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s140_6.0.hex" SD_API_V6_S140_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_6.0_1m_with_s140_usb_6.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
+# TODO: look into how we can get the connfw version number from the hex build
+set(CONNFW_VERSION "1.2.3")
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v2/connectivity_${CONNFW_VERSION}_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_${CONNFW_VERSION}_1m_with_s132_3.1.0.hex" SD_API_V3_S132_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_${CONNFW_VERSION}_usb_with_s132_3.1.0.hex" SD_API_V3_S132_PCA10056_USB_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v5/connectivity_${CONNFW_VERSION}_1m_with_s132_5.1.0.hex" SD_API_V5_S132_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_${CONNFW_VERSION}_1m_with_s132_6.1.0.hex" SD_API_V6_S132_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_${CONNFW_VERSION}_1m_with_s140_6.1.0.hex" SD_API_V6_S140_HEX)
+file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_${CONNFW_VERSION}_1m_with_s140_usb_6.1.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
 
 function(parse_device_id device_id parse_error segger_sn serial_port)
     set(INVALID_FORMAT_MESSAGE "Device id ${device_id} is in an invalid format, must be <SEGGER_SERIAL_NUMBER>:<SERIAL_PORT>")
