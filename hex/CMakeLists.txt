@@ -14,9 +14,15 @@ find_program(KEIL_UV4 "UV4" HINTS "C:/Keil_v5/UV4")
 find_program(MERGEHEX "mergehex" HINTS "c:/Program Files (x86)/Nordic Semiconductor/nrf5x/bin")
 find_program(NRFUTIL "nrfutil")
 
+if(NOT DEFINED CONNECTIVITY_VERSION)
+    message(FATAL_ERROR "CONNECTIVITY_VERSION not provided, terminating compilation.")
+endif()
+
 #message(STATUS "KEILUV4: ${KEIL_UV4}")
 #message(STATUS "MERGEHEX: ${MERGEHEX}")
 #message(STATUS "NRFUTIL: ${NRFUTIL}")
+
+set(PCA_BLACKLIST "pca10036;")
 
 if(NOT KEIL_UV4)
     message(FATAL_ERROR "Keil UV4 not found, not able to compile connectivity firmware.")
@@ -47,6 +53,10 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
     set(SOFTDEVICE_SEARCH_PATH "${SDK_ROOT}/components/softdevice/${SOFTDEVICE_TYPE_VERSION}/hex/*.hex")
     file(GLOB FOUND_SOFTDEVICE_HEX "${SOFTDEVICE_SEARCH_PATH}")
 
+    if(FOUND_SOFTDEVICE_HEX STREQUAL "")
+        message(FATAL_ERROR "No SoftDevice found for project ${PROJECT_PATH}")
+    endif()
+
     set(ALTERNATIVE_SOFTDEVICE_HEX)
     nrf_find_alternative_softdevice(${FOUND_SOFTDEVICE_HEX} ALTERNATIVE_SOFTDEVICE_HEX)
 
@@ -58,7 +68,7 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
 
     if(${PCA_TYPE} STREQUAL "pca10028" OR ${PCA_TYPE} STREQUAL "pca10031")
         if(KEIL_UV4)
-            if("${SDK_VERSION}" STREQUAL "11")
+            if(SDK_VERSION EQUAL 11)
                 set(APP_HEX_PATH "${PROJECT_PATH}/_build/nrf51422_xxac_s130.hex" PARENT_SCOPE)
             else()
                 message(STATUS "${PCA_TYPE} is not supported in SDK ${SDK_VERSION}")
@@ -68,7 +78,7 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
         endif()
     elseif(${PCA_TYPE} STREQUAL "pca10036")
         if(KEIL_UV4)
-            if(${SDK_VERSION} STREQUAL "11")
+            if(SDK_VERSION EQUAL 11)
                 set(APP_HEX_PATH "${PROJECT_PATH}/_build/nrf52832_xxaa_s132.hex" PARENT_SCOPE)
             else()
                 message(STATUS "${PCA_TYPE} is not supported in SDK ${SDK_VERSION}")
@@ -78,7 +88,7 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
         endif()
     elseif(${PCA_TYPE} STREQUAL "pca10040")
         if(KEIL_UV4)
-            if(${SDK_VERSION} STREQUAL "11")
+            if(SDK_VERSION EQUAL 11)
                 set(APP_HEX_PATH "${PROJECT_PATH}/_build/nrf52832_xxaa_s132.hex" PARENT_SCOPE)
             else()
             set(APP_HEX_PATH "${PROJECT_PATH}/_build/nrf52832_xxaa.hex" PARENT_SCOPE)
@@ -123,7 +133,7 @@ function(nrf_create_connectivity_compile_targets)
     endif()
 
     set(SDK_ROOT "${nrf_create_connectivity_compile_targets_SDK_ROOT}")
-    #message(STATUS "SDK_ROOT:" ${SDK_ROOT})
+    message(STATUS "SDK_ROOT:" ${SDK_ROOT})
     set(SDK_VERSION ${nrf_create_connectivity_compile_targets_SDK_VERSION})
     set(VERSION ${nrf_create_connectivity_compile_targets_VERSION})
 
@@ -149,7 +159,7 @@ function(nrf_create_connectivity_compile_targets)
     #message(STATUS "Searching for projects within project ${PROJECT_FULL_PATH}")
     file(GLOB FOUND_PCA_PATHS "${PROJECT_FULL_PATH}/pca100[1-9][0-9]")
 
-    set(BUILD_TARGETS)
+    set(CONNECTIVITY_BUILD_TARGETS)
 
     foreach(PCA_PATH ${FOUND_PCA_PATHS})
         file(GLOB FOUND_PROJECTS "${PCA_PATH}/*_hci")
@@ -163,8 +173,8 @@ function(nrf_create_connectivity_compile_targets)
             nrf_extract_info_from_path(${PROJECT} PROJECT_NAME PCA_TYPE SOFTDEVICE_TYPE_VERSION TRANSPORT)
             set(TRANSPORTS)
 
-            if(PROJECT_NAME)
-                #message(STATUS "PROJECT_NAME:${PROJECT_NAME} PCA_TYPE:${PCA_TYPE} SD_TV: ${SOFTDEVICE_TYPE_VERSION} TRANSPORT:${TRANSPORT}")
+            if(PROJECT_NAME AND NOT (PCA_TYPE IN_LIST PCA_BLACKLIST))
+                message(STATUS "PROJECT_NAME:${PROJECT_NAME} PCA_TYPE:${PCA_TYPE} SD_TV: ${SOFTDEVICE_TYPE_VERSION} TRANSPORT:${TRANSPORT}")
 
                 if(TRANSPORT STREQUAL "usb")
                     list(APPEND TRANSPORTS "usb")
@@ -209,7 +219,7 @@ function(nrf_create_connectivity_compile_targets)
                         set(TARGET_NAME "connectivity_${VERSION}_${TRANSPORT}_with_${SD_VERSION}_${SD_API_VERSION}")
 
                         # Check if target name already exists
-                        list(FIND BUILD_TARGETS ${TARGET_NAME} FOUND_TARGET)
+                        list(FIND CONNECTIVITY_BUILD_TARGETS "compile_${TARGET_NAME}" FOUND_TARGET)
 
                         if(FOUND_TARGET GREATER -1)
                             message(STATUS "Target ${TARGET_NAME} already exists.")
@@ -224,12 +234,12 @@ function(nrf_create_connectivity_compile_targets)
 
                             set(SER_CONFIG_IN_PATH "${SER_CONFIG_PATH}.in")
                             if(NOT EXISTS ${SER_CONFIG_IN_PATH})
-                                message(FATAL_ERROR "ser_config.h.in not found. The SDK needs to be prepared. Please delete the build folder and try again.")
+                                message(FATAL_ERROR "ser_config.h.in not found. The SDK needs to be prepared. Please delete the build folder and try again  (${SDK_ROOT}).")
                             endif()
 
                             set(MAIN_IN_PATH "${MAIN_PATH}.in")
                             if(NOT EXISTS ${MAIN_IN_PATH})
-                                message(FATAL_ERROR "main.c.in not found. The SDK needs to be prepared. Please delete the build folder and try again.")
+                                message(FATAL_ERROR "main.c.in not found. The SDK needs to be prepared. Please delete the build folder and try again (${SDK_ROOT}).")
                             endif()
 
                             # Setup ser_config.h
@@ -241,7 +251,7 @@ function(nrf_create_connectivity_compile_targets)
                             # Setup main.c
                             add_custom_command(
                                 OUTPUT "${COMMAND_NAME}"
-                                APPEND COMMAND ${CMAKE_COMMAND} -DMAIN_IN_PATH=${MAIN_IN_PATH} -DVERSION=${VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_main.cmake
+                                APPEND COMMAND ${CMAKE_COMMAND} -DMAIN_IN_PATH=${MAIN_IN_PATH} -DCONNECTIVITY_VERSION=${VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_main.cmake
                             )
 
                             # Compile project
@@ -263,7 +273,7 @@ function(nrf_create_connectivity_compile_targets)
                             set(MINOR)
                             set(PATCH)
                             nrf_extract_version_number("${SD_API_VERSION}" MAJOR MINOR PATCH)
-                            set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/sd_api_v${MAJOR}")
+                            set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/hex/sd_api_v${MAJOR}")
                             #message(STATUS "Storing files in ${OUTPUT_DIRECTORY}")
 
                             # Copy merged file to binary directory
@@ -289,8 +299,8 @@ function(nrf_create_connectivity_compile_targets)
                                 endif()
                             endif()
 
-                            add_custom_target("${TARGET_NAME}" DEPENDS ${COMMAND_NAME})
-                            list(APPEND BUILD_TARGETS ${TARGET_NAME})
+                            add_custom_target("compile_${TARGET_NAME}" DEPENDS ${COMMAND_NAME})
+                            list(APPEND CONNECTIVITY_BUILD_TARGETS "compile_${TARGET_NAME}")
                         endif()
                     endif()
                 endforeach()
@@ -298,15 +308,11 @@ function(nrf_create_connectivity_compile_targets)
         endforeach()
     endforeach()
 
-    add_custom_target("sdk_v${SDK_VERSION}" ALL DEPENDS ${BUILD_TARGETS})
+    add_custom_target("compile_connectivity_from_sdk_v${SDK_VERSION}" ALL DEPENDS ${CONNECTIVITY_BUILD_TARGETS})
 endfunction(nrf_create_connectivity_compile_targets)
 
 set(SDK_PATH )
-
-if(NOT DEFINED VERSION)
-    set(VERSION 0.0.0)
-    message(STATUS "VERSION not provided, setting VERSION to ${VERSION}.")
-endif()
+set(CONNECTIVITY_BUILD_TARGETS )
 
 nrf_prepare_sdk(
     SDK_VERSION 11
@@ -320,7 +326,7 @@ nrf_create_connectivity_compile_targets(
     SDK_VERSION 11
     SDK_ROOT "${SDK_PATH}"
     PROJECT_DIRECTORY "examples/ble_central_and_peripheral/ble_connectivity"
-    VERSION "${VERSION}"
+    VERSION "${CONNECTIVITY_VERSION}"
 )
 
 nrf_prepare_sdk(
@@ -335,5 +341,5 @@ nrf_create_connectivity_compile_targets(
     SDK_VERSION 15
     SDK_ROOT "${SDK_PATH}"
     PROJECT_DIRECTORY "examples/connectivity/ble_connectivity"
-    VERSION "${VERSION}"
+    VERSION "${CONNECTIVITY_VERSION}"
 )
