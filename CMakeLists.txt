@@ -22,6 +22,21 @@ else()
     file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/linux/*.cpp")
 endif()
 
+set(PC_BLE_DRIVER_DEFAULT_VERSION "4.0.0")
+
+if(NOT DEFINED PC_BLE_DRIVER_VERSION)
+    message("PC_BLE_DRIVER_VERSION not specified, setting it to ${PC_BLE_DRIVER_DEFAULT_VERSION}")
+    set(PC_BLE_DRIVER_VERSION "${PC_BLE_DRIVER_DEFAULT_VERSION}")
+endif()
+
+# Add connectivity firmware building
+if(NOT DEFINED CONNECTIVITY_VERSION)
+    message("CONNECTIVITY_VERSION not specified, using ${PC_BLE_DRIVER_VERSION}")
+    set(CONNECTIVITY_VERSION "${PC_BLE_DRIVER_VERSION}" CACHE STRING "" FORCE)
+else()
+    set(CONNECTIVITY_VERSION "${CONNECTIVITY_VERSION}" CACHE STRING "" FORCE)
+endif()
+
 # SDK source files, different per API version
 
 # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
@@ -160,5 +175,8 @@ add_subdirectory(test)
 # Add examples
 add_subdirectory(examples)
 
-include (cmake/clang-dev-tools.cmake)
+if(COMPILE_CONNECTIVITY)
+    add_subdirectory(hex)
+endif()
 
+include (cmake/clang-dev-tools.cmake)

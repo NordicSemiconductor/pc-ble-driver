@@ -17,7 +17,7 @@ set(TESTS_SOFTDEVICE_V3 )
 set(TESTS_SOFTDEVICE_V5 )
 set(TESTS_SOFTDEVICE_V6 )
 
-set(CONNFW_ROOT "${CMAKE_SOURCE_DIR}/hex")
+set(CONNECTIVITY_ROOT "${CMAKE_SOURCE_DIR}/hex")
 find_program(NRFJPROG "nrfjprog")
 
 if(NOT NRFJPROG)
@@ -32,15 +32,13 @@ else()
     set(BUILD_TYPE "${CMAKE_BUILD_TYPE}")
 endif()
 
-# TODO: look into how we can get the connfw version number from the hex build
-set(CONNFW_VERSION "1.2.3")
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v2/connectivity_${CONNFW_VERSION}_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_${CONNFW_VERSION}_1m_with_s132_3.1.0.hex" SD_API_V3_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v3/connectivity_${CONNFW_VERSION}_usb_with_s132_3.1.0.hex" SD_API_V3_S132_PCA10056_USB_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v5/connectivity_${CONNFW_VERSION}_1m_with_s132_5.1.0.hex" SD_API_V5_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_${CONNFW_VERSION}_1m_with_s132_6.1.0.hex" SD_API_V6_S132_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_${CONNFW_VERSION}_1m_with_s140_6.1.0.hex" SD_API_V6_S140_HEX)
-file(TO_NATIVE_PATH "${CONNFW_ROOT}/sd_api_v6/connectivity_${CONNFW_VERSION}_1m_with_s140_usb_6.1.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v2/connectivity_${CONNECTIVITY_VERSION}_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v3/connectivity_${CONNECTIVITY_VERSION}_1m_with_s132_3.1.0.hex" SD_API_V3_S132_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v3/connectivity_${CONNECTIVITY_VERSION}_usb_with_s132_3.1.0.hex" SD_API_V3_S132_PCA10056_USB_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v5/connectivity_${CONNECTIVITY_VERSION}_1m_with_s132_5.1.0.hex" SD_API_V5_S132_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_1m_with_s132_6.1.0.hex" SD_API_V6_S132_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_1m_with_s140_6.1.0.hex" SD_API_V6_S140_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_1m_with_s140_usb_6.1.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
 
 function(parse_device_id device_id parse_error segger_sn serial_port)
     set(INVALID_FORMAT_MESSAGE "Device id ${device_id} is in an invalid format, must be <SEGGER_SERIAL_NUMBER>:<SERIAL_PORT>")
@@ -171,7 +169,7 @@ function(add_run_test_targets)
         # SDv2
         if(2 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv2_s130_pca10028
+                run_test_sdv2_s130_pca10028
                 "${BLE_DRIVER_TEST_PCA10028_A}"
                 "${BLE_DRIVER_TEST_PCA10028_B}"
                 "${SD_API_V2_S130_HEX}"
@@ -185,7 +183,7 @@ function(add_run_test_targets)
         # SDv2
         if(2 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv2_s130_pca10031
+                run_test_sdv2_s130_pca10031
                 "${BLE_DRIVER_TEST_PCA10031_A}"
                 "${BLE_DRIVER_TEST_PCA10031_B}"
                 "${SD_API_V2_S130_HEX}"
@@ -199,7 +197,7 @@ function(add_run_test_targets)
         # SDv3
         if(3 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv3_s132_pca10040
+                run_test_sdv3_s132_pca10040
                 "${BLE_DRIVER_TEST_PCA10040_A}"
                 "${BLE_DRIVER_TEST_PCA10040_B}"
                 "${SD_API_V3_S132_HEX}"
@@ -211,7 +209,7 @@ function(add_run_test_targets)
         # SDv5
         if(5 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv5_s132_pca10040
+                run_test_sdv5_s132_pca10040
                 "${BLE_DRIVER_TEST_PCA10040_A}"
                 "${BLE_DRIVER_TEST_PCA10040_B}"
                 "${SD_API_V5_S132_HEX}"
@@ -225,7 +223,7 @@ function(add_run_test_targets)
         # SDv3
         if(3 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv3_s132_pca10056_usb
+                run_test_sdv3_s132_pca10056_usb
                 "${BLE_DRIVER_TEST_PCA10056_USB_A}"
                 "${BLE_DRIVER_TEST_PCA10056_USB_B}"
                 "${SD_API_V3_S132_PCA10056_USB_HEX}"
@@ -237,7 +235,7 @@ function(add_run_test_targets)
         # SDv6
         if(6 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv6_s140_pca10056_usb
+                run_test_sdv6_s140_pca10056_usb
                 "${BLE_DRIVER_TEST_PCA10056_USB_A}"
                 "${BLE_DRIVER_TEST_PCA10056_USB_B}"
                 "${SD_API_V6_S140_PCA10056_USB_HEX}"
@@ -251,7 +249,7 @@ function(add_run_test_targets)
         # SDv3
         if(3 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv3_s132_pca10056
+                run_test_sdv3_s132_pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
                 "${SD_API_V3_S132_HEX}"
@@ -263,7 +261,7 @@ function(add_run_test_targets)
         # SDv5
         if(5 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv5_s132_pca10056
+                run_test_sdv5_s132_pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
                 "${SD_API_V5_S132_HEX}"
@@ -275,7 +273,7 @@ function(add_run_test_targets)
         # SDv6
         if(6 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
-                test_run_sdv6_s140_pca10056
+                run_test_sdv6_s140_pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
                 "${SD_API_V6_S140_HEX}"

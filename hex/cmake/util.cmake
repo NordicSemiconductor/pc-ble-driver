@@ -86,7 +86,15 @@ function(nrf_prepare_sdk)
     #message(STATUS "FILENAME: ${nrf_prepare_sdk_FILENAME}")
     #message(STATUS "SHA512: ${nrf_prepare_sdk_SHA512}")
 
-    set(SDK_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/sdks/v${nrf_prepare_sdk_SDK_VERSION}")
+    if(NOT DEFINED ENV{TMP})
+        message(FATAL_ERROR "Temporary directory not set, not able to proceed.")
+    endif()
+
+    set(SDKS_DIRECTORY "$ENV{TMP}/pc-ble-driver/sdks")
+    file(TO_CMAKE_PATH "${SDKS_DIRECTORY}" SDKS_DIRECTORY)
+    set(SDK_DIRECTORY "${SDKS_DIRECTORY}/v${nrf_prepare_sdk_SDK_VERSION}")
+    set(SDK_VERSION "${nrf_prepare_sdk_SDK_VERSION}")
+
     SET(SDK_VERSION "${nrf_prepare_sdk_SDK_VERSION}")
 
     set(SDK_SETUP_SUCCESS_FILE "${SDK_DIRECTORY}/.sdk-setup-success")
@@ -97,7 +105,7 @@ function(nrf_prepare_sdk)
         nrf_download_distfile(
             SDK
             URLS ${nrf_prepare_sdk_URLS}
-            DOWNLOAD_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/sdks"
+            DOWNLOAD_DIRECTORY "${SDKS_DIRECTORY}"
             FILENAME "${nrf_prepare_sdk_FILENAME}"
             SHA512 ${nrf_prepare_sdk_SHA512}
         )
@@ -121,6 +129,8 @@ function(nrf_prepare_sdk)
                 "${SDK_VERSION}"
                 "${SDK_DIRECTORY}"
             )
+        else()
+            message(STATUS "No patches to apply to public SDK.")
         endif()
 
         file(WRITE "${SDK_SETUP_SUCCESS_FILE}" "Successfully setup SDK.")
@@ -257,7 +267,7 @@ function(nrf_find_alternative_softdevice SOFTDEVICE_HEX_PATH ALTERNATIVE_SOFTDEV
     set(MINOR)
     set(PATCH)
     nrf_extract_version_number("${SD_API_VERSION}" MAJOR MAJOR MINOR PATCH)
-    set(SOFTDEVICE_SEARCH_PATH "${CMAKE_SOURCE_DIR}/sd_api_v${MAJOR}/${SD_VERSION}_nrf${SOC_FAMILY}_${MAJOR}.*_softdevice.hex")
+    set(SOFTDEVICE_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sd_api_v${MAJOR}/${SD_VERSION}_nrf${SOC_FAMILY}_${MAJOR}.*_softdevice.hex")
     file(GLOB ALTERNATIVE_SOFTDEVICE_HEX LIST_DIRECTORIES false "${SOFTDEVICE_SEARCH_PATH}")
 
     if(ALTERNATIVE_SOFTDEVICE_HEX)
