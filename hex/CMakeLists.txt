@@ -54,7 +54,7 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
     file(GLOB FOUND_SOFTDEVICE_HEX "${SOFTDEVICE_SEARCH_PATH}")
 
     if(FOUND_SOFTDEVICE_HEX STREQUAL "")
-        message(FATAL_ERROR "No SoftDevice found for project ${PROJECT_PATH}")
+        message(FATAL_ERROR "No SoftDevice found for project ${PROJECT_PATH}. Tried to locate it in ${SOFTDEVICE_SEARCH_PATH}")
     endif()
 
     set(ALTERNATIVE_SOFTDEVICE_HEX)
@@ -337,10 +337,10 @@ nrf_create_connectivity_compile_targets(
 
 nrf_prepare_sdk(
     SDK_VERSION 15
-    URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.0.0_a53641a.zip"
-    FILENAME "nRF5_SDK_15.0.0_a53641a.zip"
-    SHA512 404905a2fffd09edd5a96e09201fdc7238f8102772df3f279048e3dda84220466741223e70de08f0022271e35717ee57882639b728bd8ca798b189baa732c550
-    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/sdk150_add_sd_v3v5_support.patch"
+    URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.2.0_9412b96.zip"
+    FILENAME "nRF5_SDK_15.2.0_9412b96.zip"
+    SHA512 6ed3cbcbb798775557affc9a323f2665629e17359aaf8ae2e2f70c99645862185ae5d0f8fa46b17ade2af7e6dd7a62e6292b01f4e883107265c3c39c3eb22b46
+    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/sdk152_add_sd_v3v5_support.patch"
 )
 
 nrf_create_connectivity_compile_targets(
