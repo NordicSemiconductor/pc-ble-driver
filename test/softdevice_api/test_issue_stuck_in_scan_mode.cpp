@@ -48,6 +48,7 @@
 #include "ble.h"
 #include "sd_rpc.h"
 
+#include <atomic>
 #include <sstream>
 #include <thread>
 
@@ -55,6 +56,8 @@
 // The test framework is not thread safe so this variable is used to communicate that an issues has
 // occurred in a callback.
 bool error = false;
+
+std::atomic<std::chrono::steady_clock::time_point> adv_report_received;
 
 TEST_CASE("test_issue_stuck_in_scan_mode")
 {
@@ -71,6 +74,9 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
         INFO("Baud rate used: " << baudRate);
 
         const auto scanIterations = 10;
+        INFO("Purpose of this test:");
+        INFO("1) Assert that closing the adapter when scan is running does not prevent opening the adapter again.");
+        INFO("2) Assert that advertisement reports are received all the time (timeout is set to 0x00)");
         INFO("Running " << scanIterations << " adapter open -> scan -> adapter close iterations");
 
         for (auto i = 0; i < scanIterations; i++)
@@ -106,6 +112,8 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
                             }
                         }
 #endif
+                        adv_report_received.store(std::chrono::steady_clock::now());
+
                         return true;
                     case BLE_GAP_EVT_TIMEOUT:
                         if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
@@ -129,7 +137,14 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
             REQUIRE(c->configure() == NRF_SUCCESS);
             REQUIRE(c->startScan() == NRF_SUCCESS);
 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+
+            // Check that we have recently received an advertisement report
+            auto now = std::chrono::steady_clock::now();
+            auto silence_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        now - adv_report_received.load())
+                        .count();
+            REQUIRE(silence_duration < 1000);
 
             REQUIRE(error == false);
 
