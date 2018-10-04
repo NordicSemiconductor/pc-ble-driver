@@ -351,7 +351,7 @@ nrf_create_connectivity_compile_targets(
 )
 
 # Add a connectivity compilation target that depends on the last target added to CONNECTIVITY_BUILD_TARGETS
-# This target makes it easier for the developer to know which target to invoke compile
+# This target makes it easier for the developer to know which target to invoke to compile
 # all versions of connectivity firmware
 list(LENGTH CONNECTIVITY_BUILD_TARGETS CONNECTIVITY_BUILD_TARGETS_LENGTH)
 if(CONNECTIVITY_BUILD_TARGETS_LENGTH GREATER_EQUAL 1)
