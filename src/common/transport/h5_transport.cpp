@@ -180,6 +180,15 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
         const auto currentExitCriteria = exitCriterias.at(currentState);
         const auto exitCriteria = dynamic_cast<StartExitCriterias *>(currentExitCriteria.get());
 
+        if (exitCriteria == nullptr)
+        {
+            std::stringstream ss;
+            ss << "h5_transport is in state " << stateToString(currentState)
+               << " but should be in STATE_START. This state is not legal.";
+            log(SD_RPC_LOG_WARNING, ss.str());
+            return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
+        }
+
         if (errorCode != NRF_SUCCESS)
         {
             exitCriteria->ioResourceError = true;
@@ -188,6 +197,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
         {
             exitCriteria->isOpened = true;
         }
+
         stateMachineLock.unlock();
         stateMachineChange.notify_all();
     }
@@ -366,8 +376,13 @@ void H5Transport::processPacket(const payload_t &packet)
         {
             if (H5Transport::isSyncResponsePacket(h5Payload))
             {
-                dynamic_cast<UninitializedExitCriterias *>(exitCriterias[currentState].get())
-                    ->syncRspReceived = true;
+                const auto stateCriteria =
+                    dynamic_cast<UninitializedExitCriterias *>(exitCriterias[currentState].get());
+
+                if (stateCriteria != nullptr)
+                {
+                    stateCriteria->syncRspReceived = true;
+                }
             }
             else if (H5Transport::isSyncPacket(h5Payload))
             {
@@ -442,17 +457,22 @@ void H5Transport::processPacket(const payload_t &packet)
         }
         else
         {
-            try
+            if (currentState == STATE_ACTIVE)
             {
-                const auto currentExitCriteria = exitCriterias.at(currentState);
-                dynamic_cast<ActiveExitCriterias *>(currentExitCriteria.get())
-                    ->irrecoverableSyncError = true;
+                const auto exit =
+                    dynamic_cast<ActiveExitCriterias *>(exitCriterias[currentState].get());
+
+                if (exit != nullptr)
+                {
+                    exit->irrecoverableSyncError = true;
+                }
             }
-            catch (std::out_of_range &)
+            else
             {
                 std::stringstream ss;
-                ss << "State " << stateToString(currentState)
-                   << " does not have exit criteria associated with it. Ignoring packet.";
+                ss << "h5_transport received ack packet in state " << stateToString(currentState)
+                   << ". ack_num is: " << std::hex << ack_num << " seq_num is: " << std::hex
+                   << seq_num << ". Ignoring the packet.";
                 log(SD_RPC_LOG_WARNING, ss.str());
             }
         }
