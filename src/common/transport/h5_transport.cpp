@@ -157,7 +157,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
     if (currentState != STATE_START)
     {
         log(SD_RPC_LOG_FATAL, std::string("Not able to open, current state is not valid"));
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
 
     // State machine starts in a separate thread.
@@ -193,12 +193,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
     }
     catch (std::out_of_range &)
     {
-        errorCode = NRF_ERROR_INVALID_STATE;
-    }
-
-    if (errorCode != NRF_SUCCESS)
-    {
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
 
     if (waitForState(STATE_ACTIVE, OPEN_WAIT_TIMEOUT))
@@ -220,13 +215,12 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
                 // in time period OPEN_WAIT_TIMEOUT
                 return NRF_ERROR_TIMEOUT;
             case STATE_FAILED:
-                return NRF_ERROR_INTERNAL;
             case STATE_CLOSED:
-                return NRF_ERROR_RESOURCES;
+                return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
             case STATE_ACTIVE:
                 return NRF_SUCCESS;
             default:
-                return NRF_ERROR_INTERNAL;
+                return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
         }
     }
 }
@@ -276,7 +270,7 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data)
 {
     if (currentState != STATE_ACTIVE)
     {
-        return NRF_ERROR_INVALID_STATE;
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
 
     // max theoretical length of encoded packet, aditional 6 bytes h5 encoding and all bytes escaped
@@ -317,7 +311,7 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data)
     }
 
     lastPacket.clear();
-    return NRF_ERROR_TIMEOUT;
+    return NRF_ERROR_SD_RPC_H5_TRANSPORT_NO_RESPONSE;
 }
 
 h5_state_t H5Transport::state() const
@@ -1080,7 +1074,7 @@ std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet
         retval << " header_checksum:" << std::hex << +header_checksum;
     }
 
-    retval << " err_code:" << err_code;
+    retval << " err_code:0x" << std::hex << err_code;
 
     if (packet_type == LINK_CONTROL_PACKET)
     {

@@ -57,7 +57,7 @@ uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &da
 {
     if (!status_callback || !data_callback || !log_callback)
     {
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_INVALID_ARGUMENT;
     }
 
     upperStatusCallback = status_callback;
