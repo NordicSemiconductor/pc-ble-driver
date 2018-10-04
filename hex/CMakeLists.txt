@@ -159,8 +159,6 @@ function(nrf_create_connectivity_compile_targets)
     #message(STATUS "Searching for projects within project ${PROJECT_FULL_PATH}")
     file(GLOB FOUND_PCA_PATHS "${PROJECT_FULL_PATH}/pca100[1-9][0-9]")
 
-    set(CONNECTIVITY_BUILD_TARGETS)
-
     foreach(PCA_PATH ${FOUND_PCA_PATHS})
         file(GLOB FOUND_PROJECTS "${PCA_PATH}/*_hci")
         #message(STATUS "Found projects: ${FOUND_PROJECTS}")
@@ -299,7 +297,15 @@ function(nrf_create_connectivity_compile_targets)
                                 endif()
                             endif()
 
-                            add_custom_target("compile_${TARGET_NAME}" DEPENDS ${COMMAND_NAME})
+                            # Make the last target added to list of targets a dependency to this target
+                            # We need to make sure that the targets are compile in sequence
+                            # since the source code changes in every target (configuration of .in files)
+                            list(LENGTH CONNECTIVITY_BUILD_TARGETS CONNECTIVITY_BUILD_TARGETS_LENGTH)
+                            if(CONNECTIVITY_BUILD_TARGETS_LENGTH GREATER_EQUAL 1)
+                                list(GET CONNECTIVITY_BUILD_TARGETS -1 PREVIOUS_TARGET)
+                            endif()
+
+                            add_custom_target("compile_${TARGET_NAME}" DEPENDS ${COMMAND_NAME} ${PREVIOUS_TARGET})
                             list(APPEND CONNECTIVITY_BUILD_TARGETS "compile_${TARGET_NAME}")
                         endif()
                     endif()
@@ -308,11 +314,11 @@ function(nrf_create_connectivity_compile_targets)
         endforeach()
     endforeach()
 
-    add_custom_target("compile_connectivity_from_sdk_v${SDK_VERSION}" ALL DEPENDS ${CONNECTIVITY_BUILD_TARGETS})
+    set(CONNECTIVITY_BUILD_TARGETS ${CONNECTIVITY_BUILD_TARGETS} PARENT_SCOPE)
 endfunction(nrf_create_connectivity_compile_targets)
 
 set(SDK_PATH )
-set(CONNECTIVITY_BUILD_TARGETS )
+set(CONNECTIVITY_BUILD_TARGETS "")
 
 nrf_prepare_sdk(
     SDK_VERSION 11
@@ -343,3 +349,12 @@ nrf_create_connectivity_compile_targets(
     PROJECT_DIRECTORY "examples/connectivity/ble_connectivity"
     VERSION "${CONNECTIVITY_VERSION}"
 )
+
+# Add a connectivity compilation target that depends on the last target added to CONNECTIVITY_BUILD_TARGETS
+# This target makes it easier for the developer to know which target to invoke compile
+# all versions of connectivity firmware
+list(LENGTH CONNECTIVITY_BUILD_TARGETS CONNECTIVITY_BUILD_TARGETS_LENGTH)
+if(CONNECTIVITY_BUILD_TARGETS_LENGTH GREATER_EQUAL 1)
+    list(GET CONNECTIVITY_BUILD_TARGETS -1 PREVIOUS_TARGET)
+    add_custom_target("compile_connectivity" DEPENDS ${PREVIOUS_TARGET})
+endif()
