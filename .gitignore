@@ -5,6 +5,7 @@ _build
 *.pyc
 **/build
 /sdk/
+build*/
 
 # Temporary files
 *.bak
