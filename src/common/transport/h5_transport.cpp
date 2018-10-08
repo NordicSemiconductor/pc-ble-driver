@@ -184,7 +184,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
         {
             std::stringstream ss;
             ss << "h5_transport is in state " << stateToString(currentState)
-               << " but should be in STATE_START. This state is not legal.";
+               << " but should be in STATE_START. This state is not valid.";
             log(SD_RPC_LOG_WARNING, ss.str());
             return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
         }
@@ -358,6 +358,13 @@ void H5Transport::processPacket(const payload_t &packet)
     if (err_code != NRF_SUCCESS)
     {
         errorPacketCount++;
+
+        std::stringstream ss;
+        ss << "h5_decode error, code: 0x" << std::hex << static_cast<uint32_t>(err_code);
+        ss << ", error count: " << static_cast<uint32_t>(errorPacketCount)
+           << ". raw packet: " << asHex(packet);
+        log(SD_RPC_LOG_ERROR, ss.str());
+
         return;
     }
 
@@ -964,10 +971,10 @@ std::string H5Transport::stateToString(const h5_state_t state)
     {
         return H5TransportSingleton::get().stateString.at(state);
     }
-    catch (const std::out_of_range &e)
+    catch (std::out_of_range&)
     {
         std::stringstream ss;
-        ss << "UNKNOWN state " << e.what();
+        ss << "UNKNOWN[0x" << std::hex << static_cast<uint32_t>(state) << "]";
         return ss.str();
     }
 }
@@ -978,10 +985,10 @@ std::string H5Transport::pktTypeToString(const h5_pkt_type_t pktType)
     {
         return H5TransportSingleton::get().pktTypeString.at(pktType);
     }
-    catch (const std::out_of_range &e)
+    catch (std::out_of_range&)
     {
         std::stringstream ss;
-        ss << "UNKNOWN pktType " << e.what();
+        ss << "UNKNOWN[0x" << std::hex << static_cast<uint32_t>(pktType) << "]";
         return ss.str();
     }
 }
@@ -989,6 +996,11 @@ std::string H5Transport::pktTypeToString(const h5_pkt_type_t pktType)
 std::string H5Transport::asHex(const payload_t &packet)
 {
     std::stringstream hex;
+
+    if (packet.empty())
+    {
+        return "N/A";
+    }
 
     for_each(packet.begin(), packet.end(), [&](uint8_t byte) {
         hex << std::setfill('0') << std::setw(2) << std::hex << +byte << " ";
@@ -1115,7 +1127,7 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
         incomingPacketCount++;
     }
 
-    const std::string logLine = h5PktToString(outgoing, packet).c_str();
+    const std::string logLine = h5PktToString(outgoing, packet);
 
     if (upperLogCallback)
     {
