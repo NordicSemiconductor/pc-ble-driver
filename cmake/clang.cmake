@@ -5,7 +5,6 @@ add_compile_options(
     -Wno-long-long
     -Wfloat-equal
     -Wpointer-arith
-    -Wlogical-op
 )
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14> $<$<COMPILE_LANGUAGE:C>:-std=c99>)

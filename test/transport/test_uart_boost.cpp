@@ -35,45 +35,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- // Logging support
+// Logging support
 #include "internal/log.h"
 
- // Test framework
+// Test framework
 #define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
-#include "uart_boost.h"
-#include "../test_setup.h"
+#include <test_setup.h>
+#include <uart_boost.h>
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cstdlib>
-#include <thread>
-#include <random>
-#include <regex>
-#include <iterator>
 #include <chrono>
+#include <cstdlib>
+#include <iterator>
+#include <regex>
+#include <string>
+#include <thread>
+#include <vector>
 
 #if defined(_MSC_VER)
 // Disable warning "This function or variable may be unsafe. Consider using _dupenv_s instead."
-#pragma warning(disable: 4996)
+#pragma warning(disable : 4996)
 #endif
 
 using std::chrono::system_clock;
 
-struct PortStats {
+struct PortStats
+{
     uint32_t pktCount;
     size_t pktMinSize;
     size_t pktMaxSize;
 
-    PortStats() : pktCount(0), pktMinSize(std::numeric_limits<uint32_t>::max()), pktMaxSize(0) {}
+    PortStats()
+        : pktCount(0)
+        , pktMinSize(std::numeric_limits<uint32_t>::max())
+        , pktMaxSize(0)
+    {}
 };
 
-std::ostream& operator<<(std::ostream &out, const PortStats &stats)
+std::ostream &operator<<(std::ostream &out, const PortStats &stats)
 {
-    out << "pkt_count: " << stats.pktCount
-        << " pkt_max_size: " << stats.pktMaxSize
+    out << "pkt_count: " << stats.pktCount << " pkt_max_size: " << stats.pktMaxSize
         << " pkt_min_size: ";
 
     if (stats.pktMinSize == std::numeric_limits<uint32_t>::max())
@@ -92,32 +94,33 @@ TEST_CASE("open_close")
 {
     auto env = ::test::getEnvironment();
 
-    INFO("Two serial ports must be specifided. Please specify environment variables BLE_DRIVER_TEST_SERIAL_PORT_A and BLE_DRIVER_TEST_SERIAL_PORT_B");
+    INFO("Two serial ports must be specifided. Please specify environment variables "
+         "BLE_DRIVER_TEST_SERIAL_PORT_A and BLE_DRIVER_TEST_SERIAL_PORT_B");
     REQUIRE(env.serialPorts.size() == 2);
 
     auto envPortA = env.serialPorts.at(0);
-    auto portA = envPortA.port.c_str();
+    auto portA    = envPortA.port.c_str();
 
-    auto ap = UartCommunicationParameters();
-    ap.baudRate = envPortA.baudRate;
-    ap.dataBits = UartDataBitsEight;
+    UartCommunicationParameters ap;
+    ap.baudRate    = envPortA.baudRate;
+    ap.dataBits    = UartDataBitsEight;
     ap.flowControl = UartFlowControlNone;
-    ap.parity = UartParityNone;
-    ap.portName = portA;
-    ap.stopBits = UartStopBitsOne;
-    auto a = new UartBoost(ap);
+    ap.parity      = UartParityNone;
+    ap.portName    = portA;
+    ap.stopBits    = UartStopBitsOne;
+    auto a         = new UartBoost(ap);
 
     auto envPortB = env.serialPorts.at(1);
-    auto portB = envPortB.port.c_str();
+    auto portB    = envPortB.port.c_str();
 
-    auto bp = UartCommunicationParameters();
-    bp.baudRate = envPortB.baudRate;
-    bp.dataBits = UartDataBitsEight;
+    UartCommunicationParameters bp;
+    bp.baudRate    = envPortB.baudRate;
+    bp.dataBits    = UartDataBitsEight;
     bp.flowControl = UartFlowControlNone;
-    bp.parity = UartParityNone;
-    bp.portName = portB;
-    bp.stopBits = UartStopBitsOne;
-    auto b = new UartBoost(bp);
+    bp.parity      = UartParityNone;
+    bp.portName    = portB;
+    bp.stopBits    = UartStopBitsOne;
+    auto b         = new UartBoost(bp);
 
     bool error = false;
 
@@ -131,18 +134,19 @@ TEST_CASE("open_close")
     std::generate(sendOnB.begin(), sendOnB.end(), std::rand);
     std::generate(sendOnA.begin(), sendOnA.end(), std::rand);
 
-    auto status_callback = [&error](sd_rpc_app_status_t code, const char *message) -> void
-    {
+    const auto status_callback = [&error](const sd_rpc_app_status_t code,
+                                          const std::string &message) -> void {
         NRF_LOG("code: " << code << " message: " << message);
         if (code != NRF_SUCCESS)
         {
             error = true;
-            NRF_LOG("ERROR: code is " << std::to_string(code) << " must be " << std::to_string(NRF_SUCCESS));
+            NRF_LOG("ERROR: code is " << std::to_string(code) << " must be "
+                                      << std::to_string(NRF_SUCCESS));
         }
     };
 
-    auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity, std::string message) -> void
-    {
+    auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity,
+                                                 std::string message) -> void {
         NRF_LOG("severity: " << severity << " message: " << message);
 
         if (severity == 1)
@@ -175,47 +179,41 @@ TEST_CASE("open_close")
     PortStats portAStats;
     PortStats portBStats;
 
-    b->open(
-        status_callback,
-        [&receivedOnB, &portBStats](const uint8_t *data, const size_t length) -> void
-        {
-            receivedOnB.insert(receivedOnB.end(), data, data + length);
+    b->open(status_callback,
+            [&receivedOnB, &portBStats](const uint8_t *data, const size_t length) -> void {
+                receivedOnB.insert(receivedOnB.end(), data, data + length);
 
-            if (portBStats.pktMaxSize < length)
-            {
-                portBStats.pktMaxSize = length;
-            }
+                if (portBStats.pktMaxSize < length)
+                {
+                    portBStats.pktMaxSize = length;
+                }
 
-            if (portBStats.pktMinSize > length)
-            {
-                portBStats.pktMinSize = length;
-            }
+                if (portBStats.pktMinSize > length)
+                {
+                    portBStats.pktMinSize = length;
+                }
 
-            portBStats.pktCount++;
-        },
-        log_callback
-    );
+                portBStats.pktCount++;
+            },
+            log_callback);
 
-    a->open(
-        status_callback,
-        [&receivedOnA, &portAStats](const uint8_t *data, const size_t length) -> void
-        {
-            receivedOnA.insert(receivedOnA.end(), data, data + length);
+    a->open(status_callback,
+            [&receivedOnA, &portAStats](const uint8_t *data, const size_t length) -> void {
+                receivedOnA.insert(receivedOnA.end(), data, data + length);
 
-            if (portAStats.pktMaxSize < length)
-            {
-                portAStats.pktMaxSize = length;
-            }
+                if (portAStats.pktMaxSize < length)
+                {
+                    portAStats.pktMaxSize = length;
+                }
 
-            if (portAStats.pktMinSize > length)
-            {
-                portAStats.pktMinSize = length;
-            }
+                if (portAStats.pktMinSize > length)
+                {
+                    portAStats.pktMinSize = length;
+                }
 
-            portAStats.pktCount++;
-        },
-        log_callback
-    );
+                portAStats.pktCount++;
+            },
+            log_callback);
 
     b->send(sendOnB);
     a->send(sendOnA);

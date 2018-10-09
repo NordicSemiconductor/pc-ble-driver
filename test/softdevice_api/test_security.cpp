@@ -40,14 +40,14 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include "internal/log.h"
+#include <internal/log.h>
 
 // Test support
-#include "../test_setup.h"
-#include "../test_util.h"
+#include <test_setup.h>
+#include <test_util.h>
 
-#include "ble.h"
-#include "sd_rpc.h"
+#include <ble.h>
+#include <sd_rpc.h>
 
 #include <sstream>
 #include <string>

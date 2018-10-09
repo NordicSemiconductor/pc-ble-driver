@@ -6,7 +6,7 @@ if(WIN32)
 	add_custom_target(tidy COMMAND echo "not supported on Windows")
 
 else()
-	find_program(CLANG_TIDY run-clang-tidy.py)
+	find_program(CLANG_TIDY NAMES run-clang-tidy.py run-clang-tidy-6.0.py)
 	if(NOT CLANG_TIDY)
 
 		message(STATUS "Did not find clang-tidy, target tidy is disabled.")

@@ -1,16 +1,15 @@
 // Logging support
-#include "internal/log.h"
+#include <internal/log.h>
 
-#include "../test_setup.h"
-#include "../test_util.h"
+#include <test_setup.h>
+#include <test_util.h>
 
 // Test framework
 #define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
-#include "transport.h"
-#include "nrf_error.h"
-#include "../virtual_uart.h"
+#include <nrf_error.h>
+#include <virtual_uart.h>
 
 #if defined(_MSC_VER)
 // Disable warning "This function or variable may be unsafe. Consider using _dupenv_s instead."
@@ -46,7 +45,7 @@ TEST_CASE("virtual_uart")
         const std::string uartAName = "uartA";
 
         uartA->open(
-            [&uartAName](const sd_rpc_app_status_t code, const char *message) -> void
+            [&uartAName](const sd_rpc_app_status_t code, const std::string &message) -> void
             {
                 NRF_LOG("[" << uartAName << "][status] code: " << code << " message: " << message);
             },
@@ -60,12 +59,12 @@ TEST_CASE("virtual_uart")
         const std::string uartBName = "uartB";
 
         uartB->open(
-            [&uartBName](sd_rpc_app_status_t code, const char *message) -> void
+            [&uartBName](const sd_rpc_app_status_t code, const std::string &message) -> void
             {
                 NRF_LOG("[" << uartBName << "][status] code: " << code << " message: " << message);
             },
             dataCallback(uartBName, payloadFromA),
-            [&uartBName](sd_rpc_log_severity_t severity, std::string message) -> void
+            [&uartBName](const sd_rpc_log_severity_t severity, const std::string &message) -> void
             {
                 NRF_LOG("[" << uartBName << "][log] severity: " << severity << " message: " << message);
             }

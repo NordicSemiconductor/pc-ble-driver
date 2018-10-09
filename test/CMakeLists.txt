@@ -292,8 +292,9 @@ function(setup_test source_file softdevice_api_ver test_list)
     add_executable(${test_name} ${source_file})
 
     target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver})
-    target_include_directories(${test_name} PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s132/headers)
-    target_include_directories(${test_name} PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s140/headers)
+    target_include_directories(${test_name} SYSTEM PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s132/headers)
+    target_include_directories(${test_name} SYSTEM PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s140/headers)
+    target_include_directories(${test_name} SYSTEM PRIVATE include)
 
     if(WIN32)
         target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} Catch2::Catch2)

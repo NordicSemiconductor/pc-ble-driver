@@ -33,14 +33,21 @@ if(NOT MSVC)
     message(STATUS "Building with build type: ${CMAKE_BUILD_TYPE}.")
 endif()
 
+# Set C++ standard to use
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Compiler specific
-if(MSVC)
-    include(${CMAKE_CURRENT_LIST_DIR}/msvc.cmake)
-elseif(APPLE)
-    include(${CMAKE_CURRENT_LIST_DIR}/apple.cmake)
-else()
-    # Linux
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    include(${CMAKE_CURRENT_LIST_DIR}/clang.cmake)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    include(${CMAKE_CURRENT_LIST_DIR}/msvc.cmake)
+endif()
+
+if(APPLE)
+    include(${CMAKE_CURRENT_LIST_DIR}/apple.cmake)
 endif()
 
 # Add or remove SD API versions here

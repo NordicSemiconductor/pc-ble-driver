@@ -54,11 +54,8 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
 
 class BLESecurityContext
 {
-private:
-    void *context;
-
 public:
-    explicit BLESecurityContext(void* context) : context(context)
+    explicit BLESecurityContext(void* context)
     {
         app_ble_gap_sec_context_root_set(context);
     }

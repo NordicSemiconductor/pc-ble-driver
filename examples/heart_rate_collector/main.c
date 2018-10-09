@@ -389,6 +389,7 @@ static uint32_t ble_stack_init()
     return err_code;
 }
 
+#if NRF_SD_BLE_API < 5
 /**@brief Set BLE option for the BLE role and connection bandwidth.
  *
  * @return NRF_SUCCESS on option set successfully, otherwise an error code.
@@ -409,6 +410,7 @@ static uint32_t ble_options_set()
     return NRF_ERROR_NOT_SUPPORTED;
 #endif
 }
+#endif
 
 #if NRF_SD_BLE_API >= 5
 /**@brief Function for setting configuration for the BLE stack.

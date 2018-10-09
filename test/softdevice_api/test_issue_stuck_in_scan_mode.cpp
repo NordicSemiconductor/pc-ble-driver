@@ -40,13 +40,13 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include "internal/log.h"
+#include <internal/log.h>
 
-#include "../test_setup.h"
-#include "../test_util.h"
+#include <test_setup.h>
+#include <test_util.h>
 
-#include "ble.h"
-#include "sd_rpc.h"
+#include <ble.h>
+#include <sd_rpc.h>
 
 #include <sstream>
 #include <thread>
@@ -63,7 +63,6 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort         = env.serialPorts.at(0);
-    const auto numberOfIterations = env.numberOfIterations;
 
     SECTION("reproduce")
     {

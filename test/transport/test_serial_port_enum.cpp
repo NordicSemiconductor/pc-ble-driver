@@ -40,12 +40,12 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include "internal/log.h"
+#include <internal/log.h>
 
 #include <sd_rpc.h>
 #include <nrf_error.h>
 
-#include "../test_setup.h"
+#include <test_setup.h>
 
 #if defined(_MSC_VER)
 // Disable warning "This function or variable may be unsafe. Consider using _dupenv_s instead."
