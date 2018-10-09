@@ -20,7 +20,11 @@ namespace testutil {
 //    this struct is not thread safe, the implementer of the test
 //    must take that into account when using this scratchpad
 
-constexpr size_t ADV_DATA_BUFFER_SIZE = 200;
+#if NRF_SD_BLE_API < 6
+constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_MAX_SIZE;
+#else
+constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+#endif
 
 struct AdapterWrapperScratchpad
 {
@@ -98,12 +102,12 @@ struct AdapterWrapperScratchpad
 
     // Data members related to sending advertisement reports
     uint8_t adv_handle;
-    ble_gap_adv_data_t adv_report_data;                       // Data used for advertising
-    ble_data_t adv_report_adv_data;                           // Advertisement data
-    uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE]; // Advertisement data buffer // TODO:
-                                                              // declare magic number
-    ble_data_t adv_report_scan_rsp_data;                      // Scan report data
-    ble_gap_adv_properties_t adv_properties;                  // Properties used for advertising
+    ble_gap_adv_data_t adv_report_data;                            // Data used for advertising
+    ble_data_t adv_report_adv_data;                                // Advertisement data
+    uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE];      // Advertisement data buffer
+    uint8_t adv_report_scan_rsp_data_buffer[ADV_DATA_BUFFER_SIZE]; // Advertisement data buffer
+    ble_data_t adv_report_scan_rsp_data;                           // Scan report data
+    ble_gap_adv_properties_t adv_properties; // Properties used for advertising
 #endif
 
     ble_gap_adv_params_t adv_params; // Parameters used for advertising

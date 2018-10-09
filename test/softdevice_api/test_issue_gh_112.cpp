@@ -82,7 +82,7 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
     advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
     advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
 
-    auto err_code = p->setAdvertisingData(advertisingData);
+    auto err_code = p->setupAdvertising(advertisingData);
     if (err_code != NRF_SUCCESS)
         return err_code;
 

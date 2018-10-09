@@ -56,6 +56,17 @@ class AdapterWrapper
         setupScratchpad(mtu);
     }
 
+    ~AdapterWrapper()
+    {
+        if (m_adapter != nullptr)
+        {
+            const auto err_code = sd_rpc_close(m_adapter);
+            NRF_LOG(role() << " returned 0x" << std::hex << static_cast<uint32_t>(err_code) << " on sd_rpc_close.");
+            sd_rpc_adapter_delete(m_adapter);
+            NRF_LOG(role() << " sd_rpc_adapter_delete called and returned.");
+        }
+    }
+
     uint32_t configure()
     {
         uint32_t error_code;
@@ -163,7 +174,9 @@ class AdapterWrapper
         return error_code;
     }
 
-    uint32_t setAdvertisingData(const std::vector<uint8_t> &advertisingData)
+    uint32_t setupAdvertising(const std::vector<uint8_t> &advertisingData  = std::vector<uint8_t>{},
+                              const std::vector<uint8_t> &scanResponseData = std::vector<uint8_t>{},
+                              const bool connectable = true, const bool extended = false)
     {
 #if NRF_SD_BLE_API <= 5
         const uint8_t *sr_data       = nullptr;
@@ -183,14 +196,72 @@ class AdapterWrapper
             return NRF_ERROR_INVALID_PARAM;
         }
 
-        std::copy(advertisingData.begin(), advertisingData.end(),
-                  scratchpad.adv_report_adv_data_buffer);
-        scratchpad.adv_report_adv_data.p_data = scratchpad.adv_report_adv_data_buffer;
-        scratchpad.adv_report_adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
+        if (advertisingDataSize == 0)
+        {
+            scratchpad.adv_report_adv_data.p_data = nullptr;
+            scratchpad.adv_report_adv_data.len    = 0;
+        }
+        else
+        {
+            std::copy(advertisingData.begin(), advertisingData.end(),
+                      scratchpad.adv_report_adv_data_buffer);
+            scratchpad.adv_report_adv_data.p_data = scratchpad.adv_report_adv_data_buffer;
+            scratchpad.adv_report_adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
+        }
+
+        const auto scanResponseDataSize = scanResponseData.size();
+        if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
+        {
+            NRF_LOG(role() << " Scan response data is larger then the buffer set asize.");
+            return NRF_ERROR_INVALID_PARAM;
+        }
+
+        if (scanResponseDataSize == 0)
+        {
+            scratchpad.adv_report_scan_rsp_data.p_data = nullptr;
+            scratchpad.adv_report_scan_rsp_data.len    = 0;
+        }
+        else
+        {
+            std::copy(scanResponseData.begin(), scanResponseData.end(),
+                      scratchpad.adv_report_scan_rsp_data_buffer);
+            scratchpad.adv_report_scan_rsp_data.p_data = scratchpad.adv_report_scan_rsp_data_buffer;
+            scratchpad.adv_report_scan_rsp_data.len = static_cast<uint16_t>(scanResponseDataSize);
+        }
 
         // Tie together the advertisement setup
-        scratchpad.adv_report_data.adv_data      = scratchpad.adv_report_adv_data;
-        scratchpad.adv_report_data.scan_rsp_data = scratchpad.adv_report_scan_rsp_data;
+        scratchpad.adv_report_data.adv_data               = scratchpad.adv_report_adv_data;
+        scratchpad.adv_report_data.scan_rsp_data          = scratchpad.adv_report_scan_rsp_data;
+        scratchpad.adv_params.properties.anonymous        = 0;
+        scratchpad.adv_params.properties.include_tx_power = 0;
+
+        // Support only undirected advertisement for now
+        if (extended)
+        {
+            if (connectable)
+            {
+                scratchpad.adv_params.properties.type =
+                    BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_UNDIRECTED;
+            }
+            else
+            {
+                scratchpad.adv_params.properties.type =
+                    BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
+            }
+        }
+        else
+        {
+            if (connectable)
+            {
+                scratchpad.adv_params.properties.type =
+                    BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+            }
+            else
+            {
+                scratchpad.adv_params.properties.type =
+                    BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
+            }
+        }
 
         auto err_code =
             sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
@@ -199,7 +270,7 @@ class AdapterWrapper
 
         if (err_code != NRF_SUCCESS)
         {
-            NRF_LOG(role() << " Setting advertisement data failed.");
+            NRF_LOG(role() << " Setup of advertisement failed.");
         }
         else
         {
@@ -530,6 +601,9 @@ class AdapterWrapper
                                << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
                                << " scan_req_report:["
                                << testutil::asText(gapEvent.params.scan_req_report) << "]]");
+                break;
+            default:
+                NRF_LOG(role() << " UNKNOWN EVENT WITH ID [0x" << std::hex << eventId << "]");
                 break;
         }
     }
