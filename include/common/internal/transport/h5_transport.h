@@ -76,43 +76,12 @@ constexpr uint8_t SyncConfigField         = 0x11;
 using state_action_t = std::function<h5_state_t()>;
 using payload_t      = std::vector<uint8_t>;
 
-/**
- * \brief Singleton that contains data used in a multithreaded context from H5Transport
- *
- * Multi-threaded access to "global" data members requires that threads construct in a synchronized
- * manner.
- *
- * This class uses the magic statics approach that is supported in C++11.
- *
- * For a good explanation about the approach you can read this article:
- * http://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics
- */
-class H5TransportSingleton final
-{
-  public:
-    static H5TransportSingleton &get();
-
-    std::map<const control_pkt_type, const payload_t> pkt_pattern;
-    std::map<const h5_state_t, const std::string> stateString;
-    std::map<const h5_pkt_type_t, const std::string> pktTypeString;
-
-  private:
-    H5TransportSingleton();
-    ~H5TransportSingleton() = default;
-
-    // Delete the copy and move constructors
-    H5TransportSingleton(const H5TransportSingleton &) = delete;
-    H5TransportSingleton &operator=(const H5TransportSingleton &) = delete;
-    H5TransportSingleton(H5TransportSingleton &&)                 = delete;
-    H5TransportSingleton &operator=(H5TransportSingleton &&) = delete;
-};
-
 class H5Transport : public Transport
 {
   public:
     H5Transport() = delete;
     H5Transport(Transport *nextTransportLayer, const uint32_t retransmission_interval);
-    ~H5Transport();
+    ~H5Transport() noexcept;
 
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
                   const log_cb_t &log_callback) override;
@@ -128,10 +97,13 @@ class H5Transport : public Transport
     static bool isResetPacket(const payload_t &packet, const uint8_t offset = 0);
     static bool checkPattern(const payload_t &packet, const uint8_t offset,
                              const payload_t &pattern);
+    static payload_t getPktPattern(const control_pkt_type);
+    static std::string stateToString(const h5_state_t state);
+    static std::string pktTypeToString(const h5_pkt_type_t pktType);
 
   private:
     void dataHandler(const uint8_t *data, const size_t length);
-    void statusHandler(const sd_rpc_app_status_t code, const char *error);
+    void statusHandler(const sd_rpc_app_status_t code, const std::string &error);
     void processPacket(const payload_t &packet);
 
     void sendControlPacket(control_pkt_type type);
@@ -169,13 +141,10 @@ class H5Transport : public Transport
     uint32_t errorPacketCount;
 
     void logPacket(const bool outgoing, const payload_t &packet);
-    void log(const sd_rpc_log_severity_t &level, const std::string &logLine) const;
     void logStateTransition(const h5_state_t from, const h5_state_t to) const;
-    static std::string stateToString(const h5_state_t state);
     static std::string asHex(const payload_t &packet);
     static std::string hciPacketLinkControlToString(const payload_t &payload);
     std::string h5PktToString(const bool out, const payload_t &h5Packet) const;
-    static std::string pktTypeToString(const h5_pkt_type_t pktType);
 
     // State machine related
     h5_state_t currentState;
@@ -192,10 +161,13 @@ class H5Transport : public Transport
 
     void stateMachineWorker();
 
-    std::mutex
-        stateMutex; // Mutex that allows threads to wait for a given state in the state machine
+    // Mutex that allows threads to wait for a given state in the state machine
+    std::mutex stateMutex;
     bool waitForState(h5_state_t state, std::chrono::milliseconds timeout);
     std::condition_variable stateWaitCondition;
+
+    bool isOpen;
+    std::mutex publicMethodMutex;
 };
 
 #endif // H5_TRANSPORT_H

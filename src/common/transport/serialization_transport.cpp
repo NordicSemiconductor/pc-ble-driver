@@ -55,8 +55,9 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     , responseBuffer(nullptr)
     , responseLength(nullptr)
     , runEventThread(false)
+    , isOpen(false)
 {
-    // SerializationTransport takes owership of dataLinkLayer provided object
+    // SerializationTransport takes ownership of dataLinkLayer provided object
     nextTransportLayer = std::shared_ptr<Transport>(dataLinkLayer);
     responseTimeout    = response_timeout;
 }
@@ -64,6 +65,15 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
 uint32_t SerializationTransport::open(const status_cb_t &status_callback,
                                       const evt_cb_t &event_callback, const log_cb_t &log_callback)
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (isOpen)
+    {
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_OPEN;
+    }
+
+    isOpen = true;
+
     statusCallback = status_callback;
     eventCallback  = event_callback;
     logCallback    = log_callback;
@@ -94,6 +104,15 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
 
 uint32_t SerializationTransport::close()
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (!isOpen)
+    {
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
+    }
+
+    isOpen = false;
+
     runEventThread = false;
     eventWaitCondition.notify_all();
 
@@ -112,18 +131,25 @@ uint32_t SerializationTransport::close()
     return nextTransportLayer->close();
 }
 
-uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer,
+uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer, uint8_t *rspBuffer,
                                       uint32_t *rspLength, serialization_pkt_type_t pktType)
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (!isOpen)
+    {
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_INVALID_STATE;
+    }
+
     // Mutex to avoid multiple threads sending commands at the same time.
     std::lock_guard<std::mutex> sendGuard(sendMutex);
     rspReceived    = false;
     responseBuffer = rspBuffer;
     responseLength = rspLength;
 
-    std::vector<uint8_t> commandBuffer(cmdLength + 1);
+    std::vector<uint8_t> commandBuffer(cmdBuffer.size() + 1);
     commandBuffer[0] = pktType;
-    std::memcpy(&commandBuffer[1], cmdBuffer, cmdLength * sizeof(uint8_t));
+    std::copy(cmdBuffer.begin(), cmdBuffer.end(), commandBuffer.begin() + 1);
 
     const auto errCode = nextTransportLayer->send(commandBuffer);
 
@@ -161,9 +187,11 @@ void SerializationTransport::eventHandlingRunner()
         std::unique_lock<std::mutex> eventLock(eventMutex);
         eventWaitCondition.wait(eventLock);
 
-        while (!eventQueue.empty())
+        while (!eventQueue.empty() && isOpen)
         {
             const auto eventData = eventQueue.front();
+            const auto eventDataSize = static_cast<uint32_t>(eventData.size());
+
             eventQueue.pop();
             eventLock.unlock();
 
@@ -172,16 +200,17 @@ void SerializationTransport::eventHandlingRunner()
             // Set security context
             BLESecurityContext context(this);
 
-            uint32_t possibleEventLength = 700;
-            std::unique_ptr<ble_evt_t> event(
-                static_cast<ble_evt_t *>(std::malloc(possibleEventLength)));
+            auto possibleEventLength = MaxPossibleEventLength;
+            std::vector<uint8_t> eventDecodeBuffer;
+            eventDecodeBuffer.reserve(MaxPossibleEventLength);
+            const auto event         = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
 
-            const auto errCode = ble_event_dec(eventData.data, eventData.dataLength, event.get(),
-                                               &possibleEventLength);
+            const auto errCode =
+                ble_event_dec(eventData.data(), eventDataSize, event, &possibleEventLength);
 
-            if (eventCallback != nullptr && errCode == NRF_SUCCESS)
+            if (eventCallback && errCode == NRF_SUCCESS)
             {
-                eventCallback(event.get());
+                eventCallback(event);
             }
 
             if (errCode != NRF_SUCCESS)
@@ -191,8 +220,6 @@ void SerializationTransport::eventHandlingRunner()
                            << std::endl;
                 logCallback(SD_RPC_LOG_ERROR, logMessage.str().c_str());
             }
-
-            free(eventData.data);
 
             eventLock.lock();
         }
@@ -217,13 +244,11 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
     }
     else if (eventType == SERIALIZATION_EVENT)
     {
-        eventData_t eventData{};
-        eventData.data = static_cast<uint8_t *>(malloc(dataLength));
-        std::memcpy(eventData.data, startOfData, dataLength);
-        eventData.dataLength = static_cast<uint32_t>(dataLength);
-
+        std::vector<uint8_t> event;
+        event.reserve(dataLength);
+        std::copy(startOfData, startOfData + dataLength, std::back_inserter(event));
         std::lock_guard<std::mutex> eventLock(eventMutex);
-        eventQueue.push(eventData);
+        eventQueue.push(std::move(event));
         eventWaitCondition.notify_one();
     }
     else

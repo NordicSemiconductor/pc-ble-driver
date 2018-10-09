@@ -81,48 +81,6 @@ const auto OPEN_WAIT_TIMEOUT = std::chrono::milliseconds(2000);
 // Duration to wait before continuing UART communication after reset is sent to target
 const auto RESET_WAIT_DURATION = std::chrono::milliseconds(300);
 
-H5TransportSingleton::H5TransportSingleton()
-{
-    stateString = {
-        {STATE_UNKNOWN, "STATE_UNKNOWN"},
-        {STATE_START, "STATE_START"},
-        {STATE_UNINITIALIZED, "STATE_UNINITIALIZED"},
-        {STATE_ACTIVE, "STATE_ACTIVE"},
-        {STATE_FAILED, "STATE_FAILED"},
-        {STATE_RESET, "STATE_RESET"},
-        {STATE_INITIALIZED, "STATE_INITIALIZED"},
-        {STATE_CLOSED, "STATE_CLOSED"},
-        {STATE_NO_RESPONSE, "STATE_NO_RESPONSE"},
-    };
-
-    pkt_pattern = {
-        {CONTROL_PKT_RESET, {}},
-        {CONTROL_PKT_ACK, {}},
-        {CONTROL_PKT_SYNC, {SyncFirstByte, SyncSecondByte}},
-        {CONTROL_PKT_SYNC_RESPONSE, {SyncRspFirstByte, SyncRspSecondByte}},
-        {CONTROL_PKT_SYNC_CONFIG, {SyncConfigFirstByte, SyncConfigSecondByte, SyncConfigField}},
-        {CONTROL_PKT_SYNC_CONFIG_RESPONSE,
-         {SyncConfigRspFirstByte, SyncConfigRspSecondByte, SyncConfigField}}};
-
-    pktTypeString = {
-        {ACK_PACKET, "ACK"},
-        {HCI_COMMAND_PACKET, "HCI_COMMAND_PACKET"},
-        {ACL_DATA_PACKET, "ACL_DATA_PACKET"},
-        {SYNC_DATA_PACKET, "SYNC_DATA_PACKET"},
-        {HCI_EVENT_PACKET, "HCI_EVENT_PACKET"},
-        {RESET_PACKET, "RESERVED_5"},
-        {VENDOR_SPECIFIC_PACKET, "VENDOR_SPECIFIC"},
-        {LINK_CONTROL_PACKET, "LINK_CONTROL_PACKET"},
-    };
-}
-
-H5TransportSingleton &H5TransportSingleton::get()
-{
-    // Let's create a magic static
-    static H5TransportSingleton instance;
-    return instance;
-}
-
 #pragma region Public methods
 H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransmission_interval)
     : nextTransportLayer(_nextTransportLayer)
@@ -135,18 +93,29 @@ H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransm
     , errorPacketCount(0)
     , currentState(STATE_START)
     , stateMachineReady(false)
+    , isOpen(false)
 {
     setupStateMachine();
 }
 
-H5Transport::~H5Transport()
+H5Transport::~H5Transport() noexcept
 {
+    std::cerr << "~H5Transport" << std::endl;
     delete nextTransportLayer;
 }
 
 uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
                            const log_cb_t &log_callback)
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (isOpen)
+    {
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
+    }
+
+    isOpen = true;
+
     auto errorCode = Transport::open(status_callback, data_callback, log_callback);
 
     if (errorCode != NRF_SUCCESS)
@@ -237,6 +206,15 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
 
 uint32_t H5Transport::close()
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (!isOpen)
+    {
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_ALREADY_CLOSED;
+    }
+
+    isOpen = false;
+
     try
     {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
@@ -263,22 +241,14 @@ uint32_t H5Transport::close()
 
     stopStateMachine();
 
-    const auto errorCode1 = nextTransportLayer->close();
-    const auto errorCode2 = Transport::close();
-
-    if (errorCode1 != NRF_SUCCESS)
-    {
-        return errorCode1;
-    }
-    else
-    {
-        return errorCode2;
-    }
+    return nextTransportLayer->close();
 }
 
 uint32_t H5Transport::send(const std::vector<uint8_t> &data)
 {
-    if (currentState != STATE_ACTIVE)
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (currentState != STATE_ACTIVE || !isOpen)
     {
         return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
@@ -302,7 +272,10 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data)
     while (remainingRetransmissions--)
     {
         logPacket(true, h5EncodedPacket);
-        nextTransportLayer->send(lastPacket);
+        const auto err_code = nextTransportLayer->send(lastPacket);
+
+        if (err_code != NRF_SUCCESS)
+            return err_code;
 
         const uint8_t seqNumBefore = seqNum;
 
@@ -345,6 +318,13 @@ void H5Transport::processPacket(const payload_t &packet)
     if (err_code != NRF_SUCCESS)
     {
         errorPacketCount++;
+
+        std::stringstream ss;
+        ss << "slip_decode error, code: 0x" << std::hex << static_cast<uint32_t>(err_code);
+        ss << ", H5 error count: " << static_cast<uint32_t>(errorPacketCount)
+           << ". raw packet: " << asHex(packet);
+        log(SD_RPC_LOG_ERROR, ss.str());
+
         return;
     }
 
@@ -361,7 +341,7 @@ void H5Transport::processPacket(const payload_t &packet)
 
         std::stringstream ss;
         ss << "h5_decode error, code: 0x" << std::hex << static_cast<uint32_t>(err_code);
-        ss << ", error count: " << static_cast<uint32_t>(errorPacketCount)
+        ss << ", H5 error count: " << static_cast<uint32_t>(errorPacketCount)
            << ". raw packet: " << asHex(packet);
         log(SD_RPC_LOG_ERROR, ss.str());
 
@@ -489,7 +469,7 @@ void H5Transport::processPacket(const payload_t &packet)
     stateMachineChange.notify_all();
 }
 
-void H5Transport::statusHandler(sd_rpc_app_status_t code, const char *error)
+void H5Transport::statusHandler(const sd_rpc_app_status_t code, const std::string &message)
 {
     if (code == IO_RESOURCES_UNAVAILABLE)
     {
@@ -516,10 +496,7 @@ void H5Transport::statusHandler(sd_rpc_app_status_t code, const char *error)
         }
     }
 
-    if (upperStatusCallback)
-    {
-        upperStatusCallback(code, error);
-    }
+    status(code, message);
 }
 
 void H5Transport::dataHandler(const uint8_t *data, const size_t length)
@@ -671,7 +648,7 @@ void H5Transport::setupStateMachine()
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit =
             dynamic_cast<UninitializedExitCriterias *>(exitCriterias[STATE_UNINITIALIZED].get());
-        uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
+        auto syncRetransmission = PACKET_RETRANSMISSIONS;
 
         while (!exit->isFullfilled() && syncRetransmission > 0)
         {
@@ -931,7 +908,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type)
 
     try
     {
-        const auto payload = H5TransportSingleton::get().pkt_pattern.at(type);
+        const auto payload = getPktPattern(type);
 
         h5_encode(payload, h5Packet, 0, type == CONTROL_PKT_ACK ? ackNum : 0, false, false,
                   h5_packet);
@@ -941,15 +918,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type)
         std::stringstream logLine;
 
         logLine << "Trying to send unknown control packet to device. " << e.what() << ". Aborting.";
-
-        if (upperLogCallback)
-        {
-            upperLogCallback(SD_RPC_LOG_INFO, logLine.str());
-        }
-        else
-        {
-            std::clog << logLine.str() << std::endl;
-        }
+        log(SD_RPC_LOG_INFO, logLine.str());
 
         std::terminate();
     }
@@ -967,29 +936,57 @@ void H5Transport::sendControlPacket(const control_pkt_type type)
 #pragma region Debugging
 std::string H5Transport::stateToString(const h5_state_t state)
 {
-    try
+    switch (state)
     {
-        return H5TransportSingleton::get().stateString.at(state);
-    }
-    catch (std::out_of_range&)
-    {
-        std::stringstream ss;
-        ss << "UNKNOWN[0x" << std::hex << static_cast<uint32_t>(state) << "]";
-        return ss.str();
+        case STATE_START:
+            return "STATE_START";
+        case STATE_RESET:
+            return "STATE_RESET";
+        case STATE_UNINITIALIZED:
+            return "STATE_UNINITIALIZED";
+        case STATE_INITIALIZED:
+            return "STATE_INITIALIZED";
+        case STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        case STATE_FAILED:
+            return "STATE_FAILED";
+        case STATE_CLOSED:
+            return "STATE_CLOSED";
+        case STATE_NO_RESPONSE:
+            return "STATE_NO_RESPONSE";
+        case STATE_UNKNOWN:
+            return "STATE_UNKNOWN";
+        default:
+            std::stringstream ss;
+            ss << "UNKNOWN[0x" << std::hex << static_cast<uint32_t>(state) << "]";
+            return ss.str();
     }
 }
 
 std::string H5Transport::pktTypeToString(const h5_pkt_type_t pktType)
 {
-    try
+    switch (pktType)
     {
-        return H5TransportSingleton::get().pktTypeString.at(pktType);
-    }
-    catch (std::out_of_range&)
-    {
-        std::stringstream ss;
-        ss << "UNKNOWN[0x" << std::hex << static_cast<uint32_t>(pktType) << "]";
-        return ss.str();
+        case ACK_PACKET:
+            return "ACK";
+        case HCI_COMMAND_PACKET:
+            return "HCI_COMMAND_PACKET";
+        case ACL_DATA_PACKET:
+            return "ACL_DATA_PACKET";
+        case SYNC_DATA_PACKET:
+            return "SYNC_DATA_PACKET";
+        case HCI_EVENT_PACKET:
+            return "HCI_EVENT_PACKET";
+        case RESET_PACKET:
+            return "RESERVED_5";
+        case VENDOR_SPECIFIC_PACKET:
+            return "VENDOR_SPECIFIC";
+        case LINK_CONTROL_PACKET:
+            return "LINK_CONTROL_PACKET";
+        default:
+            std::stringstream ss;
+            ss << "UNKNOWN[0x" << std::hex << static_cast<uint32_t>(pktType) << "]";
+            return ss.str();
     }
 }
 
@@ -1128,27 +1125,7 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
     }
 
     const std::string logLine = h5PktToString(outgoing, packet);
-
-    if (upperLogCallback)
-    {
-        upperLogCallback(SD_RPC_LOG_DEBUG, logLine);
-    }
-    else
-    {
-        std::clog << logLine << std::endl;
-    }
-}
-
-void H5Transport::log(const sd_rpc_log_severity_t &level, const std::string &logLine) const
-{
-    if (upperLogCallback)
-    {
-        upperLogCallback(level, logLine);
-    }
-    else
-    {
-        std::clog << logLine << std::endl;
-    }
+    log(SD_RPC_LOG_DEBUG, logLine);
 }
 
 void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
@@ -1156,14 +1133,7 @@ void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
     std::stringstream logLine;
     logLine << "State change: " << stateToString(from) << " -> " << stateToString(to) << std::endl;
 
-    if (upperLogCallback)
-    {
-        upperLogCallback(SD_RPC_LOG_DEBUG, logLine.str());
-    }
-    else
-    {
-        std::clog << logLine.str() << std::endl;
-    }
+    log(SD_RPC_LOG_DEBUG, logLine.str());
 }
 
 #pragma endregion Debugging related methods
@@ -1191,6 +1161,31 @@ bool H5Transport::checkPattern(const payload_t &packet, const uint8_t offset,
     }
 
     return true;
+}
+
+payload_t H5Transport::getPktPattern(const control_pkt_type type)
+{
+    switch (type)
+    {
+        case CONTROL_PKT_RESET:
+            return {};
+        case CONTROL_PKT_ACK:
+            return {};
+        case CONTROL_PKT_SYNC:
+            return {SyncFirstByte, SyncSecondByte};
+        case CONTROL_PKT_SYNC_RESPONSE:
+            return {SyncRspFirstByte, SyncRspSecondByte};
+        case CONTROL_PKT_SYNC_CONFIG:
+            return {SyncConfigFirstByte, SyncConfigSecondByte, SyncConfigField};
+        case CONTROL_PKT_SYNC_CONFIG_RESPONSE:
+            return {SyncConfigRspFirstByte, SyncConfigRspSecondByte, SyncConfigField};
+        case CONTROL_PKT_LAST:
+            return {};
+        default:
+            std::stringstream ss;
+            ss << "unknown CONTROL packet type 0x" << std::hex << static_cast<uint32_t>(type);
+            throw std::out_of_range(ss.str());
+    }
 }
 
 bool H5Transport::isSyncPacket(const payload_t &packet, const uint8_t offset)

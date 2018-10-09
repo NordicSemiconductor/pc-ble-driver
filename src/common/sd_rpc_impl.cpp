@@ -211,6 +211,6 @@ uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
     std::vector<uint8_t> tx_buffer_vector(tx_buffer_length);
     tx_buffer_vector[0] = static_cast<uint8_t>(reset_mode);
 
-    return adapterLayer->transport->send(&tx_buffer_vector[0], tx_buffer_length, nullptr,
+    return adapterLayer->transport->send(tx_buffer_vector, nullptr,
                                          &rx_buffer_length, SERIALIZATION_RESET_CMD);
 }

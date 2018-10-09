@@ -71,6 +71,7 @@ class AdapterInternal
     sd_rpc_log_severity_t logSeverityFilter;
 
     bool isOpen;
+    std::mutex publicMethodMutex;
 };
 
 #endif // ADAPTER_INTERNAL_H__

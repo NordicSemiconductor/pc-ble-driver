@@ -63,7 +63,7 @@ class UartBoost : public Transport
      */
     UartBoost(const UartCommunicationParameters &communicationParameters);
 
-    ~UartBoost();
+    ~UartBoost() noexcept;
 
     /**
      *@brief Setup of serial port service with parameter data.
@@ -111,6 +111,8 @@ class UartBoost : public Transport
     std::vector<uint8_t> writeBufferVector;
     std::deque<uint8_t> writeQueue;
     std::mutex queueMutex;
+    std::mutex publicMethodMutex;
+    bool isOpen;
 
     std::function<void(const asio::error_code, const size_t)> callbackReadHandle;
     std::function<void(const asio::error_code, const size_t)> callbackWriteHandle;
@@ -123,6 +125,7 @@ class UartBoost : public Transport
     asio::serial_port *serialPort;
 
     asio::io_service::work *workNotifier;
+
 };
 
 #endif // UART_BOOST_H

@@ -35,7 +35,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- #include "ble_common.h"
+#include "ble_common.h"
 
 #include <memory>
 #include <sstream>
@@ -44,22 +44,25 @@
 #include "nrf_error.h"
 #include "ser_config.h"
 
-uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function, const decode_function_t &decode_function)
+uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
+                       const decode_function_t &decode_function)
 {
-    uint32_t tx_buffer_length = SER_HAL_TRANSPORT_MAX_PKT_SIZE;
     uint32_t rx_buffer_length = 0;
 
-     // warning: do not manage memory manually; consider a container or a smart pointer
+    // std::unique_ptr<uint8_t>
+    // tx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
     // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,hicpp-no-malloc)
-    std::unique_ptr<uint8_t> tx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
-    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,hicpp-no-malloc)
-    std::unique_ptr<uint8_t> rx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
+    std::unique_ptr<uint8_t> rx_buffer(
+        static_cast<uint8_t *>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
 
     std::stringstream error_message;
+    auto _adapter = static_cast<AdapterInternal *>(adapter->internal);
 
-    auto _adapter = static_cast<AdapterInternal*>(adapter->internal);
-
-    auto err_code = encode_function(tx_buffer.get(), &tx_buffer_length);
+    // Create tx_buffer
+    uint32_t tx_buffer_length = SER_HAL_TRANSPORT_MAX_PKT_SIZE;
+    std::vector<uint8_t> tx_buffer(tx_buffer_length);
+    auto err_code = encode_function(tx_buffer.data(), &tx_buffer_length);
+    tx_buffer.resize(tx_buffer_length);
 
     if (AdapterInternal::isInternalError(err_code))
     {
@@ -70,19 +73,11 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
 
     if (decode_function != nullptr)
     {
-        err_code = _adapter->transport->send(
-            tx_buffer.get(),
-            tx_buffer_length,
-            rx_buffer.get(),
-            &rx_buffer_length);
+        err_code = _adapter->transport->send(tx_buffer, rx_buffer.get(), &rx_buffer_length);
     }
     else
     {
-        err_code = _adapter->transport->send(
-            tx_buffer.get(),
-            tx_buffer_length,
-            nullptr,
-            &rx_buffer_length);
+        err_code = _adapter->transport->send(tx_buffer, nullptr, &rx_buffer_length);
     }
 
     if (AdapterInternal::isInternalError(err_code))
@@ -90,7 +85,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
         error_message << "Error sending packet to target. Code: 0x" << std::hex << err_code;
         _adapter->statusHandler(PKT_SEND_ERROR, error_message.str().c_str());
 
-        switch(err_code)
+        switch (err_code)
         {
             case NRF_ERROR_SD_RPC_H5_TRANSPORT_NO_RESPONSE:
                 return NRF_ERROR_SD_RPC_NO_RESPONSE;

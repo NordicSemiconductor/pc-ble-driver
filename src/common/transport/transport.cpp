@@ -39,21 +39,16 @@
 
 #include "nrf_error.h"
 
+#include <iostream>
 #include <stdint.h>
 
 using namespace std;
 
-Transport::Transport()
-{
-    /* Intentional empty */
-}
+Transport::Transport()  = default;
+Transport::~Transport() = default;
 
-Transport::~Transport()
-{
-    /* Intentional empty */
-}
-
-uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback, const log_cb_t &log_callback)
+uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                         const log_cb_t &log_callback)
 {
     if (!status_callback || !data_callback || !log_callback)
     {
@@ -61,13 +56,32 @@ uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &da
     }
 
     upperStatusCallback = status_callback;
-    upperDataCallback = data_callback;
-    upperLogCallback = log_callback;
+    upperDataCallback   = data_callback;
+    upperLogCallback    = log_callback;
 
     return NRF_SUCCESS;
 }
 
-uint32_t Transport::close()
+void Transport::log(const sd_rpc_log_severity_t severity, const std::string &message) const
 {
-    return NRF_SUCCESS;
+    if (upperLogCallback)
+    {
+        upperLogCallback(SD_RPC_LOG_TRACE, message);
+    }
+    else
+    {
+        std::cerr << "LOG(" << static_cast<uint32_t>(severity) << "): " << message << std::endl;
+    }
+}
+
+void Transport::status(const sd_rpc_app_status_t code, const std::string &message) const
+{
+    if (upperLogCallback)
+    {
+        upperStatusCallback(code, message);
+    }
+    else
+    {
+        std::cerr << "status(" << static_cast<uint32_t>(code) << ") " << message << std::endl;
+    }
 }

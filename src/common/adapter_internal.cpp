@@ -61,10 +61,14 @@ uint32_t AdapterInternal::open(const sd_rpc_status_handler_t status_callback,
                                const sd_rpc_evt_handler_t event_callback,
                                const sd_rpc_log_handler_t log_callback)
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
     if (isOpen)
     {
         return NRF_ERROR_INVALID_STATE;
     }
+
+    isOpen = true;
 
     statusCallback = status_callback;
     eventCallback  = event_callback;
@@ -77,17 +81,13 @@ uint32_t AdapterInternal::open(const sd_rpc_status_handler_t status_callback,
     const auto boundLogHandler =
         std::bind(&AdapterInternal::logHandler, this, std::placeholders::_1, std::placeholders::_2);
     auto err = transport->open(boundStatusHandler, boundEventHandler, boundLogHandler);
-
-    if (err == NRF_SUCCESS)
-    {
-        isOpen = true;
-    }
-
     return err;
 }
 
 uint32_t AdapterInternal::close()
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
     if (!isOpen)
     {
         return NRF_ERROR_INVALID_STATE;
@@ -132,6 +132,7 @@ bool AdapterInternal::isInternalError(const uint32_t error_code)
 
 uint32_t AdapterInternal::logSeverityFilterSet(const sd_rpc_log_severity_t severity_filter)
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
     logSeverityFilter = severity_filter;
     return NRF_SUCCESS;
 }

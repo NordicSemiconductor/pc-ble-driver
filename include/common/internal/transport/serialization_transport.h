@@ -52,6 +52,8 @@
 typedef uint32_t (*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
 typedef std::function<void(ble_evt_t *p_ble_evt)> evt_cb_t;
 
+constexpr uint32_t MaxPossibleEventLength = 700;
+
 struct eventData_t
 {
     uint8_t *data;
@@ -81,7 +83,7 @@ class SerializationTransport
     uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback,
                   const log_cb_t &log_callback);
     uint32_t close();
-    uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength,
+    uint32_t send(const std::vector<uint8_t> &cmdBuffer, uint8_t *rspBuffer, uint32_t *rspLength,
                   serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
 
   private:
@@ -111,7 +113,10 @@ class SerializationTransport
     std::mutex eventMutex;
     std::condition_variable eventWaitCondition;
     std::thread eventThread;
-    std::queue<eventData_t> eventQueue;
+    std::queue<std::vector<uint8_t>> eventQueue;
+
+    bool isOpen;
+    std::mutex publicMethodMutex;
 };
 
 #endif // SERIALIZATION_TRANSPORT_H
