@@ -48,7 +48,6 @@
 #include "ble.h"
 #include "sd_rpc.h"
 
-#include <atomic>
 #include <sstream>
 #include <thread>
 
@@ -57,7 +56,7 @@
 // occurred in a callback.
 bool error = false;
 
-std::atomic<std::chrono::steady_clock::time_point> adv_report_received;
+std::chrono::steady_clock::time_point adv_report_received;
 
 TEST_CASE("test_issue_stuck_in_scan_mode")
 {
@@ -112,7 +111,7 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
                             }
                         }
 #endif
-                        adv_report_received.store(std::chrono::steady_clock::now());
+                        adv_report_received = std::chrono::steady_clock::now();
 
                         return true;
                     case BLE_GAP_EVT_TIMEOUT:
@@ -142,7 +141,7 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
             // Check that we have recently received an advertisement report
             auto now = std::chrono::steady_clock::now();
             auto silence_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        now - adv_report_received.load())
+                        now - adv_report_received)
                         .count();
             REQUIRE(silence_duration < 1000);
 
