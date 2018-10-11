@@ -44,6 +44,7 @@
 #include "ble_common.h"
 
 #include <cstring> // Do not remove! Required by gcc.
+#include <iterator>
 #include <memory>
 #include <sstream>
 
@@ -189,7 +190,7 @@ void SerializationTransport::eventHandlingRunner()
 
         while (!eventQueue.empty() && isOpen)
         {
-            const auto eventData = eventQueue.front();
+            const auto eventData     = eventQueue.front();
             const auto eventDataSize = static_cast<uint32_t>(eventData.size());
 
             eventQueue.pop();
@@ -203,7 +204,7 @@ void SerializationTransport::eventHandlingRunner()
             auto possibleEventLength = MaxPossibleEventLength;
             std::vector<uint8_t> eventDecodeBuffer;
             eventDecodeBuffer.reserve(MaxPossibleEventLength);
-            const auto event         = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
+            const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
 
             const auto errCode =
                 ble_event_dec(eventData.data(), eventDataSize, event, &possibleEventLength);
