@@ -55,6 +55,88 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
     string(REGEX REPLACE "(\\.version_minor[ ]+\\=[ ]+)0xf2(,\n)" "\\1@VERSION_MINOR@\\2" MAIN_IN "${MAIN_IN}")
     string(REGEX REPLACE "(\\.version_patch[ ]+\\=[ ]+)0xf3(,\n)" "\\1@VERSION_PATCH@\\2" MAIN_IN "${MAIN_IN}")
     file(WRITE "${MAIN_PATH}.in" "${MAIN_IN}")
+
+     # Configure armgcc related files (if armgcc is available)
+    find_program(GCC "arm-none-eabi-gcc")
+
+    if(DEFINED ENV{GCCARMEMB_TOOLCHAIN_PATH} OR GCC)
+        # Get gcc version
+        if(GCC)
+            get_filename_component(GCC_TOOLCHAIN_PATH "${GCC}" DIRECTORY)
+            set(GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}/..")
+        else()
+            set(GCC_TOOLCHAIN_PATH "$ENV{GCCARMEMB_TOOLCHAIN_PATH}")
+            # Environment variables are quoted, remove the quote
+            string(REPLACE "\"" "" GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}")
+        endif()
+
+        file(TO_CMAKE_PATH "${GCC_TOOLCHAIN_PATH}" GCC_TOOLCHAIN_PATH)
+        set(GCC "${GCC_TOOLCHAIN_PATH}/bin/arm-none-eabi-gcc")
+
+        message(STATUS "Found armgcc in path ${GCC}.")
+
+        execute_process(
+            COMMAND "${GCC}" -dumpversion
+            RESULT_VARIABLE GCC_RUN_RESULT
+            OUTPUT_VARIABLE GCC_VERSION
+        )
+
+        # SDKv15 requires bin in addition to GCCARMEMB_TOOLCHAIN_PATH set by gccvar
+        if(SDK_VERSION EQUAL 15)
+            set(GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}/bin/")
+        endif()
+
+        if(GCC_RUN_RESULT EQUAL 0)
+            string(STRIP "${GCC_VERSION}" GCC_VERSION)
+            message(STATUS "armgcc returned with version number ${GCC_VERSION}")
+        else()
+            message(FATAL_ERROR "armgcc returned ${GCC_RUN_RESULT}. Assuming armgcc is non usable (ran ${GCC} -dumpversion).")
+            return()
+        endif()
+
+        set(TOOLCHAIN_PATH "${SDK_DIRECTORY}/components/toolchain/gcc")
+        if(EXISTS "${TOOLCHAIN_PATH}")
+            if(WIN32)
+                set(MAKEFILE "${TOOLCHAIN_PATH}/Makefile.windows")
+                if(EXISTS "${MAKEFILE}")
+                    message(STATUS "Altering Makefile using armgcc for Windows")
+                else()
+                    message(STATUS "Makefile not found: ${MAKEFILE}")
+                    set(MAKEFILE)
+                endif()
+            else()
+                # Assume POSIX if not WIN32
+                set(MAKEFILE "${TOOLCHAIN_PATH}/Makefile.posix")
+                if(EXISTS "${MAKEFILE}")
+                    message(STATUS "Altering Makefile using armgcc for POSIX .")
+                else()
+                    message(STATUS "Makefile not found: ${MAKEFILE}")
+                    set(MAKEFILE)
+                endif()
+            endif()
+
+            if(MAKEFILE)
+                file(READ "${MAKEFILE}" MAKEFILE_CONTENT)
+                file(WRITE "${MAKEFILE}.pristine" "${MAKEFILE_CONTENT}")
+
+                # Make the file into a list since the ^$ expressions will not work
+                string(REGEX REPLACE "\r?\n" ";" MAKEFILE_LINES "${MAKEFILE_CONTENT}")
+                set(MAKEFILE_CONTENT_NEW)
+
+                foreach(LINE ${MAKEFILE_LINES})
+                    #message(STATUS "L:${LINE}")
+                    string(REGEX REPLACE "^(GNU_INSTALL_ROOT [\\?:]= ).*$" "\\1${GCC_TOOLCHAIN_PATH}" MAKEFILE_LINE "${LINE}")
+                    string(REGEX REPLACE "^(GNU_VERSION [\\?:]= ).*$" "\\1${GCC_VERSION}" MAKEFILE_LINE "${MAKEFILE_LINE}")
+                    #message(STATUS "M:${MAKEFILE_LINE}")
+                    string(APPEND MAKEFILE_CONTENT_NEW "${MAKEFILE_LINE}\n")
+                endforeach()
+
+                set(MAKEFILE_CONTENT "${MAKEFILE_CONTENT_NEW}")
+                file(WRITE "${MAKEFILE}" "${MAKEFILE_CONTENT}")
+                #message(STATUS "Makefile content after change: ${MAKEFILE_CONTENT}")
+            endif()
+        endif()
+    endif()
 endfunction()
 
 #[[
