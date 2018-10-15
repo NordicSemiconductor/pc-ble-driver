@@ -100,7 +100,6 @@ H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransm
 
 H5Transport::~H5Transport() noexcept
 {
-    std::cerr << "~H5Transport" << std::endl;
     delete nextTransportLayer;
 }
 

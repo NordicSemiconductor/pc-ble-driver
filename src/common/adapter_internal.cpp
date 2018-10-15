@@ -80,8 +80,7 @@ uint32_t AdapterInternal::open(const sd_rpc_status_handler_t status_callback,
         std::bind(&AdapterInternal::eventHandler, this, std::placeholders::_1);
     const auto boundLogHandler =
         std::bind(&AdapterInternal::logHandler, this, std::placeholders::_1, std::placeholders::_2);
-    auto err = transport->open(boundStatusHandler, boundEventHandler, boundLogHandler);
-    return err;
+    return transport->open(boundStatusHandler, boundEventHandler, boundLogHandler);
 }
 
 uint32_t AdapterInternal::close()
@@ -102,7 +101,11 @@ void AdapterInternal::statusHandler(const sd_rpc_app_status_t code, const std::s
 {
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
-    statusCallback(&adapter, code, message.c_str());
+
+    if (statusCallback != nullptr)
+    {
+        statusCallback(&adapter, code, message.c_str());
+    }
 }
 
 void AdapterInternal::eventHandler(ble_evt_t *event)
@@ -110,7 +113,11 @@ void AdapterInternal::eventHandler(ble_evt_t *event)
     // Event Thread
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
-    eventCallback(&adapter, event);
+
+    if (eventCallback != nullptr)
+    {
+        eventCallback(&adapter, event);
+    }
 }
 
 void AdapterInternal::logHandler(const sd_rpc_log_severity_t severity,
@@ -119,7 +126,7 @@ void AdapterInternal::logHandler(const sd_rpc_log_severity_t severity,
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
 
-    if (static_cast<uint32_t>(severity) >= static_cast<uint32_t>(logSeverityFilter))
+    if (logCallback != nullptr && (static_cast<uint32_t>(severity) >= static_cast<uint32_t>(logSeverityFilter)))
     {
         logCallback(&adapter, severity, log_message.c_str());
     }
