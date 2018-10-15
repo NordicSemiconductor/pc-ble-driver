@@ -70,16 +70,11 @@ TEST_CASE("test_pc_ble_driver_open_close")
         INFO("Serial port used: " << serialPort.port);
         INFO("Baud rate used: " << baudRate);
 
-        auto c = std::unique_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
+        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port, baudRate);
 
-        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                            testutil::logHandler) == NRF_SUCCESS);
-
-        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                            testutil::logHandler) == NRF_ERROR_INVALID_STATE);
-
-        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
+        REQUIRE(c->open() == NRF_SUCCESS);
+        REQUIRE(c->open() == NRF_SUCCESS);
+        REQUIRE(c->close() == NRF_SUCCESS);
     }
 
     SECTION("close_already_closed_adapter")
@@ -89,14 +84,12 @@ TEST_CASE("test_pc_ble_driver_open_close")
         INFO("Serial port used: " << serialPort.port);
         INFO("Baud rate used: " << baudRate);
 
-        auto c = std::unique_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
+        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port, baudRate);
 
-        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_ERROR_INVALID_STATE);
-        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                            testutil::logHandler) == NRF_SUCCESS);
-        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
-        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_ERROR_INVALID_STATE);
+        REQUIRE(c->close() == NRF_SUCCESS);
+        REQUIRE(c->open() == NRF_SUCCESS);
+        REQUIRE(c->close()  == NRF_SUCCESS);
+        REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
     }
 
     SECTION("open_close_open_iterations")
@@ -108,9 +101,8 @@ TEST_CASE("test_pc_ble_driver_open_close")
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            auto c = std::shared_ptr<testutil::AdapterWrapper>(
-                new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
-            testutil::adapters.push_back(c);
+            auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
+                                                                baudRate);
 
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);
@@ -138,8 +130,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
                 }
             });
 
-            REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                                testutil::logHandler) == NRF_SUCCESS);
+            REQUIRE(c->open() == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
             REQUIRE(c->startScan() == NRF_SUCCESS);
 
@@ -147,8 +138,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
 
             REQUIRE(error == false);
 
-            REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
-            testutil::adapters.clear();
+            REQUIRE(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
 
             NRF_LOG("Iteration #" << (i + 1) << " of " << numberOfIterations << " complete.");

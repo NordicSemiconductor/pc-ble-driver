@@ -71,7 +71,8 @@ bool testComplete = false;
 uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
                          const std::string &advertisingName,
                          const std::vector<uint8_t> &initialCharaciteristicValue,
-                         const uint16_t characteristicValueMaxLength) {
+                         const uint16_t characteristicValueMaxLength)
+{
     // Setup the advertisement data
     std::vector<uint8_t> advertisingData;
     testutil::appendAdvertisingName(advertisingData, advertisingName);
@@ -140,13 +141,15 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
                                            &(p->scratchpad.gatts_characteristic_handle));
 }
 
-TEST_CASE("test_issue_gh_112") {
+TEST_CASE("test_issue_gh_112")
+{
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
-    SECTION("reproduce_error") {
+    SECTION("reproduce_error")
+    {
         const auto baudRate = central.baudRate;
 
         INFO("Central serial port used: " << central.port);
@@ -156,12 +159,12 @@ TEST_CASE("test_issue_gh_112") {
         const auto peripheralAdvName = "peripheral";
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c = std::shared_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Central, central.port, baudRate, 150));
+        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
+                                                            baudRate, 150);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
-        auto p = std::shared_ptr<testutil::AdapterWrapper>(
-            new testutil::AdapterWrapper(testutil::Peripheral, peripheral.port, baudRate, 150));
+        auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
+                                                            baudRate, 150);
 
         // Use Heart rate service and characteristics as target for testing but
         // the values sent are not according to the Heart Rate service
@@ -187,10 +190,6 @@ TEST_CASE("test_issue_gh_112") {
         p->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
         p->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
         p->scratchpad.mtu                    = 150;
-
-        // Register adapters so that C based callbacks can find them in sd_rpc_open callbacks
-        testutil::adapters.push_back(c);
-        testutil::adapters.push_back(p);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -226,7 +225,9 @@ TEST_CASE("test_issue_gh_112") {
                     }
 #if NRF_SD_BLE_API == 6
                     else
-                    { c->startScan(true); }
+                    {
+                        c->startScan(true);
+                    }
 #endif
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
@@ -418,8 +419,10 @@ TEST_CASE("test_issue_gh_112") {
                                           << testutil::gattStatusToString(gattcEvent->gatt_status));
                         error = true;
                     }
-
-                    testComplete = true;
+                    else
+                    {
+                        testComplete = true;
+                    }
 
                     return true;
                 case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
@@ -487,6 +490,7 @@ TEST_CASE("test_issue_gh_112") {
                 {
                     // Use scratchpad defaults when advertising
                     NRF_LOG(p->role() << " Starting advertising.");
+
                     const auto err_code = p->startAdvertising();
                     if (err_code != NRF_SUCCESS)
                     {
@@ -558,19 +562,17 @@ TEST_CASE("test_issue_gh_112") {
         });
 
         // Open the adapters
-        REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                            testutil::logHandler) == NRF_SUCCESS);
-        REQUIRE(sd_rpc_open(p->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                            testutil::logHandler) == NRF_SUCCESS);
+        REQUIRE(c->open() == NRF_SUCCESS);
+        REQUIRE(p->open() == NRF_SUCCESS);
 
         REQUIRE(c->configure() == NRF_SUCCESS);
         REQUIRE(p->configure() == NRF_SUCCESS);
 
-        // Starting the scan starts the sequence of operations to get a connection established
-        REQUIRE(c->startScan() == NRF_SUCCESS);
-
         REQUIRE(setupPeripheral(p, peripheralAdvName, {0x00}, p->scratchpad.mtu) == NRF_SUCCESS);
         REQUIRE(p->startAdvertising() == NRF_SUCCESS);
+
+        // Starting the scan starts the sequence of operations to get a connection established
+        REQUIRE(c->startScan() == NRF_SUCCESS);
 
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -578,16 +580,17 @@ TEST_CASE("test_issue_gh_112") {
         REQUIRE(error == false);
         REQUIRE(testComplete == true);
 
-        REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
+        REQUIRE(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        REQUIRE(sd_rpc_close(p->unwrap()) == NRF_SUCCESS);
+        REQUIRE(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
     }
 }
 
 #else
-TEST_CASE("test_issue_gh_112") {
+TEST_CASE("test_issue_gh_112")
+{
     INFO("Not relevant for SoftDevice API version < 3")
 }
 

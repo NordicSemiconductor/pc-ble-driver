@@ -62,7 +62,7 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
-    const auto serialPort         = env.serialPorts.at(0);
+    const auto serialPort = env.serialPorts.at(0);
 
     SECTION("reproduce")
     {
@@ -73,17 +73,18 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
 
         const auto scanIterations = 10;
         INFO("Purpose of this test:");
-        INFO("1) Assert that closing the adapter when scan is running does not prevent opening the adapter again.");
-        INFO("2) Assert that advertisement reports are received all the time (timeout is set to 0x00)");
+        INFO("1) Assert that closing the adapter when scan is running does not prevent opening the "
+             "adapter again.");
+        INFO("2) Assert that advertisement reports are received all the time (timeout is set to "
+             "0x00)");
         INFO("Running " << scanIterations << " adapter open -> scan -> adapter close iterations");
 
         for (auto i = 0; i < scanIterations; i++)
         {
             auto adv_report_count = 0;
 
-            auto c = std::shared_ptr<testutil::AdapterWrapper>(
-                new testutil::AdapterWrapper(testutil::Central, serialPort.port, baudRate));
-            testutil::adapters.push_back(c);
+            auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
+                                                                baudRate);
 
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);
@@ -130,8 +131,7 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
                 }
             });
 
-            REQUIRE(sd_rpc_open(c->unwrap(), testutil::statusHandler, testutil::eventHandler,
-                                testutil::logHandler) == NRF_SUCCESS);
+            REQUIRE(c->open() == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
             REQUIRE(c->startScan() == NRF_SUCCESS);
 
@@ -139,16 +139,15 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
 
             // Check that we have recently received an advertisement report
             auto now = std::chrono::steady_clock::now();
-            auto silence_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        now - adv_report_received)
-                        .count();
+            auto silence_duration =
+                std::chrono::duration_cast<std::chrono::milliseconds>(now - adv_report_received)
+                    .count();
             REQUIRE(silence_duration < 1000);
 
             REQUIRE(error == false);
 
             // Cleanup current adapter connection
-            REQUIRE(sd_rpc_close(c->unwrap()) == NRF_SUCCESS);
-            testutil::adapters.clear();
+            REQUIRE(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
         }
     }

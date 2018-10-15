@@ -16,6 +16,7 @@
 
 #include "test_util_adapter_wrapper_scratchpad.h"
 #include <cstring>
+#include <map>
 
 namespace testutil {
 using LogCallback =
@@ -52,6 +53,8 @@ class AdapterWrapper
     {
         m_adapter = adapterInit(port.c_str(), baudRate);
 
+        AdapterWrapper::adapters[m_adapter->internal] = this;
+
         // Setup scratchpad with default values
         setupScratchpad(mtu);
     }
@@ -61,7 +64,12 @@ class AdapterWrapper
         if (m_adapter != nullptr)
         {
             const auto err_code = sd_rpc_close(m_adapter);
-            NRF_LOG(role() << " returned 0x" << std::hex << static_cast<uint32_t>(err_code) << " on sd_rpc_close.");
+            NRF_LOG(role() << " returned 0x" << std::hex << static_cast<uint32_t>(err_code)
+                           << " on sd_rpc_close.");
+
+            // Remove adapter from map of adapters used in callbacks
+            AdapterWrapper::adapters.erase(m_adapter);
+
             sd_rpc_adapter_delete(m_adapter);
             NRF_LOG(role() << " sd_rpc_adapter_delete called and returned.");
         }
@@ -120,6 +128,16 @@ class AdapterWrapper
     bool error()
     {
         return m_async_error;
+    }
+
+    uint32_t open()
+    {
+        return sd_rpc_open(m_adapter, statusHandler, eventHandler, logHandler);
+    }
+
+    uint32_t close()
+    {
+        return sd_rpc_close(m_adapter);
     }
 
     uint32_t startScan(const bool resume = false)
@@ -788,6 +806,8 @@ class AdapterWrapper
     GattsEventCallback m_gattsEventCallback;
     GattcEventCallback m_gattcEventCallback;
 
+    static std::map<void *, AdapterWrapper *> adapters;
+
     void setupScratchpad(const uint16_t mtu = 0)
     {
         // Setup scratchpad with default values, take role into account
@@ -984,7 +1004,62 @@ class AdapterWrapper
         transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
         return sd_rpc_adapter_create(transport_layer);
     }
+
+    static void statusHandler(adapter_t *adapter, sd_rpc_app_status_t code, const char *message)
+    {
+        try
+        {
+            const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
+            wrappedAdapter->processStatus(code, message);
+        }
+        catch (std::out_of_range &)
+        {
+            NRF_LOG(
+                "In statusHandler callback, not able to find adapter to invoke status handler on.");
+        }
+        catch (std::system_error &e)
+        {
+            NRF_LOG("std::system_error in statusHandler: " << e.what());
+        }
+    }
+
+    static void eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
+    {
+        try
+        {
+            const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
+            wrappedAdapter->processEvent(p_ble_evt);
+        }
+        catch (std::out_of_range &)
+        {
+            NRF_LOG("In eventHandler, not able to find adapter to invoke event handler on.");
+        }
+        catch (std::system_error &e)
+        {
+            NRF_LOG("std::system_error in eventHandler: " << e.what());
+        }
+    }
+
+    static void logHandler(adapter_t *adapter, sd_rpc_log_severity_t severity,
+                           const char *log_message)
+    {
+        try
+        {
+            const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
+            wrappedAdapter->processLog(severity, log_message);
+        }
+        catch (std::out_of_range &)
+        {
+            NRF_LOG("In logHandler, not able to find adapter to invoke log handler on.");
+        }
+        catch (std::system_error &e)
+        {
+            NRF_LOG("std::system_error in logHandler: " << e.what());
+        }
+    }
 };
+
+std::map<void *, AdapterWrapper *> AdapterWrapper::adapters;
 
 } //  namespace testutil
 
