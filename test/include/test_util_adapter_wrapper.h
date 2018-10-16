@@ -68,7 +68,7 @@ class AdapterWrapper
                            << " on sd_rpc_close.");
 
             // Remove adapter from map of adapters used in callbacks
-            AdapterWrapper::adapters.erase(m_adapter);
+            AdapterWrapper::adapters.erase(m_adapter->internal);
 
             sd_rpc_adapter_delete(m_adapter);
             NRF_LOG(role() << " sd_rpc_adapter_delete called and returned.");
