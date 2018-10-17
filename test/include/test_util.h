@@ -137,6 +137,25 @@ static void appendRandomData(std::vector<uint8_t> &data, const size_t size)
     data.resize(size);
     std::generate(data.begin(), data.end(), std::rand);
 }
+
+/*
+ * @brief Function that fills a std::vector<uint8_t> with random ASCII values
+ *
+ * @param[in,out] data vector to populate with random ASCII values
+ * @param[in] size number of random values to fill the vector with
+ */
+
+static void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size)
+{
+    data.resize(size);
+    std::generate(data.begin(), data.end(), [] {
+        uint8_t c;
+        while (!std::isalnum(c = static_cast<uint8_t>(std::rand())))
+            ;
+        return c;
+    });
+}
+
 } // namespace testutil
 
 #endif // TEST_UTIL_H__

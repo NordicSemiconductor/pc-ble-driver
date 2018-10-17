@@ -4,13 +4,16 @@
 #include "ble.h"
 #include "ble_hci.h"
 
+#include <cctype>
+
 namespace testutil {
 /**
  * @brief Function that convert data to string representation
  * @param[in] data Data to represent as a string
  * @return string representation of data
  */
-static std::string asHex(const std::vector<uint8_t> &data) {
+static std::string asHex(const std::vector<uint8_t> &data)
+{
     std::stringstream retval;
 
     for (uint8_t const &value : data)
@@ -21,7 +24,8 @@ static std::string asHex(const std::vector<uint8_t> &data) {
     return retval.str();
 }
 
-static std::string asHex(const uint16_t &data) {
+static std::string asHex(const uint16_t &data)
+{
     std::stringstream retval;
     retval << std::setfill('0') << std::setw(2) << std::hex << data;
     return retval.str();
@@ -33,7 +37,8 @@ static std::string asHex(const uint16_t &data) {
  * @param[in] address Bluetooth Lower Energy address
  * @return string representation of provided address
  */
-static std::string asText(const ble_gap_addr_t &address) {
+static std::string asText(const ble_gap_addr_t &address)
+{
     std::stringstream retval;
 
     for (int i = sizeof(address.addr) - 1; i >= 0; --i)
@@ -78,13 +83,15 @@ static std::string asText(const ble_gap_addr_t &address) {
  *
  * @return textual representation of the error
  */
-static std::string errorToString(const uint32_t error_code) {
+static std::string errorToString(const uint32_t error_code)
+{
     std::stringstream retval;
     retval << "error code: 0x" << std::setfill('0') << std::setw(2) << std::hex << error_code;
     return retval.str();
 }
 
-static std::string ioCapsToString(const uint8_t code) {
+static std::string ioCapsToString(const uint8_t code)
+{
     std::stringstream retval;
 
     switch (code)
@@ -113,7 +120,8 @@ static std::string ioCapsToString(const uint8_t code) {
     return retval.str();
 }
 
-static std::string roleToString(const uint8_t role) {
+static std::string roleToString(const uint8_t role)
+{
     std::stringstream retval;
 
     switch (role)
@@ -135,7 +143,8 @@ static std::string roleToString(const uint8_t role) {
     return retval.str();
 }
 
-static std::string gattAuthErrorSrcToString(const uint8_t errorSrc) {
+static std::string gattAuthErrorSrcToString(const uint8_t errorSrc)
+{
     std::stringstream retval;
 
     switch (errorSrc)
@@ -155,7 +164,8 @@ static std::string gattAuthErrorSrcToString(const uint8_t errorSrc) {
     return retval.str();
 }
 
-static std::string gattAuthStatusToString(const uint8_t authStatus) {
+static std::string gattAuthStatusToString(const uint8_t authStatus)
+{
     std::stringstream retval;
 
     switch (authStatus)
@@ -229,7 +239,8 @@ static std::string gattAuthStatusToString(const uint8_t authStatus) {
     return retval.str();
 }
 
-static std::string hciStatusCodeToString(const uint8_t hciStatusCode) {
+static std::string hciStatusCodeToString(const uint8_t hciStatusCode)
+{
     std::stringstream retval;
 
     switch (hciStatusCode)
@@ -330,7 +341,8 @@ static std::string hciStatusCodeToString(const uint8_t hciStatusCode) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_passkey_display_t &passkeyDisplay) {
+static std::string asText(const ble_gap_evt_passkey_display_t &passkeyDisplay)
+{
     std::stringstream retval;
     std::stringstream passkey;
 
@@ -344,7 +356,8 @@ static std::string asText(const ble_gap_evt_passkey_display_t &passkeyDisplay) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_enc_info_t &encryptionInfo) {
+static std::string asText(const ble_gap_enc_info_t &encryptionInfo)
+{
     std::stringstream retval;
     std::vector<uint8_t> key(encryptionInfo.ltk, encryptionInfo.ltk + encryptionInfo.ltk_len);
 
@@ -355,7 +368,8 @@ static std::string asText(const ble_gap_enc_info_t &encryptionInfo) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_conn_params_t &connectionParams) {
+static std::string asText(const ble_gap_conn_params_t &connectionParams)
+{
     std::stringstream retval;
 
     retval << "conn_sup_timeout:" << static_cast<uint32_t>(connectionParams.conn_sup_timeout)
@@ -369,7 +383,8 @@ static std::string asText(const ble_gap_conn_params_t &connectionParams) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_connected_t &connected) {
+static std::string asText(const ble_gap_evt_connected_t &connected)
+{
     std::stringstream retval;
 
     retval << "peer_addr:[" << asText(connected.peer_addr) << "] ";
@@ -385,22 +400,25 @@ static std::string asText(const ble_gap_evt_connected_t &connected) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_disconnected_t &disconnected) {
+static std::string asText(const ble_gap_evt_disconnected_t &disconnected)
+{
     std::stringstream retval;
 
     retval << "reason:" << hciStatusCodeToString(disconnected.reason);
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_scan_req_report_t &scanReqReport) {
+static std::string asText(const ble_gap_evt_scan_req_report_t &scanReqReport)
+{
     std::stringstream retval;
 
     retval << "peer_addr:[" << asText(scanReqReport.peer_addr) << "]";
-    retval << " rssi:" << static_cast<uint32_t>(scanReqReport.rssi);
+    retval << " rssi:" << static_cast<int32_t>(scanReqReport.rssi);
     return retval.str();
 }
 
-static std::string asText(const ble_gap_sec_kdist_t &keyDist) {
+static std::string asText(const ble_gap_sec_kdist_t &keyDist)
+{
     std::stringstream retval;
     retval << "enc:" << (keyDist.enc ? "yes" : "no") << " ";
     retval << "id:" << (keyDist.id ? "yes" : "no") << " ";
@@ -409,7 +427,8 @@ static std::string asText(const ble_gap_sec_kdist_t &keyDist) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_sec_request_t &securityRequest) {
+static std::string asText(const ble_gap_evt_sec_request_t &securityRequest)
+{
     std::stringstream retval;
     retval << "bond:" << (securityRequest.bond ? "yes" : "no") << " ";
     retval << "mitm:" << (securityRequest.mitm ? "yes" : "no") << " ";
@@ -418,7 +437,8 @@ static std::string asText(const ble_gap_evt_sec_request_t &securityRequest) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_sec_params_request_t &securityParamsRequest) {
+static std::string asText(const ble_gap_evt_sec_params_request_t &securityParamsRequest)
+{
     std::stringstream retval;
     retval << "peer_params:[";
     retval << "bond:" << (securityParamsRequest.peer_params.bond ? "yes" : "no") << " ";
@@ -438,7 +458,8 @@ static std::string asText(const ble_gap_evt_sec_params_request_t &securityParams
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_auth_key_request_t &authKeyRequest) {
+static std::string asText(const ble_gap_evt_auth_key_request_t &authKeyRequest)
+{
     std::stringstream retval;
     retval << "key_type: ";
 
@@ -460,7 +481,8 @@ static std::string asText(const ble_gap_evt_auth_key_request_t &authKeyRequest) 
     return retval.str();
 }
 
-static std::string asText(const ble_gap_conn_sec_mode_t &connSecMode) {
+static std::string asText(const ble_gap_conn_sec_mode_t &connSecMode)
+{
     std::stringstream retval;
 
     retval << "sm:" << static_cast<uint32_t>(connSecMode.sm)
@@ -471,71 +493,210 @@ static std::string asText(const ble_gap_conn_sec_mode_t &connSecMode) {
         retval << "Security Mode 0 Level 0: No access permissions at all";
     }
     else if (connSecMode.sm == 1 && connSecMode.lv == 1)
-    { retval << "No security is needed (aka open link)"; }
+    {
+        retval << "No security is needed (aka open link)";
+    }
     else if (connSecMode.sm == 1 && connSecMode.lv == 2)
-    { retval << "Encrypted link required, MITM protection not necessary"; }
+    {
+        retval << "Encrypted link required, MITM protection not necessary";
+    }
     else if (connSecMode.sm == 1 && connSecMode.lv == 3)
-    { retval << "MITM protected encrypted link required"; }
+    {
+        retval << "MITM protected encrypted link required";
+    }
     else if (connSecMode.sm == 1 && connSecMode.lv == 4)
-    { retval << "LESC MITM protected encrypted link required"; }
+    {
+        retval << "LESC MITM protected encrypted link required";
+    }
     else if (connSecMode.sm == 2 && connSecMode.lv == 1)
-    { retval << "Signing or encryption required, MITM protection not necessary"; }
+    {
+        retval << "Signing or encryption required, MITM protection not necessary";
+    }
     else if (connSecMode.sm == 2 && connSecMode.lv == 2)
-    { retval << "MITM protected signing required, unless link is MITM protected encrypted"; }
+    {
+        retval << "MITM protected signing required, unless link is MITM protected encrypted";
+    }
 
     retval << "'";
     return retval.str();
 }
 
-static std::string asText(const ble_gap_conn_sec_t &connSec) {
+static std::string asText(const ble_gap_conn_sec_t &connSec)
+{
     std::stringstream retval;
     retval << "sec_mode:[" << asText(connSec.sec_mode) << "] ";
     retval << "encr_key_size:" << static_cast<uint32_t>(connSec.encr_key_size);
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_rssi_changed_t &rssiChanged) {
+static std::string asText(const ble_gap_evt_rssi_changed_t &rssiChanged)
+{
     std::stringstream retval;
     retval << "rssi:" << static_cast<uint32_t>(rssiChanged.rssi) << "dBm";
     return retval.str();
 }
 
-static std::string asText(const ble_gap_lesc_p256_pk_t &lsecP256Pk) {
+static std::string asText(const ble_gap_lesc_p256_pk_t &lsecP256Pk)
+{
     std::stringstream retval;
     std::vector<uint8_t> key(lsecP256Pk.pk, lsecP256Pk.pk + 64);
     retval << "key:" << asHex(key);
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_key_pressed_t &keyPressed) {
+static std::string asText(const ble_gap_evt_key_pressed_t &keyPressed)
+{
     std::stringstream retval;
     retval << "pk_not:" << keyPressed.kp_not; // TODO: convert to string
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_timeout_t &timeout) {
+static std::string asText(const std::vector<uint8_t> &data)
+{
+    std::stringstream retval;
+
+    for (auto v : data)
+    {
+        if (std::isprint(v))
+        {
+            retval << v;
+        }
+    }
+
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_timeout_t &timeout)
+{
     std::stringstream retval;
     retval << "src:" << timeout.src; // TODO: convert to string
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_adv_report_t &advReport) {
-#if NRF_SD_BLE_API < 6
+#if NRF_SD_BLE_API == 6
+static std::string asText(const ble_gap_adv_report_type_t &reportType)
+{
     std::stringstream retval;
-    std::vector<uint8_t> data(advReport.data, advReport.data + advReport.dlen);
 
-    retval << "peer_addr:[" << asText(advReport.peer_addr) << "]";
-    retval << " data:" << asHex(data);
-    retval << " rssi:" << static_cast<uint32_t>(advReport.rssi) << "dBm";
-    retval << " scan_rsp:" << (advReport.scan_rsp ? "yes" : "no");
-    retval << " type:0x" << asHex(advReport.type); // TODO: convert to string
+    if (reportType.connectable)
+    {
+        retval << " connectable:" << (reportType.connectable ? "yes" : "no");
+    }
+
+    if (reportType.scannable)
+    {
+        retval << " scannable:" << (reportType.scannable ? "yes" : "no");
+    }
+
+    if (reportType.directed)
+    {
+        retval << " directed:" << (reportType.directed ? "yes" : "no");
+    }
+
+    if (reportType.scan_response)
+    {
+        retval << " scan_response:" << (reportType.scan_response ? "yes" : "no");
+    }
+
+    if (reportType.extended_pdu)
+    {
+        retval << " extended_pdu:" << (reportType.extended_pdu ? "yes" : "no");
+    }
+
+    retval << " status:";
+
+    switch (reportType.status)
+    {
+        case BLE_GAP_ADV_DATA_STATUS_COMPLETE:
+            retval << "COMPLETE";
+            break;
+        case BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_MORE_DATA:
+            retval << "INCOMPLETE_MORE_DATA";
+            break;
+        case BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_TRUNCATED:
+            retval << "INCOMPLETE_TRUNCATED";
+            break;
+        case BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_MISSED:
+            retval << "INCOMPLETE_MISSED";
+            break;
+        default:
+            retval << "UNKNOWN(" << std::hex << static_cast<uint32_t>(reportType.status) << ")";
+            break;
+    }
+
     return retval.str();
-#else
-    return "asText for ble_gap_evt_adv_report_t not supported on SD API v6";
+}
 #endif
+
+#if NRF_SD_BLE_API == 6
+static std::string asText(const ble_gap_aux_pointer_t &auxPointer)
+{
+    std::stringstream retval;
+    retval << "aux_offset:" << static_cast<uint32_t>(auxPointer.aux_offset);
+    retval << " aux_phy:" << static_cast<uint32_t>(auxPointer.aux_phy);
+    return retval.str();
+}
+#endif
+
+static std::string asText(const ble_gap_evt_adv_report_t &advReport)
+{
+    std::stringstream retval;
+#if NRF_SD_BLE_API == 6
+    std::vector<uint8_t> data(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
+    retval << "type:" << asText(advReport.type);
+
+#else
+    std::vector<uint8_t> data(advReport.data, advReport.data + advReport.dlen);
+    retval << "type:" << asHex(advReport.type);
+#endif
+
+#if NRF_SD_BLE_API == 6
+    if (advReport.type.directed)
+    {
+        retval << " direct_addr:[" << asText(advReport.direct_addr) << "]";
+    }
+
+    retval << " primary_phy:" << static_cast<uint32_t>(advReport.primary_phy);
+    retval << " secondary_phy:" << static_cast<uint32_t>(advReport.secondary_phy);
+
+    if (advReport.tx_power != BLE_GAP_POWER_LEVEL_INVALID)
+    {
+        retval << " tx_power:" << static_cast<uint32_t>(advReport.tx_power);
+    }
+#endif
+
+    retval << " rssi:" << static_cast<int32_t>(advReport.rssi) << "dBm";
+
+#if NRF_SD_BLE_API == 6
+    retval << " ch_index:" << std::hex << static_cast<uint32_t>(advReport.ch_index);
+
+    if (advReport.set_id != BLE_GAP_ADV_REPORT_SET_ID_NOT_AVAILABLE)
+    {
+        retval << " set_id:" << std::hex << static_cast<uint32_t>(advReport.set_id);
+    }
+
+    if (advReport.data_id != BLE_GAP_ADV_REPORT_SET_ID_NOT_AVAILABLE)
+    {
+        retval << " data_id:" << std::hex << static_cast<uint32_t>(advReport.data_id);
+    }
+
+    if (advReport.type.status == BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_MORE_DATA)
+    {
+        retval << " aux_pointer:[" << asText(advReport.aux_pointer) << "]";
+    }
+#endif
+
+#if NRF_SD_BLE_API < 6
+    retval << " scan_rsp:" << (advReport.scan_rsp ? "yes" : "no");
+#endif
+
+    retval << " data:" << asHex(data) << "/" << asText(data);
+
+    return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_lesc_dhkey_request_t &dhkeyRequest) {
+static std::string asText(const ble_gap_evt_lesc_dhkey_request_t &dhkeyRequest)
+{
     std::stringstream retval;
     retval << "p_pk_peer:["
            << ((dhkeyRequest.p_pk_peer != nullptr) ? asText(*dhkeyRequest.p_pk_peer) : "NULL")
@@ -544,7 +705,8 @@ static std::string asText(const ble_gap_evt_lesc_dhkey_request_t &dhkeyRequest) 
     return retval.str();
 }
 
-static std::string asText(const ble_gap_master_id_t &masterId) {
+static std::string asText(const ble_gap_master_id_t &masterId)
+{
     std::stringstream retval;
     std::vector<uint8_t> rand(masterId.rand, masterId.rand + sizeof(masterId.rand));
     retval << "ediv:0x" << asHex(masterId.ediv);
@@ -552,7 +714,8 @@ static std::string asText(const ble_gap_master_id_t &masterId) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_sec_info_request_t &secInfoRequest) {
+static std::string asText(const ble_gap_evt_sec_info_request_t &secInfoRequest)
+{
     std::stringstream retval;
     retval << "peer_addr:[" << asText(secInfoRequest.peer_addr) << "]";
     retval << " enc_info:" << (secInfoRequest.enc_info ? "required" : "not_required");
@@ -566,7 +729,8 @@ static std::string asText(const ble_gap_evt_sec_info_request_t &secInfoRequest) 
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_conn_sec_update_t &connSecUpdate) {
+static std::string asText(const ble_gap_evt_conn_sec_update_t &connSecUpdate)
+{
     std::stringstream retval;
     retval << "conn_sec:[";
     retval << asText(connSecUpdate.conn_sec);
@@ -574,7 +738,8 @@ static std::string asText(const ble_gap_evt_conn_sec_update_t &connSecUpdate) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_sec_levels_t &secLevels) {
+static std::string asText(const ble_gap_sec_levels_t &secLevels)
+{
     std::stringstream retval;
     retval << "lv1:" << (secLevels.lv1 ? "yes" : "no");
     retval << " lv2:" << (secLevels.lv2 ? "yes" : "no");
@@ -583,7 +748,8 @@ static std::string asText(const ble_gap_sec_levels_t &secLevels) {
     return retval.str();
 }
 
-static std::string asText(const ble_gap_evt_auth_status_t &authStatus) {
+static std::string asText(const ble_gap_evt_auth_status_t &authStatus)
+{
     std::stringstream retval;
     retval << "auth_status:" << gattAuthStatusToString(authStatus.auth_status) << " ";
     retval << "error_src:" << gattAuthErrorSrcToString(authStatus.error_src) << " ";
@@ -602,7 +768,8 @@ static std::string asText(const ble_gap_evt_auth_status_t &authStatus) {
  *
  * @return textual representation of the code
  */
-static std::string gattStatusToString(const uint16_t code) {
+static std::string gattStatusToString(const uint16_t code)
+{
     std::stringstream retval;
     retval << "GATT status code: 0x" << std::setfill('0') << std::setw(4) << std::hex
            << (uint32_t)code << ".";
@@ -610,7 +777,8 @@ static std::string gattStatusToString(const uint16_t code) {
 }
 
 // Operator overloading for common types used
-std::string asText(const sd_rpc_app_status_t &status) {
+std::string asText(const sd_rpc_app_status_t &status)
+{
     switch (status)
     {
         case PKT_SEND_MAX_RETRIES_REACHED:
@@ -634,25 +802,29 @@ std::string asText(const sd_rpc_app_status_t &status) {
     }
 }
 
-static std::string asText(const uint16_t &value) {
+static std::string asText(const uint16_t &value)
+{
     std::stringstream retval;
     retval << "0x" << std::setfill('0') << std::setw(4) << std::hex << (uint32_t)value;
     return retval.str();
 }
 
-static std::string asText(const uint8_t &value) {
+static std::string asText(const uint8_t &value)
+{
     std::stringstream retval;
     retval << "0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)value;
     return retval.str();
 }
 
-static std::string asText(const ble_uuid_t &uuid) {
+static std::string asText(const ble_uuid_t &uuid)
+{
     std::stringstream retval;
     retval << "uuid:[type: " << asText(uuid.type) << ", uuid: " << asText(uuid.uuid) << "]";
     return retval.str();
 }
 
-static std::string asText(const ble_gattc_char_t &gattc_char) {
+static std::string asText(const ble_gattc_char_t &gattc_char)
+{
     std::stringstream retval;
     retval << "characteristic:["
            << "handle_decl: " << asText(gattc_char.handle_decl)
@@ -662,7 +834,8 @@ static std::string asText(const ble_gattc_char_t &gattc_char) {
     return retval.str();
 }
 
-static std::string asText(const ble_gattc_handle_range_t &gattc_handle_range) {
+static std::string asText(const ble_gattc_handle_range_t &gattc_handle_range)
+{
     std::stringstream retval;
     retval << "handle range:["
            << "start: " << asText(gattc_handle_range.start_handle)
@@ -670,14 +843,16 @@ static std::string asText(const ble_gattc_handle_range_t &gattc_handle_range) {
     return retval.str();
 }
 
-static std::string asText(const ble_gattc_desc_t &gattc_desc) {
+static std::string asText(const ble_gattc_desc_t &gattc_desc)
+{
     std::stringstream retval;
     retval << "descriptor:["
            << "handle: " << asText(gattc_desc.handle) << " " << asText(gattc_desc.uuid) << "]";
     return retval.str();
 }
 
-static std::string asText(const sd_rpc_log_severity_t &severity) {
+static std::string asText(const sd_rpc_log_severity_t &severity)
+{
     switch (severity)
     {
         case SD_RPC_LOG_TRACE:
