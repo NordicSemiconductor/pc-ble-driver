@@ -155,6 +155,16 @@ uint32_t ble_event_dec(uint8_t const * const p_buf,
             fp_event_decoder = ble_gap_evt_phy_update_request_dec;
             break;
 #endif
+#if NRF_SD_BLE_API_VERSION >= 6
+#ifndef S112
+        case BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT:
+            fp_event_decoder = ble_gap_evt_qos_channel_survey_report_dec;
+            break;
+#endif
+        case BLE_GAP_EVT_ADV_SET_TERMINATED:
+            fp_event_decoder = ble_gap_evt_adv_set_terminated_dec;
+            break;
+#endif
 #if NRF_SD_BLE_API_VERSION >= 4  && !defined(S112)
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
             fp_event_decoder = ble_gap_evt_data_length_update_request_dec;
