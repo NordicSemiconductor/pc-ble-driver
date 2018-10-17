@@ -536,6 +536,57 @@ uint32_t ble_gap_evt_data_length_update_dec(uint8_t const * const p_buf,
                                  uint32_t              packet_len,
                                  ble_evt_t * const     p_event,
                                  uint32_t * const      p_event_len);
+
+#endif //NRF_SD_BLE_API_VERSION >= 4
+
+#if NRF_SD_BLE_API_VERSION >= 6
+#ifndef S112
+/**
+ * @brief Decodes ble_gap_evt_qos_channel_survey_report event.
+ *
+ * If \p p_event is null, the required length of \p p_event is returned in \p p_event_len.
+ *
+ * @param[in] p_buf            Pointer to the beginning of an event packet.
+ * @param[in] packet_len       Length (in bytes) of the event packet.
+ * @param[in,out] p_event      Pointer to a \ref ble_evt_t buffer where the decoded event will be
+ *                             stored. If NULL, required length will be returned in \p p_event_len.
+ * @param[in,out] p_event_len  \c in: Size (in bytes) of \p p_event buffer.
+ *                             \c out: Length of decoded contents of \p p_event.
+ *
+ * @retval NRF_SUCCESS               Decoding success.
+ * @retval NRF_ERROR_NULL            Decoding failure. NULL pointer supplied.
+ * @retval NRF_ERROR_INVALID_LENGTH  Decoding failure. Incorrect buffer length.
+ * @retval NRF_ERROR_DATA_SIZE       Decoding failure. Length of \p p_event is too small to
+ *                                   hold decoded event.
+ */
+uint32_t ble_gap_evt_qos_channel_survey_report_dec(uint8_t const * const p_buf,
+        uint32_t              packet_len,
+        ble_evt_t * const     p_event,
+        uint32_t * const      p_event_len);
+#endif
+
+/**
+ * @brief Decodes ble_gap_evt_adv_set_terminated event.
+ *
+ * If \p p_event is null, the required length of \p p_event is returned in \p p_event_len.
+ *
+ * @param[in] p_buf            Pointer to the beginning of an event packet.
+ * @param[in] packet_len       Length (in bytes) of the event packet.
+ * @param[in,out] p_event      Pointer to a \ref ble_evt_t buffer where the decoded event will be
+ *                             stored. If NULL, required length will be returned in \p p_event_len.
+ * @param[in,out] p_event_len  \c in: Size (in bytes) of \p p_event buffer.
+ *                             \c out: Length of decoded contents of \p p_event.
+ *
+ * @retval NRF_SUCCESS               Decoding success.
+ * @retval NRF_ERROR_NULL            Decoding failure. NULL pointer supplied.
+ * @retval NRF_ERROR_INVALID_LENGTH  Decoding failure. Incorrect buffer length.
+ * @retval NRF_ERROR_DATA_SIZE       Decoding failure. Length of \p p_event is too small to
+ *                                   hold decoded event.
+ */
+uint32_t ble_gap_evt_adv_set_terminated_dec(uint8_t const * const p_buf,
+                                 uint32_t              packet_len,
+                                 ble_evt_t * const     p_event,
+                                 uint32_t * const      p_event_len);
 #endif
 /** @} */
 

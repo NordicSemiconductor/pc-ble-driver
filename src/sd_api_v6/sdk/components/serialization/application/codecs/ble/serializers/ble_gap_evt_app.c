@@ -394,6 +394,21 @@ uint32_t ble_gap_evt_data_length_update_dec(uint8_t const * const p_buf,
 }
 #endif //NRF_SD_BLE_API_VERSION >= 4 @@ !defined(S112)
 #if NRF_SD_BLE_API_VERSION > 5
+#ifndef S112
+uint32_t ble_gap_evt_qos_channel_survey_report_dec(uint8_t const * const p_buf,
+        uint32_t              packet_len,
+        ble_evt_t * const     p_event,
+        uint32_t * const      p_event_len)
+{
+    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT, gap, qos_channel_survey_report);
+
+    SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
+    SER_PULL_uint8array((uint8_t *)p_event->evt.gap_evt.params.qos_channel_survey_report.channel_energy, BLE_GAP_CHANNEL_COUNT);
+
+    SER_EVT_DEC_END;
+}
+#endif //S112
+
 uint32_t ble_gap_evt_adv_set_terminated_dec(uint8_t const * const p_buf,
                                  uint32_t              packet_len,
                                  ble_evt_t * const     p_event,
