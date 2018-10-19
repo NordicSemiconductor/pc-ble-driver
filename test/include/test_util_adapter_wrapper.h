@@ -104,6 +104,23 @@ class AdapterWrapper
         }
 #endif
 
+// Store the local address
+#if NRF_SD_BLE_API >= 3
+        error_code = sd_ble_gap_addr_get(m_adapter, &address);
+#else
+        error_code = sd_ble_gap_address_get(m_adapter, &address);
+#endif
+
+        if (error_code != NRF_SUCCESS)
+        {
+            NRF_LOG(role() << " sd_ble_gap_addr_get failed.");
+            return error_code;
+        }
+        else
+        {
+            NRF_LOG(role() << " GAP address is: " << testutil::asText(address));
+        }
+
         return error_code;
     }
 
@@ -839,6 +856,9 @@ class AdapterWrapper
     // There is no encapsulation of the values in the scratchpad and the scratchpad is not
     // thread safe.
     AdapterWrapperScratchpad scratchpad;
+
+    // My address
+    ble_gap_addr_t address;
 
   private:
     // Adapter from pc-ble-driver
