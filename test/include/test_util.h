@@ -126,6 +126,35 @@ static void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const s
     std::copy(name.begin(), name.end(), std::back_inserter(advertisingData));
 }
 
+/**
+ * @brief Function that append flags to advertisement type
+ *
+ * @param[in,out] advertisingData std::vector to append advertisement flags to
+ * @param[in] flags Flags to append to advertisingData
+ */
+static void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags)
+{
+    advertisingData.push_back(2); // Flags field size + flags data size
+    advertisingData.push_back(BLE_GAP_AD_TYPE_FLAGS);
+    advertisingData.push_back(flags);
+}
+
+/**
+ * @brief Function that append manufacturer specifid data to advertisement
+ *
+ * @param[in,out] advertisingData std::vector to append manufacturer specific data to
+ * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData
+ */
+static void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
+                                           const std::vector<uint8_t> manufacturerSpecificData)
+{
+    advertisingData.push_back(1 +
+                              manufacturerSpecificData.size()); // data_size + AD_TYPE_FIELD_SIZE
+    advertisingData.push_back(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA);
+    std::copy(manufacturerSpecificData.begin(), manufacturerSpecificData.end(),
+              std::back_inserter(advertisingData));
+}
+
 /*
  * @brief Function that fills a std::vector<uint8_t> with random values
  *

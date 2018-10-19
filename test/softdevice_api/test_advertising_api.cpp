@@ -85,9 +85,11 @@ TEST_CASE("test_advertising_api")
         INFO("Peripheral serial port used: " << peripheral.port);
         INFO("Baud rate used: " << baudRate);
 
+        const auto maxLengthOfAdvData = testutil::ADV_DATA_BUFFER_SIZE;
+
         std::vector<uint8_t> peripheralAdvNameBase;
-        testutil::appendRandomAlphaNumeric(peripheralAdvNameBase, testutil::ADV_DATA_BUFFER_SIZE -
-                                                                      2 /* length and AD type */);
+        testutil::appendRandomAlphaNumeric(peripheralAdvNameBase,
+                                           maxLengthOfAdvData - 2 /* length and AD type */);
 
         const std::string peripheralAdvName(peripheralAdvNameBase.begin(),
                                             peripheralAdvNameBase.end());
@@ -173,13 +175,15 @@ TEST_CASE("test_advertising_api")
 
         // Create advertising data and scan response data
         std::vector<uint8_t> advertising;
+
 #if 1
+        testutil::appendAdvertisementFlags(advertising, BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
         testutil::appendAdvertisingName(advertising, peripheralAdvName);
 
         std::vector<uint8_t> scanResponse;
         std::vector<uint8_t> scanResponseData;
         testutil::appendRandomData(scanResponseData,
-                                   testutil::ADV_DATA_BUFFER_SIZE - 2 /* length and AD type */);
+                                   maxLengthOfAdvData - 2 /* length and AD type */);
 
         scanResponse.reserve(scanResponseData.size() + 2);
         scanResponse.push_back(
@@ -188,18 +192,20 @@ TEST_CASE("test_advertising_api")
         std::copy(scanResponseData.begin(), scanResponseData.end(),
                   std::back_inserter(scanResponse));
 #else
+        testutil::appendAdvertisementFlags(advertising, BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
         testutil::appendAdvertisingName(advertising, "12345");
-        const std::vector<uint8_t> scanResponse = {};
+        std::vector<uint8_t> scanResponse;
+        testutil::appendManufacturerSpecificData(scanResponse, {1,2,3,4});
 #endif
 
-        REQUIRE(p->setupAdvertising(advertising,              // advertising data
-                                    scanResponse,             // scan response data
-                                    40, //BLE_GAP_ADV_INTERVAL_MIN, // interval
-                                    0,                        // duration
-                                    false,                    // connectable
-                                    true,                     // extended
-                                    false, // true,                     // scan_req_notification
-                                    0,     // set_id
+        REQUIRE(p->setupAdvertising({},    // advertising data
+                                    scanResponse,      // scan response data
+                                    40,                // interval
+                                    0,                 // duration
+                                    false,             // connectable
+                                    true,              // extended
+                                    true,             // scan_req_notification
+                                    0,                 // set_id
                                     BLE_GAP_PHY_1MBPS, // primary phy
                                     BLE_GAP_PHY_2MBPS, // secondary phy
                                     0,                 // filter policy
