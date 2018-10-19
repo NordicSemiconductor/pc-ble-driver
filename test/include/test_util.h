@@ -112,6 +112,43 @@ static bool findAdvName(const ble_gap_evt_adv_report_t *p_adv_report,
     return found(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME) || found(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME);
 }
 
+static void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
+                                                 const size_t additionalBytes,
+                                                 const bool extended    = false,
+                                                 const bool connectable = false)
+{
+    auto valid            = true;
+    const auto packetSize = existingPacket.size() + additionalBytes;
+
+    if (packetSize > testutil::ADV_DATA_BUFFER_SIZE)
+    {
+        if (extended)
+        {
+#if NRF_SD_BLE_API == 6
+            valid = packetSize > (connectable
+                                      ? BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_CONNECTABLE_MAX_SUPPORTED
+                                      : BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED);
+#else
+            throw std::invalid_argument(
+                "Only SoftDevice API version 6 or newer support extended advertising.");
+#endif
+        }
+        else
+        {
+#if NRF_SD_BLE_API == 6
+            valid = packetSize > BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+#else
+            valid = packetSize > BLE_GAP_ADV_MAX_SIZE;
+#endif
+        }
+    }
+
+    if (!valid)
+    {
+        throw std::range_error("Packet size is larger than allowed for this type of advertising.");
+    }
+}
+
 /**
  * @brief Function that append name to advertise to advertisement type
  * BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME
@@ -119,9 +156,13 @@ static bool findAdvName(const ble_gap_evt_adv_report_t *p_adv_report,
  * @param[in,out] advertisingData std::vector to append advertisement data to
  * @param[in] name Name to append to advertisingData
  */
-static void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name)
+static void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name,
+                                  const bool extended = false)
 {
-    advertisingData.push_back((uint8_t)(name.length() + 1)); // Device name + advertisement type
+    assertAdvertisementPacketSizeIsValid(advertisingData, 2 /* size + type */ + name.length(),
+                                         extended);
+
+    advertisingData.push_back(1 /* type */ + static_cast<uint8_t>(name.length()));
     advertisingData.push_back(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME);
     std::copy(name.begin(), name.end(), std::back_inserter(advertisingData));
 }
@@ -132,8 +173,11 @@ static void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const s
  * @param[in,out] advertisingData std::vector to append advertisement flags to
  * @param[in] flags Flags to append to advertisingData
  */
-static void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags)
+static void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
+                                     const bool extended = false)
 {
+    assertAdvertisementPacketSizeIsValid(advertisingData, 3 /* size + type + flags */, extended);
+
     advertisingData.push_back(2); // Flags field size + flags data size
     advertisingData.push_back(BLE_GAP_AD_TYPE_FLAGS);
     advertisingData.push_back(flags);
@@ -146,10 +190,13 @@ static void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, cons
  * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData
  */
 static void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
-                                           const std::vector<uint8_t> manufacturerSpecificData)
+                                           const std::vector<uint8_t> manufacturerSpecificData,
+                                           const bool extended = false)
 {
-    advertisingData.push_back(1 +
-                              manufacturerSpecificData.size()); // data_size + AD_TYPE_FIELD_SIZE
+    assertAdvertisementPacketSizeIsValid(
+        advertisingData, 2 /* size + type */ + manufacturerSpecificData.size(), extended);
+
+    advertisingData.push_back(1 /* type */ + static_cast<uint8_t>(manufacturerSpecificData.size()));
     advertisingData.push_back(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA);
     std::copy(manufacturerSpecificData.begin(), manufacturerSpecificData.end(),
               std::back_inserter(advertisingData));

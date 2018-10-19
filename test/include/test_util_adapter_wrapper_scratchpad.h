@@ -24,7 +24,7 @@ namespace testutil {
 constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_MAX_SIZE;
 #else
 constexpr size_t ADV_DATA_BUFFER_SIZE =
-    BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_CONNECTABLE_MAX_SUPPORTED;
+    BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED;
 #endif
 
 struct AdapterWrapperScratchpad

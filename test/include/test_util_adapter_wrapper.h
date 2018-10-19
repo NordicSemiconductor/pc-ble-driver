@@ -189,7 +189,14 @@ class AdapterWrapper
         }
         else
         {
-            NRF_LOG(role() << " Scan started");
+            if (!resume)
+            {
+                NRF_LOG(role() << " Scan resume failed");
+            }
+            else
+            {
+                NRF_LOG(role() << " Scan resumed");
+            }
         }
 
         return error_code;

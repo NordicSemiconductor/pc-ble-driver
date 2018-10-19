@@ -641,13 +641,14 @@ static std::string asText(const ble_gap_aux_pointer_t &auxPointer)
 static std::string asText(const ble_gap_evt_adv_report_t &advReport)
 {
     std::stringstream retval;
+
+    retval << "peer_addr:[" << asText(advReport.peer_addr) << "]";
 #if NRF_SD_BLE_API == 6
     std::vector<uint8_t> data(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
-    retval << "type:" << asText(advReport.type);
-
+    retval << " type:[" << asText(advReport.type) << "]";
 #else
     std::vector<uint8_t> data(advReport.data, advReport.data + advReport.dlen);
-    retval << "type:" << asHex(advReport.type);
+    retval << " type:" << asHex(advReport.type);
 #endif
 
 #if NRF_SD_BLE_API == 6

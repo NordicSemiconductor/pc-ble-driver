@@ -176,27 +176,13 @@ TEST_CASE("test_advertising_api")
         // Create advertising data and scan response data
         std::vector<uint8_t> advertising;
 
-#if 1
-        testutil::appendAdvertisementFlags(advertising, BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
-        testutil::appendAdvertisingName(advertising, peripheralAdvName);
-
         std::vector<uint8_t> scanResponse;
-        std::vector<uint8_t> scanResponseData;
-        testutil::appendRandomData(scanResponseData,
+        std::vector<uint8_t> randomData;
+        testutil::appendRandomData(randomData,
                                    maxLengthOfAdvData - 2 /* length and AD type */);
 
-        scanResponse.reserve(scanResponseData.size() + 2);
-        scanResponse.push_back(
-            static_cast<uint8_t>(scanResponseData.size() + 1)); // Data + advertisement type
-        scanResponse.push_back(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA);
-        std::copy(scanResponseData.begin(), scanResponseData.end(),
-                  std::back_inserter(scanResponse));
-#else
-        testutil::appendAdvertisementFlags(advertising, BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
-        testutil::appendAdvertisingName(advertising, "12345");
-        std::vector<uint8_t> scanResponse;
-        testutil::appendManufacturerSpecificData(scanResponse, {1,2,3,4});
-#endif
+        scanResponse.reserve(maxLengthOfAdvData);
+        testutil::appendManufacturerSpecificData(scanResponse, randomData, true);
 
         REQUIRE(p->setupAdvertising({},    // advertising data
                                     scanResponse,      // scan response data
@@ -213,7 +199,7 @@ TEST_CASE("test_advertising_api")
                                     ) == NRF_SUCCESS);
         REQUIRE(p->startAdvertising() == NRF_SUCCESS);
 
-        REQUIRE(c->startScan() == NRF_SUCCESS);
+        REQUIRE(c->startScan(false, true, false) == NRF_SUCCESS);
 
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(5));
