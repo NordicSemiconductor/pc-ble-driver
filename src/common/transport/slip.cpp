@@ -38,6 +38,7 @@
 #include "slip.h"
 #include "nrf_error.h"
 #include "sd_rpc_types.h"
+#include <cstddef>
 #include <vector>
 
 constexpr uint8_t SLIP_END     = 0xC0;
@@ -72,7 +73,7 @@ void slip_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &ou
 
 uint32_t slip_decode(const std::vector<uint8_t> &packet, std::vector<uint8_t> &out_packet)
 {
-    for (size_t i = 0; i < packet.size(); i++)
+    for (std::size_t i = 0; i < packet.size(); i++)
     {
         if (packet[i] == SLIP_END)
         {
