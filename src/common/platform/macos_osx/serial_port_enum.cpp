@@ -111,7 +111,6 @@ const char* SEGGER_VENDOR_ID = "1366";
 typedef vector<serial_device_t*> adapter_list_t;
 
 static mach_port_t masterPort;
-static io_registry_entry_t root;
 
 // Function prototypes
 static void FindModems(io_iterator_t *matchingServices);
@@ -120,7 +119,6 @@ static adapter_list_t* GetAdapters();
 
 static void FindModems(io_iterator_t *matchingServices)
 {
-    kern_return_t     kernResult;
     CFMutableDictionaryRef  classesToMatch;
 
     classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue);
@@ -244,8 +242,6 @@ static adapter_list_t* GetAdapters()
 
     // Initialize the returned path
     *bsdPath = '\0';
-
-    int length = 0;
 
     while ((modemService = IOIteratorNext(serialPortIterator)))
     {
