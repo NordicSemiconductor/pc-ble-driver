@@ -289,40 +289,6 @@ class AdapterWrapper
         scratchpad.adv_params.secondary_phy         = secondary_phy;
         scratchpad.adv_params.max_adv_evts          = max_adv_events;
 
-#if 0
-        // From nRF5_SDK_15.2.0_9412b96\components\ble\ble_advertising\ble_advertising.c:
-        //
-        // 'Configure a initial advertising configuration. The advertising data and and advertising
-        // parameters will be changed later when we call @ref ble_advertising_start, but must be set
-        // to legal values here to define an advertising handle.'
-        //
-        // TODO: clarify if they are illegal when setting up extended advertising...
-        ble_gap_adv_params_t initialAdvertisementParams {};
-        initialAdvertisementParams.primary_phy = BLE_GAP_PHY_1MBPS;
-
-        // From nRF5_SDK_15.2.0_9412b96\examples\ble_peripheral\ble_app_rscs\main.c:
-        // APP_ADV_DURATION  18000
-        initialAdvertisementParams.duration = 18000;
-        initialAdvertisementParams.properties.type =
-            BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-        initialAdvertisementParams.p_peer_addr   = nullptr;
-        initialAdvertisementParams.filter_policy = BLE_GAP_ADV_FP_ANY;
-
-        // From nRF5_SDK_15.2.0_9412b96\examples\ble_peripheral\ble_app_rscs\main.c:
-        // APP_ADV_INTERVAL  40
-        initialAdvertisementParams.interval = 40;
-        uint8_t initialAdvertisementHandle  = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
-
-        auto err_code = sd_ble_gap_adv_set_configure(m_adapter, &initialAdvertisementHandle,
-                                                     nullptr, &initialAdvertisementParams);
-
-        if (err_code != NRF_SUCCESS)
-        {
-            NRF_LOG(role() << " Setup of initial advertisement params failed.");
-            return err_code;
-        }
-#endif
-
         // Support only undirected advertisement for now
         if (extended)
         {
@@ -354,10 +320,6 @@ class AdapterWrapper
         auto err_code =
             sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
                                          &(scratchpad.adv_report_data), &(scratchpad.adv_params));
-
-/*        err_code =
-            sd_ble_gap_adv_set_configure(m_adapter, &(initialAdvertisementHandle),
-                                         &(scratchpad.adv_report_data), &(scratchpad.adv_params));*/
 #endif
 
         if (err_code != NRF_SUCCESS)

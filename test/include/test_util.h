@@ -11,6 +11,7 @@
 #include <iterator>
 #include <random>
 #include <vector>
+#include <cstring>
 
 namespace testutil {
 
@@ -62,6 +63,28 @@ static bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &ad
     return false;
 }
 
+static bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
+                                         std::vector<uint8_t> &manufacturer_specific_data)
+{
+    std::vector<uint8_t> advData;
+
+    uint8_t *data;
+    uint16_t data_len;
+
+#if NRF_SD_BLE_API >= 6
+    data     = (uint8_t *)p_adv_report.data.p_data;
+    data_len = p_adv_report.data.len;
+#else
+    data     = (uint8_t *)p_adv_report.data;
+    data_len = p_adv_report.dlen;
+#endif
+    advData.assign(data, data + data_len);
+
+    std::vector<uint8_t> manufacturerSpecific;
+    return advReportParse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, advData,
+                          manufacturer_specific_data);
+}
+
 /**
  * @brief Function that search for advertisement name in BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME or
  * BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME
@@ -71,7 +94,7 @@ static bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &ad
  *
  * @return true if name is found, false if not
  */
-static bool findAdvName(const ble_gap_evt_adv_report_t *p_adv_report,
+static bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report,
                         const std::string &name_to_find)
 {
     std::vector<uint8_t> advData;
@@ -80,11 +103,11 @@ static bool findAdvName(const ble_gap_evt_adv_report_t *p_adv_report,
     uint16_t data_len;
 
 #if NRF_SD_BLE_API >= 6
-    data     = (uint8_t *)p_adv_report->data.p_data;
-    data_len = p_adv_report->data.len;
+    data     = (uint8_t *)p_adv_report.data.p_data;
+    data_len = p_adv_report.data.len;
 #else
-    data     = (uint8_t *)p_adv_report->data;
-    data_len = p_adv_report->dlen;
+    data     = (uint8_t *)p_adv_report.data;
+    data_len = p_adv_report.dlen;
 #endif
     advData.assign(data, data + data_len);
 
@@ -230,6 +253,32 @@ static void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t si
             ;
         return c;
     });
+}
+
+bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs)
+{
+    const auto addressIsSame = std::memcmp(lhs.addr, rhs.addr, BLE_GAP_ADDR_LEN) == 0;
+
+    if (addressIsSame && (lhs.addr_type == rhs.addr_type))
+    {
+#if NRF_SD_BLE_API == 6
+        if (lhs.addr_id_peer != rhs.addr_id_peer)
+        {
+            return false;
+        }
+#endif // NRF_SD_BLE_API 
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool operator!=(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs)
+{
+    return !(lhs == rhs);
 }
 
 } // namespace testutil
