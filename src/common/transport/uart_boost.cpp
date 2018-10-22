@@ -45,6 +45,11 @@
 #include <sstream>
 #include <system_error>
 
+#if defined(__APPLE__)
+#include <cerrno>
+#include <system_error>
+#endif
+
 #include <asio.hpp>
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
@@ -151,7 +156,8 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
 
         if (ioctl(serialPort->native_handle(), _IOW('T', 2, speed_t), &speed) == -1)
         {
-            throw std::system_error(errno, "Failed to set baud rate to " + std::to_string(speed));
+            const auto error = std::error_code(errno, std::system_category());
+            throw std::system_error(error, "Failed to set baud rate to " + std::to_string(speed));
         }
 #endif
     }
