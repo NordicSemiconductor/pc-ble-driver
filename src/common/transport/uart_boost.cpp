@@ -45,6 +45,12 @@
 #include <sstream>
 #include <system_error>
 
+#if defined(__APPLE__)
+#include <cerrno>
+#include <system_error>
+#include <IOKit/serial/ioss.h>
+#endif
+
 #include <asio.hpp>
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
@@ -131,17 +137,30 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
         // std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-        const auto baudRate      = uartSettingsBoost.getBoostBaudRate();
         const auto flowControl   = uartSettingsBoost.getBoostFlowControl();
         const auto stopBits      = uartSettingsBoost.getBoostStopBits();
         const auto parity        = uartSettingsBoost.getBoostParity();
         const auto characterSize = uartSettingsBoost.getBoostCharacterSize();
 
-        serialPort->set_option(baudRate);
         serialPort->set_option(flowControl);
         serialPort->set_option(stopBits);
         serialPort->set_option(parity);
         serialPort->set_option(characterSize);
+
+#if !defined(__APPLE__)
+        const auto baudRate = uartSettingsBoost.getBoostBaudRate();
+        serialPort->set_option(baudRate);
+#else
+        // Workaround for setting non-standard baudrate on macOS
+        // get underlying boost serial port handle and apply baud rate directly
+        auto speed = (speed_t)uartSettingsBoost.getBaudRate();
+
+        if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
+        {
+            const auto error = std::error_code(errno, std::system_category());
+            throw std::system_error(error, "Failed to set baud rate to " + std::to_string(speed));
+        }
+#endif
     }
     catch (std::exception &ex)
     {
@@ -322,7 +341,8 @@ void UartBoost::readHandler(const asio::error_code &errorCode, const size_t byte
     if (!isOpen && !errorCode)
     {
         std::stringstream message;
-        message << "serial port closed, but " << bytesTransferred << " bytes received. Data will not be sent to transport layer above.";
+        message << "serial port closed, but " << bytesTransferred
+                << " bytes received. Data will not be sent to transport layer above.";
         log(SD_RPC_LOG_DEBUG, message.str());
     }
 
