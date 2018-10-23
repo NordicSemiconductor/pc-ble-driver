@@ -229,7 +229,7 @@ TEST_CASE("test_security")
                 case BLE_GAP_EVT_DISCONNECTED:
                     return true;
                 case BLE_GAP_EVT_ADV_REPORT:
-                    if (testutil::findAdvName(&(gapEvent->params.adv_report), peripheralAdvName))
+                    if (testutil::findAdvName(gapEvent->params.adv_report, peripheralAdvName))
                     {
                         if (!c->scratchpad.connection_in_progress)
                         {

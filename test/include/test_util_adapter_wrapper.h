@@ -104,6 +104,23 @@ class AdapterWrapper
         }
 #endif
 
+// Store the local address
+#if NRF_SD_BLE_API >= 3
+        error_code = sd_ble_gap_addr_get(m_adapter, &address);
+#else
+        error_code = sd_ble_gap_address_get(m_adapter, &address);
+#endif
+
+        if (error_code != NRF_SUCCESS)
+        {
+            NRF_LOG(role() << " sd_ble_gap_addr_get failed.");
+            return error_code;
+        }
+        else
+        {
+            NRF_LOG(role() << " GAP address is: " << testutil::asText(address));
+        }
+
         return error_code;
     }
 
@@ -140,11 +157,14 @@ class AdapterWrapper
         return sd_rpc_close(m_adapter);
     }
 
-    uint32_t startScan(const bool resume = false)
+    uint32_t startScan(const bool resume = false, const bool extended = false,
+                       const bool incomplete = false)
     {
 #if NRF_SD_BLE_API == 6
-        scratchpad.adv_report_receive_buffer.p_data = scratchpad.adv_report_data_received;
-        scratchpad.adv_report_receive_buffer.len    = sizeof(scratchpad.adv_report_data_received);
+        scratchpad.adv_report_receive_buffer.p_data  = scratchpad.adv_report_data_received;
+        scratchpad.adv_report_receive_buffer.len     = sizeof(scratchpad.adv_report_data_received);
+        scratchpad.scan_param.extended               = extended ? 1 : 0;
+        scratchpad.scan_param.report_incomplete_evts = incomplete ? 1 : 0;
 #endif
 
 #if NRF_SD_BLE_API < 6
@@ -186,7 +206,14 @@ class AdapterWrapper
         }
         else
         {
-            NRF_LOG(role() << " Scan started");
+            if (!resume)
+            {
+                NRF_LOG(role() << " Scan resume failed");
+            }
+            else
+            {
+                NRF_LOG(role() << " Scan resumed");
+            }
         }
 
         return error_code;
@@ -194,7 +221,12 @@ class AdapterWrapper
 
     uint32_t setupAdvertising(const std::vector<uint8_t> &advertisingData  = std::vector<uint8_t>{},
                               const std::vector<uint8_t> &scanResponseData = std::vector<uint8_t>{},
-                              const bool connectable = true, const bool extended = false)
+                              const uint32_t interval = BLE_GAP_ADV_INTERVAL_MIN,
+                              const uint32_t duration = 0, const bool connectable = true,
+                              const bool extended = false, const bool scan_req_notification = false,
+                              const uint8_t set_id = 0, const uint8_t primary_phy = 0,
+                              const uint8_t secondary_phy = 0, const uint8_t filter_policy = 0,
+                              const uint32_t max_adv_events = 0)
     {
 #if NRF_SD_BLE_API <= 5
         const uint8_t *sr_data       = nullptr;
@@ -210,7 +242,7 @@ class AdapterWrapper
 
         if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
         {
-            NRF_LOG(role() << " Advertisement data is larger then the buffer set asize.");
+            NRF_LOG(role() << " Advertising data is larger then the buffer set asize.");
             return NRF_ERROR_INVALID_PARAM;
         }
 
@@ -228,11 +260,6 @@ class AdapterWrapper
         }
 
         const auto scanResponseDataSize = scanResponseData.size();
-        if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
-        {
-            NRF_LOG(role() << " Scan response data is larger then the buffer set asize.");
-            return NRF_ERROR_INVALID_PARAM;
-        }
 
         if (scanResponseDataSize == 0)
         {
@@ -252,6 +279,15 @@ class AdapterWrapper
         scratchpad.adv_report_data.scan_rsp_data          = scratchpad.adv_report_scan_rsp_data;
         scratchpad.adv_params.properties.anonymous        = 0;
         scratchpad.adv_params.properties.include_tx_power = 0;
+
+        scratchpad.adv_params.set_id                = set_id;
+        scratchpad.adv_params.interval              = interval;
+        scratchpad.adv_params.duration              = duration;
+        scratchpad.adv_params.filter_policy         = filter_policy;
+        scratchpad.adv_params.scan_req_notification = (scan_req_notification ? 1 : 0);
+        scratchpad.adv_params.primary_phy           = primary_phy;
+        scratchpad.adv_params.secondary_phy         = secondary_phy;
+        scratchpad.adv_params.max_adv_evts          = max_adv_events;
 
         // Support only undirected advertisement for now
         if (extended)
@@ -782,6 +818,9 @@ class AdapterWrapper
     // There is no encapsulation of the values in the scratchpad and the scratchpad is not
     // thread safe.
     AdapterWrapperScratchpad scratchpad;
+
+    // My address
+    ble_gap_addr_t address;
 
   private:
     // Adapter from pc-ble-driver

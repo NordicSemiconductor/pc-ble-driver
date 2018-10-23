@@ -219,7 +219,8 @@ void SerializationTransport::eventHandlingRunner()
                 std::stringstream logMessage;
                 logMessage << "Failed to decode event, error code is " << errCode << "."
                            << std::endl;
-                logCallback(SD_RPC_LOG_ERROR, logMessage.str().c_str());
+                logCallback(SD_RPC_LOG_ERROR, logMessage.str());
+                statusCallback(PKT_DECODE_ERROR, logMessage.str());
             }
 
             eventLock.lock();
