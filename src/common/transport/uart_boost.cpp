@@ -48,6 +48,7 @@
 #if defined(__APPLE__)
 #include <cerrno>
 #include <system_error>
+#include <IOKit/serial/ioss.h>
 #endif
 
 #include <asio.hpp>
@@ -154,7 +155,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // get underlying boost serial port handle and apply baud rate directly
         auto speed = (speed_t)uartSettingsBoost.getBaudRate();
 
-        if (ioctl(serialPort->native_handle(), _IOW('T', 2, speed_t), &speed) == -1)
+        if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
         {
             const auto error = std::error_code(errno, std::system_category());
             throw std::system_error(error, "Failed to set baud rate to " + std::to_string(speed));
