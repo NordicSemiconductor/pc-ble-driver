@@ -656,6 +656,52 @@ class AdapterWrapper
                                << " scan_req_report:["
                                << testutil::asText(gapEvent.params.scan_req_report) << "]]");
                 break;
+#if NRF_SD_BLE_API == 6
+            case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
+                NRF_LOG(role() << " BLE_GAP_EVT_PHY_UPDATE_REQUEST ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.phy_update_request) << "]]");
+                break;
+
+            case BLE_GAP_EVT_PHY_UPDATE:
+                NRF_LOG(role() << " BLE_GAP_EVT_PHY_UPDATE ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.phy_update) << "]]");
+                break;
+
+            case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
+                NRF_LOG(role() << " BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.data_length_update_request)
+                               << "]]");
+                break;
+
+            case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
+                NRF_LOG(role() << " BLE_GAP_EVT_DATA_LENGTH_UPDATE ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.data_length_update) << "]]");
+                break;
+
+            case BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT:
+                NRF_LOG(role() << " BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.qos_channel_survey_report)
+                               << "]]");
+                break;
+
+            case BLE_GAP_EVT_ADV_SET_TERMINATED:
+                NRF_LOG(role() << " BLE_GAP_EVT_ADV_SET_TERMINATED ["
+                               << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
+                               << " scan_req_report:["
+                               << testutil::asText(gapEvent.params.adv_set_terminated) << "]]");
+                break;
+
+#endif // NRF_SD_BLE_API == 6
             default:
                 NRF_LOG(role() << " UNKNOWN EVENT WITH ID [0x" << std::hex << eventId << "]");
                 break;

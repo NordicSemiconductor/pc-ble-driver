@@ -626,9 +626,7 @@ static std::string asText(const ble_gap_adv_report_type_t &reportType)
 
     return retval.str();
 }
-#endif
 
-#if NRF_SD_BLE_API == 6
 static std::string asText(const ble_gap_aux_pointer_t &auxPointer)
 {
     std::stringstream retval;
@@ -636,7 +634,106 @@ static std::string asText(const ble_gap_aux_pointer_t &auxPointer)
     retval << " aux_phy:" << static_cast<uint32_t>(auxPointer.aux_phy);
     return retval.str();
 }
-#endif
+
+static std::string asText(const ble_gap_phys_t &phys)
+{
+    std::stringstream retval;
+    retval << "tx_phys:" << static_cast<uint32_t>(phys.tx_phys);
+    retval << " rx_phys:" << static_cast<uint32_t>(phys.rx_phys);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_phy_update_request_t &phyUpdateRequest)
+{
+    std::stringstream retval;
+    retval << "peer_preferred_phys:[" << asText(phyUpdateRequest.peer_preferred_phys) << "]";
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_phy_update_t &phyUpdate)
+{
+    std::stringstream retval;
+    retval << "status: " << static_cast<uint32_t>(phyUpdate.status);
+    retval << " tx_phy:" << static_cast<uint32_t>(phyUpdate.tx_phy);
+    retval << " rx_phy:" << static_cast<uint32_t>(phyUpdate.rx_phy);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_data_length_params_t &dataLengthParams)
+{
+    std::stringstream retval;
+    retval << "max_tx_octets: " << static_cast<uint32_t>(dataLengthParams.max_tx_octets);
+    retval << "max_rx_octets: " << static_cast<uint32_t>(dataLengthParams.max_rx_octets);
+    retval << "max_tx_time_us: " << static_cast<uint32_t>(dataLengthParams.max_tx_time_us);
+    retval << "max_rx_time_us: " << static_cast<uint32_t>(dataLengthParams.max_rx_time_us);
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_data_length_update_request_t &dataLengthUpdateRequest)
+{
+    std::stringstream retval;
+    retval << "peer_params:[" << asText(dataLengthUpdateRequest.peer_params) << "]";
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_data_length_update_t &dataLengthUpdate)
+{
+    std::stringstream retval;
+    retval << "effective_params:[" << asText(dataLengthUpdate.effective_params) << "]";
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_qos_channel_survey_report_t &qosChannelSurveyReport)
+{
+    std::stringstream retval;
+    std::vector<uint8_t> channels;
+    channels.assign(qosChannelSurveyReport.channel_energy,
+                    qosChannelSurveyReport.channel_energy + BLE_GAP_CHANNEL_COUNT);
+
+    retval << "channel_energy:";
+    for (auto channel : channels)
+    {
+        retval << " " << static_cast<uint32_t>(channel);
+    }
+
+    return retval.str();
+}
+
+static std::string asText(const ble_data_t &data)
+{
+    std::stringstream retval;
+
+    std::vector<uint8_t> wrappedData;
+    wrappedData.assign(data.p_data, data.p_data + data.len);
+
+    retval << "data:" << asHex(wrappedData);
+    retval << " len:" << static_cast<uint32_t>(data.len);
+
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_adv_data_t &advData)
+{
+    std::stringstream retval;
+
+    retval << "adv_data:[" << asText(advData.adv_data) << "]";
+    retval << " scan_rsp_data:[" << asText(advData.scan_rsp_data) << "]";
+    return retval.str();
+}
+
+static std::string asText(const ble_gap_evt_adv_set_terminated_t &advSetTerminated)
+{
+    std::stringstream retval;
+    retval << "reason:" << static_cast<uint32_t>(advSetTerminated.reason);
+    retval << " adv_handle:" << asHex(advSetTerminated.adv_handle);
+    retval << " num_completed_adv_events:"
+           << static_cast<uint32_t>(advSetTerminated.num_completed_adv_events);
+    retval << " adv_data:[" << asText(advSetTerminated.adv_data) << "]";
+
+    return retval.str();
+}
+
+#endif // NRF_SD_BLE_API == 6
 
 static std::string asText(const ble_gap_evt_adv_report_t &advReport)
 {
