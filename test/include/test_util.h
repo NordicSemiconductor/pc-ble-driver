@@ -8,10 +8,10 @@
 #include "ble.h"
 
 #include <algorithm>
+#include <cstring>
 #include <iterator>
 #include <random>
 #include <vector>
-#include <cstring>
 
 namespace testutil {
 
@@ -266,7 +266,7 @@ bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs)
         {
             return false;
         }
-#endif // NRF_SD_BLE_API 
+#endif // NRF_SD_BLE_API
 
         return true;
     }
@@ -280,6 +280,18 @@ bool operator!=(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs)
 {
     return !(lhs == rhs);
 }
+
+#if NRF_SD_BLE_API == 6
+bool operator==(const ble_gap_phys_t &lhs, const ble_gap_phys_t &rhs)
+{
+    return ((lhs.tx_phys == rhs.tx_phys) && (lhs.rx_phys == rhs.rx_phys));
+}
+
+bool operator!=(const ble_gap_phys_t &lhs, const ble_gap_phys_t &rhs)
+{
+    return !(lhs == rhs);
+}
+#endif // NRF_SD_BLE_API == 6
 
 } // namespace testutil
 
