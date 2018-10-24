@@ -73,7 +73,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
         auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port, baudRate);
 
         REQUIRE(c->open() == NRF_SUCCESS);
-        REQUIRE(c->open() == NRF_SUCCESS);
+        REQUIRE(c->open() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->close() == NRF_SUCCESS);
     }
 
@@ -86,7 +86,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
 
         auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port, baudRate);
 
-        REQUIRE(c->close() == NRF_SUCCESS);
+        REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->close()  == NRF_SUCCESS);
         REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);

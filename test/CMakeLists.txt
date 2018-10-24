@@ -131,6 +131,7 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
 
     message(STATUS "Configuring target to run \"cmake -E env ${define_env}\" before running test.")
 
+    # Link tests together so they are ran in sequence
     foreach(integration_test IN LISTS tests)
         add_custom_command(
             OUTPUT ${COMMAND_NAME}
@@ -215,6 +216,18 @@ function(add_run_test_targets)
                 "${SD_API_V5_S132_HEX}"
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V5}"
+            )
+        endif()
+
+        # SDv6
+        if(6 IN_LIST SD_API_VER_NUMS)
+            add_softdevice_test(
+                run_test_sdv6_s132_pca10040
+                "${BLE_DRIVER_TEST_PCA10040_A}"
+                "${BLE_DRIVER_TEST_PCA10040_B}"
+                "${SD_API_V6_S132_HEX}"
+                "${TEST_REPORTER}"
+                "${TESTS_SOFTDEVICE_V6}"
             )
         endif()
     endif()
