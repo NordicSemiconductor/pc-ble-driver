@@ -69,7 +69,6 @@
 #include <errno.h>
 #include <termios.h>
 
-#include <assert.h>
 #include <vector>
 #include <iostream>
 
@@ -133,14 +132,20 @@ static void FindModems(io_iterator_t *matchingServices)
     kern_return_t status;
 
     status = IOMasterPort(MACH_PORT_NULL, &masterPort);
-    assert(status == kIOReturnSuccess);
 
-    /*
-    root = IORegistryGetRootEntry(masterPort);
-    assert(root != MACH_PORT_NULL); */
+    if (status != kIOReturnSuccess)
+    {
+        std::cerr << "Error calling IOMasterPort: " << std::hex << "0x" << status << std::endl;
+        std::abort();
+    }
 
     status = IOServiceGetMatchingServices(masterPort, classesToMatch, matchingServices);
-    assert(status == kIOReturnSuccess);
+
+    if (status != kIOReturnSuccess)
+    {
+        std::cerr << "Error calling IOServiceGetMatchingServices: " << std::hex << "0x" << status << std::endl;
+        std::abort();
+    }
 }
 
 static io_registry_entry_t GetUsbDevice(char* pathName)
@@ -154,7 +159,12 @@ static io_registry_entry_t GetUsbDevice(char* pathName)
         io_iterator_t matchingServices;
 
         kern_return_t status = IOServiceGetMatchingServices(masterPort, classesToMatch, &matchingServices);
-        assert(status == kIOReturnSuccess);
+
+        if (status != kIOReturnSuccess)
+        {
+            std::cerr << "Error calling IOServiceGetMatchingServices: " << std::hex << "0x" << status << std::endl;
+            std::abort();
+        }
 
         io_service_t service;
         Boolean deviceFound = false;
@@ -261,7 +271,11 @@ static adapter_list_t* GetAdapters()
                                         kCFStringEncodingUTF8);
             CFRelease(bsdPathAsCFString);
 
-            assert(result);
+            if (!result)
+            {
+                std::cerr << "Error calling CFStringGetCString: " << std::hex << "0x" << status << std::endl;
+                std::abort();
+            }
 
             serial_device_t *serial_device = (serial_device_t*)malloc(sizeof(serial_device_t));
             memset(serial_device, 0, sizeof(serial_device_t));
