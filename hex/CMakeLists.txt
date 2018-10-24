@@ -38,6 +38,10 @@ if(NOT NRFUTIL)
     message(FATAL_ERROR "nrfutil not found, not able to create DFU packages of connectivity firmware.")
 endif()
 
+if(NOT MAKE)
+    message(FATAL_ERROR "make not found, not able to compile connectivity firmware.")
+endif()
+
 function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDEVICE_HEX_PATH)
     set(PROJECT_NAME)
     set(PCA_TYPE)
