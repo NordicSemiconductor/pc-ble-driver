@@ -273,7 +273,7 @@ static adapter_list_t* GetAdapters()
 
             if (!result)
             {
-                std::cerr << "Error calling CFStringGetCString: " << std::hex << "0x" << status << std::endl;
+                std::cerr << "Error calling CFStringGetCString: " << std::hex << "0x" << result << std::endl;
                 std::abort();
             }
 
