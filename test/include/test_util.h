@@ -148,7 +148,7 @@ static void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> exis
         if (extended)
         {
 #if NRF_SD_BLE_API == 6
-            valid = packetSize > (connectable
+            valid = packetSize > static_cast<size_t>(connectable
                                       ? BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_CONNECTABLE_MAX_SUPPORTED
                                       : BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED);
 #else
