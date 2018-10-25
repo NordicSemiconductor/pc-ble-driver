@@ -166,6 +166,8 @@ function(add_run_test_targets)
     #    S130: PCA10031
     set(TEST_REPORTER "junit")
 
+    set(RUN_TEST_TARGETS )
+
     if(BLE_DRIVER_TEST_PCA10028_A AND BLE_DRIVER_TEST_PCA10028_B)
         # SDv2
         if(2 IN_LIST SD_API_VER_NUMS)
@@ -177,6 +179,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V2}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv2_s130_pca10028)
         endif()
     endif()
 
@@ -191,6 +194,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V2}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv2_s130_pca10031)
         endif()
     endif()
 
@@ -205,6 +209,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V3}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv3_s132_pca10040)
         endif()
 
         # SDv5
@@ -217,6 +222,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V5}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv5_s132_pca10040)
         endif()
 
         # SDv6
@@ -229,6 +235,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V6}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv6_s132_pca10040)
         endif()
     endif()
 
@@ -243,6 +250,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V3}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv3_s132_pca10056_usb)
         endif()
 
         # SDv6
@@ -255,6 +263,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V6}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv6_s140_pca10056_usb)
         endif()
     endif()
 
@@ -269,6 +278,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V3}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv3_s132_pca10056)
         endif()
 
         # SDv5
@@ -281,6 +291,7 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V5}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv5_s132_pca10056)
         endif()
 
         # SDv6
@@ -293,8 +304,11 @@ function(add_run_test_targets)
                 "${TEST_REPORTER}"
                 "${TESTS_SOFTDEVICE_V6}"
             )
+            list(APPEND RUN_TEST_TARGETS run_test_sdv6_s140_pca10056)
         endif()
     endif()
+
+    add_custom_target(run_tests DEPENDS ${RUN_TEST_TARGETS})
 endfunction(add_run_test_targets)
 
 function(setup_test source_file softdevice_api_ver test_list)
