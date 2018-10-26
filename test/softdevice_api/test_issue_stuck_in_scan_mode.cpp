@@ -51,6 +51,7 @@
 #include <sstream>
 #include <thread>
 
+#if NRF_SD_BLE_API > 2
 // Indicates if an error has occurred in a callback.
 // The test framework is not thread safe so this variable is used to communicate that an issues has
 // occurred in a callback.
@@ -152,3 +153,9 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
         }
     }
 }
+#else
+TEST_CASE("test_issue_stuck_in_scan_mode")
+{
+    INFO("This test is known to fail on nRF51, SDv2");
+}
+#endif // NRF_SD_BLE_API > 2
