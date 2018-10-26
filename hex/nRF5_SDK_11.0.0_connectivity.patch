@@ -539,3 +539,147 @@ index 0f597ba..2f6bfb4 100644
                <Define> HCI_TIMER2 BLE_STACK_SUPPORT_REQD __STACK_SIZE=2048 __HEAP_SIZE=1024 BOARD_PCA10028 S130 SER_CONNECTIVITY APP_SCHEDULER_WITH_PAUSE BSP_DEFINES_ONLY NRF51 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
                <Undefine></Undefine>
                <IncludePath>..\..\..\config\ble_connectivity_s130_hci_pca10028;..\..\..\config;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\config;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\mailbox;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\serialization\common;..\..\..\..\..\..\components\serialization\common\struct_ser\s130;..\..\..\..\..\..\components\serialization\common\transport;..\..\..\..\..\..\components\serialization\common\transport\ser_phy;..\..\..\..\..\..\components\serialization\common\transport\ser_phy\config;..\..\..\..\..\..\components\serialization\connectivity;..\..\..\..\..\..\components\serialization\connectivity\codecs\common;..\..\..\..\..\..\components\serialization\connectivity\codecs\s130\middleware;..\..\..\..\..\..\components\serialization\connectivity\codecs\s130\serializers;..\..\..\..\..\..\components\serialization\connectivity\hal;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s130\headers;..\..\..\..\..\..\components\softdevice\s130\headers\nrf51;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\bsp</IncludePath>
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
+diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
+--- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
++++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
+@@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
+ endif
+ 
+ MK := mkdir
+-RM := rm -rf
++RM := cmake -E remove_directory
+ 
+ #echo suspend
+ ifeq ("$(VERBOSE)","1")
