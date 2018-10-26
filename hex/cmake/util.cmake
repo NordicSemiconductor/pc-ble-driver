@@ -104,6 +104,25 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
                     message(STATUS "Makefile not found: ${MAKEFILE}")
                     set(MAKEFILE)
                 endif()
+
+                set(MAKEFILE_COMMON "${TOOLCHAIN_PATH}/Makefile.common")
+
+                if(EXISTS "${MAKEFILE_COMMON}")
+                    message(STATUS "Replacing \"rm -rf\" with \"cmake -E remove_directory\" on Windows")
+
+                    file(READ "${MAKEFILE_COMMON}" MAKEFILE_CONTENT)
+                    file(WRITE "${MAKEFILE_COMMON}.pristine" "${MAKEFILE_CONTENT}")
+
+                    string(
+                        REPLACE "RM := rm -rf" "RM := \"${CMAKE_COMMAND}\" -E remove_directory" 
+                        MAKEFILE_CONTENT_NEW "${MAKEFILE_CONTENT}"
+                    )
+
+                    set(MAKEFILE_CONTENT "${MAKEFILE_CONTENT_NEW}")
+                    file(WRITE "${MAKEFILE_COMMON}" "${MAKEFILE_CONTENT}")
+                else()
+                    message(STATUS "Makefile.common not found: ${MAKEFILE}")
+                endif()
             else()
                 # Assume POSIX if not WIN32
                 set(MAKEFILE "${TOOLCHAIN_PATH}/Makefile.posix")
@@ -118,6 +137,11 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
             if(MAKEFILE)
                 file(READ "${MAKEFILE}" MAKEFILE_CONTENT)
                 file(WRITE "${MAKEFILE}.pristine" "${MAKEFILE_CONTENT}")
+
+                string(REGEX MATCH ";" LIST_SEPARATOR_FOUND "${MAKEFILE_CONTENT}")
+                if(LIST_SEPARATOR_FOUND STREQUAL ";")
+                    message(FATAL_ERROR "${MAKEFILE} contains ; which is the list split operator, cannot continue.")
+                endif()
 
                 # Make the file into a list since the ^$ expressions will not work
                 string(REGEX REPLACE "\r?\n" ";" MAKEFILE_LINES "${MAKEFILE_CONTENT}")
