@@ -1,0 +1,5 @@
+# Ignore everything in this directory
+# Remove this when we are release connecitivty firmware
+*
+# Except this file
+!.gitignore
