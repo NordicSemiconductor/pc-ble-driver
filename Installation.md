@@ -77,15 +77,34 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 ## Compiling the connectivity .hex files
 
-Precompiled connectivity firmware are provided and can be used with standard Nordic Development Kits. The .hex files are available in the `hex/sd_api_v<x>` folder. They include the SoftDevice and the connectivity application.
+CMake is used to build connectivity firmware. The .hex files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
 
-You only need to recompile the connectivity application if you want to run it on a custom board. You can use the `hex/sd_api_v<x>/bootstrap_sd_api_v<X>.sh` script to download and patch the nRF SDK and the application with ease. Using this scripts, the steps 1 and 2 below are done automatically:
+### Dependencies
+1. Follow instructions in `Compiling pc-ble-driver from source` to install all dependencies.
+2. Install Make.
+3. Install [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
 
-1. [Download the nRF SDK 11 or 14](https://developer.nordicsemi.com/nRF5_SDK/) (depending on the SoftDevice API you want to use) and unzip `nRF5_SDK_<x>.<y>.<z>_<sha>.zip`
-2. Apply the patch `hex/sd_api_v<x>/SDK<ver>_connectivity.patch` from the unzipped SDK folder (e.g. `git apply -p1 --ignore-whitespace /repos/pc-ble-driver/hex/sd_api_v2/sdk110_connectivity.patch`)
-3. Open the connectivity project `<sdk>/examples/ble_central_and_peripheral/ble_connectivity/pca100<xx>/ser_s13<x>_hci`
-4. Compile it using the the compiler of your choice
-5. Merge the built connectivity hex file with the corresponding SoftDevice hex file (e.g. `mergehex -m connectivity.hex softdevice.hex -o connectivity_with_softdevice.hex`)
+#### Windows
+* Use chocolatey package manager for Windows to install Make.
+
+1. Install [Chocolatey](https://chocolatey.org/).
+2. Open cmd and type `choco install make`.
+3. Make sure that make is exported in path variable.
+
+### Compilation
+Follow steps in `Compiling pc-ble-driver from source` for details on how to create project files for your platform. Two additional flags must be passed to CMake to create project files for connectivity firmware. `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
+* `COMPILE_CONNECTIVITY=1`
+* `CONNECTIVITY_VERSION=<version>`
+
+#### Example
+
+Compiling on Linux
+
+    $ cd build
+    $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+    $ cd hex
+    $ make compile_connectivity
 
 ## Compiling pc-ble-driver from source
 
