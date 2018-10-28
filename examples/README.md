@@ -2,31 +2,26 @@
 
 #### Building
 
-Build the examples just like you built `pc-ble-driver`.
+Project files for `heart_rate_monitor` and `heart_rate_collector` examples are created and build together with `pc-ble-driver` by default. It is also possible to (re)build only the examples.
 
-We will use `heart_rate_monitor` as the concrete example to follow along with, but building and running `hear_rate_collector` is exactly the same.
+If there is no Makefile in `build/examples`, follow `Compiling pc-ble-driver from source` in [Installation.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#compiling-pc-ble-driver-from-source) to create it.
 
-    $ cd pc-ble-driver/examples/heart_rate_monitor/
-    $ mkdir build/
-    $ cd build/
-
-Note: this step depends on your operating system [as documented here](https://github.com/NordicSemiconductor/pc-ble-driver#compiling-pc-ble-driver-from-source).
-    
-    $ cmake .. -G "Unix Makefiles"
+From project root
+    $ cd build/examples/
     $ make
 
 If everything went well, you should see:
 
-    $ ls pc-ble-driver/examples/heart_rate_monitor/build/
-    > hrm_v2 hrm_v5 ...
+    $ ls
+    > heart_rate_monitor_v2 heart_rate_monitor_v3 ...
 
-Where `hrm_v2` and `hrm_v5` are the executables you will run.
+Where `heart_rate_monitor_v2` and `heart_rate_monitor_v3` etc are the executables you will run.
 
 #### Running
 
-Plug your nRF5 DK into you're PC and [Flash the connectivity firmware](https://github.com/NordicSemiconductor/pc-ble-driver#flashing-the-connectivity-firmware).
+Plug your nRF5 DK into you're PC and [Flash the connectivity firmware](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#flashing-the-connectivity-firmware).
 
-Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you flash your nRF5 device with `sd_api_v<x>/connectivity_<ver>_115k2_with_s13<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
+Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you flash your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_115k2_with_s<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
 
 If you are on OS X there is a known [J-Link issue](https://github.com/NordicSemiconductor/pc-ble-driver#macos-os-x) that you need to do a workaround for.
 
@@ -37,7 +32,7 @@ Now find out which serial port your device is on:
 
 And run the example:
 
-    $ ./hrm_v<x> /dev/tty.usbmodem<xxxx>
+    $ ./heart_rate_monitor_v<x> /dev/tty.usbmodem<xxxx>
 
 #### Evaluating
 

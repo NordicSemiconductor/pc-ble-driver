@@ -3,7 +3,10 @@
 The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
 * SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
+* SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
 * SoftDevice s132 API version 5: `s132_nrf52_5.x.x` (only for nRF52 series ICs)
+* SoftDevice s132 API version 6: `s132_nrf52_6.x.x` (only for nRF52 series ICs)
+* SoftDevice s140 API version 6: `s140_nrf52_6.x.x` (only for nRF52 series ICs)
 
 The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
@@ -36,7 +39,7 @@ To use this library you will need to flash the connectivity firmware on a nRF5x 
 Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
-    $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s13<v>_<a>.<b>.<c>.hex
+    $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s<x>_<a>.<b>.<c>.hex
 
 ### J-Link USB CDC serial ports
 
@@ -79,8 +82,9 @@ If you want to revert back to the Segger firmware you will have to download the 
 
 CMake is used to build connectivity firmware. The .hex files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
 
+[Compiling pc-ble-driver from source](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#compiling-the-connectivity-hex-files)
 ### Dependencies
-1. Follow instructions in `Compiling pc-ble-driver from source` to install all dependencies.
+1. Follow instructions in `Compiling pc-ble-driver from source` and install all dependencies.
 2. Install Make.
 3. Install [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
 
