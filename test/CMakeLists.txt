@@ -311,17 +311,34 @@ function(add_run_test_targets)
     add_custom_target(run_tests DEPENDS ${RUN_TEST_TARGETS})
 endfunction(add_run_test_targets)
 
-function(setup_test source_file softdevice_api_ver test_list)
+function(setup_test)
+    cmake_parse_arguments(
+        SETUP_TEST
+        ""
+        "SOURCE_FILE;SOFTDEVICE_API_VER;TEST_LIST"
+        SOURCE_TESTCASES
+        ${ARGN}
+    )
+
+    set(softdevice_api_ver "${SETUP_TEST_SOFTDEVICE_API_VER}")
+    set(source_file "${SETUP_TEST_SOURCE_FILE}")
+    set(source_testcases "${SETUP_TEST_SOURCE_TESTCASES}")
+    set(test_list "${SETUP_TEST_TEST_LIST}")
+
+    file(GLOB test_util_src "util/src/*.cpp")
+
+    message("softdevice_api_ver:${softdevice_api_ver} source_file:${source_file} source_testcases:${source_testcases} test_list:${test_list}")
+
     get_filename_component(test_name ${source_file} NAME_WE)
     set(test_name "${test_name}_v${softdevice_api_ver}")
 
     # Build executable
-    add_executable(${test_name} ${source_file})
+    add_executable(${test_name} ${source_file} ${source_testcases} ${test_util_src})
 
     target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver})
     target_include_directories(${test_name} SYSTEM PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s132/headers)
     target_include_directories(${test_name} SYSTEM PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s140/headers)
-    target_include_directories(${test_name} SYSTEM PRIVATE include)
+    target_include_directories(${test_name} SYSTEM PRIVATE util/include)
 
     if(WIN32)
         target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} Catch2::Catch2)
@@ -352,16 +369,17 @@ if(TEST_TRANSPORT)
 
     foreach(transport_test_src ${transport_tests_src})
         # Use any SD API version for linking object files common between SD API versions
-        setup_test(${transport_test_src} ${ANY_SD_API_VERSION} TESTS_SOFTDEVICE_${ANY_SD_API_VERSION})
+        setup_test(SOURCE_FILE ${transport_test_src} SOURCE_TESTCASES "" SOFTDEVICE_API_VER ${ANY_SD_API_VERSION} TEST_LIST TESTS_SOFTDEVICE_${ANY_SD_API_VERSION})
     endforeach(transport_test_src)
 endif(TEST_TRANSPORT)
 
 if(TEST_SOFTDEVICE_API)
     file(GLOB tests_src "softdevice_api/test_*.cpp")
+    file(GLOB testcases_src "softdevice_api/testcase_*.cpp")
 
     foreach(SD_API_VER ${SD_API_VER_NUMS})
         foreach(test_src ${tests_src})
-            setup_test(${test_src} ${SD_API_VER} TESTS_SOFTDEVICE_V${SD_API_VER})
+            setup_test(SOURCE_FILE ${test_src} SOURCE_TESTCASES ${testcases_src} SOFTDEVICE_API_VER ${SD_API_VER} TEST_LIST TESTS_SOFTDEVICE_V${SD_API_VER})
         endforeach(test_src)
     endforeach(SD_API_VER)
 

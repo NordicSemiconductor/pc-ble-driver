@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 // This issue is only relevant for SoftDevice API >= 3
@@ -56,97 +55,97 @@
 #include <string>
 #include <thread>
 
-constexpr uint16_t BLE_UUID_HEART_RATE_SERVICE          = 0x180D;
-constexpr uint16_t BLE_UUID_HEART_RATE_MEASUREMENT_CHAR = 0x2A37;
-constexpr uint16_t BLE_UUID_CCCD                        = 0x2902;
-
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-// Set to true when the test is complete
-bool testComplete = false;
-
-uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
-                         const std::string &advertisingName,
-                         const std::vector<uint8_t> &initialCharaciteristicValue,
-                         const uint16_t characteristicValueMaxLength)
-{
-    // Setup the advertisement data
-    std::vector<uint8_t> advertisingData;
-    testutil::appendAdvertisingName(advertisingData, advertisingName);
-    advertisingData.push_back(3); // Length of upcoming advertisement type
-    advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
-
-    // Store BLE_UUID_HEART_RATE_SERVICE in little - endian format.
-    advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
-    advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
-
-    auto err_code = p->setupAdvertising(advertisingData);
-    if (err_code != NRF_SUCCESS)
-        return err_code;
-
-    // Setup service, use service UUID specified in scratchpad.target_service
-    err_code =
-        sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
-                                 &(p->scratchpad.target_service), &(p->scratchpad.service_handle));
-    if (err_code != NRF_SUCCESS)
-        return err_code;
-
-    // Setup characteristic, use characteristic UUID specified in scratchpad.target_characteristic
-    ble_gatts_char_md_t char_md;
-    ble_gatts_attr_md_t cccd_md;
-    ble_gatts_attr_t attr_char_value;
-    ble_gatts_attr_md_t attr_md;
-
-    memset(&cccd_md, 0, sizeof(cccd_md));
-
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
-    cccd_md.vloc = BLE_GATTS_VLOC_STACK;
-
-    memset(&char_md, 0, sizeof(char_md));
-
-    char_md.char_props.read          = 1;
-    char_md.char_props.notify        = 1;
-    char_md.char_props.write         = 1;
-    char_md.char_props.write_wo_resp = 1;
-    char_md.p_char_user_desc         = nullptr;
-    char_md.p_char_pf                = nullptr;
-    char_md.p_user_desc_md           = nullptr;
-    char_md.p_cccd_md                = &cccd_md;
-    char_md.p_sccd_md                = nullptr;
-
-    memset(&attr_md, 0, sizeof(attr_md));
-
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
-    attr_md.vloc    = BLE_GATTS_VLOC_STACK;
-    attr_md.rd_auth = 0;
-    attr_md.wr_auth = 0;
-    attr_md.vlen    = 1;
-
-    memset(&attr_char_value, 0, sizeof(attr_char_value));
-
-    attr_char_value.p_uuid    = &(p->scratchpad.target_characteristic);
-    attr_char_value.p_attr_md = &attr_md;
-    attr_char_value.init_len  = static_cast<uint16_t>(initialCharaciteristicValue.size());
-    attr_char_value.init_offs = 0;
-    attr_char_value.max_len   = characteristicValueMaxLength;
-    attr_char_value.p_value   = const_cast<uint8_t *>(initialCharaciteristicValue.data());
-
-    return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
-                                           &attr_char_value,
-                                           &(p->scratchpad.gatts_characteristic_handle));
-}
-
-TEST_CASE("test_issue_gh_112")
+TEST_CASE("issue_gh_112","[issue][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
+
+    constexpr uint16_t BLE_UUID_HEART_RATE_SERVICE          = 0x180D;
+    constexpr uint16_t BLE_UUID_HEART_RATE_MEASUREMENT_CHAR = 0x2A37;
+    constexpr uint16_t BLE_UUID_CCCD                        = 0x2902;
+
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an
+    // issues has occurred in a callback.
+    auto error = false;
+
+    // Set to true when the test is complete
+    auto testComplete = false;
+
+    auto setupPeripheral = [&](const std::shared_ptr<testutil::AdapterWrapper> &p,
+                               const std::string &advertisingName,
+                               const std::vector<uint8_t> &initialCharaciteristicValue,
+                               const uint16_t characteristicValueMaxLength) -> uint32_t {
+        // Setup the advertisement data
+        std::vector<uint8_t> advertisingData;
+        testutil::appendAdvertisingName(advertisingData, advertisingName);
+        advertisingData.push_back(3); // Length of upcoming advertisement type
+        advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
+
+        // Store BLE_UUID_HEART_RATE_SERVICE in little - endian format.
+        advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
+        advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
+
+        auto err_code = p->setupAdvertising(advertisingData);
+        if (err_code != NRF_SUCCESS)
+            return err_code;
+
+        // Setup service, use service UUID specified in scratchpad.target_service
+        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
+                                            &(p->scratchpad.target_service),
+                                            &(p->scratchpad.service_handle));
+        if (err_code != NRF_SUCCESS)
+            return err_code;
+
+        // Setup characteristic, use characteristic UUID specified in
+        // scratchpad.target_characteristic
+        ble_gatts_char_md_t char_md;
+        ble_gatts_attr_md_t cccd_md;
+        ble_gatts_attr_t attr_char_value;
+        ble_gatts_attr_md_t attr_md;
+
+        memset(&cccd_md, 0, sizeof(cccd_md));
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
+        cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+
+        memset(&char_md, 0, sizeof(char_md));
+
+        char_md.char_props.read          = 1;
+        char_md.char_props.notify        = 1;
+        char_md.char_props.write         = 1;
+        char_md.char_props.write_wo_resp = 1;
+        char_md.p_char_user_desc         = nullptr;
+        char_md.p_char_pf                = nullptr;
+        char_md.p_user_desc_md           = nullptr;
+        char_md.p_cccd_md                = &cccd_md;
+        char_md.p_sccd_md                = nullptr;
+
+        memset(&attr_md, 0, sizeof(attr_md));
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
+        attr_md.vloc    = BLE_GATTS_VLOC_STACK;
+        attr_md.rd_auth = 0;
+        attr_md.wr_auth = 0;
+        attr_md.vlen    = 1;
+
+        memset(&attr_char_value, 0, sizeof(attr_char_value));
+
+        attr_char_value.p_uuid    = &(p->scratchpad.target_characteristic);
+        attr_char_value.p_attr_md = &attr_md;
+        attr_char_value.init_len  = static_cast<uint16_t>(initialCharaciteristicValue.size());
+        attr_char_value.init_offs = 0;
+        attr_char_value.max_len   = characteristicValueMaxLength;
+        attr_char_value.p_value   = const_cast<uint8_t *>(initialCharaciteristicValue.data());
+
+        return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
+                                               &attr_char_value,
+                                               &(p->scratchpad.gatts_characteristic_handle));
+    };
 
     SECTION("reproduce_error")
     {
@@ -196,8 +195,7 @@ TEST_CASE("test_issue_gh_112")
         REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        c->setGapEventCallback([&c, &peripheralAdvName](const uint16_t eventId,
-                                                        const ble_gap_evt_t *gapEvent) -> bool {
+        c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -259,8 +257,8 @@ TEST_CASE("test_issue_gh_112")
             }
         });
 
-        c->setGattcEventCallback([&c](const uint16_t eventId,
-                                      const ble_gattc_evt_t *gattcEvent) -> bool {
+        c->setGattcEventCallback([&](const uint16_t eventId,
+                                     const ble_gattc_evt_t *gattcEvent) -> bool {
             switch (eventId)
             {
                 case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP:
@@ -454,7 +452,7 @@ TEST_CASE("test_issue_gh_112")
         });
 
         c->setGattsEventCallback(
-            [&c](const uint16_t eventId, const ble_gatts_evt_t *gattsEvent) -> bool {
+            [&](const uint16_t eventId, const ble_gatts_evt_t *gattsEvent) -> bool {
                 switch (eventId)
                 {
                     case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
@@ -475,13 +473,7 @@ TEST_CASE("test_issue_gh_112")
                 }
             });
 
-        c->setEventCallback([&c](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(c->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
-        });
-
-        p->setGapEventCallback([&p](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
+        p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -534,7 +526,7 @@ TEST_CASE("test_issue_gh_112")
         });
 
         p->setGattsEventCallback(
-            [&p](const uint16_t eventId, const ble_gatts_evt_t *gattsEvent) -> bool {
+            [&](const uint16_t eventId, const ble_gatts_evt_t *gattsEvent) -> bool {
                 switch (eventId)
                 {
                     case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
@@ -554,12 +546,6 @@ TEST_CASE("test_issue_gh_112")
                         return false;
                 }
             });
-
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
-        });
 
         // Open the adapters
         REQUIRE(c->open() == NRF_SUCCESS);

@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 #if NRF_SD_BLE_API >= 6
@@ -55,22 +54,22 @@
 #include <sstream>
 #include <thread>
 
-using namespace testutil;
-
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-TEST_CASE("test_advertising_api")
+TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
+    using namespace testutil;
+
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
+
 #if NRF_SD_BLE_API == 6
-    SECTION("test_extended")
+    SECTION("extended_advertising")
     {
         const auto baudRate = central.baudRate;
 

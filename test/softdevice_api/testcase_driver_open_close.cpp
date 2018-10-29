@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 // Logging support
@@ -51,13 +50,13 @@
 #include <sstream>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-TEST_CASE("test_pc_ble_driver_open_close")
+TEST_CASE("driver_open_close","[rpc][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
+
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort         = env.serialPorts.at(0);
@@ -70,7 +69,8 @@ TEST_CASE("test_pc_ble_driver_open_close")
         INFO("Serial port used: " << serialPort.port);
         INFO("Baud rate used: " << baudRate);
 
-        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port, baudRate);
+        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
+                                                            baudRate);
 
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->open() == NRF_ERROR_INVALID_STATE);
@@ -84,11 +84,12 @@ TEST_CASE("test_pc_ble_driver_open_close")
         INFO("Serial port used: " << serialPort.port);
         INFO("Baud rate used: " << baudRate);
 
-        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port, baudRate);
+        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
+                                                            baudRate);
 
         REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->open() == NRF_SUCCESS);
-        REQUIRE(c->close()  == NRF_SUCCESS);
+        REQUIRE(c->close() == NRF_SUCCESS);
         REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
     }
 
@@ -107,8 +108,8 @@ TEST_CASE("test_pc_ble_driver_open_close")
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);
 
-            c->setGapEventCallback([&c](const uint16_t eventId,
-                                        const ble_gap_evt_t *gapEvent) -> bool {
+            c->setGapEventCallback([&](const uint16_t eventId,
+                                       const ble_gap_evt_t *gapEvent) -> bool {
                 switch (eventId)
                 {
                     case BLE_GAP_EVT_ADV_REPORT:
@@ -141,7 +142,8 @@ TEST_CASE("test_pc_ble_driver_open_close")
             REQUIRE(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
 
-            NRF_LOG("Iteration #" << (i + 1) << " of " << numberOfIterations << " complete.");
+            NRF_LOG("Iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
+                                  << numberOfIterations << " complete.");
         }
     }
 }

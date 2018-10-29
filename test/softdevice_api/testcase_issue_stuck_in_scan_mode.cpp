@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 // Logging support
@@ -51,16 +50,15 @@
 #include <sstream>
 #include <thread>
 
-#if NRF_SD_BLE_API > 2
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-std::chrono::steady_clock::time_point adv_report_received;
-
-TEST_CASE("test_issue_stuck_in_scan_mode")
+TEST_CASE("issue_stuck_in_scan_mode","[issue][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
+
+    std::chrono::steady_clock::time_point adv_report_received;
+
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort = env.serialPorts.at(0);
@@ -87,14 +85,18 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
             auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
                                                                 baudRate);
 
+            NRF_LOG(c->role() << " Starting scan iteration #" << std::dec
+                              << static_cast<uint32_t>(i) << " of "
+                              << static_cast<uint32_t>(scanIterations));
+
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);
 
             // Scan forever
             c->scratchpad.scan_param.timeout = 0;
 
-            c->setGapEventCallback([&c, &adv_report_count](const uint16_t eventId,
-                                                           const ble_gap_evt_t *gapEvent) -> bool {
+            c->setGapEventCallback([&](const uint16_t eventId,
+                                       const ble_gap_evt_t *gapEvent) -> bool {
                 switch (eventId)
                 {
                     case BLE_GAP_EVT_ADV_REPORT:
@@ -150,12 +152,9 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
             // Cleanup current adapter connection
             REQUIRE(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
+
+            NRF_LOG(c->role() << " Scan iteration #" << std::dec << static_cast<uint32_t>(i)
+                              << " of " << static_cast<uint32_t>(scanIterations) << " completed");
         }
     }
 }
-#else
-TEST_CASE("test_issue_stuck_in_scan_mode")
-{
-    INFO("This test is known to fail on nRF51, SDv2");
-}
-#endif // NRF_SD_BLE_API > 2

@@ -36,8 +36,9 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
+
+#if NRF_SD_BLE_API >= 6
 
 // Logging support
 #include <internal/log.h>
@@ -53,52 +54,24 @@
 #include <string>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
+using namespace testutil;
 
-// Set to true when the test is complete
-bool testCompleteCentral = false;
-bool testCompletePeripheral = false;
-
-enum AuthenticationType {
-    LEGACY_PASSKEY,
-    LEGACY_OOB,
-};
-
-AuthenticationType authType;
-
-uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
-                         const std::string &advertisingName,
-                         const std::vector<uint8_t> &initialCharacteristicValue,
-                         const uint16_t characteristicValueMaxLength)
+TEST_CASE("phy_update","[known_issue][PCA10056][PCA10059][nRF52840]")
 {
-    // Setup the advertisement data
-    std::vector<uint8_t> advertisingData;
-    testutil::appendAdvertisingName(advertisingData, advertisingName);
-    advertisingData.push_back(3); // Length of upcoming advertisement type
-    advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
 
-    const auto err_code = p->setupAdvertising(advertisingData);
-    if (err_code != NRF_SUCCESS)
-    {
-        NRF_LOG(p->role() << " Error setting advertising data, "
-                          << ", " << testutil::errorToString(err_code));
-        return err_code;
-    }
+    // Set to true when the test is complete
+    auto testComplete = false;
 
-    return err_code;
-}
-
-TEST_CASE("test_security")
-{
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
-    SECTION("legacy_passkey")
+    SECTION("update_from_1mps_to_2mpb")
     {
         const auto baudRate = central.baudRate;
 
@@ -106,32 +79,43 @@ TEST_CASE("test_security")
         INFO("Peripheral serial port used: " << peripheral.port);
         INFO("Baud rate used: " << baudRate);
 
-        const auto peripheralAdvName = "peripheral";
+        const auto advertisementNameLength = 20;
+        std::vector<uint8_t> peripheralAdvNameBuffer(advertisementNameLength);
+        testutil::appendRandomAlphaNumeric(peripheralAdvNameBuffer, advertisementNameLength);
+        const std::string peripheralAdvName(peripheralAdvNameBuffer.begin(),
+                                            peripheralAdvNameBuffer.end());
+        std::vector<uint8_t> advResponse;
+        testutil::appendAdvertisingName(advResponse, peripheralAdvName);
+
+        ble_gap_phys_t requestedPhys{BLE_GAP_PHY_2MBPS, BLE_GAP_PHY_2MBPS};
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c =
-            std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port, baudRate);
+        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
+                                                            baudRate, 150);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate);
+                                                            baudRate, 150);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
         REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        c->setGapEventCallback([&c, &p, peripheralAdvName](const uint16_t eventId,
-                                                           const ble_gap_evt_t *gapEvent) -> bool {
+        c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
                 {
-                    authType            = LEGACY_PASSKEY;
-                    const auto err_code = c->startAuthentication(true, true, false, true);
+                    const auto err_code =
+                        sd_ble_gap_phy_update(c->unwrap(), gapEvent->conn_handle, &requestedPhys);
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        NRF_LOG(c->role()
+                                << "BLE_GAP_EVT_CONNECTED: error calling sd_ble_gap_phy_update"
+                                << ", " << testutil::errorToString(err_code));
+
                         error = true;
                     }
                 }
@@ -156,12 +140,10 @@ TEST_CASE("test_security")
                             }
                         }
                     }
-#if NRF_SD_BLE_API == 6
                     else
                     {
                         c->startScan(true);
                     }
-#endif
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
                     if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
@@ -188,73 +170,28 @@ TEST_CASE("test_security")
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+                case BLE_GAP_EVT_PHY_UPDATE:
                 {
-                    ble_gap_sec_keyset_t keyset;
-                    memset(&keyset, 0, sizeof(ble_gap_sec_keyset_t));
-
-                    ble_gap_sec_keys_t keys_own;
-                    ble_gap_sec_keys_t keys_peer;
-                    memset(&keys_own, 0, sizeof(keys_own));
-                    memset(&keys_peer, 0, sizeof(keys_peer));
-
-                    keyset.keys_own  = keys_own;
-                    keyset.keys_peer = keys_peer;
-
-                    const auto err_code = c->securityParamsReply(keyset);
-
-                    if (err_code != NRF_SUCCESS)
+                    if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
+                        gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
+                        NRF_LOG(
+                            c->role()
+                            << "BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request");
                         error = true;
-                    }
-                }
-                    return true;
-                case BLE_GAP_EVT_PASSKEY_DISPLAY:
-                {
-                    size_t size = 0;
-
-                    switch (p->scratchpad.key_type)
-                    {
-                        case BLE_GAP_AUTH_KEY_TYPE_PASSKEY:
-                            size = 6;
-                            break;
-                        case BLE_GAP_AUTH_KEY_TYPE_OOB:
-                            size = 16;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (size != 0)
-                    {
-                        std::memcpy(c->scratchpad.key, gapEvent->params.passkey_display.passkey,
-                                    size);
-                    }
-
-                    const auto err_code =
-                        p->authKeyReply(p->scratchpad.key_type, c->scratchpad.key);
-
-                    if (err_code != NRF_SUCCESS)
-                    {
-                        error = true;
-                    }
-                }
-                    return true;
-                case BLE_GAP_EVT_SEC_REQUEST:
-                    return true;
-                case BLE_GAP_EVT_AUTH_KEY_REQUEST:
-                    return true;
-                case BLE_GAP_EVT_CONN_SEC_UPDATE:
-                    return true;
-                case BLE_GAP_EVT_AUTH_STATUS:
-                    if (gapEvent->params.auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS)
-                    {
-                        testCompleteCentral = true;
                     }
                     else
                     {
-                        error = true;
+                        const auto status = gapEvent->params.phy_update.status;
+                        if (status != BLE_HCI_STATUS_CODE_SUCCESS)
+                        {
+                            NRF_LOG(c->role() << "BLE_GAP_EVT_PHY_UPDATE: status is " << status
+                                              << ", should be BLE_HCI_STATUS_CODE_SUCCESS( "
+                                              << BLE_HCI_STATUS_CODE_SUCCESS << ")");
+                            error = true;
+                        }
                     }
+                }
 
                     return true;
                 default:
@@ -268,7 +205,7 @@ TEST_CASE("test_security")
             return true;
         });
 
-        p->setGapEventCallback([&p](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
+        p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -286,32 +223,62 @@ TEST_CASE("test_security")
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
                     return true;
-                case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+                case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
                 {
-                    ble_gap_sec_keyset_t keyset;
-                    std::memset(&keyset, 0, sizeof(keyset));
-
-                    const auto err_code =
-                        p->securityParamsReply(BLE_GAP_SEC_STATUS_SUCCESS, keyset);
-
-                    if (err_code != NRF_SUCCESS)
+                    if (gapEvent->params.phy_update_request.peer_preferred_phys != requestedPhys)
                     {
+                        NRF_LOG(p->role() << "BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: update "
+                                             "request is not equal to the one sent from central");
                         error = true;
-                    }
-                }
-                    return true;
-                case BLE_GAP_EVT_AUTH_STATUS:
-                    if (gapEvent->params.auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS)
-                    {
-                        // Move on to the next type of bonding/pairing
-                        testCompletePeripheral = true;
                     }
                     else
                     {
+                        const auto err_code = sd_ble_gap_phy_update(
+                            p->unwrap(), gapEvent->conn_handle,
+                            &(gapEvent->params.phy_update_request.peer_preferred_phys));
+
+                        if (err_code != NRF_SUCCESS)
+                        {
+                            NRF_LOG(p->role()
+                                    << "BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: error calling "
+                                       "sd_ble_gap_phy_update"
+                                    << ", " << testutil::errorToString(err_code));
+
+                            error = true;
+                        }
+                    }
+                }
+                    return true;
+                case BLE_GAP_EVT_PHY_UPDATE:
+                {
+                    if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
+                        gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
+                    {
+                        NRF_LOG(
+                            p->role()
+                            << "BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request");
                         error = true;
                     }
+                    else
+                    {
+                        const auto status = gapEvent->params.phy_update.status;
+
+                        if (status != BLE_HCI_STATUS_CODE_SUCCESS)
+                        {
+                            NRF_LOG(p->role() << "BLE_GAP_EVT_PHY_UPDATE: status is " << status
+                                              << ", should be BLE_HCI_STATUS_CODE_SUCCESS( "
+                                              << BLE_HCI_STATUS_CODE_SUCCESS << ")");
+                            error = true;
+                        }
+                        else
+                        {
+                            testComplete = true;
+                        }
+                    }
+                }
 
                     return true;
+
                 default:
                     return false;
             }
@@ -330,18 +297,21 @@ TEST_CASE("test_security")
         REQUIRE(c->configure() == NRF_SUCCESS);
         REQUIRE(p->configure() == NRF_SUCCESS);
 
-        REQUIRE(setupPeripheral(p, peripheralAdvName, {0x00}, p->scratchpad.mtu) == NRF_SUCCESS);
+        REQUIRE(p->setupAdvertising(advResponse, // advertising data
+                                    {},          // scan response data
+                                    40,          // interval
+                                    0,           // duration
+                                    true         // connectable
+                                    ) == NRF_SUCCESS);
         REQUIRE(p->startAdvertising() == NRF_SUCCESS);
 
-        // Starting the scan starts the sequence of operations to get a connection established
         REQUIRE(c->startScan() == NRF_SUCCESS);
 
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(5));
 
         REQUIRE(error == false);
-        REQUIRE(testCompleteCentral == true);
-        REQUIRE(testCompletePeripheral == true);
+        REQUIRE(testComplete == true);
 
         REQUIRE(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
@@ -350,3 +320,4 @@ TEST_CASE("test_security")
         sd_rpc_adapter_delete(p->unwrap());
     }
 }
+#endif // NRF_SD_BLE_API >= 6
