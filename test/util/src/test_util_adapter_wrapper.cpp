@@ -836,7 +836,7 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.ble_enable_params.gap_enable_params.periph_conn_count   = 1;
     scratchpad.ble_enable_params.gap_enable_params.central_conn_count  = 1;
     scratchpad.ble_enable_params.gap_enable_params.central_sec_count   = 1;
-    scratchpad.ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
+    scratchpad.ble_enable_params.common_enable_params.p_conn_bw_counts = nullptr;
     scratchpad.ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 
     if (m_role == Central)

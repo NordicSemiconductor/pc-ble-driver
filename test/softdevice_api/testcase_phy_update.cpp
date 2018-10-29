@@ -56,15 +56,15 @@
 
 using namespace testutil;
 
-TEST_CASE("test_phy_update")
+TEST_CASE("phy_update","[PCA10056][PCA10059][nRF52840]")
 {
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues
     // has occurred in a callback.
-    bool error = false;
+    auto error = false;
 
     // Set to true when the test is complete
-    bool testComplete = false;
+    auto testComplete = false;
 
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);

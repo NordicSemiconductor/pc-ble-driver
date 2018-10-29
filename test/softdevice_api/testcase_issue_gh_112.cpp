@@ -55,7 +55,7 @@
 #include <string>
 #include <thread>
 
-TEST_CASE("test_issue_gh_112")
+TEST_CASE("issue_gh_112")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
@@ -69,10 +69,10 @@ TEST_CASE("test_issue_gh_112")
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an
     // issues has occurred in a callback.
-    bool error = false;
+    auto error = false;
 
     // Set to true when the test is complete
-    bool testComplete = false;
+    auto testComplete = false;
 
     auto setupPeripheral = [&](const std::shared_ptr<testutil::AdapterWrapper> &p,
                                const std::string &advertisingName,

@@ -52,7 +52,7 @@
 #include <string>
 #include <thread>
 
-TEST_CASE("test_security")
+TEST_CASE("security")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);

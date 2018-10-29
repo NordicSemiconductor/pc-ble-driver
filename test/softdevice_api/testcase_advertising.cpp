@@ -54,7 +54,7 @@
 #include <sstream>
 #include <thread>
 
-TEST_CASE("test_advertising_api", "[advertising][known_error]")
+TEST_CASE("advertising_api", "[advertising][known_error]")
 {
     using namespace testutil;
 
@@ -66,10 +66,10 @@ TEST_CASE("test_advertising_api", "[advertising][known_error]")
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues
     // has occurred in a callback.
-    bool error = false;
+    auto error = false;
 
 #if NRF_SD_BLE_API == 6
-    SECTION("test_extended")
+    SECTION("extended_advertising")
     {
         const auto baudRate = central.baudRate;
 
