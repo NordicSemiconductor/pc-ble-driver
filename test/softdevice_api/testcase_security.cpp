@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 // Logging support
@@ -53,32 +52,43 @@
 #include <string>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-// Set to true when the test is complete
-bool testCompleteCentral = false;
-bool testCompletePeripheral = false;
-
-enum AuthenticationType {
-    LEGACY_PASSKEY,
-    LEGACY_OOB,
-};
-
-AuthenticationType authType;
-
-uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
-                         const std::string &advertisingName,
-                         const std::vector<uint8_t> &initialCharacteristicValue,
-                         const uint16_t characteristicValueMaxLength)
+TEST_CASE("test_security")
 {
+    auto env = ::test::getEnvironment();
+    REQUIRE(env.serialPorts.size() >= 2);
+    const auto central    = env.serialPorts.at(0);
+    const auto peripheral = env.serialPorts.at(1);
+
+    // Set to true when the test is complete
+    bool testCompleteCentral = false;
+    bool testCompletePeripheral = false;
+
+    constexpr uint16_t BLE_UUID_HEART_RATE_SERVICE          = 0x180D;
+    constexpr uint16_t BLE_UUID_HEART_RATE_MEASUREMENT_CHAR = 0x2A37;
+    constexpr uint16_t BLE_UUID_CCCD                        = 0x2902;
+
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    bool error = false;
+
+    // Set to true when the test is complete
+    bool testComplete = false;
+
+    enum AuthenticationType {
+        LEGACY_PASSKEY,
+        LEGACY_OOB,
+    };
+
+    AuthenticationType authType;
+
+    const auto setupPeripheral = [&](const std::shared_ptr<testutil::AdapterWrapper> &p,
+                                     const std::string &advertisingName,
+                                     const std::vector<uint8_t> &initialCharacteristicValue,
+                                     const uint16_t characteristicValueMaxLength) -> uint32_t {
     // Setup the advertisement data
     std::vector<uint8_t> advertisingData;
     testutil::appendAdvertisingName(advertisingData, advertisingName);
-    advertisingData.push_back(3); // Length of upcoming advertisement type
-    advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
 
     const auto err_code = p->setupAdvertising(advertisingData);
     if (err_code != NRF_SUCCESS)
@@ -89,14 +99,7 @@ uint32_t setupPeripheral(const std::shared_ptr<testutil::AdapterWrapper> &p,
     }
 
     return err_code;
-}
-
-TEST_CASE("test_security")
-{
-    auto env = ::test::getEnvironment();
-    REQUIRE(env.serialPorts.size() >= 2);
-    const auto central    = env.serialPorts.at(0);
-    const auto peripheral = env.serialPorts.at(1);
+    };
 
     SECTION("legacy_passkey")
     {
@@ -121,8 +124,7 @@ TEST_CASE("test_security")
         REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        c->setGapEventCallback([&c, &p, peripheralAdvName](const uint16_t eventId,
-                                                           const ble_gap_evt_t *gapEvent) -> bool {
+        c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -262,13 +264,7 @@ TEST_CASE("test_security")
             }
         });
 
-        c->setEventCallback([&c](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(c->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
-        });
-
-        p->setGapEventCallback([&p](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
+        p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
                 case BLE_GAP_EVT_CONNECTED:
@@ -303,7 +299,6 @@ TEST_CASE("test_security")
                 case BLE_GAP_EVT_AUTH_STATUS:
                     if (gapEvent->params.auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS)
                     {
-                        // Move on to the next type of bonding/pairing
                         testCompletePeripheral = true;
                     }
                     else
@@ -315,12 +310,6 @@ TEST_CASE("test_security")
                 default:
                     return false;
             }
-        });
-
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
         });
 
         // Open the adapters

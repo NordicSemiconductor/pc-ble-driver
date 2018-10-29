@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 // Logging support
@@ -51,13 +50,13 @@
 #include <sstream>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
 TEST_CASE("test_pc_ble_driver_open_close")
 {
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
+
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort         = env.serialPorts.at(0);
@@ -107,7 +106,7 @@ TEST_CASE("test_pc_ble_driver_open_close")
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);
 
-            c->setGapEventCallback([&c](const uint16_t eventId,
+            c->setGapEventCallback([&](const uint16_t eventId,
                                         const ble_gap_evt_t *gapEvent) -> bool {
                 switch (eventId)
                 {

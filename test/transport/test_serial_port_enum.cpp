@@ -40,6 +40,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
+#define NRF_LOG_SETUP
 #include <internal/log.h>
 
 #include <sd_rpc.h>
