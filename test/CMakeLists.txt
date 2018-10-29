@@ -323,7 +323,7 @@ function(setup_test)
     set(softdevice_api_ver "${SETUP_TEST_SOFTDEVICE_API_VER}")
     set(source_file "${SETUP_TEST_SOURCE_FILE}")
     set(source_testcases "${SETUP_TEST_SOURCE_TESTCASES}")
-    set(test_list "${TEST_LIST}")
+    set(test_list "${SETUP_TEST_TEST_LIST}")
 
     file(GLOB test_util_src "util/src/*.cpp")
 
