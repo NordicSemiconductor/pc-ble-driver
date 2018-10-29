@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 #if NRF_SD_BLE_API >= 6
@@ -55,18 +54,18 @@
 #include <string>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-// Set to true when the test is complete
-bool testComplete = false;
-
 using namespace testutil;
 
 TEST_CASE("test_phy_update")
 {
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    bool error = false;
+
+    // Set to true when the test is complete
+    bool testComplete = false;
+
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);

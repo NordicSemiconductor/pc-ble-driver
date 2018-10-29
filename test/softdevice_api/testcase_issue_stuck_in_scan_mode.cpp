@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 // Logging support
@@ -51,15 +50,15 @@
 #include <sstream>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-std::chrono::steady_clock::time_point adv_report_received;
-
 TEST_CASE("test_issue_stuck_in_scan_mode")
 {
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    bool error = false;
+
+    std::chrono::steady_clock::time_point adv_report_received;
+
     auto env = ::test::getEnvironment();
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort = env.serialPorts.at(0);
@@ -92,8 +91,8 @@ TEST_CASE("test_issue_stuck_in_scan_mode")
             // Scan forever
             c->scratchpad.scan_param.timeout = 0;
 
-            c->setGapEventCallback([&c, &adv_report_count](const uint16_t eventId,
-                                                           const ble_gap_evt_t *gapEvent) -> bool {
+            c->setGapEventCallback([&](const uint16_t eventId,
+                                       const ble_gap_evt_t *gapEvent) -> bool {
                 switch (eventId)
                 {
                     case BLE_GAP_EVT_ADV_REPORT:

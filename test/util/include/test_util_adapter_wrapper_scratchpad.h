@@ -1,5 +1,4 @@
-#ifndef TEST_UTIL_ADAPTER_WRAPPER_SCRATCHPAD_H__
-#define TEST_UTIL_ADAPTER_WRAPPER_SCRATCHPAD_H__
+#pragma once
 
 #include "test_util_conversion.h"
 #include "test_util_role.h"
@@ -114,5 +113,3 @@ struct AdapterWrapperScratchpad
     ble_gap_adv_params_t adv_params{}; // Parameters used for advertising
 };
 } //  namespace testutil
-
-#endif // TEST_UTIL_ADAPTER_WRAPPER_SCRATCHPAD_H__

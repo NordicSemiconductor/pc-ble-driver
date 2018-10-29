@@ -1,4 +1,5 @@
 // Logging support
+#define NRF_LOG_SETUP
 #include <internal/log.h>
 
 #include <test_setup.h>
