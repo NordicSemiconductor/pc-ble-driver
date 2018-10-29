@@ -49,7 +49,6 @@
 
 #include "app_ble_gap_sec_keys.h"
 #include "nrf_error.h"
-#include <stddef.h>
 
 #include <mutex>
 
@@ -124,4 +123,16 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
     }
 
     return err_code;
+}
+
+uint32_t app_ble_gap_reset()
+{
+    for (auto &keyset : m_app_keys_table)
+    {
+        keyset.conn_active = false;
+    }
+
+    current_context = nullptr;
+
+    return NRF_SUCCESS;
 }

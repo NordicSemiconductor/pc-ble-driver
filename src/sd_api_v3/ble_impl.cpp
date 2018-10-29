@@ -201,6 +201,9 @@ uint32_t sd_ble_enable(
 {
     (void)p_app_ram_base;
 
+    // Reset previous app_ble_gap data
+    app_ble_gap_reset();
+
     const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_enable_req_enc(
             p_params,

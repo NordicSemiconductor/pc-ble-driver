@@ -119,6 +119,15 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle);
  * @retval NRF_ERROR_NOT_FOUND        instance with conn_handle not found
  */
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, ser_ble_gap_app_keyset_t **pp_gap_app_keyset);
+
+/**
+ * @brief Reset internal values in app_ble_gap
+ *
+ * The purpose of this function is to clear internal values in this file
+ * when starting to use the adapter
+ */
+uint32_t app_ble_gap_reset();
+
 /** @} */
 
 #ifdef __cplusplus

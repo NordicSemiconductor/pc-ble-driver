@@ -146,3 +146,12 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle,
     *pp_gap_app_keyset = connHandle->second;
     return NRF_SUCCESS;
 }
+
+uint32_t app_ble_gap_reset()
+{
+    // TODO: add memory cleanup of keys
+    m_app_keys_table.clear();
+    current_context = nullptr;
+
+    return NRF_SUCCESS;
+}

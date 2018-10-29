@@ -81,7 +81,6 @@ uint32_t ble_gap_evt_auth_key_request_dec(uint8_t const * const p_buf,
     SER_EVT_DEC_END;
 }
 
-
 extern ser_ble_gap_app_keyset_t m_app_keys_table[];
 
 uint32_t ble_gap_evt_auth_status_dec(uint8_t const * const p_buf,
