@@ -50,7 +50,7 @@
 #include <sstream>
 #include <thread>
 
-TEST_CASE("issue_stuck_in_scan_mode")
+TEST_CASE("issue_stuck_in_scan_mode","[issue][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues

@@ -54,7 +54,7 @@
 #include <sstream>
 #include <thread>
 
-TEST_CASE("advertising_api", "[advertising][known_error]")
+TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     using namespace testutil;
 

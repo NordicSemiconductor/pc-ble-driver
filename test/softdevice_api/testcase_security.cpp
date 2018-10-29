@@ -52,24 +52,20 @@
 #include <string>
 #include <thread>
 
-TEST_CASE("security")
+TEST_CASE("security","[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
-    constexpr uint16_t BLE_UUID_HEART_RATE_SERVICE          = 0x180D;
-    constexpr uint16_t BLE_UUID_HEART_RATE_MEASUREMENT_CHAR = 0x2A37;
-    constexpr uint16_t BLE_UUID_CCCD                        = 0x2902;
-
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues
     // has occurred in a callback.
-    bool error = false;
+    auto error = false;
 
     // Set to true when the test is complete
-    bool testComplete = false;
+    auto testComplete = false;
 
     enum AuthenticationType {
         LEGACY_PASSKEY,
@@ -85,12 +81,6 @@ TEST_CASE("security")
         // Setup the advertisement data
         std::vector<uint8_t> advertisingData;
         testutil::appendAdvertisingName(advertisingData, advertisingName);
-        advertisingData.push_back(3); // Length of upcoming advertisement type
-        advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
-
-        // Store BLE_UUID_HEART_RATE_SERVICE in little-endian format.
-        advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
-        advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
 
         auto err_code = p->setupAdvertising(advertisingData);
         if (err_code != NRF_SUCCESS)
@@ -99,67 +89,6 @@ TEST_CASE("security")
                               << ", " << testutil::errorToString(err_code));
             return err_code;
         }
-
-        // Setup service, use service UUID specified in scratchpad.target_service
-        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
-                                            &(p->scratchpad.target_service),
-                                            &(p->scratchpad.service_handle));
-        if (err_code != NRF_SUCCESS)
-        {
-            NRF_LOG(p->role() << " Error adding GATTS service, "
-                              << ", " << testutil::errorToString(err_code));
-            return err_code;
-        }
-
-        // Setup characteristic, use characteristic UUID specified in
-        // scratchpad.target_characteristic
-        ble_gatts_char_md_t char_md;
-        ble_gatts_attr_md_t cccd_md;
-        ble_gatts_attr_t attr_char_value;
-        ble_gatts_attr_md_t attr_md;
-
-        memset(&cccd_md, 0, sizeof(cccd_md));
-
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
-        cccd_md.vloc = BLE_GATTS_VLOC_STACK;
-
-        memset(&char_md, 0, sizeof(char_md));
-
-        char_md.char_props.read          = 1;
-        char_md.char_props.notify        = 1;
-        char_md.char_props.write         = 1;
-        char_md.char_props.write_wo_resp = 1;
-        char_md.p_char_user_desc         = nullptr;
-        char_md.p_char_pf                = nullptr;
-        char_md.p_user_desc_md           = nullptr;
-        char_md.p_cccd_md                = &cccd_md;
-        char_md.p_sccd_md                = nullptr;
-
-        memset(&attr_md, 0, sizeof(attr_md));
-
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
-        attr_md.vloc    = BLE_GATTS_VLOC_STACK;
-        attr_md.rd_auth = 0;
-        attr_md.wr_auth = 0;
-        attr_md.vlen    = 1;
-
-        memset(&attr_char_value, 0, sizeof(attr_char_value));
-
-        attr_char_value.p_uuid    = &(p->scratchpad.target_characteristic);
-        attr_char_value.p_attr_md = &attr_md;
-        attr_char_value.init_len  = static_cast<uint16_t>(initialCharacteristicValue.size());
-        attr_char_value.init_offs = 0;
-        attr_char_value.max_len   = characteristicValueMaxLength;
-        attr_char_value.p_value   = const_cast<uint8_t *>(initialCharacteristicValue.data());
-
-        err_code = sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle,
-                                                   &char_md, &attr_char_value,
-                                                   &(p->scratchpad.gatts_characteristic_handle));
-
-        NRF_LOG(p->role() << " Error adding GATTS characteristic"
-                          << ", " << testutil::errorToString(err_code));
 
         return err_code;
     };
@@ -181,29 +110,6 @@ TEST_CASE("security")
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
                                                             baudRate);
-
-        // Use Heart rate service and characteristics as target for testing but
-        // the values sent are not according to the Heart Rate service
-
-        // BLE Central scratchpad
-        c->scratchpad.target_service.uuid = BLE_UUID_HEART_RATE_SERVICE;
-        c->scratchpad.target_service.type = BLE_UUID_TYPE_BLE;
-
-        c->scratchpad.target_characteristic.uuid = BLE_UUID_HEART_RATE_MEASUREMENT_CHAR;
-        c->scratchpad.target_characteristic.type = BLE_UUID_TYPE_BLE;
-
-        c->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
-        c->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
-
-        // BLE Peripheral scratchpad
-        p->scratchpad.target_service.uuid = BLE_UUID_HEART_RATE_SERVICE;
-        p->scratchpad.target_service.type = BLE_UUID_TYPE_BLE;
-
-        p->scratchpad.target_characteristic.uuid = BLE_UUID_HEART_RATE_MEASUREMENT_CHAR;
-        p->scratchpad.target_characteristic.type = BLE_UUID_TYPE_BLE;
-
-        p->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
-        p->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -593,11 +499,11 @@ TEST_CASE("security")
         REQUIRE(c->configure() == NRF_SUCCESS);
         REQUIRE(p->configure() == NRF_SUCCESS);
 
-        // Starting the scan starts the sequence of operations to get a connection established
-        REQUIRE(c->startScan() == NRF_SUCCESS);
-
         REQUIRE(setupPeripheral(p, peripheralAdvName, {0x00}, p->scratchpad.mtu) == NRF_SUCCESS);
         REQUIRE(p->startAdvertising() == NRF_SUCCESS);
+
+        // Starting the scan starts the sequence of operations to get a connection established
+        REQUIRE(c->startScan() == NRF_SUCCESS);
 
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(5));

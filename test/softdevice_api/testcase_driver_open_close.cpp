@@ -50,7 +50,7 @@
 #include <sstream>
 #include <thread>
 
-TEST_CASE("driver_open_close")
+TEST_CASE("driver_open_close","[rpc][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues
