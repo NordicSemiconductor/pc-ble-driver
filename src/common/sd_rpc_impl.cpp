@@ -39,7 +39,6 @@
 
 #include "adapter_internal.h"
 #include "ble_common.h"
-#include "conn_systemreset_app.h"
 #include "h5_transport.h"
 #include "serial_port_enum.h"
 #include "serialization_transport.h"
@@ -64,7 +63,7 @@ uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], 
 
     *size = static_cast<uint32_t>(descs.size());
 
-    int i = 0;
+    auto i = 0;
     for (auto &desc : descs)
     {
         strncpy(serial_port_descs[i].port, desc.comName.c_str(), SD_RPC_MAXPATHLEN);
@@ -168,15 +167,15 @@ uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
         return NRF_ERROR_INVALID_PARAM;
     }
 
-    // Create a BLE GAP state object
-    const auto err_code = app_ble_gap_state_create(adapterLayer->transport);
+    const auto err_code = adapterLayer->open(status_handler, event_handler, log_handler);
 
     if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
 
-    return adapterLayer->open(status_handler, event_handler, log_handler);
+    // Create a BLE GAP state object
+    return app_ble_gap_state_create(adapterLayer->transport);
 }
 
 uint32_t sd_rpc_close(adapter_t *adapter)
@@ -189,12 +188,7 @@ uint32_t sd_rpc_close(adapter_t *adapter)
     }
 
     // Delete BLE GAP state object
-    const auto err_code = app_ble_gap_state_delete(adapterLayer->transport);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
+    app_ble_gap_state_delete(adapterLayer->transport);
 
     return adapterLayer->close();
 }
@@ -221,7 +215,7 @@ uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
         return NRF_ERROR_INVALID_PARAM;
     }
 
-    uint32_t tx_buffer_length = 1; // This command has 1 byte payload, hence length 1
+    const uint32_t tx_buffer_length = 1; // This command has 1 byte payload, hence length 1
     uint32_t rx_buffer_length = 0; // This command does not generate a response, hence length 0
 
     std::vector<uint8_t> tx_buffer_vector(tx_buffer_length);
