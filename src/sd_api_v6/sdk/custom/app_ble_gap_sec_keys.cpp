@@ -41,6 +41,7 @@
 #include "nrf_error.h"
 #include "ser_config.h"
 
+#include <atomic>
 #include <cstring>
 #include <map>
 #include <mutex>
@@ -63,8 +64,15 @@ typedef struct
 
 static std::map<void *, std::shared_ptr<adapter_ble_gap_state_t>> adapters_gap_state;
 
-void *current_context = nullptr;
-std::mutex current_context_mutex;
+typedef struct
+{
+    void *key{nullptr};
+    std::atomic<uint32_t> key_lock_count{0};
+    std::recursive_mutex key_mutex;
+} adapter_key_t;
+
+static adapter_key_t request_reply_key;
+static adapter_key_t event_key;
 
 uint32_t app_ble_gap_state_create(void *key)
 {
@@ -85,31 +93,70 @@ uint32_t app_ble_gap_state_delete(void *key)
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    // TODO: if this key is used in request_reply_key
+    // TODO: or event_key, remove them from the keys
+    // TODO: and unlock any keys
+
     return NRF_SUCCESS;
 }
 
-void app_ble_gap_sec_context_root_set(void *context)
+void app_ble_gap_adapter_key_lock(void *key, const app_ble_gap_adapter_key_t key_type)
 {
-    current_context_mutex.lock();
-    current_context = context;
+    // TODO: do not clear current_context until
+    // TODO: the recursive mutex is unwound
+
+    if (key_type == EVENT_ADAPTER_KEY)
+    {
+        event_key.key_mutex.lock();
+        event_key.key = key;
+    }
+    else if (key_type == REQUEST_REPLY_ADAPTER_KEY)
+    {
+        request_reply_key.key_mutex.lock();
+        request_reply_key.key = key;
+    }
 }
 
-void app_ble_gap_sec_context_root_release()
+void app_ble_gap_adapter_key_unlock(const app_ble_gap_adapter_key_t key_type)
 {
-    current_context = nullptr;
-    current_context_mutex.unlock();
+    // Do not clear the current_context until
+    // the context_lock_count is zero
+    if (key_type == EVENT_ADAPTER_KEY)
+    {
+        event_key.key_mutex.unlock();
+        event_key.key = nullptr;
+    }
+    else if (key_type == REQUEST_REPLY_ADAPTER_KEY)
+    {
+        request_reply_key.key_mutex.unlock();
+        request_reply_key.key = nullptr;
+    }
+}
+
+bool app_ble_gap_adapter_key_check_assigned(const app_ble_gap_adapter_key_t key_type)
+{
+    if (key_type == EVENT_ADAPTER_KEY)
+    {
+        return event_key.key != nullptr;
+    }
+    else if (key_type == REQUEST_REPLY_ADAPTER_KEY)
+    {
+        return request_reply_key.key != nullptr;
+    }
+
+    return false;
 }
 
 uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(REQUEST_REPLY_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(request_reply_key.key);
 
         for (auto i = 0; i < SER_MAX_CONNECTIONS; i++)
         {
@@ -134,14 +181,14 @@ uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index)
 
 uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(EVENT_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(event_key.key);
 
         for (auto &keys : gap_state->app_keys_table)
         {
@@ -162,25 +209,26 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
 
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(EVENT_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(event_key.key);
 
-        for (auto &keys : gap_state->app_keys_table)
+        for (auto i = 0; i < SER_MAX_CONNECTIONS; i++)
         {
-            if ((keys.conn_handle == conn_handle) && (keys.conn_handle == 1))
+            auto &keys = gap_state->app_keys_table[i];
+            if ((keys.conn_handle == conn_handle) && (keys.conn_active == 1))
             {
-                keys.conn_active = 0;
+                *p_index = i;
                 return NRF_SUCCESS;
             }
         }
 
-        return NRF_ERROR_NO_MEM;
+        return NRF_ERROR_NOT_FOUND;
     }
     catch (const std::out_of_range &)
     {
@@ -190,14 +238,14 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
 
 uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(REQUEST_REPLY_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(request_reply_key.key);
         std::memcpy(&(gap_state->app_keys_table[index].keyset), keyset,
                     sizeof(ble_gap_sec_keyset_t));
         return NRF_SUCCESS;
@@ -210,15 +258,15 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
 
 uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset_t **keyset)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(EVENT_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
-        *keyset = &(gap_state->app_keys_table[index].keyset);
+        const auto gap_state = adapters_gap_state.at(event_key.key);
+        *keyset              = &(gap_state->app_keys_table[index].keyset);
         return NRF_SUCCESS;
     }
     catch (const std::out_of_range &)
@@ -229,14 +277,14 @@ uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset
 
 uint32_t app_ble_gap_reset()
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(REQUEST_REPLY_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(request_reply_key.key);
 
         for (auto &adv_set : gap_state->adv_sets)
         {
@@ -249,8 +297,6 @@ uint32_t app_ble_gap_reset()
         }
 
         gap_state->m_scan_data = {nullptr, 0};
-
-        current_context = nullptr;
     }
     catch (const std::out_of_range &)
     {
@@ -262,14 +308,14 @@ uint32_t app_ble_gap_reset()
 
 uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(REQUEST_REPLY_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(request_reply_key.key);
 
         if (gap_state->m_scan_data.p_data != nullptr)
         {
@@ -287,21 +333,15 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 
 uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(EVENT_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
-
-        if (gap_state->m_scan_data.p_data != nullptr)
-        {
-            return NRF_ERROR_BUSY;
-        }
-
-        memcpy(p_data, &(gap_state->m_scan_data), sizeof(ble_data_t));
+        const auto gap_state = adapters_gap_state.at(event_key.key);
+        std::memcpy(p_data, &(gap_state->m_scan_data), sizeof(ble_data_t));
 
         if (gap_state->m_scan_data.p_data != nullptr)
         {
@@ -320,14 +360,14 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
 uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
                                       uint8_t *p_scan_rsp_data)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(REQUEST_REPLY_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(request_reply_key.key);
 
         for (auto &m_adv_set : gap_state->adv_sets)
         {
@@ -352,14 +392,14 @@ uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
 uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
                                         uint8_t **pp_scan_rsp_data)
 {
-    if (current_context == nullptr)
+    if (!app_ble_gap_adapter_key_check_assigned(EVENT_ADAPTER_KEY))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_context);
+        const auto gap_state = adapters_gap_state.at(event_key.key);
 
         for (auto &m_adv_set : gap_state->adv_sets)
         {

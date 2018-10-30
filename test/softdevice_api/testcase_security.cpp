@@ -52,7 +52,7 @@
 #include <string>
 #include <thread>
 
-TEST_CASE("security","[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
+TEST_CASE("security", "[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);
@@ -256,164 +256,6 @@ TEST_CASE("security","[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
             }
         });
 
-        c->setGattcEventCallback([&](const uint16_t eventId,
-                                     const ble_gattc_evt_t *gattcEvent) -> bool {
-            switch (eventId)
-            {
-                case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP:
-                {
-                    NRF_LOG(c->role() << " BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP");
-
-                    if (gattcEvent->gatt_status != NRF_SUCCESS)
-                    {
-                        NRF_LOG(c->role() << " Service discovery failed. "
-                                          << testutil::gattStatusToString(gattcEvent->gatt_status));
-                        error = true;
-                        return true;
-                    }
-
-                    const auto count = gattcEvent->params.prim_srvc_disc_rsp.count;
-
-                    if (count == 0)
-                    {
-                        NRF_LOG(c->role() << " No services not found.");
-                        error = true;
-                        return true;
-                    }
-
-                    auto targetServiceFound = false;
-
-                    ble_gattc_service_t service;
-
-                    for (auto service_index = 0; service_index < count; service_index++)
-                    {
-                        service = gattcEvent->params.prim_srvc_disc_rsp.services[service_index];
-
-                        if (service.uuid.uuid == c->scratchpad.target_service.uuid &&
-                            service.uuid.type == c->scratchpad.target_service.type)
-                        {
-                            NRF_LOG(c->role() << " Found target service "
-                                              << testutil::asText(c->scratchpad.target_service));
-                            targetServiceFound = true;
-                            break;
-                        }
-                    }
-
-                    if (!targetServiceFound)
-                    {
-                        error = true;
-                        NRF_LOG(c->role() << " Did not find target service "
-                                          << testutil::asText(c->scratchpad.target_service));
-                        return true;
-                    }
-
-                    c->scratchpad.service_start_handle = service.handle_range.start_handle;
-                    c->scratchpad.service_end_handle   = service.handle_range.end_handle;
-
-                    NRF_LOG(c->role() << " Discovered target service. "
-                                      << testutil::asText(service.uuid) << " start_handle: "
-                                      << testutil::asText(c->scratchpad.service_start_handle)
-                                      << " end_handle: "
-                                      << testutil::asText(c->scratchpad.service_end_handle));
-
-                    if (c->startCharacteristicDiscovery() != NRF_SUCCESS)
-                    {
-                        error = true;
-                    }
-                }
-                    return true;
-                case BLE_GATTC_EVT_CHAR_DISC_RSP:
-                {
-                    const auto count = gattcEvent->params.char_disc_rsp.count;
-
-                    if (gattcEvent->gatt_status != NRF_SUCCESS)
-                    {
-                        NRF_LOG(c->role() << " Characteristic discovery failed. "
-                                          << testutil::gattStatusToString(gattcEvent->gatt_status));
-                        error = true;
-                        return true;
-                    }
-
-                    NRF_LOG(
-                        c->role()
-                        << " Received characteristic discovery response, characteristics count: "
-                        << count);
-
-                    auto foundTargetCharacteristic = false;
-
-                    for (auto i = 0; i < count; i++)
-                    {
-                        NRF_LOG(c->role()
-                                << " [characteristic #" << i << "] "
-                                << testutil::asText(gattcEvent->params.char_disc_rsp.chars[i]));
-
-                        if (gattcEvent->params.char_disc_rsp.chars[i].uuid.uuid ==
-                                c->scratchpad.target_characteristic.uuid &&
-                            gattcEvent->params.char_disc_rsp.chars[i].uuid.type ==
-                                c->scratchpad.target_characteristic.type)
-                        {
-                            NRF_LOG(c->role()
-                                    << " Found target characteristic, "
-                                    << testutil::asText(c->scratchpad.target_characteristic));
-                            c->scratchpad.characteristic_decl_handle =
-                                gattcEvent->params.char_disc_rsp.chars[i].handle_decl;
-                            c->scratchpad.characteristic_value_handle =
-                                gattcEvent->params.char_disc_rsp.chars[i].handle_value;
-                            foundTargetCharacteristic = true;
-                        }
-                    }
-
-                    if (!foundTargetCharacteristic)
-                    {
-                        NRF_LOG(c->role() << " Did not find target characteristic "
-                                          << testutil::asText(c->scratchpad.target_characteristic));
-                        error = true;
-                    }
-                    else
-                    {
-                        if (c->startDescriptorDiscovery() != NRF_SUCCESS)
-                        {
-                            error = true;
-                        }
-                    }
-
-                    return true;
-                }
-                case BLE_GATTC_EVT_DESC_DISC_RSP:
-                {
-                    const auto count = gattcEvent->params.desc_disc_rsp.count;
-
-                    if (gattcEvent->gatt_status != NRF_SUCCESS)
-                    {
-                        NRF_LOG(c->role() << " Descriptor discovery failed. "
-                                          << testutil::gattStatusToString(gattcEvent->gatt_status));
-                        error = true;
-                        return true;
-                    }
-
-                    NRF_LOG(c->role()
-                            << " Received descriptor discovery response, descriptor count: "
-                            << count);
-                }
-                    return true;
-                case BLE_GATTC_EVT_WRITE_RSP:
-                    NRF_LOG(c->role() << " Received write response.");
-
-                    if (gattcEvent->gatt_status != NRF_SUCCESS)
-                    {
-                        NRF_LOG(c->role() << " Error. Write operation failed.  "
-                                          << testutil::gattStatusToString(gattcEvent->gatt_status));
-                        error = true;
-                    }
-
-                    testComplete = true;
-
-                    return true;
-                default:
-                    return false;
-            }
-        });
-
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
@@ -484,12 +326,6 @@ TEST_CASE("security","[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
                 default:
                     return false;
             }
-        });
-
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
         });
 
         // Open the adapters

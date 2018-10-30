@@ -199,10 +199,7 @@ void SerializationTransport::eventHandlingRunner()
             // Allocate memory to store decoded event including an unknown quantity of padding
 
             // Set security context
-            BLESecurityContext context(this);
-            std::stringstream logEntry;
-            logEntry << "Locked context GAP state for adapter key (0x" << this << ")";
-            logCallback(SD_RPC_LOG_TRACE, logEntry.str());
+            BLEGAPStateEventLock context(this);
 
             auto possibleEventLength = MaxPossibleEventLength;
             std::vector<uint8_t> eventDecodeBuffer;

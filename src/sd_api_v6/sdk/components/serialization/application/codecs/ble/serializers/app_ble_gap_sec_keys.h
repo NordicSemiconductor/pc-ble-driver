@@ -77,22 +77,24 @@ typedef struct
     ble_gap_sec_keyset_t keyset; /**< Keyset structure, see @ref ble_gap_sec_keyset_t.*/
 } ser_ble_gap_app_keyset_t;
 
+typedef enum { REQUEST_REPLY_ADAPTER_KEY, EVENT_ADAPTER_KEY } app_ble_gap_adapter_key_t;
+
 /**@brief GAP connection - keys table for storage.
  *
  * @note  This array is used to store keys.
  */
-//extern ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
+// extern ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
 
 /**@brief Sets root context for calls to *_context_create, *_context_destroy, *_context_find
  *
  * @param[in]     context             root pointer to use as key for finding keysets
  */
-void app_ble_gap_sec_context_root_set(void *context);
+void app_ble_gap_adapter_key_lock(void *key, const app_ble_gap_adapter_key_t key_type);
 
 /**@brief Release root context for calls to *_context_create, *_context_destroy, *_context_find
  *
  */
-void app_ble_gap_sec_context_root_release();
+void app_ble_gap_adapter_key_unlock(const app_ble_gap_adapter_key_t key_type);
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
@@ -125,8 +127,20 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle);
  */
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index);
 
-uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset);
+/**@breif Gets key in given context. This function uses the event context since it is only used from
+ * that location.
+ *
+ * @param[in] index key index
+ * @param[out] Double pointer to keyset for given key index
+ */
 uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset_t **keyset);
+
+/**@brief Updates key in given context. This function uses the request reply context.
+ *
+ * @param[in] index key index
+ * @param[out] Pointer to keyset for given key index
+ */
+uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset);
 
 /**
  * @brief Reset internal values in app_ble_gap

@@ -48,19 +48,18 @@
 #include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
 
 #include <cstdint>
-#include <sstream>
 
 static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
-                       const decode_function_t &decode_function)
+                                  const decode_function_t &decode_function)
 {
-    auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+    const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)
     {
         return NRF_ERROR_INVALID_PARAM;
     }
 
-    BLESecurityContext ctx(adapterLayer->transport);
+    BLEGAPStateRequestReplyLock stateLock(adapterLayer->transport);
     return encode_decode(adapter, encode_function, decode_function);
 }
 
@@ -545,6 +544,24 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter, uint16_t conn_handle, u
                                      ble_gap_sec_keyset_t const *p_sec_keyset)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        uint32_t index = 0;
+        auto err_code  = app_ble_gap_sec_context_create(conn_handle, &index);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            return err_code;
+        }
+
+        if (p_sec_keyset)
+        {
+            err_code = app_ble_gap_sec_keys_update(index, p_sec_keyset);
+
+            if (err_code != NRF_SUCCESS)
+            {
+                return err_code;
+            }
+        }
+
         return ble_gap_sec_params_reply_req_enc(conn_handle, sec_status, p_sec_params, p_sec_keyset,
                                                 buffer, length);
     };
@@ -553,26 +570,6 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter, uint16_t conn_handle, u
                                             uint32_t *result) -> uint32_t {
         return ble_gap_sec_params_reply_rsp_dec(buffer, length, p_sec_keyset, result);
     };
-
-    uint32_t err_code = NRF_SUCCESS;
-
-    uint32_t index = 0;
-    err_code       = app_ble_gap_sec_context_create(conn_handle, &index);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
-
-    if (p_sec_keyset)
-    {
-        err_code = app_ble_gap_sec_keys_update(index, p_sec_keyset);
-
-        if (err_code != NRF_SUCCESS)
-        {
-            return err_code;
-        }
-    }
 
     return gap_encode_decode(adapter, encode_function, decode_function);
 }

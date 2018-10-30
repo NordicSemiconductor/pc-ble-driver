@@ -52,23 +52,27 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
  * security context before calling the codecs. Typically the root context is the SerializationTransport object.
 */
 
-class BLESecurityContext
+class BLEGAPStateRequestReplyLock
 {
 public:
-    explicit BLESecurityContext(void* context)
-    {
-        app_ble_gap_sec_context_root_set(context);
-    }
-
-    ~BLESecurityContext()
-    {
-        app_ble_gap_sec_context_root_release();
-    }
-
-    BLESecurityContext(const BLESecurityContext &) = delete;
-    BLESecurityContext& operator=(const BLESecurityContext &) = delete;
-    BLESecurityContext(BLESecurityContext &&) = delete;
-    BLESecurityContext& operator=(BLESecurityContext &&) = delete;
+    explicit BLEGAPStateRequestReplyLock(void* context);
+    ~BLEGAPStateRequestReplyLock();
+    BLEGAPStateRequestReplyLock(const BLEGAPStateRequestReplyLock &) = delete;
+    BLEGAPStateRequestReplyLock& operator=(const BLEGAPStateRequestReplyLock &) = delete;
+    BLEGAPStateRequestReplyLock(BLEGAPStateRequestReplyLock &&) = delete;
+    BLEGAPStateRequestReplyLock& operator=(BLEGAPStateRequestReplyLock &&) = delete;
 };
+
+class BLEGAPStateEventLock
+{
+public:
+    explicit BLEGAPStateEventLock(void* context);
+    ~BLEGAPStateEventLock();
+    BLEGAPStateEventLock(const BLEGAPStateEventLock &) = delete;
+    BLEGAPStateEventLock& operator=(const BLEGAPStateEventLock &) = delete;
+    BLEGAPStateEventLock(BLEGAPStateEventLock &&) = delete;
+    BLEGAPStateEventLock& operator=(BLEGAPStateEventLock &&) = delete;
+};
+
 
 #endif

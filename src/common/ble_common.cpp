@@ -44,6 +44,26 @@
 #include "nrf_error.h"
 #include "ser_config.h"
 
+BLEGAPStateRequestReplyLock::BLEGAPStateRequestReplyLock(void *context)
+{
+    app_ble_gap_adapter_key_lock(context, REQUEST_REPLY_ADAPTER_KEY);
+}
+
+BLEGAPStateRequestReplyLock::~BLEGAPStateRequestReplyLock()
+{
+    app_ble_gap_adapter_key_unlock(REQUEST_REPLY_ADAPTER_KEY);
+}
+
+BLEGAPStateEventLock::BLEGAPStateEventLock(void *context)
+{
+    app_ble_gap_adapter_key_lock(context, EVENT_ADAPTER_KEY);
+}
+
+BLEGAPStateEventLock::~BLEGAPStateEventLock()
+{
+    app_ble_gap_adapter_key_unlock(EVENT_ADAPTER_KEY);
+}
+
 uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
                        const decode_function_t &decode_function)
 {

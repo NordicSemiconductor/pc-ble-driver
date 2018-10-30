@@ -154,7 +154,7 @@ uint32_t sd_ble_enable(adapter_t *adapter,
     (void)p_app_ram_base;
 
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
-    BLESecurityContext ctx(adapterLayer->transport);
+    BLEGAPStateRequestReplyLock stateLock(adapterLayer->transport);
 
     // Reset previous app_ble_gap data
     app_ble_gap_reset();
