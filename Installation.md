@@ -85,8 +85,8 @@ CMake is used to build connectivity firmware. The .hex files are available in th
 [Compiling pc-ble-driver from source](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#compiling-the-connectivity-hex-files)
 ### Dependencies
 1. Follow instructions in `Compiling pc-ble-driver from source` and install all dependencies.
-2. Install Make.
-3. Install [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
+2. A recent version of GNU Make.
+3. Install a recent version of [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) .
 
 #### Windows
 * Use chocolatey package manager for Windows to install Make.

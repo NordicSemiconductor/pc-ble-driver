@@ -2,7 +2,7 @@
 
 #### Building
 
-Project files for `heart_rate_monitor` and `heart_rate_collector` examples are created and build together with `pc-ble-driver` by default. It is also possible to (re)build only the examples.
+Project files for `heart_rate_monitor` and `heart_rate_collector` examples are created and built together with `pc-ble-driver` by default. It is also possible to (re)build only the examples.
 
 If there is no Makefile in `build/examples`, follow `Compiling pc-ble-driver from source` in [Installation.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#compiling-pc-ble-driver-from-source) to create it.
 
@@ -23,7 +23,7 @@ Plug your nRF5 DK into you're PC and [Flash the connectivity firmware](https://g
 
 Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you flash your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_115k2_with_s<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
 
-If you are on OS X there is a known [J-Link issue](https://github.com/NordicSemiconductor/pc-ble-driver#macos-os-x) that you need to do a workaround for.
+If you are on macOS or a recent version of Linux there is a known [J-Link issue](https://github.com/NordicSemiconductor/pc-ble-driver#macos-os-x) that you need to do a workaround for.
 
 Now find out which serial port your device is on:
 
