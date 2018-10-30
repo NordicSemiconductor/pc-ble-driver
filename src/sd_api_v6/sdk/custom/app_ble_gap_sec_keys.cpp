@@ -46,7 +46,6 @@
 #include <mutex>
 #include <sd_rpc_types.h>
 
-#if NRF_SD_BLE_API_VERSION >= 6
 typedef struct
 {
     bool active;
@@ -54,15 +53,12 @@ typedef struct
     uint8_t *p_adv_data;
     uint8_t *p_scan_rsp_data;
 } adv_set_t;
-#endif
 
 typedef struct
 {
     ser_ble_gap_app_keyset_t app_keys_table[SER_MAX_CONNECTIONS]{};
-#if NRF_SD_BLE_API_VERSION >= 6
     adv_set_t adv_sets[BLE_GAP_ADV_SET_COUNT_MAX]{};
     ble_data_t m_scan_data = {nullptr, 0};
-#endif
 } adapter_ble_gap_state_t;
 
 static std::map<void *, std::shared_ptr<adapter_ble_gap_state_t>> adapters_gap_state;
@@ -72,8 +68,6 @@ std::mutex current_context_mutex;
 
 uint32_t app_ble_gap_state_create(void *key)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (adapters_gap_state.count(key) == 1)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -84,10 +78,8 @@ uint32_t app_ble_gap_state_create(void *key)
     return NRF_SUCCESS;
 }
 
-uint32_t app_ble_gap_state_release(void *key)
+uint32_t app_ble_gap_state_delete(void *key)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (adapters_gap_state.erase(key) != 1)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -110,9 +102,6 @@ void app_ble_gap_sec_context_root_release()
 
 uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index)
 {
-    // Find current context
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -145,8 +134,6 @@ uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index)
 
 uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -156,19 +143,16 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
     {
         const auto gap_state = adapters_gap_state.at(current_context);
 
-        uint32_t err_code = NRF_ERROR_NO_MEM;
-
         for (auto &keys : gap_state->app_keys_table)
         {
             if (keys.conn_handle == conn_handle)
             {
                 keys.conn_active = 0;
-                err_code         = NRF_SUCCESS;
-                break;
+                return NRF_SUCCESS;
             }
         }
 
-        return err_code;
+        return NRF_ERROR_NO_MEM;
     }
     catch (const std::out_of_range &)
     {
@@ -178,8 +162,6 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle)
 
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -189,19 +171,16 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
     {
         const auto gap_state = adapters_gap_state.at(current_context);
 
-        uint32_t err_code = NRF_ERROR_NO_MEM;
-
         for (auto &keys : gap_state->app_keys_table)
         {
             if ((keys.conn_handle == conn_handle) && (keys.conn_handle == 1))
             {
                 keys.conn_active = 0;
-                err_code         = NRF_SUCCESS;
-                break;
+                return NRF_SUCCESS;
             }
         }
 
-        return err_code;
+        return NRF_ERROR_NO_MEM;
     }
     catch (const std::out_of_range &)
     {
@@ -209,11 +188,80 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index)
     }
 }
 
-#if NRF_SD_BLE_API_VERSION >= 6
+uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset)
+{
+    if (current_context == nullptr)
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(current_context);
+        std::memcpy(&(gap_state->app_keys_table[index].keyset), keyset,
+                    sizeof(ble_gap_sec_keyset_t));
+        return NRF_SUCCESS;
+    }
+    catch (const std::out_of_range &)
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+}
+
+uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset_t **keyset)
+{
+    if (current_context == nullptr)
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(current_context);
+        *keyset = &(gap_state->app_keys_table[index].keyset);
+        return NRF_SUCCESS;
+    }
+    catch (const std::out_of_range &)
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+}
+
+uint32_t app_ble_gap_reset()
+{
+    if (current_context == nullptr)
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(current_context);
+
+        for (auto &adv_set : gap_state->adv_sets)
+        {
+            adv_set.active = false;
+        }
+
+        for (auto &keyset : gap_state->app_keys_table)
+        {
+            keyset.conn_active = false;
+        }
+
+        gap_state->m_scan_data = {nullptr, 0};
+
+        current_context = nullptr;
+    }
+    catch (const std::out_of_range &)
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+
+    return NRF_SUCCESS;
+}
+
 uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -239,8 +287,6 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 
 uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -274,8 +320,6 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
 uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
                                       uint8_t *p_scan_rsp_data)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -308,8 +352,6 @@ uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
 uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
                                         uint8_t **pp_scan_rsp_data)
 {
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
     if (current_context == nullptr)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -337,40 +379,3 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
-
-uint32_t app_ble_gap_reset()
-{
-    std::lock_guard<std::mutex> lck(current_context_mutex);
-
-    if (current_context == nullptr)
-    {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
-    }
-
-    try
-    {
-        const auto gap_state = adapters_gap_state.at(current_context);
-
-        for (auto &adv_set : gap_state->adv_sets)
-        {
-            adv_set.active = false;
-        }
-
-        for (auto &keyset : gap_state->app_keys_table)
-        {
-            keyset.conn_active = false;
-        }
-
-        gap_state->m_scan_data = {nullptr, 0};
-
-        current_context = nullptr;
-    }
-    catch (const std::out_of_range &)
-    {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
-    }
-
-    return NRF_SUCCESS;
-}
-
-#endif

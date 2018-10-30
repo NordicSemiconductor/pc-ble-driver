@@ -200,6 +200,9 @@ void SerializationTransport::eventHandlingRunner()
 
             // Set security context
             BLESecurityContext context(this);
+            std::stringstream logEntry;
+            logEntry << "Locked context GAP state for adapter key (0x" << this << ")";
+            logCallback(SD_RPC_LOG_TRACE, logEntry.str());
 
             auto possibleEventLength = MaxPossibleEventLength;
             std::vector<uint8_t> eventDecodeBuffer;

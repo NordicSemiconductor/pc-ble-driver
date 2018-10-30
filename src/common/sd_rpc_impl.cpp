@@ -168,6 +168,14 @@ uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
         return NRF_ERROR_INVALID_PARAM;
     }
 
+    // Create a BLE GAP state object
+    const auto err_code = app_ble_gap_state_create(adapterLayer->transport);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+
     return adapterLayer->open(status_handler, event_handler, log_handler);
 }
 
@@ -178,6 +186,14 @@ uint32_t sd_rpc_close(adapter_t *adapter)
     if (adapterLayer == nullptr)
     {
         return NRF_ERROR_INVALID_PARAM;
+    }
+
+    // Delete BLE GAP state object
+    const auto err_code = app_ble_gap_state_delete(adapterLayer->transport);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
     }
 
     return adapterLayer->close();

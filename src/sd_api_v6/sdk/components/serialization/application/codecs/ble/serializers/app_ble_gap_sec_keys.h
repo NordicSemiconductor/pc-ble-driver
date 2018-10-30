@@ -124,7 +124,20 @@ uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle);
  * @retval NRF_ERROR_NOT_FOUND        Instance with conn_handle not found.
  */
 uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index);
-/** @} */
+
+uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset);
+uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset_t **keyset);
+
+/**
+ * @brief Reset internal values in app_ble_gap
+ *
+ * The purpose of this function is to clear internal values in this file
+ * when starting to use the adapter
+ */
+uint32_t app_ble_gap_reset();
+
+uint32_t app_ble_gap_state_create(void *key);
+uint32_t app_ble_gap_state_delete(void *key);
 
 #if NRF_SD_BLE_API_VERSION >= 6
 /**
@@ -171,17 +184,8 @@ uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
 uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
                                         uint8_t **pp_scan_rsp_data);
 
-/**
- * @brief Reset internal values in app_ble_gap
- *
- * The purpose of this function is to clear internal values in this file
- * when starting to use the adapter
- */
-uint32_t app_ble_gap_reset();
-
+#endif // NRF_SD_BLE_API_VERSION >= 6
 /** @} */
-
-#endif
 #ifdef __cplusplus
 }
 #endif
