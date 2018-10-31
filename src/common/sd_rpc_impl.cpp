@@ -44,6 +44,7 @@
 #include "serialization_transport.h"
 #include "uart_boost.h"
 #include "uart_settings_boost.h"
+#include "app_ble_gap_sec_keys.h"
 
 #include <cstdlib>
 

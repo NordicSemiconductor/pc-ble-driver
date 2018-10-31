@@ -133,7 +133,7 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index);
  * @param[in] index key index
  * @param[out] Double pointer to keyset for given key index
  */
-uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset_t **keyset);
+uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **keyset);
 
 /**@brief Updates key in given context. This function uses the request reply context.
  *
@@ -150,7 +150,22 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
  */
 uint32_t app_ble_gap_reset();
 
+/**
+ * @brief Create GAP states for a given adapter
+ *
+ * The purpose of this function is create a GAP state for a given adapter.
+ * 
+ * @param[in] key Key that represents the adapter, used by other functions to select GAP state for a adapter
+ */
 uint32_t app_ble_gap_state_create(void *key);
+
+/**
+ * @brief Delete GAP states for a given adapter
+ *
+ * The purpose of this function is to delete the GAP state for a given adapter.
+ * 
+ * @param[in] key Key that represents the adapter
+ */
 uint32_t app_ble_gap_state_delete(void *key);
 
 #if NRF_SD_BLE_API_VERSION >= 6

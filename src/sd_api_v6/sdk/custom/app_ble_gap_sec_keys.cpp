@@ -41,10 +41,11 @@
 #include "nrf_error.h"
 #include "ser_config.h"
 
-#include <atomic>
 #include <cstring>
 #include <map>
 #include <mutex>
+#include <memory>
+
 #include <sd_rpc_types.h>
 
 typedef struct
@@ -55,23 +56,52 @@ typedef struct
     uint8_t *p_scan_rsp_data;
 } adv_set_t;
 
+/**
+ * @brief This structure keeps GAP states for one adapter
+ */
 typedef struct
 {
+    // GAP connection - BLE security keys table for storage.
     ser_ble_gap_app_keyset_t app_keys_table[SER_MAX_CONNECTIONS]{};
+    // Advertisement sets - BLE advertisement sets
     adv_set_t adv_sets[BLE_GAP_ADV_SET_COUNT_MAX]{};
-    ble_data_t m_scan_data = {nullptr, 0};
+    // Buffer for scan data received
+    ble_data_t scan_data = {nullptr, 0};
 } adapter_ble_gap_state_t;
 
+/**
+ * @brief This map keeps the GAP states (see @ref adapter_ble_gap_state_t) for adapters used
+ */
 static std::map<void *, std::shared_ptr<adapter_ble_gap_state_t>> adapters_gap_state;
 
+/**
+ * @brief This structure keeps information related to an adapter key
+ *
+ * An adapter key is used to tell the codecs what adapter_ble_gap_state_t to
+ * use during encoding and decoding.
+ *
+ */
 typedef struct
 {
+    /**
+     * @brief Key that points to the @ref adapter_ble_gap_state_t [adapter GAP state] currently used be codecs
+     */
     void *key{nullptr};
-    std::atomic<uint32_t> key_lock_count{0};
-    std::recursive_mutex key_mutex;
+    
+    /**
+     * @brief Mutex that protects changing the context while encoding/decoding is in progress
+     */
+    std::mutex key_mutex;
 } adapter_key_t;
 
+/**
+ * @brief Adapter key used for encoding/decoding request reply commands
+ */
 static adapter_key_t request_reply_key;
+
+/**
+ * @brief Adapter key used for decoding events
+ */
 static adapter_key_t event_key;
 
 uint32_t app_ble_gap_state_create(void *key)
@@ -102,9 +132,6 @@ uint32_t app_ble_gap_state_delete(void *key)
 
 void app_ble_gap_adapter_key_lock(void *key, const app_ble_gap_adapter_key_t key_type)
 {
-    // TODO: do not clear current_context until
-    // TODO: the recursive mutex is unwound
-
     if (key_type == EVENT_ADAPTER_KEY)
     {
         event_key.key_mutex.lock();
@@ -256,7 +283,7 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
     }
 }
 
-uint32_t app_ble_gap_sec_keys_get(const uint32_t index, const ble_gap_sec_keyset_t **keyset)
+uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **keyset)
 {
     if (!app_ble_gap_adapter_key_check_assigned(EVENT_ADAPTER_KEY))
     {
@@ -296,7 +323,7 @@ uint32_t app_ble_gap_reset()
             keyset.conn_active = false;
         }
 
-        gap_state->m_scan_data = {nullptr, 0};
+        gap_state->scan_data = {nullptr, 0};
     }
     catch (const std::out_of_range &)
     {
@@ -317,12 +344,12 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
     {
         const auto gap_state = adapters_gap_state.at(request_reply_key.key);
 
-        if (gap_state->m_scan_data.p_data != nullptr)
+        if (gap_state->scan_data.p_data != nullptr)
         {
             return NRF_ERROR_BUSY;
         }
 
-        memcpy(&(gap_state->m_scan_data), p_data, sizeof(ble_data_t));
+        memcpy(&(gap_state->scan_data), p_data, sizeof(ble_data_t));
         return NRF_SUCCESS;
     }
     catch (const std::out_of_range &)
@@ -341,11 +368,11 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
     try
     {
         const auto gap_state = adapters_gap_state.at(event_key.key);
-        std::memcpy(p_data, &(gap_state->m_scan_data), sizeof(ble_data_t));
+        std::memcpy(p_data, &(gap_state->scan_data), sizeof(ble_data_t));
 
-        if (gap_state->m_scan_data.p_data != nullptr)
+        if (gap_state->scan_data.p_data != nullptr)
         {
-            gap_state->m_scan_data.p_data = nullptr;
+            gap_state->scan_data.p_data = nullptr;
             return NRF_SUCCESS;
         }
 
