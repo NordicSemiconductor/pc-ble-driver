@@ -91,7 +91,7 @@ uint32_t ble_gap_evt_auth_status_dec(uint8_t const * const p_buf,
 
     // keyset is an extension of standard event data - used to synchronize keys at application
     uint32_t conn_index;
-    err_code = app_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
+    err_code = app_ble_gap_sec_keys_find(p_event->evt.gap_evt.conn_handle, &conn_index);
     if (err_code == NRF_SUCCESS)
     {
         ble_gap_sec_keyset_t *keyset;
@@ -100,7 +100,7 @@ uint32_t ble_gap_evt_auth_status_dec(uint8_t const * const p_buf,
 
         SER_PULL_FIELD(keyset, ble_gap_sec_keyset_t_dec);
 
-        err_code = app_ble_gap_sec_context_destroy(p_event->evt.gap_evt.conn_handle);
+        err_code = app_ble_gap_sec_keys_storage_destroy(p_event->evt.gap_evt.conn_handle);
         SER_ASSERT(err_code == NRF_SUCCESS, err_code);
     }
 
@@ -212,7 +212,7 @@ uint32_t ble_gap_evt_lesc_dhkey_request_dec(uint8_t const * const p_buf,
 
     // keyset is an extension of standard event data - used to synchronize keys at application
     uint32_t conn_index;
-    err_code = app_ble_gap_sec_context_find(p_event->evt.gap_evt.conn_handle, &conn_index);
+    err_code = app_ble_gap_sec_keys_find(p_event->evt.gap_evt.conn_handle, &conn_index);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
     ble_gap_sec_keyset_t *keyset;

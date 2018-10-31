@@ -199,7 +199,7 @@ void SerializationTransport::eventHandlingRunner()
             // Allocate memory to store decoded event including an unknown quantity of padding
 
             // Set security context
-            BLEGAPStateEventLock context(this);
+            RequestReplyCodecContext context(this);
 
             auto possibleEventLength = MaxPossibleEventLength;
             std::vector<uint8_t> eventDecodeBuffer;

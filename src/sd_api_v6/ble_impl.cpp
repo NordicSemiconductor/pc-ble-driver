@@ -154,10 +154,10 @@ uint32_t sd_ble_enable(adapter_t *adapter,
     (void)p_app_ram_base;
 
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
-    BLEGAPStateRequestReplyLock stateLock(adapterLayer->transport);
+    RequestReplyCodecContext context(adapterLayer->transport);
 
     // Reset previous app_ble_gap data
-    app_ble_gap_reset();
+    app_ble_gap_state_reset();
 
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_enable_req_enc(

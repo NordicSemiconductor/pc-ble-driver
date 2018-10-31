@@ -40,14 +40,11 @@
 #include "ble_common.h"
 #include "adapter_internal.h"
 
-#include <cstring>
-
 // C code
 #include "ble_gap.h"
 #include "ble_gap_app.h" // Encoder/decoder functions
 
-//TODO: Find a way to support multiple adapters
-#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
+#include "app_ble_gap_sec_keys.h"
 
 #include <cstdint>
 
@@ -678,6 +675,24 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
                                      ble_gap_sec_keyset_t const *p_sec_keyset)
 {
     const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        uint32_t index = 0;
+        auto err_code = app_ble_gap_sec_keys_storage_create(conn_handle, &index);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            return err_code;
+        }
+
+        if (p_sec_keyset)
+        {
+            err_code = app_ble_gap_sec_keys_update(index, p_sec_keyset);
+
+            if (err_code != NRF_SUCCESS)
+            {
+                return err_code;
+            }
+        }
+
         return ble_gap_sec_params_reply_req_enc(
             conn_handle,
             sec_status,
@@ -694,21 +709,6 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
             p_sec_keyset,
             result);
     };
-
-    uint32_t err_code = NRF_SUCCESS;
-
-    uint32_t index = 0;
-    err_code = app_ble_gap_sec_context_create(conn_handle, &index);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
-
-    if (p_sec_keyset)
-    {
-        std::memcpy(&(m_app_keys_table[index].keyset), p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
-    }
 
     return encode_decode(adapter, encode_function, decode_function);
 }

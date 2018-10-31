@@ -59,7 +59,7 @@ static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &e
         return NRF_ERROR_INVALID_PARAM;
     }
 
-    BLEGAPStateRequestReplyLock stateLock(adapterLayer->transport);
+    RequestReplyCodecContext context(adapterLayer->transport);
     return encode_decode(adapter, encode_function, decode_function);
 }
 
@@ -545,7 +545,7 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter, uint16_t conn_handle, u
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         uint32_t index = 0;
-        auto err_code  = app_ble_gap_sec_context_create(conn_handle, &index);
+        auto err_code  = app_ble_gap_sec_keys_storage_create(conn_handle, &index);
 
         if (err_code != NRF_SUCCESS)
         {

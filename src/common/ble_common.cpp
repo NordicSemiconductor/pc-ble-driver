@@ -45,24 +45,26 @@
 #include "ser_config.h"
 #include "app_ble_gap_sec_keys.h"
 
-BLEGAPStateRequestReplyLock::BLEGAPStateRequestReplyLock(void *context)
+//AdapterRequestReplyCodecContext
+
+RequestReplyCodecContext::RequestReplyCodecContext(void *adapterId)
 {
-    app_ble_gap_adapter_key_lock(context, REQUEST_REPLY_ADAPTER_KEY);
+    app_ble_gap_set_current_adapter_id(adapterId, REQUEST_REPLY_CODEC_CONTEXT);
 }
 
-BLEGAPStateRequestReplyLock::~BLEGAPStateRequestReplyLock()
+RequestReplyCodecContext::~RequestReplyCodecContext()
 {
-    app_ble_gap_adapter_key_unlock(REQUEST_REPLY_ADAPTER_KEY);
+    app_ble_gap_unset_current_adapter_id(REQUEST_REPLY_CODEC_CONTEXT);
 }
 
-BLEGAPStateEventLock::BLEGAPStateEventLock(void *context)
+EventCodecContext::EventCodecContext(void *adapterId)
 {
-    app_ble_gap_adapter_key_lock(context, EVENT_ADAPTER_KEY);
+    app_ble_gap_set_current_adapter_id(adapterId, EVENT_CODEC_CONTEXT);
 }
 
-BLEGAPStateEventLock::~BLEGAPStateEventLock()
+EventCodecContext::~EventCodecContext()
 {
-    app_ble_gap_adapter_key_unlock(EVENT_ADAPTER_KEY);
+    app_ble_gap_unset_current_adapter_id(EVENT_CODEC_CONTEXT);
 }
 
 uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
