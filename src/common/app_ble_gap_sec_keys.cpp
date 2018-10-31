@@ -162,7 +162,7 @@ void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_contex
     }
 }
 
-bool app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context)
+uint32_t app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context)
 {
     if (codec_context == EVENT_CODEC_CONTEXT)
     {
@@ -210,7 +210,7 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
     return NRF_ERROR_NO_MEM;
 }
 
-uint32_t app_ble_gap_sec_keys_storage_destroy(uint16_t conn_handle)
+uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
 {
     if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
     {
@@ -238,7 +238,7 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(uint16_t conn_handle)
     }
 }
 
-uint32_t app_ble_gap_sec_keys_find(uint16_t conn_handle, uint32_t *p_index)
+uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index)
 {
     if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
     {

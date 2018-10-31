@@ -44,8 +44,7 @@
 #include "ble_gap.h"
 #include "ble_gap_app.h" // Encoder/decoder functions
 
-// TODO: Find a way to support multiple adapters
-#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
+#include "app_ble_gap_sec_keys.h"
 
 #include <cstdint>
 

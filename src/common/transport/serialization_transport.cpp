@@ -196,11 +196,10 @@ void SerializationTransport::eventHandlingRunner()
             eventQueue.pop();
             eventLock.unlock();
 
+            // Set codec context
+            EventCodecContext context(this);
+
             // Allocate memory to store decoded event including an unknown quantity of padding
-
-            // Set security context
-            RequestReplyCodecContext context(this);
-
             auto possibleEventLength = MaxPossibleEventLength;
             std::vector<uint8_t> eventDecodeBuffer;
             eventDecodeBuffer.reserve(MaxPossibleEventLength);
@@ -217,8 +216,8 @@ void SerializationTransport::eventHandlingRunner()
             if (errCode != NRF_SUCCESS)
             {
                 std::stringstream logMessage;
-                logMessage << "Failed to decode event, error code is " << errCode << "."
-                           << std::endl;
+                logMessage << "Failed to decode event, error code is " << std::dec << errCode << "/0x"
+                           << std::hex << errCode << "." << std::endl;
                 logCallback(SD_RPC_LOG_ERROR, logMessage.str());
                 statusCallback(PKT_DECODE_ERROR, logMessage.str());
             }

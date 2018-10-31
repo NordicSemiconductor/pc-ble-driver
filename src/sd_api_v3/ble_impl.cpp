@@ -42,6 +42,8 @@
 #include "ble_app.h"
 
 #include <cstdint>
+#include <app_ble_gap_sec_keys.h>
+#include <adapter_internal.h>
 
 uint32_t sd_ble_uuid_encode(adapter_t* adapter, ble_uuid_t const * const p_uuid,
     uint8_t * const          p_uuid_le_len,
@@ -201,8 +203,11 @@ uint32_t sd_ble_enable(
 {
     (void)p_app_ram_base;
 
+    auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+    RequestReplyCodecContext context(adapterLayer->transport);
+
     // Reset previous app_ble_gap data
-    app_ble_gap_reset();
+    app_ble_gap_state_reset();
 
     const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_enable_req_enc(

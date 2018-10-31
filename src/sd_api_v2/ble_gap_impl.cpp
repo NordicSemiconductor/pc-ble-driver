@@ -46,10 +46,23 @@
 #include "ble_gap.h"
 #include "ble_gap_app.h" // Encoder/decoder functions
 
-//TODO: Find a way to support multiple adapters
-#include "app_ble_gap_sec_keys.h" // m_app_keys_table and app_ble_gap_sec_context_create
+#include "app_ble_gap_sec_keys.h"
 
 #include <cstdint>
+
+static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
+                                  const decode_function_t &decode_function)
+{
+    const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
+
+    if (adapterLayer == nullptr)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
+    RequestReplyCodecContext context(adapterLayer->transport);
+    return encode_decode(adapter, encode_function, decode_function);
+}
 
 uint32_t sd_ble_gap_adv_start(
     adapter_t *adapter,
@@ -70,7 +83,7 @@ uint32_t sd_ble_gap_adv_start(
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -93,7 +106,7 @@ uint32_t sd_ble_gap_device_name_get(adapter_t *adapter, uint8_t * const p_dev_na
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_appearance_get(adapter_t *adapter, uint16_t * const p_appearance)
@@ -113,7 +126,7 @@ uint32_t sd_ble_gap_appearance_get(adapter_t *adapter, uint16_t * const p_appear
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_device_name_set(adapter_t *adapter, ble_gap_conn_sec_mode_t const * const p_write_perm,
@@ -135,7 +148,7 @@ uint32_t sd_ble_gap_device_name_set(adapter_t *adapter, ble_gap_conn_sec_mode_t 
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_appearance_set(adapter_t *adapter, uint16_t appearance)
@@ -154,7 +167,7 @@ uint32_t sd_ble_gap_appearance_set(adapter_t *adapter, uint16_t appearance)
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -171,7 +184,7 @@ uint32_t sd_ble_gap_ppcp_set(adapter_t *adapter, ble_gap_conn_params_t const * c
         return ble_gap_ppcp_set_rsp_dec(buffer, length, result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -193,7 +206,7 @@ uint32_t sd_ble_gap_adv_data_set(adapter_t *adapter, uint8_t const * const p_dat
         return ble_gap_adv_data_set_rsp_dec(buffer, length, result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -211,7 +224,7 @@ uint32_t sd_ble_gap_conn_param_update(adapter_t *adapter, uint16_t conn_handle, 
         return ble_gap_conn_param_update_rsp_dec(buffer, length, result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -229,7 +242,7 @@ uint32_t sd_ble_gap_disconnect(adapter_t *adapter, uint16_t conn_handle, uint8_t
         return ble_gap_disconnect_rsp_dec(buffer, length, result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_sec_info_reply(adapter_t *adapter, uint16_t conn_handle,
@@ -251,7 +264,7 @@ uint32_t sd_ble_gap_sec_info_reply(adapter_t *adapter, uint16_t conn_handle,
         return ble_gap_sec_info_reply_rsp_dec(buffer, length, result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -272,7 +285,7 @@ uint32_t sd_ble_gap_ppcp_get(adapter_t *adapter, ble_gap_conn_params_t * const p
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t * const p_addr)
@@ -292,7 +305,7 @@ uint32_t sd_ble_gap_address_get(adapter_t *adapter, ble_gap_addr_t * const p_add
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_address_set(adapter_t *adapter, uint8_t addr_cycle_mode, ble_gap_addr_t const * const p_addr)
@@ -312,7 +325,7 @@ uint32_t sd_ble_gap_address_set(adapter_t *adapter, uint8_t addr_cycle_mode, ble
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_adv_stop(adapter_t *adapter)
@@ -330,7 +343,7 @@ uint32_t sd_ble_gap_adv_stop(adapter_t *adapter)
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -354,7 +367,7 @@ uint32_t sd_ble_gap_auth_key_reply(adapter_t *adapter, uint16_t conn_handle,
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_authenticate(adapter_t *adapter, uint16_t conn_handle, ble_gap_sec_params_t const * const p_sec_params)
@@ -374,7 +387,7 @@ uint32_t sd_ble_gap_authenticate(adapter_t *adapter, uint16_t conn_handle, ble_g
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle, ble_gap_conn_sec_t * const p_conn_sec)
@@ -395,7 +408,7 @@ uint32_t sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle, ble_g
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_rssi_start(adapter_t *adapter, uint16_t conn_handle, uint8_t threshold_dbm, uint8_t skip_count)
@@ -416,7 +429,7 @@ uint32_t sd_ble_gap_rssi_start(adapter_t *adapter, uint16_t conn_handle, uint8_t
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_rssi_stop(adapter_t *adapter, uint16_t conn_handle)
@@ -435,7 +448,7 @@ uint32_t sd_ble_gap_rssi_stop(adapter_t *adapter, uint16_t conn_handle)
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_tx_power_set(adapter_t *adapter, int8_t tx_power)
@@ -454,7 +467,7 @@ uint32_t sd_ble_gap_tx_power_set(adapter_t *adapter, int8_t tx_power)
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
@@ -472,7 +485,7 @@ uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_connect(adapter_t *adapter,
@@ -497,7 +510,7 @@ uint32_t sd_ble_gap_connect(adapter_t *adapter,
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -516,7 +529,7 @@ uint32_t sd_ble_gap_connect_cancel(adapter_t *adapter)
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -536,7 +549,7 @@ uint32_t sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const *
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_encrypt(adapter_t *adapter,
@@ -560,7 +573,7 @@ uint32_t sd_ble_gap_encrypt(adapter_t *adapter,
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -583,7 +596,7 @@ uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t  conn_handle,
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 
@@ -594,6 +607,24 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
                                      ble_gap_sec_keyset_t const *p_sec_keyset)
 {
     const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        uint32_t index = 0;
+        auto err_code  = app_ble_gap_sec_keys_storage_create(conn_handle, &index);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            return err_code;
+        }
+
+        if (p_sec_keyset)
+        {
+            err_code = app_ble_gap_sec_keys_update(index, p_sec_keyset);
+
+            if (err_code != NRF_SUCCESS)
+            {
+                return err_code;
+            }
+        }
+
         return ble_gap_sec_params_reply_req_enc(
             conn_handle,
             sec_status,
@@ -611,26 +642,7 @@ uint32_t sd_ble_gap_sec_params_reply(adapter_t *adapter,
             result);
     };
 
-    ser_ble_gap_app_keyset_t *keyset = nullptr;
-
-    // First allocate security context for serialization. We add the a security context for the
-    // connection even if the developer has not provided a p_sec_keyset since the same structure
-    // will be used for storing keys received from the peer.
-    const auto adapterInternal = static_cast<AdapterInternal*>(adapter->internal);
-    BLESecurityContext context(adapterInternal->transport);
-    const auto err_code = app_ble_gap_sec_context_create(conn_handle, &keyset);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
-
-    if (p_sec_keyset)
-    {
-        std::memcpy(&keyset->keyset, p_sec_keyset, sizeof(ble_gap_sec_keyset_t));
-    }
-
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_lesc_oob_data_get(adapter_t *adapter, uint16_t conn_handle, ble_gap_lesc_p256_pk_t const *p_pk_own, ble_gap_lesc_oob_data_t *p_oobd_own)
@@ -652,7 +664,7 @@ uint32_t sd_ble_gap_lesc_oob_data_get(adapter_t *adapter, uint16_t conn_handle, 
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_lesc_oob_data_set(adapter_t *adapter, uint16_t conn_handle, ble_gap_lesc_oob_data_t const *p_oobd_own, ble_gap_lesc_oob_data_t const *p_oobd_peer)
@@ -673,7 +685,7 @@ uint32_t sd_ble_gap_lesc_oob_data_set(adapter_t *adapter, uint16_t conn_handle, 
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_lesc_dhkey_reply(adapter_t *adapter, uint16_t conn_handle, ble_gap_lesc_dhkey_t const *p_dhkey)
@@ -693,7 +705,7 @@ uint32_t sd_ble_gap_lesc_dhkey_reply(adapter_t *adapter, uint16_t conn_handle, b
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
 uint32_t sd_ble_gap_keypress_notify(adapter_t *adapter, uint16_t conn_handle, uint8_t kp_not)
@@ -713,5 +725,5 @@ uint32_t sd_ble_gap_keypress_notify(adapter_t *adapter, uint16_t conn_handle, ui
             result);
     };
 
-    return encode_decode(adapter, encode_function, decode_function);
+    return gap_encode_decode(adapter, encode_function, decode_function);
 }
