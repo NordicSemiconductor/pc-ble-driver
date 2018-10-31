@@ -39,7 +39,7 @@
 #include "ble_serialization.h"
 #include "ble_gap_struct_serialization.h"
 #include "cond_field_serialization.h"
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 
 uint32_t ble_gap_evt_lesc_dhkey_request_dec(uint8_t const * const p_buf,
                                             uint32_t              packet_len,

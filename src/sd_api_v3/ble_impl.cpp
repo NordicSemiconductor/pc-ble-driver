@@ -42,7 +42,7 @@
 #include "ble_app.h"
 
 #include <cstdint>
-#include <app_ble_gap_sec_keys.h>
+#include <app_ble_gap.h>
 #include <adapter_internal.h>
 
 uint32_t sd_ble_uuid_encode(adapter_t* adapter, ble_uuid_t const * const p_uuid,

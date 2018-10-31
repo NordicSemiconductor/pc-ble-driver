@@ -40,7 +40,7 @@
 #include "ble_gap_evt_app.h"
 #include "ble_serialization.h"
 #include "app_util.h"
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 #include "ble_gap_struct_serialization.h"
 #include "cond_field_serialization.h"
 #include <string.h>

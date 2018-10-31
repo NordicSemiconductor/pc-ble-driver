@@ -44,7 +44,7 @@
 #include "ble_gap.h"
 #include "ble_gap_app.h"
 
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 
 #include <cstdint>
 

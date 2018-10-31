@@ -43,7 +43,7 @@
 #include "adapter_internal.h"
 #include "nrf_error.h"
 #include "ser_config.h"
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 
 //AdapterRequestReplyCodecContext
 

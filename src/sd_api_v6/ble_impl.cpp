@@ -38,7 +38,7 @@
 #include "adapter.h"
 #include "ble_common.h"
 
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 #include "ble.h"
 #include "ble_app.h"
 #include <adapter_internal.h>

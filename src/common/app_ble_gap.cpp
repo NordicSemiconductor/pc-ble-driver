@@ -37,7 +37,7 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 #include "nrf_error.h"
 #include "ser_config.h"
 

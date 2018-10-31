@@ -40,7 +40,7 @@
 #include "ble_serialization.h"
 #include "ble_gap_struct_serialization.h"
 #include "app_util.h"
-#include "app_ble_gap_sec_keys.h"
+#include "app_ble_gap.h"
 
 uint32_t ble_gap_evt_auth_status_dec(
         uint8_t const * const p_buf,
