@@ -38,8 +38,6 @@
 // Test framework
 #include "catch2/catch.hpp"
 
-#if NRF_SD_BLE_API >= 6
-
 // Logging support
 #include <internal/log.h>
 
@@ -54,7 +52,7 @@
 #include <sstream>
 #include <thread>
 
-TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
+TEST_CASE("advertising", "[gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
 {
     using namespace testutil;
 
@@ -69,7 +67,7 @@ TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][P
     auto error = false;
 
 #if NRF_SD_BLE_API == 6
-    SECTION("extended_advertising")
+    SECTION("extended")
     {
         const auto baudRate = central.baudRate;
 
@@ -225,6 +223,7 @@ TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][P
                 case BLE_GAP_EVT_ADV_SET_TERMINATED:
                 {
                     const auto setTerminated = gapEvent->params.adv_set_terminated;
+
                     if (setTerminated.adv_handle != p->scratchpad.adv_handle)
                     {
                         NRF_LOG(p->role() << " BLE_GAP_EVT_ADV_SET_TERMINATED: Received "
@@ -232,50 +231,42 @@ TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][P
                                              "one setup with sd_ble_gap_adv_set_configure.");
                         error = true;
                     }
-                    else
+
+                    if (setTerminated.reason != BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
                     {
-                        if (setTerminated.num_completed_adv_events != maxLengthOfAdvData)
-                        {
-                            NRF_LOG(p->role()
-                                    << " BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
-                                       "advertisement events does not match max_adv_evts set in "
-                                       "sd_ble_gap_adv_set_configure.");
-                            error = true;
-                        }
-                        else
-                        {
-                            if (setTerminated.reason !=
-                                BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
-                            {
-                                NRF_LOG(p->role()
-                                        << " BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason was not "
-                                           "LIMIT_REACHED which it should be.");
-                                error = true;
-                            }
-                            else
-                            {
-                                std::vector<uint8_t> manufacturerSpecificData;
-                                const auto advReport = setTerminated.adv_data;
-
-                                std::vector<uint8_t> advData;
-                                const auto data       = advReport.adv_data.p_data;
-                                const auto dataLength = advReport.adv_data.len;
-                                advData.assign(data, data + dataLength);
-
-                                if (scanResponse != advData)
-                                {
-                                    NRF_LOG(p->role()
-                                            << " BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
-                                               "buffers set in sd_ble_gap_adv_set_configure does "
-                                               "not match.");
-                                    error = true;
-                                }
-                            }
-                        }
+                        NRF_LOG(p->role()
+                                << " BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason was not "
+                                   "LIMIT_REACHED which it should be.");
+                        error = true;
                     }
-                }
+
+                    if (setTerminated.num_completed_adv_events != maxNumberOfAdvertisements)
+                    {
+                        NRF_LOG(p->role()
+                                << " BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
+                                   "advertisement events does not match max_adv_evts set in "
+                                   "sd_ble_gap_adv_set_configure.");
+                        error = true;
+                    }
+
+                    std::vector<uint8_t> manufacturerSpecificData;
+                    const auto advReport = setTerminated.adv_data;
+
+                    std::vector<uint8_t> advData;
+                    const auto data       = advReport.adv_data.p_data;
+                    const auto dataLength = advReport.adv_data.len;
+                    advData.assign(data, data + dataLength);
+
+                    if (scanResponse != advData)
+                    {
+                        NRF_LOG(p->role() << " BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
+                                             "buffers set in sd_ble_gap_adv_set_configure does "
+                                             "not match with advertisement received.");
+                        error = true;
+                    }
 
                     return true;
+                }
                 default:
                     return false;
             }
@@ -340,11 +331,3 @@ TEST_CASE("advertising_api", "[gap][known_error][PCA10028][PCA10031][PCA10040][P
     }
 #endif // NRF_SD_BLE_API == 6
 }
-
-#else
-TEST_CASE("test_advertising_api")
-{
-    INFO("Not relevant for SoftDevice API version < 3")
-}
-
-#endif // NRF_SD_BLE_API >= 6
