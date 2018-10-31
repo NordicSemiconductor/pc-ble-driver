@@ -35,16 +35,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// C++ code
 #include "adapter.h"
 #include "ble_common.h"
 #include "adapter_internal.h"
 
-#include <cstring>
-
-// C code
 #include "ble_gap.h"
-#include "ble_gap_app.h" // Encoder/decoder functions
+#include "ble_gap_app.h"
 
 #include "app_ble_gap_sec_keys.h"
 
