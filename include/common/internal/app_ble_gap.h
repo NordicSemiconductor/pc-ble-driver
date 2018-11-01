@@ -85,7 +85,7 @@ typedef enum {
 /**
  * @brief Create GAP states for a given adapter
  *
- * The purpose of this function is create a GAP state for a given adapter.
+ * The purpose of this function is to create a GAP state for a given adapter.
  *
  * @param[in] key Key that represents the adapter, used by other functions to select GAP state for a
  * adapter

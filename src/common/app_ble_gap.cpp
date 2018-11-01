@@ -86,8 +86,8 @@ static std::map<void *, std::shared_ptr<adapter_ble_gap_state_t>> adapters_gap_s
 typedef struct
 {
     /**
-     * @brief Key that points to the @ref adapter_ble_gap_state_t [adapter GAP state] currently used
-     * be codecs
+     * @brief adapter_id that points to the @ref adapter_ble_gap_state_t [adapter GAP state] currently used
+     * by codecs
      */
     void *adapter_id{nullptr};
 
