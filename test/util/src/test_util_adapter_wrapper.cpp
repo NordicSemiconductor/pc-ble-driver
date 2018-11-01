@@ -177,18 +177,18 @@ uint32_t AdapterWrapper::startScan(const bool resume, const bool extended, const
     {
         if (!resume)
         {
-            NRF_LOG(role() << " Scan start failed");
+            NRF_LOG(role() << " Scan start failed with error " << asHex(error_code));
         }
         else
         {
-            NRF_LOG(role() << " Scan resume failed");
+            NRF_LOG(role() << " Scan resume failed with error " << asHex(error_code));
         }
     }
     else
     {
         if (!resume)
         {
-            NRF_LOG(role() << " Scan resume failed");
+            NRF_LOG(role() << " Scan started");
         }
         else
         {
@@ -1009,14 +1009,13 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
 
 adapter_t *AdapterWrapper::adapterInit(const char *serial_port, uint32_t baud_rate)
 {
-    physical_layer_t *phy;
-    data_link_layer_t *data_link_layer;
-    transport_layer_t *transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
-                                            SD_RPC_PARITY_NONE);
-    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
-    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
+    const auto phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate,
+                                                              SD_RPC_FLOW_CONTROL_NONE,
+                                                              SD_RPC_PARITY_NONE);
+
+    const auto data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
+    const auto transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
     return sd_rpc_adapter_create(transport_layer);
 }
 

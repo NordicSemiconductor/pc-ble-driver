@@ -43,6 +43,29 @@
 #include "adapter_internal.h"
 #include "nrf_error.h"
 #include "ser_config.h"
+#include "app_ble_gap.h"
+
+//AdapterRequestReplyCodecContext
+
+RequestReplyCodecContext::RequestReplyCodecContext(void *adapterId)
+{
+    app_ble_gap_set_current_adapter_id(adapterId, REQUEST_REPLY_CODEC_CONTEXT);
+}
+
+RequestReplyCodecContext::~RequestReplyCodecContext()
+{
+    app_ble_gap_unset_current_adapter_id(REQUEST_REPLY_CODEC_CONTEXT);
+}
+
+EventCodecContext::EventCodecContext(void *adapterId)
+{
+    app_ble_gap_set_current_adapter_id(adapterId, EVENT_CODEC_CONTEXT);
+}
+
+EventCodecContext::~EventCodecContext()
+{
+    app_ble_gap_unset_current_adapter_id(EVENT_CODEC_CONTEXT);
+}
 
 uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
                        const decode_function_t &decode_function)
