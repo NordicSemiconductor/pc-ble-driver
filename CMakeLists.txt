@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.11)
 project(pc-ble-driver)
 
-include (cmake/pc-ble-driver.cmake)
+include(cmake/pc-ble-driver.cmake)
+
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+    message(FATAL_ERROR "Protocol implementation does not support big endian platforms.")
+endif()
 
 # Common source files
 file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")

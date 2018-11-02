@@ -471,7 +471,7 @@ uint32_t ble_data_t_enc(void const * const p_void_struct,
 {
     SER_STRUCT_ENC_BEGIN(ble_data_t);
 
-    uint32_t buf_id = (uint32_t)p_struct->p_data;
+    uint32_t buf_id = *((uint32_t*)&(p_struct->p_data));
     SER_PUSH_uint32(&buf_id);
     SER_PUSH_len16data(p_struct->p_data, p_struct->len);
 

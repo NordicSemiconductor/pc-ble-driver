@@ -1723,12 +1723,12 @@ uint32_t ble_gap_evt_adv_set_terminated_t_enc(void const * const p_void_struct,
     SER_PUSH_uint8(&p_struct->num_completed_adv_events);
     SER_PUSH_uint16(&p_struct->adv_data.adv_data.len);
 
-    uint32_t addr = (uint32_t)p_struct->adv_data.adv_data.p_data;
+    uint32_t addr = *((uint32_t*)&(p_struct->adv_data.adv_data.p_data));
     SER_PUSH_uint32(&addr);
 
     SER_PUSH_uint16(&p_struct->adv_data.scan_rsp_data.len);
 
-    addr = (uint32_t)p_struct->adv_data.scan_rsp_data.p_data;
+    addr = *((uint32_t*)&(p_struct->adv_data.scan_rsp_data.p_data));
     SER_PUSH_uint32(&addr);
 
     SER_STRUCT_ENC_END;
