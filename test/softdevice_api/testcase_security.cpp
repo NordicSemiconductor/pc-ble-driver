@@ -67,13 +67,6 @@ TEST_CASE("security", "[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
     // Set to true when the test is complete
     auto testComplete = false;
 
-    enum AuthenticationType {
-        LEGACY_PASSKEY,
-        LEGACY_OOB,
-    };
-
-    AuthenticationType authType;
-
     const auto setupPeripheral = [&](const std::shared_ptr<testutil::AdapterWrapper> &p,
                                      const std::string &advertisingName,
                                      const std::vector<uint8_t> &initialCharacteristicValue,
@@ -121,7 +114,6 @@ TEST_CASE("security", "[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
             {
                 case BLE_GAP_EVT_CONNECTED:
                 {
-                    authType            = LEGACY_PASSKEY;
                     const auto err_code = c->startAuthentication(true, true, false, true);
 
                     if (err_code != NRF_SUCCESS)
@@ -307,21 +299,6 @@ TEST_CASE("security", "[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
                         error = true;
                     }
 
-                    return true;
-                case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-                {
-                    NRF_LOG(p->role() << " BLE_GATTS_EVT_SYS_ATTR_MISSING");
-
-                    const auto err_code = sd_ble_gatts_sys_attr_set(
-                        p->unwrap(), p->scratchpad.connection_handle, nullptr, 0, 0);
-
-                    if (err_code != NRF_SUCCESS)
-                    {
-                        error = true;
-                        NRF_LOG(p->role() << "Failed updating persistent sys attr info. "
-                                          << testutil::errorToString(err_code));
-                    }
-                }
                     return true;
                 default:
                     return false;
