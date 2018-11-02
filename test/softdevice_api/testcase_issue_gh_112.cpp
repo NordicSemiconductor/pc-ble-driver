@@ -575,7 +575,7 @@ TEST_CASE("issue_gh_112","[issue][PCA10028][PCA10031][PCA10040][PCA10056][PCA100
 }
 
 #else
-TEST_CASE("test_issue_gh_112")
+TEST_CASE("issue_gh_112")
 {
     INFO("Not relevant for SoftDevice API version < 3")
 }
