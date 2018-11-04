@@ -75,6 +75,7 @@ struct Environment
     std::vector<SerialPort> serialPorts;
     uint32_t numberOfIterations;
     sd_rpc_log_severity_t driverLogLevel;
+    bool driverLogLevelSet;
     uint32_t baudRate;
 };
 

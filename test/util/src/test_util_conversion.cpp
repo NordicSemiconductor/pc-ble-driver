@@ -981,4 +981,36 @@ std::string asText(const sd_rpc_log_severity_t &severity)
             break;
     };
 }
+
+sd_rpc_log_severity_t parseLogSeverity(const std::string &level)
+{
+    if (level == "trace")
+    {
+        return SD_RPC_LOG_TRACE;
+    }
+    else if (level == "debug")
+    {
+        return SD_RPC_LOG_DEBUG;
+    }
+    else if (level == "info")
+    {
+        return SD_RPC_LOG_INFO;
+    }
+    else if (level == "warning")
+    {
+        return SD_RPC_LOG_WARNING;
+    }
+    else if (level == "error")
+    {
+        return SD_RPC_LOG_ERROR;
+    }
+    else if (level == "fatal")
+    {
+        return SD_RPC_LOG_FATAL;
+    }
+
+    std::stringstream ss;
+    ss << "Not able to parse '" << level << "' to be sd_rpc_log_severity_t.";
+    throw std::invalid_argument(ss.str());
+}
 } // namespace testutil

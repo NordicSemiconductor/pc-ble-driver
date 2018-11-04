@@ -66,6 +66,7 @@ Environment getEnvironment()
         numberOfIterations = std::stoi(envNumberOfIterations);
     }
 
+    // Command line argument override environment variable
     if (ConfiguredEnvironment.numberOfIterations != 0)
     {
         numberOfIterations = ConfiguredEnvironment.numberOfIterations;
@@ -73,41 +74,25 @@ Environment getEnvironment()
 
     env.numberOfIterations = numberOfIterations;
 
-    auto driverLogLevel          = SD_RPC_LOG_INFO;
-    const auto envDriverLogLevel = std::getenv("BLE_DRIVER_TEST_LOGLEVEL");
-
-    if (envDriverLogLevel != nullptr)
+    env.driverLogLevel = SD_RPC_LOG_INFO;
+    
+    // Command line argument override environment variable
+    if (ConfiguredEnvironment.driverLogLevelSet)
     {
-        const auto envDriverLogLevel_ = std::string(envDriverLogLevel);
+        env.driverLogLevel = ConfiguredEnvironment.driverLogLevel;
+    }
+    else
+    {
+        const auto envDriverLogLevel = std::getenv("BLE_DRIVER_TEST_LOGLEVEL");
 
-        if (envDriverLogLevel_ == "trace")
+        if (envDriverLogLevel != nullptr)
         {
-            driverLogLevel = SD_RPC_LOG_TRACE;
-        }
-        else if (envDriverLogLevel_ == "debug")
-        {
-            driverLogLevel = SD_RPC_LOG_DEBUG;
-        }
-        else if (envDriverLogLevel_ == "info")
-        {
-            driverLogLevel = SD_RPC_LOG_INFO;
-        }
-        else if (envDriverLogLevel_ == "warning")
-        {
-            driverLogLevel = SD_RPC_LOG_WARNING;
-        }
-        else if (envDriverLogLevel_ == "error")
-        {
-            driverLogLevel = SD_RPC_LOG_ERROR;
-        }
-        else if (envDriverLogLevel_ == "fatal")
-        {
-            driverLogLevel = SD_RPC_LOG_FATAL;
+            env.driverLogLevel = testutil::parseLogSeverity(envDriverLogLevel);
         }
     }
 
-    env.driverLogLevel = driverLogLevel;
-    env.baudRate       = baudRate;
+    env.driverLogLevelSet = true;
+    env.baudRate          = baudRate;
 
     return env;
 };
