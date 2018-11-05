@@ -1,15 +1,20 @@
 #include "test_setup.h"
+#include <utility>
+#include <algorithm>
 
 namespace test {
+
+Environment ConfiguredEnvironment;
+
 SerialPort::SerialPort(std::string port, uint32_t baudRate)
-    : port(port)
+    : port(std::move(port))
     , baudRate(baudRate){};
 
 Environment getEnvironment()
 {
     Environment env;
 
-    auto baudRate    = DEFAULT_BAUD_RATE;
+    auto baudRate          = DEFAULT_BAUD_RATE;
     const auto envBaudRate = std::getenv("BLE_DRIVER_TEST_BAUD_RATE");
 
     if (envBaudRate != nullptr)
@@ -17,64 +22,77 @@ Environment getEnvironment()
         baudRate = std::stoi(envBaudRate);
     }
 
-    auto envPortA = std::getenv("BLE_DRIVER_TEST_SERIAL_PORT_A");
-
-    if (envPortA != nullptr)
+    // Command line argument override environment variable
+    if (ConfiguredEnvironment.baudRate != 0)
     {
-        env.serialPorts.push_back(SerialPort(envPortA, baudRate));
+        baudRate = ConfiguredEnvironment.baudRate;
     }
 
-    auto envPortB = std::getenv("BLE_DRIVER_TEST_SERIAL_PORT_B");
-
-    if (envPortB != nullptr)
+    // Command line argument override environment variable
+    if (std::count_if(ConfiguredEnvironment.serialPorts.begin(),
+                      ConfiguredEnvironment.serialPorts.end(),
+                      [](const SerialPort &port) -> bool { return !port.port.empty(); }) >= 2)
     {
-        env.serialPorts.push_back(SerialPort(envPortB, baudRate));
+        for (auto port : ConfiguredEnvironment.serialPorts)
+        {
+            if (!port.port.empty())
+            {
+                env.serialPorts.emplace_back(port.port, baudRate);
+            }
+        }
+    }
+    else
+    {
+        auto envPortA = std::getenv("BLE_DRIVER_TEST_SERIAL_PORT_A");
+
+        if (envPortA != nullptr)
+        {
+            env.serialPorts.emplace_back(envPortA, baudRate);
+        }
+
+        auto envPortB = std::getenv("BLE_DRIVER_TEST_SERIAL_PORT_B");
+
+        if (envPortB != nullptr)
+        {
+            env.serialPorts.emplace_back(envPortB, baudRate);
+        }
     }
 
-    auto numberOfIterations    = 100;
-    auto envNumberOfIterations = std::getenv("BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS");
+    auto numberOfIterations          = 100;
+    const auto envNumberOfIterations = std::getenv("BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS");
 
     if (envNumberOfIterations != nullptr)
     {
         numberOfIterations = std::stoi(envNumberOfIterations);
     }
 
+    // Command line argument override environment variable
+    if (ConfiguredEnvironment.numberOfIterations != 0)
+    {
+        numberOfIterations = ConfiguredEnvironment.numberOfIterations;
+    }
+
     env.numberOfIterations = numberOfIterations;
 
-    auto driverLogLevel    = SD_RPC_LOG_INFO;
-    auto envDriverLogLevel = std::getenv("BLE_DRIVER_TEST_LOGLEVEL");
-
-    if (envDriverLogLevel != nullptr)
+    env.driverLogLevel = SD_RPC_LOG_INFO;
+    
+    // Command line argument override environment variable
+    if (ConfiguredEnvironment.driverLogLevelSet)
     {
-        auto envDriverLogLevel_ = std::string(envDriverLogLevel);
+        env.driverLogLevel = ConfiguredEnvironment.driverLogLevel;
+    }
+    else
+    {
+        const auto envDriverLogLevel = std::getenv("BLE_DRIVER_TEST_LOGLEVEL");
 
-        if (envDriverLogLevel_ == "trace")
+        if (envDriverLogLevel != nullptr)
         {
-            driverLogLevel = SD_RPC_LOG_TRACE;
-        }
-        else if (envDriverLogLevel_ == "debug")
-        {
-            driverLogLevel = SD_RPC_LOG_DEBUG;
-        }
-        else if (envDriverLogLevel_ == "info")
-        {
-            driverLogLevel = SD_RPC_LOG_INFO;
-        }
-        else if (envDriverLogLevel_ == "warning")
-        {
-            driverLogLevel = SD_RPC_LOG_WARNING;
-        }
-        else if (envDriverLogLevel_ == "error")
-        {
-            driverLogLevel = SD_RPC_LOG_ERROR;
-        }
-        else if (envDriverLogLevel_ == "fatal")
-        {
-            driverLogLevel = SD_RPC_LOG_FATAL;
+            env.driverLogLevel = testutil::parseLogSeverity(envDriverLogLevel);
         }
     }
 
-    env.driverLogLevel = driverLogLevel;
+    env.driverLogLevelSet = true;
+    env.baudRate          = baudRate;
 
     return env;
 };
