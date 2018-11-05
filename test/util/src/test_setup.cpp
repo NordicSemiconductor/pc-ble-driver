@@ -1,6 +1,6 @@
 #include "test_setup.h"
-#include <utility>
 #include <algorithm>
+#include <utility>
 
 namespace test {
 
@@ -9,6 +9,30 @@ Environment ConfiguredEnvironment;
 SerialPort::SerialPort(std::string port, uint32_t baudRate)
     : port(std::move(port))
     , baudRate(baudRate){};
+
+std::string getEnvironmentAsText(const Environment &env)
+{
+    std::stringstream ss;
+
+    if (env.serialPorts.empty())
+    {
+        ss << "No serial ports setup.\n";
+    }
+    else
+    {
+        ss << "serial-ports:\n";
+        for (auto port : env.serialPorts)
+        {
+            ss << "  port:" << port.port << " baud-rate:" << port.baudRate << "\n";
+        }
+    }
+
+    ss << "hardware-info:" << env.hardwareInfo << "\n";
+    ss << "log-level:" << testutil::asText(env.driverLogLevel) << "\n";
+    ss << "iterations(if relevant):" << env.numberOfIterations << "\n";
+
+    return ss.str();
+}
 
 Environment getEnvironment()
 {
@@ -75,7 +99,7 @@ Environment getEnvironment()
     env.numberOfIterations = numberOfIterations;
 
     env.driverLogLevel = SD_RPC_LOG_INFO;
-    
+
     // Command line argument override environment variable
     if (ConfiguredEnvironment.driverLogLevelSet)
     {
@@ -93,6 +117,7 @@ Environment getEnvironment()
 
     env.driverLogLevelSet = true;
     env.baudRate          = baudRate;
+    env.hardwareInfo      = ConfiguredEnvironment.hardwareInfo;
 
     return env;
 };

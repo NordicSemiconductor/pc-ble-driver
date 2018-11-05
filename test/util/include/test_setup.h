@@ -82,11 +82,13 @@ struct Environment
     sd_rpc_log_severity_t driverLogLevel;
     bool driverLogLevelSet;
     uint32_t baudRate;
+    std::string hardwareInfo;
 };
 
 extern Environment ConfiguredEnvironment;
 
 Environment getEnvironment();
+std::string getEnvironmentAsText(const Environment &env);
 
 class VirtualTransportSendSync : public Transport
 {

@@ -60,6 +60,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     auto error = false;
 
     auto env = ::test::getEnvironment();
+    INFO(::test::getEnvironmentAsText(env));
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort         = env.serialPorts.at(0);
     const auto numberOfIterations = env.numberOfIterations;
@@ -67,9 +68,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     SECTION("open_already_opened_adapter")
     {
         const auto baudRate = serialPort.baudRate;
-
-        INFO("Serial port used: " << serialPort.port);
-        INFO("Baud rate used: " << baudRate);
 
         auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
                                                             baudRate);
@@ -83,9 +81,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     {
         const auto baudRate = serialPort.baudRate;
 
-        INFO("Serial port used: " << serialPort.port);
-        INFO("Baud rate used: " << baudRate);
-
         auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
                                                             baudRate);
 
@@ -98,9 +93,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     SECTION("open_close_open_iterations")
     {
         const auto baudRate = serialPort.baudRate;
-
-        INFO("Serial port used: " << serialPort.port);
-        INFO("Baud rate used: " << baudRate);
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {

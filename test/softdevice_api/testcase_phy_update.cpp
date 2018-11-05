@@ -67,6 +67,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
     auto testComplete = false;
 
     auto env = ::test::getEnvironment();
+    INFO(::test::getEnvironmentAsText(env));
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
@@ -74,10 +75,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
     SECTION("update_from_1mps_to_2mpb")
     {
         const auto baudRate = central.baudRate;
-
-        INFO("Central serial port used: " << central.port);
-        INFO("Peripheral serial port used: " << peripheral.port);
-        INFO("Baud rate used: " << baudRate);
 
         const auto advertisementNameLength = 20;
         std::vector<uint8_t> peripheralAdvNameBuffer(advertisementNameLength);

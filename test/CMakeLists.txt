@@ -62,7 +62,7 @@ function(parse_device_id device_id parse_error segger_sn serial_port)
     set(${serial_port} ${DEVICE_SERIAL_PORT} PARENT_SCOPE)
 endfunction()
 
-function(add_softdevice_test target_name device_a device_b connfw tests_reporter tests)
+function(add_softdevice_test target_name pca device_a device_b connfw tests_reporter tests)
     # Basic sanity checks
     if(NOT NRFJPROG)
         return()
@@ -110,7 +110,8 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --program ${connfw}
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports" || (exit 0)
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports" 
+        COMMAND ${CMAKE_COMMAND} -E sleep 1
     )
 
     if(BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS)
@@ -119,17 +120,14 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
         set(OPENCLOSE_ITERATIONS 10)
     endif()
 
-    set(define_env )
-    list(APPEND define_env "BLE_DRIVER_TEST_SERIAL_PORT_A=${DEVICE_A_SERIAL_PORT}")
-    list(APPEND define_env "BLE_DRIVER_TEST_SERIAL_PORT_B=${DEVICE_B_SERIAL_PORT}")
-    list(APPEND define_env "BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS=${OPENCLOSE_ITERATIONS}")
-    list(APPEND define_env "BLE_DRIVER_TEST_LOGLEVEL=trace")
-
     if(APPLE)
-        list(APPEND define_env "BLE_DRIVER_TEST_BAUD_RATE=115200")
+        set(BAUD_RATE 115200)
+    else()
+        set(BAUD_RATE 1000000)
     endif()
 
-    message(STATUS "Configuring target to run \"cmake -E env ${define_env}\" before running test.")
+    # Extract hex filename only
+    get_filename_component(connfw_filename "${connfw}" NAME)
 
     # Link tests together so they are ran in sequence
     foreach(integration_test IN LISTS tests)
@@ -137,8 +135,14 @@ function(add_softdevice_test target_name device_a device_b connfw tests_reporter
             OUTPUT ${COMMAND_NAME}
             APPEND COMMAND ${CMAKE_COMMAND} -E env ${define_env}
             "$<TARGET_FILE:${integration_test}>"
+            --port-a ${DEVICE_A_SERIAL_PORT}
+            --port-b ${DEVICE_B_SERIAL_PORT}
+            --iterations ${OPENCLOSE_ITERATIONS}
+            --baud-rate ${BAUD_RATE}
+            --log-level trace
+            --hardware-info "hex:${connfw_filename},pca:${pca}"
             --reporter ${tests_reporter} 
-            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml"
+            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml" || (exit 0)
             DEPENDS ${integration_test}
         )
     endforeach()
@@ -173,6 +177,7 @@ function(add_run_test_targets)
         if(2 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv2_s130_pca10028
+                pca10028
                 "${BLE_DRIVER_TEST_PCA10028_A}"
                 "${BLE_DRIVER_TEST_PCA10028_B}"
                 "${SD_API_V2_S130_HEX}"
@@ -188,6 +193,7 @@ function(add_run_test_targets)
         if(2 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv2_s130_pca10031
+                pca10031
                 "${BLE_DRIVER_TEST_PCA10031_A}"
                 "${BLE_DRIVER_TEST_PCA10031_B}"
                 "${SD_API_V2_S130_HEX}"
@@ -203,6 +209,7 @@ function(add_run_test_targets)
         if(3 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv3_s132_pca10040
+                pca10040
                 "${BLE_DRIVER_TEST_PCA10040_A}"
                 "${BLE_DRIVER_TEST_PCA10040_B}"
                 "${SD_API_V3_S132_HEX}"
@@ -216,6 +223,7 @@ function(add_run_test_targets)
         if(5 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv5_s132_pca10040
+                pca10040
                 "${BLE_DRIVER_TEST_PCA10040_A}"
                 "${BLE_DRIVER_TEST_PCA10040_B}"
                 "${SD_API_V5_S132_HEX}"
@@ -229,6 +237,7 @@ function(add_run_test_targets)
         if(6 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv6_s132_pca10040
+                pca10040
                 "${BLE_DRIVER_TEST_PCA10040_A}"
                 "${BLE_DRIVER_TEST_PCA10040_B}"
                 "${SD_API_V6_S132_HEX}"
@@ -244,6 +253,7 @@ function(add_run_test_targets)
         if(3 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv3_s132_pca10056_usb
+                pca10056
                 "${BLE_DRIVER_TEST_PCA10056_USB_A}"
                 "${BLE_DRIVER_TEST_PCA10056_USB_B}"
                 "${SD_API_V3_S132_PCA10056_USB_HEX}"
@@ -257,6 +267,7 @@ function(add_run_test_targets)
         if(6 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv6_s140_pca10056_usb
+                pca10056
                 "${BLE_DRIVER_TEST_PCA10056_USB_A}"
                 "${BLE_DRIVER_TEST_PCA10056_USB_B}"
                 "${SD_API_V6_S140_PCA10056_USB_HEX}"
@@ -272,6 +283,7 @@ function(add_run_test_targets)
         if(3 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv3_s132_pca10056
+                pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
                 "${SD_API_V3_S132_HEX}"
@@ -285,6 +297,7 @@ function(add_run_test_targets)
         if(5 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv5_s132_pca10056
+                pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
                 "${SD_API_V5_S132_HEX}"
@@ -298,6 +311,7 @@ function(add_run_test_targets)
         if(6 IN_LIST SD_API_VER_NUMS)
             add_softdevice_test(
                 run_test_sdv6_s140_pca10056
+                pca10056
                 "${BLE_DRIVER_TEST_PCA10056_A}"
                 "${BLE_DRIVER_TEST_PCA10056_B}"
                 "${SD_API_V6_S140_HEX}"

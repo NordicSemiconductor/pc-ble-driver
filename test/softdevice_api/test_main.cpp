@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
 
     auto serialPortA = std::string{};
     auto serialPortB = std::string{};
+    auto hardwareInfo = std::string{};
     auto baudRate    = DEFAULT_BAUD_RATE;
 
     using namespace Catch::clara;
@@ -43,7 +44,9 @@ int main(int argc, char *argv[])
                     }
                 }
             },
-            "trace|debug|info|warning|error|fatal")["--log-level"]("pc-ble-driver log level");
+            "trace|debug|info|warning|error|fatal")["--log-level"]("pc-ble-driver log level") |
+        Opt(hardwareInfo,
+            "text")["--hardware-info"]("hardware info text to show in test reports");
 
     session.cli(cli);
 
@@ -60,6 +63,15 @@ int main(int argc, char *argv[])
     if (!serialPortB.empty())
     {
         test::ConfiguredEnvironment.serialPorts.emplace_back(serialPortB, baudRate);
+    }
+
+    if (!hardwareInfo.empty())
+    {
+        test::ConfiguredEnvironment.hardwareInfo = hardwareInfo;
+    }
+    else
+    {
+        test::ConfiguredEnvironment.hardwareInfo = "No hardware info provided.";
     }
 
     return session.run();
