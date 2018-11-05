@@ -52,7 +52,8 @@
 #include <sstream>
 #include <thread>
 
-TEST_CASE("advertising", "[gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
+    advertising, [gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]))
 {
     using namespace testutil;
 
@@ -180,12 +181,6 @@ TEST_CASE("advertising", "[gap][known_error][PCA10028][PCA10031][PCA10040][PCA10
                 default:
                     return false;
             }
-        });
-
-        c->setEventCallback([&c](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(c->role() << " Received an un-handled event with ID: " << std::hex << eventId);
-            return true;
         });
 
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {

@@ -52,7 +52,7 @@
 #include <string>
 #include <thread>
 
-TEST_CASE("security", "[PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]")
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]))
 {
     auto env = ::test::getEnvironment();
     REQUIRE(env.serialPorts.size() >= 2);

@@ -56,7 +56,7 @@
 
 using namespace testutil;
 
-TEST_CASE("phy_update","[known_issue][PCA10056][PCA10059][nRF52840]")
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059][nRF52840]))
 {
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues

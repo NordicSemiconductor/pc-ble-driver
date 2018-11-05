@@ -62,6 +62,11 @@
 #define DEFAULT_BAUD_RATE 1000000
 #endif
 
+#define STR(s) #s
+#define EXPAND(s) STR(s)
+#define CREATE_TEST_NAME_AND_TAGS(name, tags)                                                      \
+#name "_sdv" EXPAND(NRF_SD_BLE_API), #tags "[sdv" EXPAND(NRF_SD_BLE_API) "]"
+
 namespace test {
 struct SerialPort
 {
