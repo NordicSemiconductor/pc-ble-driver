@@ -61,15 +61,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
     std::chrono::steady_clock::time_point adv_report_received;
 
     auto env = ::test::getEnvironment();
+    INFO(::test::getEnvironmentAsText(env));
     REQUIRE(!env.serialPorts.empty());
     const auto serialPort = env.serialPorts.at(0);
+    INFO("Serial port used: " << serialPort.port);
 
     SECTION("reproduce")
     {
         const auto baudRate = serialPort.baudRate;
-
-        INFO("Serial port used: " << serialPort.port);
-        INFO("Baud rate used: " << baudRate);
 
         const auto scanIterations = 10;
         INFO("Purpose of this test:");
