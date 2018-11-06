@@ -68,6 +68,7 @@ typedef struct
     adv_set_t adv_sets[BLE_GAP_ADV_SET_COUNT_MAX]{};
     // Buffer for scan data received
     ble_data_t scan_data = {nullptr, 0};
+    void * ble_gap_adv_buf_addr[BLE_GAP_ADV_SET_COUNT_MAX];
 #endif // NRF_SD_BLE_API_VERSION >= 6
 } adapter_ble_gap_state_t;
 
@@ -454,5 +455,50 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
+}
+
+int app_ble_gap_adv_buf_register(void * p_buf)
+{
+    if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
+    {
+        return NRF_ERROR_SD_RPC_INVALID_STATE;
+    }
+
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+        int id = 1;
+        for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+        {
+            if (addr == NULL)
+            {
+                addr = p_buf;
+                return id;
+            }
+            id++;
+        }
+
+        return 0;
+    }
+
+    catch (const std::out_of_range &)
+    {
+        return 0;
+    }
+}
+
+void *app_ble_gap_adv_buf_unregister(int id)
+{
+    if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
+    {
+        return NULL;
+    }
+
+    const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+
+    void * ret = gap_state->ble_gap_adv_buf_addr[id-1];
+    gap_state->ble_gap_adv_buf_addr[id-1] = NULL;
+
+    return ret;
 }
 #endif // NRF_SD_BLE_API_VERSION >= 6

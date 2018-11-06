@@ -423,11 +423,12 @@ uint32_t ble_gap_evt_adv_set_terminated_dec(uint8_t const * const p_buf,
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.adv_set_terminated, ble_gap_evt_adv_set_terminated_t_dec);
 
-    err_code = app_ble_gap_adv_set_unregister(
-                       p_event->evt.gap_evt.params.adv_set_terminated.adv_handle,
-                       &p_event->evt.gap_evt.params.adv_set_terminated.adv_data.adv_data.p_data,
-                       &p_event->evt.gap_evt.params.adv_set_terminated.adv_data.scan_rsp_data.p_data);
-    SER_ERROR_CHECK(err_code == NRF_SUCCESS, err_code);
+    /* pointers contains IDs that now must be converted to actual addresses on host side */
+    p_event->evt.gap_evt.params.adv_set_terminated.adv_data.adv_data.p_data =
+            app_ble_gap_adv_buf_unregister(*(uint32_t *)p_event->evt.gap_evt.params.adv_set_terminated.adv_data.adv_data.p_data);
+    p_event->evt.gap_evt.params.adv_set_terminated.adv_data.scan_rsp_data.p_data =
+            app_ble_gap_adv_buf_unregister(*(uint32_t *)p_event->evt.gap_evt.params.adv_set_terminated.adv_data.scan_rsp_data.p_data);
+
 
     SER_EVT_DEC_END;
 }
