@@ -459,7 +459,7 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
 
 int app_ble_gap_adv_buf_register(void * p_buf)
 {
-    if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
+    if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
