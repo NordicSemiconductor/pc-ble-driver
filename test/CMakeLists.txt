@@ -341,7 +341,7 @@ function(setup_test)
 
     file(GLOB test_util_src "util/src/*.cpp")
 
-    message("softdevice_api_ver:${softdevice_api_ver} source_file:${source_file} source_testcases:${source_testcases} test_list:${test_list}")
+    message(STATUS "softdevice_api_ver:${softdevice_api_ver} source_file:${source_file} source_testcases:${source_testcases} test_list:${test_list}")
 
     get_filename_component(test_name ${source_file} NAME_WE)
     set(test_name "${test_name}_v${softdevice_api_ver}")
