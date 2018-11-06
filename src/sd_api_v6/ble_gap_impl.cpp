@@ -67,7 +67,6 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
                                       ble_gap_adv_params_t const *p_adv_params)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-
         return ble_gap_adv_set_configure_req_enc(p_adv_handle, p_adv_data, p_adv_params, buffer,
                                                  length);
     };

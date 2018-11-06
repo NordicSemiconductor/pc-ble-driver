@@ -218,7 +218,7 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
                                         uint8_t **pp_scan_rsp_data);
 
 int app_ble_gap_adv_buf_register(void * p_buf);
-void *app_ble_gap_adv_buf_unregister(int id);
+void *app_ble_gap_adv_buf_unregister(const int id);
 
 #endif // NRF_SD_BLE_API_VERSION >= 6
 /** @} */
