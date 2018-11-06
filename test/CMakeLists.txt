@@ -140,7 +140,7 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
             --iterations ${OPENCLOSE_ITERATIONS}
             --baud-rate ${BAUD_RATE}
             --log-level trace
-            --hardware-info "hex:${connfw_filename},pca:${pca}"
+            --hardware-info "hex:${connfw_filename},pca:${pca};segger_sn:[${DEVICE_A_SEGGER_SN},${DEVICE_B_SEGGER_SN}]"
             --reporter ${tests_reporter} 
             --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml" || (exit 0)
             DEPENDS ${integration_test}
