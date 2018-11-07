@@ -27,6 +27,9 @@ std::string getEnvironmentAsText(const Environment &env)
         }
     }
 
+    ss << "retransmission-interval:" << env.retransmissionInterval << "\n";
+    ss << "response-timeout:" << env.responseTimeout << "\n";
+
     ss << "hardware-info:" << env.hardwareInfo << "\n";
     ss << "log-level:" << testutil::asText(env.driverLogLevel) << "\n";
     ss << "iterations(if relevant):" << env.numberOfIterations << "\n";
@@ -118,6 +121,8 @@ Environment getEnvironment()
     env.driverLogLevelSet = true;
     env.baudRate          = baudRate;
     env.hardwareInfo      = ConfiguredEnvironment.hardwareInfo;
+    env.retransmissionInterval  = ConfiguredEnvironment.retransmissionInterval;
+    env.responseTimeout = ConfiguredEnvironment.responseTimeout;
 
     return env;
 };
