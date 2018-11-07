@@ -26,6 +26,8 @@ int main(int argc, char *argv[])
         Opt(serialPortA, "serial-port")["--port-a"]("serial port A, usually BLE central") |
         Opt(serialPortB, "serial-port")["--port-b"]("serial port B, usually BLE peripheral") |
         Opt(test::ConfiguredEnvironment.baudRate, "baud-rate")["--baud-rate"]("baud rate") |
+        Opt(test::ConfiguredEnvironment.responseTimeout, "milliseconds")["--response-timeout"]("Transport response timeout") |
+        Opt(test::ConfiguredEnvironment.retransmissionInterval, "milliseconds")["--retransmission-interval"]("Transport retransmission interval") |
         Opt(test::ConfiguredEnvironment.numberOfIterations,
             "count")["--iterations"]("number of iterations (for tests supporting that)") |
         Opt(

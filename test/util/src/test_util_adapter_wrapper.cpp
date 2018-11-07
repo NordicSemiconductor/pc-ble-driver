@@ -28,11 +28,12 @@ uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t
 }
 
 AdapterWrapper::AdapterWrapper(const Role &role, const std::string &port, const uint32_t baudRate,
-                               const uint16_t mtu)
+                               const uint16_t mtu, const uint32_t retransmissionInterval,
+                               uint32_t const responseTimeout)
     : m_role(role)
     , m_port(port)
 {
-    m_adapter = adapterInit(port.c_str(), baudRate);
+    m_adapter = adapterInit(port.c_str(), baudRate, retransmissionInterval, responseTimeout);
 
     AdapterWrapper::adapters[m_adapter->internal] = this;
 
@@ -1007,15 +1008,16 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
 }
 #endif
 
-adapter_t *AdapterWrapper::adapterInit(const char *serial_port, uint32_t baud_rate)
+adapter_t *AdapterWrapper::adapterInit(const char *serial_port, const uint32_t baud_rate,
+                                       const uint32_t retransmission_interval,
+                                       const uint32_t response_timeout)
 {
+    const auto phy = sd_rpc_physical_layer_create_uart(
+        serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE, SD_RPC_PARITY_NONE);
 
-    const auto phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate,
-                                                              SD_RPC_FLOW_CONTROL_NONE,
-                                                              SD_RPC_PARITY_NONE);
-
-    const auto data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
-    const auto transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
+    const auto data_link_layer =
+        sd_rpc_data_link_layer_create_bt_three_wire(phy, retransmission_interval);
+    const auto transport_layer = sd_rpc_transport_layer_create(data_link_layer, response_timeout);
     return sd_rpc_adapter_create(transport_layer);
 }
 

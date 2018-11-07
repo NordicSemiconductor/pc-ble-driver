@@ -77,12 +77,14 @@ struct SerialPort
 
 struct Environment
 {
-    std::vector<SerialPort> serialPorts;
-    uint32_t numberOfIterations;
-    sd_rpc_log_severity_t driverLogLevel;
-    bool driverLogLevelSet;
-    uint32_t baudRate;
-    std::string hardwareInfo;
+    std::vector<SerialPort> serialPorts{};
+    uint32_t numberOfIterations{10};
+    sd_rpc_log_severity_t driverLogLevel{SD_RPC_LOG_INFO};
+    bool driverLogLevelSet{false};
+    uint32_t baudRate{1000000};
+    uint32_t retransmissionInterval{250};
+    uint32_t responseTimeout{1500};
+    std::string hardwareInfo{};
 };
 
 extern Environment ConfiguredEnvironment;

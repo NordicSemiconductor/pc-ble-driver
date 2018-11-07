@@ -16,9 +16,9 @@
 #include "test_util_adapter_wrapper_scratchpad.h"
 
 #include <cstring>
+#include <functional>
 #include <map>
 #include <vector>
-#include <functional>
 
 namespace testutil {
 using LogCallback =
@@ -45,10 +45,11 @@ class AdapterWrapper
 {
   public:
     AdapterWrapper(const Role &role, const std::string &port, const uint32_t baudRate,
-                   const uint16_t mtu = 0);
+                   const uint16_t mtu = 0, const uint32_t retransmissionInterval = 250,
+                   uint32_t const responseTimeout = 1000);
     ~AdapterWrapper();
 
-    // Static data member that keeps pointer 
+    // Static data member that keeps pointer
     // to all adapters used by the tests
     static std::map<void *, AdapterWrapper *> adapters;
 
@@ -167,7 +168,8 @@ class AdapterWrapper
     uint32_t setBLECfg(uint8_t conn_cfg_tag);
 #endif
 
-    adapter_t *adapterInit(const char *serial_port, uint32_t baud_rate);
+    adapter_t *adapterInit(const char *serial_port, const uint32_t baud_rate,
+                           const uint32_t retransmission_interval, const uint32_t response_timeout);
 
     static void statusHandler(adapter_t *adapter, sd_rpc_app_status_t code, const char *message);
 
