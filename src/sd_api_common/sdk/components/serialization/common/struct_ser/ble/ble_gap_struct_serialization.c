@@ -7,6 +7,10 @@
 #include "string.h"
 #include "ble_gatts.h"
 
+#if !defined(SER_CONNECTIVITY) && NRF_SD_BLE_API_VERSION > 5
+#include "app_ble_gap.h"
+#endif
+
 #ifndef S112
 uint32_t ble_gap_evt_adv_report_t_enc(void const * const p_void_struct,
                                       uint8_t * const    p_buf,
@@ -61,6 +65,7 @@ uint32_t ble_gap_evt_adv_report_t_dec(uint8_t const * const p_buf,
     uint16_t temp;
     SER_PULL_uint16(&temp);
     p_struct->data_id = temp & 0x0FFF;
+
     SER_PULL_FIELD(&p_struct->data, ble_data_t_dec);
     SER_PULL_FIELD(&p_struct->aux_pointer, ble_gap_aux_pointer_t_dec);
 #else
@@ -1683,15 +1688,7 @@ uint32_t ble_gap_evt_adv_set_terminated_t_enc(void const * const p_void_struct,
     SER_PUSH_uint8(&p_struct->reason);
     SER_PUSH_uint8(&p_struct->adv_handle);
     SER_PUSH_uint8(&p_struct->num_completed_adv_events);
-    SER_PUSH_uint16(&p_struct->adv_data.adv_data.len);
-
-    uint32_t addr = *((uint32_t*)&(p_struct->adv_data.adv_data.p_data));
-    SER_PUSH_uint32(&addr);
-
-    SER_PUSH_uint16(&p_struct->adv_data.scan_rsp_data.len);
-
-    addr = *((uint32_t*)&(p_struct->adv_data.scan_rsp_data.p_data));
-    SER_PUSH_uint32(&addr);
+    SER_PUSH_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_enc);
 
     SER_STRUCT_ENC_END;
 }
@@ -1706,10 +1703,7 @@ uint32_t ble_gap_evt_adv_set_terminated_t_dec(uint8_t const * const p_buf,
     SER_PULL_uint8(&p_struct->reason);
     SER_PULL_uint8(&p_struct->adv_handle);
     SER_PULL_uint8(&p_struct->num_completed_adv_events);
-    SER_PULL_uint16(&p_struct->adv_data.adv_data.len);
-    SER_PULL_uint32(&p_struct->adv_data.adv_data.p_data);
-    SER_PULL_uint16(&p_struct->adv_data.scan_rsp_data.len);
-    SER_PULL_uint32(&p_struct->adv_data.scan_rsp_data.p_data);
+    SER_PULL_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_dec);
 
     SER_STRUCT_DEC_END;
 }

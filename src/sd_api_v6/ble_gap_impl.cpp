@@ -68,14 +68,6 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
 
-        if (p_adv_data)
-        {
-            uint8_t **pp_data = (uint8_t **)&p_adv_data->adv_data.p_data;
-            *pp_data = (uint8_t *)app_ble_gap_adv_buf_register(p_adv_data->adv_data.p_data);
-            pp_data = (uint8_t **)&p_adv_data->scan_rsp_data.p_data;
-            *pp_data = (uint8_t *)app_ble_gap_adv_buf_register(p_adv_data->scan_rsp_data.p_data);
-        }
-
         return ble_gap_adv_set_configure_req_enc(p_adv_handle, p_adv_data, p_adv_params, buffer,
                                                  length);
     };
@@ -85,7 +77,8 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
         return ble_gap_adv_set_configure_rsp_dec(buffer, length, p_adv_handle, result);
     };
 
-    return gap_encode_decode(adapter, encode_function, decode_function);
+    uint32_t err = gap_encode_decode(adapter, encode_function, decode_function);
+    return err;
 }
 
 uint32_t sd_ble_gap_adv_start(adapter_t *adapter, uint8_t adv_handle, uint8_t conn_cfg_tag)
@@ -479,16 +472,7 @@ uint32_t sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const *
                                ble_data_t const *p_adv_report_buffer)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        if (p_adv_report_buffer)
-        {
-            const auto err_code = app_ble_gap_scan_data_set(p_adv_report_buffer);
-
-            if (err_code != NRF_SUCCESS)
-            {
-                return err_code;
-            }
-        }
-
+        
         return ble_gap_scan_start_req_enc(p_scan_params, p_adv_report_buffer, buffer, length);
     };
 

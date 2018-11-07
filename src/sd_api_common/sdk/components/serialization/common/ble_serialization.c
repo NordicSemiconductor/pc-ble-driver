@@ -502,6 +502,7 @@ uint32_t buf_dec(uint8_t const * const p_buf,
         SER_ASSERT_NOT_NULL(pp_data);
         SER_ASSERT_NOT_NULL(*pp_data);
         SER_ASSERT_LENGTH_LEQ(dlen, data_len);
+
         SER_ASSERT_LENGTH_LEQ(dlen, ((int32_t)buf_len - *p_index));
         memcpy(*pp_data, &p_buf[*p_index], dlen);
         *p_index += dlen;

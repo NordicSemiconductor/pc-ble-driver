@@ -466,7 +466,7 @@ int app_ble_gap_adv_buf_register(void * p_buf)
 
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
         int id = 1;
         for (auto &addr : gap_state->ble_gap_adv_buf_addr)
         {
