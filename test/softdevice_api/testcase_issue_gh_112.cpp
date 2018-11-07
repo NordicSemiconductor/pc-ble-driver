@@ -35,11 +35,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Test framework
-#include "catch2/catch.hpp"
-
 // This issue is only relevant for SoftDevice API >= 3
 #if NRF_SD_BLE_API >= 3
+
+// Test framework
+#include "catch2/catch.hpp"
 
 // Logging support
 #include "internal/log.h"
@@ -558,12 +558,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
     REQUIRE(p->close() == NRF_SUCCESS);
     sd_rpc_adapter_delete(p->unwrap());
-}
-
-#else
-TEST_CASE("issue_gh_112")
-{
-    INFO("Not relevant for SoftDevice API version < 3")
 }
 
 #endif // This issue is only relevant for SoftDevice API >= 3
