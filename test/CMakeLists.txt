@@ -24,6 +24,14 @@ if(NOT NRFJPROG)
     message(STATUS "nrfjprog not found, tests will not be ran.")
 endif()
 
+execute_process(
+    COMMAND ${NRFJPROG} "--version" 
+    OUTPUT_VARIABLE version_info
+    RESULT_VARIABLE result
+)
+
+message(STATUS "nrfjprog reports:\nversions:${version_info}\nexit_code:${result}\n")
+
 set(BUILD_TYPE )
 if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "CMAKE_BUILD_TYPE not set, probably because it is running in a multi target environment. Setting it to Debug.")
@@ -103,15 +111,18 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
     add_custom_command(
         OUTPUT ${COMMAND_NAME}
 
+        COMMAND ${NRFJPROG} --version
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --eraseall
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --program ${connfw}
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --reset
+        COMMAND ${CMAKE_COMMAND} -E sleep 1
 
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --program ${connfw}
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports" 
         COMMAND ${CMAKE_COMMAND} -E sleep 1
+
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports" 
     )
 
     if(BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS)
