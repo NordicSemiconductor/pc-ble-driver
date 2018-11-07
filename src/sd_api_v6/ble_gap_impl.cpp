@@ -522,8 +522,7 @@ uint32_t sd_ble_gap_encrypt(adapter_t *adapter, uint16_t conn_handle,
     return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle, uint8_t *p_ch_index,
-                             int8_t *p_rssi)
+uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle, int8_t *p_rssi, uint8_t *p_ch_index)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_rssi_get_req_enc(conn_handle, p_rssi, p_ch_index, buffer, length);

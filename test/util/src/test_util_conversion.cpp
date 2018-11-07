@@ -537,7 +537,10 @@ std::string asText(const ble_gap_conn_sec_t &connSec)
 std::string asText(const ble_gap_evt_rssi_changed_t &rssiChanged)
 {
     std::stringstream retval;
-    retval << "rssi:" << static_cast<uint32_t>(rssiChanged.rssi) << "dBm";
+    retval << "rssi:" << static_cast<int32_t>(rssiChanged.rssi) << "dBm";
+#if NRF_SD_BLE_API >= 6
+    retval << " ch_index:" << static_cast<uint32_t>(rssiChanged.ch_index);
+#endif
     return retval.str();
 }
 
