@@ -71,6 +71,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
             env.responseTimeout);
 
+        REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
+                NRF_SUCCESS);
+
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->open() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->close() == NRF_SUCCESS);
@@ -82,6 +85,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
             env.responseTimeout);
 
+        REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
+                NRF_SUCCESS);
+
         REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->close() == NRF_SUCCESS);
@@ -92,6 +98,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     {
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
+            NRF_LOG("Starting iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
+                                           << numberOfIterations);
+
             auto c = std::make_shared<testutil::AdapterWrapper>(
                 testutil::Central, serialPort.port, env.baudRate, env.mtu,
                 env.retransmissionInterval, env.responseTimeout);
