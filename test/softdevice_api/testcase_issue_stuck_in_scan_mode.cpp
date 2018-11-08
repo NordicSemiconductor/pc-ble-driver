@@ -81,7 +81,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         auto adv_report_count = 0;
 
         auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
-                                                            baudRate);
+                                                            baudRate, env.retransmissionInterval,
+                                                            env.responseTimeout);
 
         NRF_LOG(c->role() << " Starting scan iteration #" << std::dec << static_cast<uint32_t>(i)
                           << " of " << static_cast<uint32_t>(scanIterations));

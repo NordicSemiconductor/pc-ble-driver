@@ -90,12 +90,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     testutil::appendAdvertisingName(advResponse, peripheralAdvName);
 
     // Instantiate an adapter to use as BLE Central in the test
-    auto c =
-        std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port, baudRate, 150);
+    auto c = std::make_shared<testutil::AdapterWrapper>(
+        testutil::Central, central.port, baudRate, env.retransmissionInterval, env.responseTimeout);
 
     // Instantiated an adapter to use as BLE Peripheral in the test
-    auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                        baudRate, 150);
+    auto p =
+        std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port, baudRate,
+                                                   env.retransmissionInterval, env.responseTimeout);
 
     REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
     REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) == NRF_SUCCESS);

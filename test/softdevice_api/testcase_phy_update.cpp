@@ -88,11 +88,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, 150);
+                                                            baudRate, env.retransmissionInterval,
+                                                            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, 150);
+                                                            baudRate, env.retransmissionInterval,
+                                                            env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -196,12 +198,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
             }
         });
 
-        c->setEventCallback([&c](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(c->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
-        });
-
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
@@ -279,12 +275,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                 default:
                     return false;
             }
-        });
-
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
         });
 
         // Open the adapters

@@ -56,7 +56,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     advertising, [gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]))
 {
     using namespace testutil;
-    
+
     auto env = ::test::getEnvironment();
     INFO(::test::getEnvironmentAsText(env));
 
@@ -106,11 +106,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, 150);
+                                                            baudRate, env.retransmissionInterval,
+                                                            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, 150);
+                                                            baudRate, env.retransmissionInterval,
+                                                            env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -263,12 +265,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                 default:
                     return false;
             }
-        });
-
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << std::hex << eventId);
-            return true;
         });
 
         c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {

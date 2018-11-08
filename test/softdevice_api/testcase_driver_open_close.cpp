@@ -70,7 +70,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
         const auto baudRate = serialPort.baudRate;
 
         auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
-                                                            baudRate);
+                                                            baudRate, env.retransmissionInterval,
+                                                            env.responseTimeout);
 
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->open() == NRF_ERROR_INVALID_STATE);
@@ -81,8 +82,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     {
         const auto baudRate = serialPort.baudRate;
 
-        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
-                                                            baudRate);
+        auto c = std::make_unique<testutil::AdapterWrapper>(
+            testutil::Central, serialPort.port, env.retransmissionInterval, env.responseTimeout);
 
         REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->open() == NRF_SUCCESS);
