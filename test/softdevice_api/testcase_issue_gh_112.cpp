@@ -78,7 +78,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
     auto setupPeripheral = [&](const std::shared_ptr<testutil::AdapterWrapper> &p,
                                const std::string &advertisingName,
-                               const std::vector<uint8_t> &initialCharaciteristicValue,
+                               const std::vector<uint8_t> &initialCharacteristicValue,
                                const uint16_t characteristicValueMaxLength) -> uint32_t {
         // Setup the advertisement data
         std::vector<uint8_t> advertisingData;
@@ -139,27 +139,27 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
         attr_char_value.p_uuid    = &(p->scratchpad.target_characteristic);
         attr_char_value.p_attr_md = &attr_md;
-        attr_char_value.init_len  = static_cast<uint16_t>(initialCharaciteristicValue.size());
+        attr_char_value.init_len  = static_cast<uint16_t>(initialCharacteristicValue.size());
         attr_char_value.init_offs = 0;
         attr_char_value.max_len   = characteristicValueMaxLength;
-        attr_char_value.p_value   = const_cast<uint8_t *>(initialCharaciteristicValue.data());
+        attr_char_value.p_value   = const_cast<uint8_t *>(initialCharacteristicValue.data());
 
         return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
                                                &attr_char_value,
                                                &(p->scratchpad.gatts_characteristic_handle));
     };
 
-    const auto baudRate          = central.baudRate;
     const auto peripheralAdvName = "peripheral";
 
     // Instantiate an adapter to use as BLE Central in the test
     auto c = std::make_shared<testutil::AdapterWrapper>(
-        testutil::Central, central.port, baudRate, env.retransmissionInterval, env.responseTimeout);
+        testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        env.responseTimeout);
 
     // Instantiated an adapter to use as BLE Peripheral in the test
-    auto p =
-        std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port, baudRate,
-                                                   env.retransmissionInterval, env.responseTimeout);
+    auto p = std::make_shared<testutil::AdapterWrapper>(
+        testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        env.responseTimeout);
 
     // Use Heart rate service and characteristics as target for testing but
     // the values sent are not according to the Heart Rate service

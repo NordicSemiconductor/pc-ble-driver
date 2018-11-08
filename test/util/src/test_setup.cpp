@@ -29,6 +29,7 @@ std::string getEnvironmentAsText(const Environment &env)
 
     ss << "retransmission-interval:" << env.retransmissionInterval << "\n";
     ss << "response-timeout:" << env.responseTimeout << "\n";
+    ss << "ble-mtu:" << env.mtu << "\n";
 
     ss << "hardware-info:" << env.hardwareInfo << "\n";
     ss << "log-level:" << testutil::asText(env.driverLogLevel) << "\n";
@@ -123,6 +124,7 @@ Environment getEnvironment()
     env.hardwareInfo      = ConfiguredEnvironment.hardwareInfo;
     env.retransmissionInterval  = ConfiguredEnvironment.retransmissionInterval;
     env.responseTimeout = ConfiguredEnvironment.responseTimeout;
+    env.mtu = ConfiguredEnvironment.mtu;
 
     return env;
 };

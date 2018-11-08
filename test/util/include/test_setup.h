@@ -84,6 +84,7 @@ struct Environment
     uint32_t baudRate{1000000};
     uint32_t retransmissionInterval{250};
     uint32_t responseTimeout{1500};
+    uint16_t mtu{150};
     std::string hardwareInfo{};
 };
 

@@ -70,8 +70,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
-    const auto baudRate = central.baudRate;
-
     auto centralRssiReportsCount    = 0;
     auto peripheralRssiReportsCount = 0;
     const auto maxRssiReportsWanted = 100;
@@ -91,12 +89,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
     // Instantiate an adapter to use as BLE Central in the test
     auto c = std::make_shared<testutil::AdapterWrapper>(
-        testutil::Central, central.port, baudRate, env.retransmissionInterval, env.responseTimeout);
+        testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        env.responseTimeout);
 
     // Instantiated an adapter to use as BLE Peripheral in the test
-    auto p =
-        std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port, baudRate,
-                                                   env.retransmissionInterval, env.responseTimeout);
+    auto p = std::make_shared<testutil::AdapterWrapper>(
+        testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        env.responseTimeout);
 
     REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
     REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) == NRF_SUCCESS);

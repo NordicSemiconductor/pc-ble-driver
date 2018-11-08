@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
         Opt(test::ConfiguredEnvironment.baudRate, "baud-rate")["--baud-rate"]("baud rate") |
         Opt(test::ConfiguredEnvironment.responseTimeout, "milliseconds")["--response-timeout"]("Transport response timeout") |
         Opt(test::ConfiguredEnvironment.retransmissionInterval, "milliseconds")["--retransmission-interval"]("Transport retransmission interval") |
+        Opt(test::ConfiguredEnvironment.mtu, "size")["--ble-mtu"]("Default BLE MTU, may be ignored in some tests") |
         Opt(test::ConfiguredEnvironment.numberOfIterations,
             "count")["--iterations"]("number of iterations (for tests supporting that)") |
         Opt(

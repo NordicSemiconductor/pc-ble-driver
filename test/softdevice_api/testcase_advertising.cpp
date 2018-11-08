@@ -64,16 +64,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
+#if NRF_SD_BLE_API == 6
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues
     // has occurred in a callback.
     auto error = false;
 
-#if NRF_SD_BLE_API == 6
     SECTION("extended")
     {
-        const auto baudRate = central.baudRate;
-
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
         const auto maxNumberOfAdvertisements = 20;
         const auto advertisementNameLength   = 40;
@@ -105,14 +103,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         testutil::appendManufacturerSpecificData(scanResponse, randomData, true);
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
-        auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto p = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);

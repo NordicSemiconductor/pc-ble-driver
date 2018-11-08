@@ -89,18 +89,17 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
     SECTION("legacy_passkey")
     {
-        const auto baudRate          = central.baudRate;
         const auto peripheralAdvName = "peripheral";
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
-        auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto p = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);

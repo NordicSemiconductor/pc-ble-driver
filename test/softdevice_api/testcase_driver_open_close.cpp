@@ -67,11 +67,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
     SECTION("open_already_opened_adapter")
     {
-        const auto baudRate = serialPort.baudRate;
-
-        auto c = std::make_unique<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto c = std::make_unique<testutil::AdapterWrapper>(
+            testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->open() == NRF_ERROR_INVALID_STATE);
@@ -80,10 +78,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
     SECTION("close_already_closed_adapter")
     {
-        const auto baudRate = serialPort.baudRate;
-
         auto c = std::make_unique<testutil::AdapterWrapper>(
-            testutil::Central, serialPort.port, env.retransmissionInterval, env.responseTimeout);
+            testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
         REQUIRE(c->open() == NRF_SUCCESS);
@@ -93,12 +90,11 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
     SECTION("open_close_open_iterations")
     {
-        const auto baudRate = serialPort.baudRate;
-
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
-                                                                baudRate);
+            auto c = std::make_shared<testutil::AdapterWrapper>(
+                testutil::Central, serialPort.port, env.baudRate, env.mtu,
+                env.retransmissionInterval, env.responseTimeout);
 
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                     NRF_SUCCESS);

@@ -74,8 +74,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
     SECTION("update_from_1mps_to_2mpb")
     {
-        const auto baudRate = central.baudRate;
-
         const auto advertisementNameLength = 20;
         std::vector<uint8_t> peripheralAdvNameBuffer(advertisementNameLength);
         testutil::appendRandomAlphaNumeric(peripheralAdvNameBuffer, advertisementNameLength);
@@ -87,14 +85,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
         ble_gap_phys_t requestedPhys{BLE_GAP_PHY_2MBPS, BLE_GAP_PHY_2MBPS};
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
-        auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto p = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
