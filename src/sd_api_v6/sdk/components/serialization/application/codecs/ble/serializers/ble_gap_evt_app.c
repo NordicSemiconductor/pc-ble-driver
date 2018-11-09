@@ -156,15 +156,7 @@ uint32_t ble_gap_evt_connected_dec(uint8_t const * const p_buf,
 
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.connected, ble_gap_evt_connected_t_dec);
-#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
-    if (BLE_GAP_ROLE_PERIPH == p_event->evt.gap_evt.params.connected.role)
-    {
-        err_code = app_ble_gap_adv_set_unregister(p_event->evt.gap_evt.params.connected.adv_handle,
-                                                 &p_event->evt.gap_evt.params.connected.adv_data.adv_data.p_data,
-                                                 &p_event->evt.gap_evt.params.connected.adv_data.scan_rsp_data.p_data);
-        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
-    }
-#endif
+
     SER_EVT_DEC_END;
 }
 
