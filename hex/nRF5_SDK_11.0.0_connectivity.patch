@@ -1,6 +1,7 @@
-diff --git a/components/libraries/scheduler/app_scheduler.h b/components/libraries/scheduler/app_scheduler.h
---- a/components/libraries/scheduler/app_scheduler.h
-+++ b/components/libraries/scheduler/app_scheduler.h
+diff --git nRF5_SDK_11.0.0_89a8197/components/libraries/scheduler/app_scheduler.h nRF5_SDK_11.0.0_XXXXXXX/components/libraries/scheduler/app_scheduler.h
+index f52e616..eeb9689 100644
+--- nRF5_SDK_11.0.0_89a8197/components/libraries/scheduler/app_scheduler.h
++++ nRF5_SDK_11.0.0_XXXXXXX/components/libraries/scheduler/app_scheduler.h
 @@ -54,6 +54,8 @@
  #include "app_error.h"
  #include "app_util.h"
@@ -10,7 +11,7 @@ diff --git a/components/libraries/scheduler/app_scheduler.h b/components/librari
  #define APP_SCHED_EVENT_HEADER_SIZE 8       /**< Size of app_scheduler.event_header_t (only for use inside APP_SCHED_BUF_SIZE()). */
  
  /**@brief Compute number of bytes required to hold the scheduler buffer.
-@@ -142,6 +142,12 @@ uint32_t app_sched_event_put(void *                    p_event_data,
+@@ -140,6 +142,12 @@ uint32_t app_sched_event_put(void *                    p_event_data,
   * @return Maximum number of events in queue observed so far.
   */
  uint16_t app_sched_queue_utilization_get(void);
@@ -23,9 +24,10 @@ diff --git a/components/libraries/scheduler/app_scheduler.h b/components/librari
  #endif
  
  #ifdef APP_SCHEDULER_WITH_PAUSE
-diff --git a/components/libraries/scheduler/app_scheduler_serconn.c b/components/libraries/scheduler/app_scheduler_serconn.c
---- a/components/libraries/scheduler/app_scheduler_serconn.c
-+++ b/components/libraries/scheduler/app_scheduler_serconn.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/libraries/scheduler/app_scheduler_serconn.c nRF5_SDK_11.0.0_XXXXXXX/components/libraries/scheduler/app_scheduler_serconn.c
+index f411eff..8d505d9 100644
+--- nRF5_SDK_11.0.0_89a8197/components/libraries/scheduler/app_scheduler_serconn.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/libraries/scheduler/app_scheduler_serconn.c
 @@ -99,7 +99,16 @@ uint32_t app_sched_init(uint16_t event_size, uint16_t queue_size, void * p_event
  
  
@@ -44,9 +46,10 @@ diff --git a/components/libraries/scheduler/app_scheduler_serconn.c b/components
  {
      uint16_t start = m_queue_start_index;
      uint16_t end   = m_queue_end_index;
-diff --git a/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c b/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
---- a/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
-+++ b/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
+index f9ede04..0fb57f4 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/application/codecs/s130/middleware/app_mw_ble_gatts.c
 @@ -586,7 +586,8 @@ static uint32_t gatts_attr_get_rsp_dec(const uint8_t * p_buffer, uint16_t length
      const uint32_t err_code = ble_gatts_attr_get_rsp_dec(
          p_buffer,
@@ -67,9 +70,10 @@ diff --git a/components/serialization/application/codecs/s130/middleware/app_mw_
  
      const uint32_t err_code = ble_gatts_attr_get_req_enc(handle,
                                                           p_uuid,
-diff --git a/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c b/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
---- a/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
-+++ b/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
+index c2e7b44..9092f64 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/application/codecs/s130/serializers/ble_gatts_attr_get.c
 @@ -38,7 +38,7 @@ uint32_t ble_gatts_attr_get_req_enc(uint16_t              handle,
      err_code = uint16_t_enc(&handle, p_buf, total_len, &index);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
@@ -96,9 +100,10 @@ diff --git a/components/serialization/application/codecs/s130/serializers/ble_ga
      err_code = cond_field_dec(p_buf, packet_len, &index, (void * *)pp_md,
              ble_gatts_attr_md_dec);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
-diff --git a/components/serialization/common/ser_config.h b/components/serialization/common/ser_config.h
---- a/components/serialization/common/ser_config.h
-+++ b/components/serialization/common/ser_config.h
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/common/ser_config.h nRF5_SDK_11.0.0_XXXXXXX/components/serialization/common/ser_config.h
+index 67b4f8a..2faaffa 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/common/ser_config.h
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/common/ser_config.h
 @@ -66,7 +66,7 @@
  
  /** UART transmission parameters */
@@ -115,9 +120,10 @@ diff --git a/components/serialization/common/ser_config.h b/components/serializa
 +#define HCI_LINK_CONTROL
 +
  #endif /* SER_CONFIG_H__ */
-diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
---- a/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
-+++ b/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h nRF5_SDK_11.0.0_XXXXXXX/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
+index 47a9b51..9d19866 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn_nrf51.h
 @@ -34,9 +34,9 @@
  /* UART configuration */
  #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOW
@@ -132,9 +138,10 @@ diff --git a/components/serialization/common/transport/ser_phy/config/ser_phy_co
 +#define SER_PHY_UART_RTS                        RTS_PIN_NUMBER
  
  #endif //SER_PHY_CONFIG_CONN_NRF51_H__
-diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
---- a/components/serialization/common/transport/ser_phy/ser_phy_hci.c
-+++ b/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/common/transport/ser_phy/ser_phy_hci.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+index a83d92e..f1c62b5 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 @@ -37,6 +37,8 @@
                                   (SER_HAL_TRANSPORT_MAX_PKT_SIZE + PKT_HDR_SIZE + PKT_CRC_SIZE))
  #define BAUD_TIME_us            (1000000uL / SER_PHY_UART_BAUDRATE_VAL)
@@ -168,9 +175,10 @@ diff --git a/components/serialization/common/transport/ser_phy/ser_phy_hci.c b/c
          if (packet_type == PKT_TYPE_ACK )
          {
              DEBUG_EVT_SLIP_ACK_RXED(0);
-diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
---- a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
-+++ b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
+index 8e4e2d1..fd00fe2 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gap.c
 @@ -621,6 +621,12 @@ uint32_t conn_mw_ble_gap_sec_params_reply(uint8_t const * const p_rx_buf,
                                                  &p_sec_keyset);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
@@ -184,9 +192,10 @@ diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_m
      sd_err_code = sd_ble_gap_sec_params_reply(*p_conn_handle, sec_status, p_sec_params, p_sec_keyset);
  
      err_code = ble_gap_sec_params_reply_rsp_enc(sd_err_code, p_tx_buf, p_tx_buf_len, p_sec_keyset);
-diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
---- a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
-+++ b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
+index f429e3e..32aa281 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/middleware/conn_mw_ble_gatts.c
 @@ -430,7 +430,7 @@ uint32_t conn_mw_ble_gatts_attr_get(uint8_t const * const p_rx_buf,
  
      sd_err_code = sd_ble_gatts_attr_get(handle, p_uuid, p_md);
@@ -196,18 +205,28 @@ diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_m
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
  
      return err_code;
-diff --git a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
---- a/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
-+++ b/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
-@@ -80,4 +80,5 @@ static const conn_mw_item_t conn_mw_item[] = {
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
+index 8c1f113..e677eda 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/middleware/conn_mw_items.c
+@@ -53,6 +53,7 @@ static const conn_mw_item_t conn_mw_item[] = {
+     {SD_BLE_GAP_CONN_SEC_GET, conn_mw_ble_gap_conn_sec_get},
+     {SD_BLE_GAP_RSSI_START, conn_mw_ble_gap_rssi_start},
+     {SD_BLE_GAP_RSSI_STOP, conn_mw_ble_gap_rssi_stop},
++    {SD_BLE_GAP_RSSI_GET, conn_mw_ble_gap_rssi_get},
+     {SD_BLE_GAP_KEYPRESS_NOTIFY, conn_mw_ble_gap_keypress_notify},
+     {SD_BLE_GAP_LESC_DHKEY_REPLY, conn_mw_ble_gap_lesc_dhkey_reply},
+     {SD_BLE_GAP_LESC_OOB_DATA_SET, conn_mw_ble_gap_lesc_oob_data_set},
+@@ -80,4 +81,5 @@ static const conn_mw_item_t conn_mw_item[] = {
      {SD_BLE_GATTS_RW_AUTHORIZE_REPLY, conn_mw_ble_gatts_rw_authorize_reply},
      {SD_BLE_GATTS_SYS_ATTR_SET, conn_mw_ble_gatts_sys_attr_set},
      {SD_BLE_GATTS_SYS_ATTR_GET, conn_mw_ble_gatts_sys_attr_get},
 +    {SD_BLE_USER_MEM_REPLY, conn_mw_ble_user_mem_reply},
  };
-diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
---- a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
-+++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
+index 817f269..2b50dce 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_auth_status.c
 @@ -46,18 +46,22 @@ uint32_t ble_gap_evt_auth_status_enc(ble_evt_t const * const p_event,
      err_code = ble_gap_evt_auth_status_t_enc(&(p_event->evt.gap_evt.params.auth_status), p_buf, total_len, &index);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
@@ -234,9 +253,10 @@ diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_g
      *p_buf_len = index;
      return err_code;
  }
-diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
---- a/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
-+++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
+index 0434d1c..50471bd 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gap_evt_disconnected.c
 @@ -15,6 +15,7 @@
  #include "app_util.h"
  #include "ble.h"
@@ -261,9 +281,10 @@ diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_g
 +
 +    return NRF_SUCCESS;
  }
-diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
---- a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
-+++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
+index 824bdee..2b8c745 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_attr_get.c
 @@ -41,7 +41,7 @@ uint32_t ble_gatts_attr_get_req_dec(uint8_t   const * const p_buf,
      err_code = uint16_t_dec(p_buf, packet_len, &index, p_handle);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
@@ -292,9 +313,10 @@ diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_g
      err_code = cond_field_enc(p_md, p_buf, buflen, &index, ble_gatts_attr_md_enc);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
  
-diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
---- a/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
-+++ b/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
+index 7eb052f..f17df14 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/codecs/s130/serializers/ble_gatts_conn.h
 @@ -539,7 +539,8 @@ uint32_t ble_gatts_attr_get_req_dec(uint8_t   const * const p_buf,
   *                                returned.
   * @param[in,out] p_buf_len       \c in: size of \p p_buf buffer.
@@ -313,9 +335,10 @@ diff --git a/components/serialization/connectivity/codecs/s130/serializers/ble_g
                                      ble_gatts_attr_md_t  * p_md);
  
  /**@brief Decodes @ref ble_gatts_initial_user_handle_get_req_dec command request.
-diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/components/serialization/connectivity/ser_conn_error_handling.c
---- a/components/serialization/connectivity/ser_conn_error_handling.c
-+++ b/components/serialization/connectivity/ser_conn_error_handling.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/ser_conn_error_handling.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/ser_conn_error_handling.c
+index a4ca279..5a0f788 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/ser_conn_error_handling.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/ser_conn_error_handling.c
 @@ -74,7 +74,7 @@ void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
  
          /* ble_debug_assert_handler(error_code, line_num, p_file_name); */
@@ -325,9 +348,10 @@ diff --git a/components/serialization/connectivity/ser_conn_error_handling.c b/c
          /* Reset the chip. Should be used in the release version. */
          NVIC_SystemReset();
  #else   /* Debug version. */
-diff --git a/components/serialization/connectivity/ser_conn_handlers.c b/components/serialization/connectivity/ser_conn_handlers.c
---- a/components/serialization/connectivity/ser_conn_handlers.c
-+++ b/components/serialization/connectivity/ser_conn_handlers.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/ser_conn_handlers.c nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/ser_conn_handlers.c
+index e69e44e..553d61c 100644
+--- nRF5_SDK_11.0.0_89a8197/components/serialization/connectivity/ser_conn_handlers.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/serialization/connectivity/ser_conn_handlers.c
 @@ -124,6 +124,12 @@ void ser_conn_ble_event_handle(ble_evt_t * p_ble_evt)
      err_code = app_sched_event_put(p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len,
                                     ser_conn_ble_event_encoder);
@@ -341,9 +365,10 @@ diff --git a/components/serialization/connectivity/ser_conn_handlers.c b/compone
  }
  
  /** @} */
-diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.c b/components/softdevice/common/softdevice_handler/softdevice_handler.c
---- a/components/softdevice/common/softdevice_handler/softdevice_handler.c
-+++ b/components/softdevice/common/softdevice_handler/softdevice_handler.c
+diff --git nRF5_SDK_11.0.0_89a8197/components/softdevice/common/softdevice_handler/softdevice_handler.c nRF5_SDK_11.0.0_XXXXXXX/components/softdevice/common/softdevice_handler/softdevice_handler.c
+index 81ee38f..705dc06 100644
+--- nRF5_SDK_11.0.0_89a8197/components/softdevice/common/softdevice_handler/softdevice_handler.c
++++ nRF5_SDK_11.0.0_XXXXXXX/components/softdevice/common/softdevice_handler/softdevice_handler.c
 @@ -70,6 +70,7 @@ nrf_nvic_state_t nrf_nvic_state;
  static softdevice_evt_schedule_func_t m_evt_schedule_func;              /**< Pointer to function for propagating SoftDevice events to the scheduler. */
  
@@ -436,9 +461,10 @@ diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.
  #if defined(BLE_STACK_SUPPORT_REQD)
  uint32_t softdevice_enable_get_default_config(uint8_t central_links_count,
                                                uint8_t periph_links_count,
-diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.h b/components/softdevice/common/softdevice_handler/softdevice_handler.h
---- a/components/softdevice/common/softdevice_handler/softdevice_handler.h
-+++ b/components/softdevice/common/softdevice_handler/softdevice_handler.h
+diff --git nRF5_SDK_11.0.0_89a8197/components/softdevice/common/softdevice_handler/softdevice_handler.h nRF5_SDK_11.0.0_XXXXXXX/components/softdevice/common/softdevice_handler/softdevice_handler.h
+index 84d5ff8..9a72955 100644
+--- nRF5_SDK_11.0.0_89a8197/components/softdevice/common/softdevice_handler/softdevice_handler.h
++++ nRF5_SDK_11.0.0_XXXXXXX/components/softdevice/common/softdevice_handler/softdevice_handler.h
 @@ -150,6 +150,23 @@ uint32_t softdevice_handler_init(nrf_clock_lf_cfg_t *              p_clock_lf_cf
   */
  uint32_t softdevice_handler_sd_disable(void);
@@ -463,9 +489,10 @@ diff --git a/components/softdevice/common/softdevice_handler/softdevice_handler.
  
  /**@brief     Function for registering for System (SOC) events.
   *
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examples/ble_central_and_peripheral/ble_connectivity/main.c
---- a/examples/ble_central_and_peripheral/ble_connectivity/main.c
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/main.c
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/main.c nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/main.c
+index 83241ef..1c48018 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/main.c
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/main.c
 @@ -28,9 +28,43 @@
  #include "ser_hal_transport.h"
  #include "ser_conn_handlers.h"
@@ -510,7 +537,7 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
  /**@brief Main function of the connectivity application. */
  int main(void)
  {
-@@ -65,6 +94,15 @@ int main(void)
+@@ -65,6 +99,15 @@ int main(void)
      {   
          /* Process SoftDevice events. */
          app_sched_execute();
@@ -526,10 +553,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/main.c b/examp
  
          /* Process received packets.
           * We can NOT add received packets as events to the application scheduler queue because
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx
-index 0f597ba..2f6bfb4 100644
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx
+index 0265b80..13d400b 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/arm5_no_packs/ble_connectivity_s130_hci_pca10028.uvprojx
 @@ -366,7 +366,7 @@
              <vShortEn>0</vShortEn>
              <vShortWch>0</vShortWch>
@@ -539,9 +566,10 @@ index 0f597ba..2f6bfb4 100644
                <Define> HCI_TIMER2 BLE_STACK_SUPPORT_REQD __STACK_SIZE=2048 __HEAP_SIZE=1024 BOARD_PCA10028 S130 SER_CONNECTIVITY APP_SCHEDULER_WITH_PAUSE BSP_DEFINES_ONLY NRF51 SOFTDEVICE_PRESENT SWI_DISABLE0</Define>
                <Undefine></Undefine>
                <IncludePath>..\..\..\config\ble_connectivity_s130_hci_pca10028;..\..\..\config;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\config;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\mailbox;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\serialization\common;..\..\..\..\..\..\components\serialization\common\struct_ser\s130;..\..\..\..\..\..\components\serialization\common\transport;..\..\..\..\..\..\components\serialization\common\transport\ser_phy;..\..\..\..\..\..\components\serialization\common\transport\ser_phy\config;..\..\..\..\..\..\components\serialization\connectivity;..\..\..\..\..\..\components\serialization\connectivity\codecs\common;..\..\..\..\..\..\components\serialization\connectivity\codecs\s130\middleware;..\..\..\..\..\..\components\serialization\connectivity\codecs\s130\serializers;..\..\..\..\..\..\components\serialization\connectivity\hal;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s130\headers;..\..\..\..\..\..\components\softdevice\s130\headers\nrf51;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\bsp</IncludePath>
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
+index f02d9d2..cc9dd3f 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -551,9 +579,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
+index 39a998a..c8dc2a6 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -563,9 +592,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
+index 37dbe7c..917ae00 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi_5W/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -575,9 +605,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
+index 77f246a..1e6f8eb 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_uart/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -587,9 +618,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
+index 989b76f..ca395e5 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -599,9 +631,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
+index 2459d52..e79a308 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -611,9 +644,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
+index 955648e..8269725 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi_5W/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -623,9 +657,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
+index fb5210d..9d004e8 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_uart/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -635,9 +670,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
+index f4b3fc1..ab9016d 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -647,9 +683,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
+index 5ef79e6..9618498 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -659,9 +696,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
+index 86f56c1..5cc47ef 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
@@ -671,9 +709,10 @@ diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
-diff --git a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
---- a/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
-+++ b/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
+index d7efd5d..ab0e8b9 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_uart/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
  endif
  
