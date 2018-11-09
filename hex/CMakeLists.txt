@@ -214,12 +214,12 @@ function(nrf_create_connectivity_compile_targets)
                         set(MINOR)
                         set(PATCH)
                         nrf_extract_version_number("${SD_API_VERSION}" MAJOR MINOR PATCH)
-                        set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/hex/sd_api_v${MAJOR}")
+                        set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sd_api_v${MAJOR}")
 
                         message(STATUS "Storing files in ${OUTPUT_DIRECTORY}")
 
                         if(NOT EXISTS ${OUTPUT_DIRECTORY})
-                            message(STATUS "Add step to create directory ${OUTPUT_DIRECTORY} during build process")
+                            message(STATUS "Adding step to create directory ${OUTPUT_DIRECTORY} during build process")
                             add_custom_command(
                                 OUTPUT "${COMMAND_NAME}"
                                 APPEND COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIRECTORY}
