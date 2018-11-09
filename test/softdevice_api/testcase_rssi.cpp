@@ -72,7 +72,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
     auto centralRssiReportsCount    = 0;
     auto peripheralRssiReportsCount = 0;
-    const auto maxRssiReportsWanted = 100;
+    const auto maxRssiReportsWanted = 50;
     const auto rssiThreshold        = 1;
     const auto rssiSkipCount        = 1;
 
@@ -117,8 +117,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                     centralError = true;
                 }
             }
-                return true;
-            case BLE_GAP_EVT_DISCONNECTED:
                 return true;
             case BLE_GAP_EVT_ADV_REPORT:
                 if (testutil::findAdvName(gapEvent->params.adv_report, peripheralAdvName))
@@ -187,10 +185,16 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                         sd_ble_gap_rssi_get(c->unwrap(), gapEvent->conn_handle, &lastRssi);
 #endif
 
-                    if (err_code != NRF_SUCCESS)
+                    if (err_code == BLE_ERROR_INVALID_CONN_HANDLE)
+                    {
+                        NRF_LOG(c->role()
+                                << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_get"
+                                << " reports connection is invalid. Connection may be down.");
+                    }
+                    else if (err_code != NRF_SUCCESS)
                     {
                         NRF_LOG(c->role() << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_get"
-                                          << ", " << testutil::errorToString(err_code));
+                                          << ", error " << testutil::errorToString(err_code));
 
                         centralError = true;
                         return true;
@@ -209,7 +213,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
                     err_code = sd_ble_gap_rssi_stop(c->unwrap(), gapEvent->conn_handle);
 
-                    if (err_code != NRF_SUCCESS)
+                    if (err_code == BLE_ERROR_INVALID_CONN_HANDLE)
+                    {
+                        NRF_LOG(c->role()
+                                << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_stop"
+                                << " reports connection is invalid. Connection may be down.");
+                    }
+                    else if (err_code != NRF_SUCCESS)
                     {
                         NRF_LOG(c->role() << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_stop"
                                           << ", " << testutil::errorToString(err_code));
@@ -252,7 +262,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
             case BLE_GAP_EVT_DISCONNECTED:
             {
                 // Use scratchpad defaults when advertising
-                NRF_LOG(p->role() << " Starting advertising.");
+                NRF_LOG(p->role() << " Disconnected, connection handle: 0x"
+                                  << testutil::asHex(gapEvent->conn_handle)
+                                  << ". Starting advertising.");
                 if (p->startAdvertising() != NRF_SUCCESS)
                 {
                     peripheralError = true;
@@ -278,7 +290,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                         sd_ble_gap_rssi_get(c->unwrap(), gapEvent->conn_handle, &lastRssi);
 #endif
 
-                    if (err_code != NRF_SUCCESS)
+                    if (err_code == BLE_ERROR_INVALID_CONN_HANDLE)
+                    {
+                        NRF_LOG(p->role()
+                                << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_get"
+                                << ", reports connection is invalid. Connection may be down.");
+                    }
+                    else if (err_code != NRF_SUCCESS)
                     {
                         NRF_LOG(p->role() << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_get"
                                           << ", " << testutil::errorToString(err_code));
@@ -300,7 +318,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
                     err_code = sd_ble_gap_rssi_stop(p->unwrap(), gapEvent->conn_handle);
 
-                    if (err_code != NRF_SUCCESS)
+                    if (err_code == BLE_ERROR_INVALID_CONN_HANDLE)
+                    {
+                        NRF_LOG(p->role()
+                                << "BLE_GAP_EVT_RSSI_STOP: sd_ble_gap_rssi_get"
+                                << " reports connection is invalid. Connection may be down.");
+                    }
+                    else if (err_code != NRF_SUCCESS)
                     {
                         NRF_LOG(p->role() << "BLE_GAP_EVT_RSSI_CHANGED: sd_ble_gap_rssi_stop"
                                           << ", " << testutil::errorToString(err_code));
@@ -336,7 +360,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     REQUIRE(c->startScan() == NRF_SUCCESS);
 
     // Wait for the test to complete
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    CAPTURE(centralRssiReportsCount);
+    CAPTURE(peripheralRssiReportsCount);
 
     REQUIRE(centralError == false);
     REQUIRE(peripheralError == false);
