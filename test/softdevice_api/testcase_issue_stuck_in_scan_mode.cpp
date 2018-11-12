@@ -66,7 +66,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
     const auto serialPort = env.serialPorts.at(0);
     INFO("Serial port used: " << serialPort.port);
 
-    const auto scanIterations = 10;
+    const auto scanIterations = env.numberOfIterations;
     INFO("Purpose of this test:");
     INFO("1) Assert that closing the adapter when scan is running does not prevent opening the "
          "adapter again.");
@@ -74,7 +74,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
          "0x00)");
     INFO("Running " << scanIterations << " adapter open -> scan -> adapter close iterations");
 
-    for (auto i = 0; i < scanIterations; i++)
+    for (auto i = static_cast<uint32_t>(0); i < scanIterations; i++)
     {
         auto adv_report_count = 0;
 
