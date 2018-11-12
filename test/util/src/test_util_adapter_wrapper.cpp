@@ -48,8 +48,7 @@ AdapterWrapper::~AdapterWrapper()
     if (m_adapter != nullptr)
     {
         const auto err_code = sd_rpc_close(m_adapter);
-        NRF_LOG(role() << " returned 0x" << std::hex << static_cast<uint32_t>(err_code)
-                       << " on sd_rpc_close.");
+        NRF_LOG(role() << " sd_rpc_close, " << testutil::errorToString(err_code));
 
         // Remove adapter from map of adapters used in callbacks
         AdapterWrapper::adapters.erase(m_adapter->internal);
@@ -91,13 +90,20 @@ uint32_t AdapterWrapper::configure()
 // Store the local address
 #if NRF_SD_BLE_API >= 3
     err_code = sd_ble_gap_addr_get(m_adapter, &address);
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gap_addr_get, " << testutil::errorToString(err_code));
+    }
 #else
     err_code = sd_ble_gap_address_get(m_adapter, &address);
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gap_address_get failed, " << testutil::errorToString(err_code));
+    }
 #endif
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_addr_get failed, " << testutil::errorToString(err_code));
         return err_code;
     }
     else
@@ -124,13 +130,13 @@ uint32_t AdapterWrapper::connect(const ble_gap_addr_t *address)
     }
     else
     {
-        NRF_LOG(role() << " sd_ble_gap_connect failed, " << testutil::errorToString(err_code));
+        NRF_LOG(role() << " sd_ble_gap_connect, " << testutil::errorToString(err_code));
     }
 
     return err_code;
 }
 
-bool AdapterWrapper::error()
+bool AdapterWrapper::error() const
 {
     return m_async_error;
 }
@@ -173,10 +179,10 @@ uint32_t AdapterWrapper::startScan(const bool resume, const bool extended, const
         scanParams = &scratchpad.scan_param;
     }
 
-    uint32_t err_code = sd_ble_gap_scan_start(m_adapter, scanParams
+    const auto err_code = sd_ble_gap_scan_start(m_adapter, scanParams
 #if NRF_SD_BLE_API == 6
-                                              ,
-                                              &(scratchpad.adv_report_receive_buffer)
+                                                ,
+                                                &(scratchpad.adv_report_receive_buffer)
 #endif
     );
 
@@ -219,6 +225,12 @@ uint32_t AdapterWrapper::setupAdvertising(
     auto err_code = sd_ble_gap_adv_data_set(m_adapter, advertisingData.data(),
                                             static_cast<uint8_t>(advertisingData.size()), sr_data,
                                             sr_data_length);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gap_adv_data_set, " << testutil::errorToString(err_code));
+        return err_code;
+    }
 #endif
 
 #if NRF_SD_BLE_API == 6
@@ -331,14 +343,14 @@ uint32_t AdapterWrapper::startAdvertising()
 #if NRF_SD_BLE_API <= 3
     err_code = sd_ble_gap_adv_start(m_adapter, &(scratchpad.adv_params));
 #elif NRF_SD_BLE_API == 5
-    err_code   = sd_ble_gap_adv_start(m_adapter, &(scratchpad.adv_params), scratchpad.config_id);
+    err_code = sd_ble_gap_adv_start(m_adapter, &(scratchpad.adv_params), scratchpad.config_id);
 #elif NRF_SD_BLE_API == 6
     err_code = sd_ble_gap_adv_start(m_adapter, scratchpad.adv_handle, scratchpad.config_id);
 #endif
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Failed to start advertising. " << testutil::errorToString(err_code));
+        NRF_LOG(role() << " Failed to start advertising, sd_ble_gap_adv_start, " << testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -359,9 +371,9 @@ uint32_t AdapterWrapper::startServiceDiscovery(const uint8_t type, const uint16_
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(
-            role() << " Failed to initiate or continue a GATT Primary Service Discovery procedure, "
-                   << testutil::errorToString(err_code));
+        NRF_LOG(role() << " Failed to initiate or continue a GATT Primary Service Discovery "
+                          "procedure, sd_ble_gattc_primary_services_discover "
+                       << testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -425,8 +437,8 @@ uint32_t AdapterWrapper::securityParamsReply(const uint8_t status,
     secParams.min_key_size = minKeySize;
     secParams.max_key_size = maxKeySize;
 
-    uint32_t err_code = sd_ble_gap_sec_params_reply(m_adapter, scratchpad.connection_handle, status,
-                                                    &secParams, &keyset);
+    const auto err_code = sd_ble_gap_sec_params_reply(m_adapter, scratchpad.connection_handle,
+                                                      status, &secParams, &keyset);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -463,7 +475,7 @@ uint32_t AdapterWrapper::startCharacteristicDiscovery()
         m_adapter, scratchpad.connection_handle, &handle_range);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gattc_characteristics_discover failed, "
+        NRF_LOG(role() << " sd_ble_gattc_characteristics_discover, "
                        << testutil::errorToString(err_code));
     }
 
@@ -936,10 +948,10 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.adv_params.timeout = 180; // 180 seconds
 #endif
     scratchpad.adv_params.interval    = millisecondsToUnits(40, UNIT_0_625_MS);
-    scratchpad.adv_params.p_peer_addr = NULL; // Undirected advertisement.
+    scratchpad.adv_params.p_peer_addr = nullptr; // Undirected advertisement.
 
 #if NRF_SD_BLE_API == 2
-    scratchpad.adv_params.p_whitelist = NULL;
+    scratchpad.adv_params.p_whitelist = nullptr;
 #endif
 
 #if NRF_SD_BLE_API == 6
@@ -950,7 +962,7 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.adv_params.properties      = scratchpad.adv_properties;
     scratchpad.adv_params.filter_policy   = BLE_GAP_ADV_FP_ANY;
     scratchpad.adv_params.duration        = BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED;
-    scratchpad.adv_params.p_peer_addr     = NULL;
+    scratchpad.adv_params.p_peer_addr     = nullptr;
     scratchpad.adv_params.max_adv_evts    = 0;
     scratchpad.adv_params.primary_phy     = BLE_GAP_PHY_AUTO;
     scratchpad.adv_params.secondary_phy   = BLE_GAP_PHY_AUTO;
@@ -960,10 +972,10 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.adv_params.channel_mask[3] = 0;
     scratchpad.adv_params.channel_mask[4] = 0;
 
-    scratchpad.adv_report_scan_rsp_data.p_data = NULL;
+    scratchpad.adv_report_scan_rsp_data.p_data = nullptr;
     scratchpad.adv_report_scan_rsp_data.len    = 0;
 
-    scratchpad.adv_report_adv_data.p_data = NULL;
+    scratchpad.adv_report_adv_data.p_data = nullptr;
     scratchpad.adv_report_adv_data.len    = 0;
 #endif
 }
@@ -986,7 +998,7 @@ uint32_t AdapterWrapper::setBLEOptions()
 uint32_t AdapterWrapper::initBLEStack()
 {
     uint32_t err_code;
-    uint32_t *app_ram_base = NULL;
+    uint32_t *app_ram_base = nullptr;
 
 #if NRF_SD_BLE_API <= 3
     err_code = sd_ble_enable(m_adapter, &scratchpad.ble_enable_params, app_ram_base);

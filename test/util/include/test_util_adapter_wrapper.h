@@ -56,7 +56,7 @@ class AdapterWrapper
     uint32_t configure();
 
     uint32_t connect(const ble_gap_addr_t *address);
-    bool error();
+    bool error() const;
 
     uint32_t open();
 
