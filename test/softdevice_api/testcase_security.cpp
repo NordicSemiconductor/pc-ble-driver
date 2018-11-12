@@ -223,12 +223,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_SEC_REQUEST:
-                    return true;
-                case BLE_GAP_EVT_AUTH_KEY_REQUEST:
-                    return true;
-                case BLE_GAP_EVT_CONN_SEC_UPDATE:
-                    return true;
                 case BLE_GAP_EVT_AUTH_STATUS:
                     if (gapEvent->params.auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS)
                     {
@@ -248,8 +242,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
-                case BLE_GAP_EVT_CONNECTED:
-                    return true;
                 case BLE_GAP_EVT_DISCONNECTED:
                 {
                     // Use scratchpad defaults when advertising
@@ -276,14 +268,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                         error = true;
                     }
                 }
-                    return true;
-                case BLE_GAP_EVT_PASSKEY_DISPLAY:
-                    return true;
-                case BLE_GAP_EVT_SEC_REQUEST:
-                    return true;
-                case BLE_GAP_EVT_AUTH_KEY_REQUEST:
-                    return true;
-                case BLE_GAP_EVT_CONN_SEC_UPDATE:
                     return true;
                 case BLE_GAP_EVT_AUTH_STATUS:
                     if (gapEvent->params.auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS)
