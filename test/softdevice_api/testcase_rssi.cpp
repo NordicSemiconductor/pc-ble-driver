@@ -72,9 +72,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
     auto centralRssiReportsCount    = 0;
     auto peripheralRssiReportsCount = 0;
-    const auto maxRssiReportsWanted = 50;
+    const auto maxRssiReportsWanted = 20;
     const auto rssiThreshold        = 1;
-    const auto rssiSkipCount        = 1;
+    const auto rssiSkipCount        = 0;
 
     auto periperalRssiStop = false;
     auto centralRssiStop   = false;
