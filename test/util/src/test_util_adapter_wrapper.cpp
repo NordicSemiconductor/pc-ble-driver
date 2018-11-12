@@ -350,7 +350,8 @@ uint32_t AdapterWrapper::startAdvertising()
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Failed to start advertising, sd_ble_gap_adv_start, " << testutil::errorToString(err_code));
+        NRF_LOG(role() << " Failed to start advertising, sd_ble_gap_adv_start, "
+                       << testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -765,8 +766,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
         }
 
         const auto logUnprocessed = [this, &eventId]() {
-            NRF_LOG(role() << " Unprocessed GAP event: 0x" << std::setfill('0') << std::setw(2)
-                           << std::hex << (uint32_t)eventId);
+            NRF_LOG(role() << " Unprocessed GAP event, " << testutil::eventIdAsText(eventId));
         };
 
         if (m_gapEventCallback)
@@ -784,8 +784,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
     else if (eventId >= BLE_GATTC_EVT_BASE && eventId <= BLE_GATTC_EVT_LAST)
     {
         const auto logUnprocessed = [this, &eventId]() {
-            NRF_LOG(role() << " Unprocessed GATTC event: 0x" << std::setfill('0') << std::setw(2)
-                           << std::hex << (uint32_t)eventId);
+            NRF_LOG(role() << " Unprocessed GATTC event, " << eventIdAsText(eventId));
         };
 
         if (m_gattcEventCallback)
@@ -803,8 +802,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
     else if (eventId >= BLE_GATTS_EVT_BASE && eventId <= BLE_GATTS_EVT_LAST)
     {
         const auto logUnprocessed = [this, &eventId]() {
-            NRF_LOG(role() << " Unprocessed GATTS event: 0x" << std::setfill('0') << std::setw(2)
-                           << std::hex << (uint32_t)eventId);
+            NRF_LOG(role() << " Unprocessed GATTS event, " << eventIdAsText(eventId));
         };
 
         if (m_gattsEventCallback)

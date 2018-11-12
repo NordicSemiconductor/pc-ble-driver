@@ -37,6 +37,8 @@ std::string roleToString(const uint8_t role);
 std::string gattAuthErrorSrcToString(const uint8_t errorSrc);
 std::string gattAuthStatusToString(const uint8_t authStatus);
 std::string hciStatusCodeToString(const uint8_t hciStatusCode);
+std::string eventIdAsText(const uint32_t eventId);
+
 std::string asText(const ble_gap_evt_passkey_display_t &passkeyDisplay);
 std::string asText(const ble_gap_enc_info_t &encryptionInfo);
 std::string asText(const ble_gap_conn_params_t &connectionParams);

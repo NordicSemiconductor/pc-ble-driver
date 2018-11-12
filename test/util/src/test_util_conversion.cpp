@@ -6,8 +6,14 @@
 
 #include <cctype>
 #include <iomanip>
+#include <map>
 #include <sstream>
 #include <vector>
+
+#define NAME_MAP_ENTRY(enumerator)                                                                 \
+    {                                                                                              \
+        enumerator, "" #enumerator ""                                                              \
+    }
 
 namespace testutil {
 /**
@@ -163,7 +169,8 @@ std::string gattAuthErrorSrcToString(const uint8_t errorSrc)
             break;
     }
 
-    retval << "/0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)errorSrc << ".";
+    retval << "/0x" << std::setfill('0') << std::setw(2) << std::hex
+           << static_cast<uint32_t>(errorSrc) << ".";
     return retval.str();
 }
 
@@ -240,7 +247,8 @@ std::string gattAuthStatusToString(const uint8_t authStatus)
             break;
     }
 
-    retval << "/0x" << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)authStatus << ".";
+    retval << "/0x" << std::setfill('0') << std::setw(2) << std::hex
+           << static_cast<uint32_t>(authStatus) << ".";
     return retval.str();
 }
 
@@ -957,31 +965,96 @@ std::string asText(const ble_gattc_desc_t &gattc_desc)
     return retval.str();
 }
 
+std::string eventIdAsText(const uint32_t eventId)
+{
+    static std::map<uint32_t, std::string> eventIds = {
+        {// GAP Events
+         NAME_MAP_ENTRY(BLE_GAP_EVT_CONNECTED),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_DISCONNECTED),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_CONN_PARAM_UPDATE),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_SEC_PARAMS_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_SEC_INFO_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_PASSKEY_DISPLAY),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_KEY_PRESSED),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_AUTH_KEY_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_LESC_DHKEY_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_AUTH_STATUS),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_CONN_SEC_UPDATE),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_TIMEOUT),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_RSSI_CHANGED),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_ADV_REPORT),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_SEC_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_SCAN_REQ_REPORT),
+#if NRF_SD_BLE_API >= 6
+         NAME_MAP_ENTRY(BLE_GAP_EVT_PHY_UPDATE_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_PHY_UPDATE),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_DATA_LENGTH_UPDATE),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT),
+         NAME_MAP_ENTRY(BLE_GAP_EVT_ADV_SET_TERMINATED),
+#endif // NRF_SD_BLE_API >= 6
+       // GATTS events
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_WRITE),
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST),
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_SYS_ATTR_MISSING),
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_HVC),
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_SC_CONFIRM),
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_TIMEOUT),
+#if NRF_SD_BLE_API >= 5
+         NAME_MAP_ENTRY(BLE_GATTS_EVT_HVN_TX_COMPLETE),
+#endif // NRF_SD_BLE_API >= 5
+       // GATTS events
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_REL_DISC_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_CHAR_DISC_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_DESC_DISC_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_ATTR_INFO_DISC_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_CHAR_VAL_BY_UUID_READ_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_READ_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_CHAR_VALS_READ_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_WRITE_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_HVX)
+#if NRF_SD_BLE_API >= 5
+             ,
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_EXCHANGE_MTU_RSP),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_TIMEOUT),
+         NAME_MAP_ENTRY(BLE_GATTC_EVT_WRITE_CMD_TX_COMPLETE)
+#endif // NRF_SD_BLE_API >= 5
+        }};
+
+    std::stringstream retval;
+
+    try
+    {
+        retval << eventIds.at(eventId) << "(0x" << asHex(eventId) << ")";
+    }
+    catch (const std::out_of_range &)
+    {
+        retval << "UNKNOWN(0x" << asHex(eventId) << ")";
+    }
+
+    return retval.str();
+}
+
 std::string asText(const sd_rpc_log_severity_t &severity)
 {
     switch (severity)
     {
         case SD_RPC_LOG_TRACE:
             return "TRACE";
-            break;
         case SD_RPC_LOG_DEBUG:
             return "DEBUG";
-            break;
         case SD_RPC_LOG_INFO:
             return "INFO";
-            break;
         case SD_RPC_LOG_WARNING:
             return "WARNING";
-            break;
         case SD_RPC_LOG_ERROR:
             return "ERROR";
-            break;
         case SD_RPC_LOG_FATAL:
             return "FATAL";
-            break;
         default:
             return "UNKNOWN";
-            break;
     };
 }
 
