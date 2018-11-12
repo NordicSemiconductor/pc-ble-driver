@@ -73,7 +73,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     auto centralRssiReportsCount    = 0;
     auto peripheralRssiReportsCount = 0;
     const auto maxRssiReportsWanted = 20;
-    const auto rssiThreshold        = 1;
+    const auto rssiThreshold        = 0;
     const auto rssiSkipCount        = 0;
 
     auto periperalRssiStop = false;
@@ -244,9 +244,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
             case BLE_GAP_EVT_CONNECTED:
             {
                 const auto err_code = sd_ble_gap_rssi_start(p->unwrap(), gapEvent->conn_handle,
-                                                            0, // threshold_dbm
-                                                            1  // skip_count
-                );
+                                                            rssiThreshold, rssiSkipCount);
 
                 if (err_code != NRF_SUCCESS)
                 {
