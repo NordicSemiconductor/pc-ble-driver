@@ -30,8 +30,10 @@ uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t
 AdapterWrapper::AdapterWrapper(const Role &role, const std::string &port, const uint32_t baudRate,
                                const uint16_t mtu, const uint32_t retransmissionInterval,
                                uint32_t const responseTimeout)
-    : m_role(role)
+    : address{}
+    , m_role(role)
     , m_port(port)
+    , m_async_error(false)
 {
     m_adapter = adapterInit(port.c_str(), baudRate, retransmissionInterval, responseTimeout);
 
@@ -59,51 +61,51 @@ AdapterWrapper::~AdapterWrapper()
 
 uint32_t AdapterWrapper::configure()
 {
-    uint32_t error_code;
+    uint32_t err_code;
 
 #if NRF_SD_BLE_API >= 5
-    error_code = setBLECfg(scratchpad.config_id);
+    err_code = setBLECfg(scratchpad.config_id);
 
-    if (error_code != NRF_SUCCESS)
+    if (err_code != NRF_SUCCESS)
     {
-        return error_code;
+        return err_code;
     }
 #endif
 
-    error_code = initBLEStack();
+    err_code = initBLEStack();
 
-    if (error_code != NRF_SUCCESS)
+    if (err_code != NRF_SUCCESS)
     {
-        return error_code;
+        return err_code;
     }
 
 #if NRF_SD_BLE_API < 5
-    error_code = setBLEOptions();
+    err_code = setBLEOptions();
 
-    if (error_code != NRF_SUCCESS)
+    if (err_code != NRF_SUCCESS)
     {
-        return error_code;
+        return err_code;
     }
 #endif
 
 // Store the local address
 #if NRF_SD_BLE_API >= 3
-    error_code = sd_ble_gap_addr_get(m_adapter, &address);
+    err_code = sd_ble_gap_addr_get(m_adapter, &address);
 #else
-    error_code = sd_ble_gap_address_get(m_adapter, &address);
+    err_code = sd_ble_gap_address_get(m_adapter, &address);
 #endif
 
-    if (error_code != NRF_SUCCESS)
+    if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_addr_get failed.");
-        return error_code;
+        NRF_LOG(role() << " sd_ble_gap_addr_get failed, " << testutil::errorToString(err_code));
+        return err_code;
     }
     else
     {
         NRF_LOG(role() << " GAP address is: " << testutil::asText(address));
     }
 
-    return error_code;
+    return err_code;
 }
 
 uint32_t AdapterWrapper::connect(const ble_gap_addr_t *address)
@@ -119,6 +121,10 @@ uint32_t AdapterWrapper::connect(const ble_gap_addr_t *address)
     if (err_code == NRF_SUCCESS)
     {
         scratchpad.connection_in_progress = true;
+    }
+    else
+    {
+        NRF_LOG(role() << " sd_ble_gap_connect failed, " << testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -167,22 +173,22 @@ uint32_t AdapterWrapper::startScan(const bool resume, const bool extended, const
         scanParams = &scratchpad.scan_param;
     }
 
-    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, scanParams
+    uint32_t err_code = sd_ble_gap_scan_start(m_adapter, scanParams
 #if NRF_SD_BLE_API == 6
-                                                ,
-                                                &(scratchpad.adv_report_receive_buffer)
+                                              ,
+                                              &(scratchpad.adv_report_receive_buffer)
 #endif
     );
 
-    if (error_code != NRF_SUCCESS)
+    if (err_code != NRF_SUCCESS)
     {
         if (!resume)
         {
-            NRF_LOG(role() << " Scan start failed with error " << asHex(error_code));
+            NRF_LOG(role() << " Scan start failed with " << testutil::errorToString(err_code));
         }
         else
         {
-            NRF_LOG(role() << " Scan resume failed with error " << asHex(error_code));
+            NRF_LOG(role() << " Scan resume failed with " << testutil::errorToString(err_code));
         }
     }
     else
@@ -197,7 +203,7 @@ uint32_t AdapterWrapper::startScan(const bool resume, const bool extended, const
         }
     }
 
-    return error_code;
+    return err_code;
 }
 
 uint32_t AdapterWrapper::setupAdvertising(
@@ -302,7 +308,7 @@ uint32_t AdapterWrapper::setupAdvertising(
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Setup of advertisement failed.");
+        NRF_LOG(role() << " Setup of advertisement failed, " << testutil::errorToString(err_code));
     }
     else
     {
@@ -353,8 +359,9 @@ uint32_t AdapterWrapper::startServiceDiscovery(const uint8_t type, const uint16_
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role()
-                << " Failed to initiate or continue a GATT Primary Service Discovery procedure\n");
+        NRF_LOG(
+            role() << " Failed to initiate or continue a GATT Primary Service Discovery procedure, "
+                   << testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -423,7 +430,7 @@ uint32_t AdapterWrapper::securityParamsReply(const uint8_t status,
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_sec_params_reply failed: 0x" << asHex(err_code));
+        NRF_LOG(role() << " sd_ble_gap_sec_params_reply, " << testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -436,7 +443,7 @@ uint32_t AdapterWrapper::securityParamsReply(const ble_gap_sec_keyset_t &keyset)
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_sec_params_reply failed: "
+        NRF_LOG(role() << " sd_ble_gap_sec_params_reply failed, "
                        << testutil::errorToString(err_code));
     }
 
@@ -452,8 +459,15 @@ uint32_t AdapterWrapper::startCharacteristicDiscovery()
 
     NRF_LOG(role() << " Discovering characteristics, " << testutil::asText(handle_range));
 
-    return sd_ble_gattc_characteristics_discover(m_adapter, scratchpad.connection_handle,
-                                                 &handle_range);
+    const auto err_code = sd_ble_gattc_characteristics_discover(
+        m_adapter, scratchpad.connection_handle, &handle_range);
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gattc_characteristics_discover failed, "
+                       << testutil::errorToString(err_code));
+    }
+
+    return err_code;
 }
 
 uint32_t AdapterWrapper::startDescriptorDiscovery()
@@ -470,8 +484,16 @@ uint32_t AdapterWrapper::startDescriptorDiscovery()
     handle_range.start_handle = scratchpad.characteristic_decl_handle;
     handle_range.end_handle   = scratchpad.service_end_handle;
 
-    return sd_ble_gattc_descriptors_discover(m_adapter, scratchpad.connection_handle,
-                                             &handle_range);
+    const auto err_code =
+        sd_ble_gattc_descriptors_discover(m_adapter, scratchpad.connection_handle, &handle_range);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gattc_descriptors_discover failed, err_code: "
+                       << testutil::errorToString(err_code));
+    }
+
+    return err_code;
 }
 
 uint32_t AdapterWrapper::writeCCCDValue(const uint16_t cccdHandle, const uint8_t value)
@@ -488,7 +510,15 @@ uint32_t AdapterWrapper::writeCCCDValue(const uint16_t cccdHandle, const uint8_t
     NRF_LOG(role() << " Writing to connection " << testutil::asText(scratchpad.connection_handle)
                    << " CCCD handle: " << testutil::asText(cccdHandle) << " value: " << value);
 
-    return sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
+    const auto err_code =
+        sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gattc_write, " << testutil::errorToString(err_code));
+    }
+
+    return err_code;
 }
 
 uint32_t AdapterWrapper::writeCharacteristicValue(const uint16_t characteristicHandle,
@@ -506,7 +536,14 @@ uint32_t AdapterWrapper::writeCharacteristicValue(const uint16_t characteristicH
                    << " characteristic_handle: " << testutil::asText(characteristicHandle)
                    << " length: " << data.size() << " value: 0x" << asHex(data));
 
-    return sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
+    const auto err_code =
+        sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_gattc_write, " << testutil::errorToString(err_code));
+    }
+
+    return err_code;
 }
 
 adapter_t *AdapterWrapper::unwrap()
@@ -934,7 +971,13 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
 uint32_t AdapterWrapper::setBLEOptions()
 {
 #if NRF_SD_BLE_API <= 3
-    return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &scratchpad.opt);
+    const auto err_code = sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &scratchpad.opt);
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " sd_ble_opt_set, " << testutil::errorToString(err_code));
+    }
+
+    return err_code;
 #else
     return NRF_ERROR_NOT_SUPPORTED;
 #endif
@@ -959,7 +1002,7 @@ uint32_t AdapterWrapper::initBLEStack()
             NRF_LOG(role() << " BLE stack already enabled\n");
             break;
         default:
-            NRF_LOG(role() << " Failed to enable BLE stack. " << testutil::errorToString(err_code));
+            NRF_LOG(role() << " Failed to enable BLE stack, " << testutil::errorToString(err_code));
             break;
     }
 
@@ -987,7 +1030,7 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
 
     if (error_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT. "
+        NRF_LOG(role() << " sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT, "
                        << testutil::errorToString(error_code));
         return error_code;
     }
@@ -997,9 +1040,10 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
     ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = scratchpad.mtu;
 
     error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
+
     if (error_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT. "
+        NRF_LOG(role() << " sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT, "
                        << testutil::errorToString(error_code));
         return error_code;
     }
