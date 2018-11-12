@@ -71,7 +71,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an
     // issues has occurred in a callback.
-    auto error = false;
+    auto centralError = false;
+    auto peripheralError = false;
 
     // Set to true when the test is complete
     auto testComplete = false;
@@ -210,7 +211,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                                     << " Error connecting to "
                                     << testutil::asText(gapEvent->params.adv_report.peer_addr)
                                     << ", " << testutil::errorToString(err_code));
-                            error = true;
+                            centralError = true;
                         }
                     }
                 }
@@ -229,7 +230,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                     if (err_code != NRF_SUCCESS)
                     {
                         NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
-                        error = true;
+                        centralError = true;
                     }
                 }
                 return true;
@@ -241,7 +242,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 if (err_code != NRF_SUCCESS)
                 {
                     NRF_LOG(c->role() << " Conn params update failed, err_code " << err_code);
-                    error = true;
+                    centralError = true;
                 }
             }
                 return true;
@@ -262,7 +263,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 {
                     NRF_LOG(c->role() << " Service discovery failed. "
                                       << testutil::gattStatusToString(gattcEvent->gatt_status));
-                    error = true;
+                    centralError = true;
                     return true;
                 }
 
@@ -271,7 +272,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 if (count == 0)
                 {
                     NRF_LOG(c->role() << " No services not found.");
-                    error = true;
+                    centralError = true;
                     return true;
                 }
 
@@ -295,7 +296,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (!targetServiceFound)
                 {
-                    error = true;
+                    centralError = true;
                     NRF_LOG(c->role() << " Did not find target service "
                                       << testutil::asText(c->scratchpad.target_service));
                     return true;
@@ -312,7 +313,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (c->startCharacteristicDiscovery() != NRF_SUCCESS)
                 {
-                    error = true;
+                    centralError = true;
                 }
             }
                 return true;
@@ -324,7 +325,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 {
                     NRF_LOG(c->role() << " Characteristic discovery failed. "
                                       << testutil::gattStatusToString(gattcEvent->gatt_status));
-                    error = true;
+                    centralError = true;
                     return true;
                 }
 
@@ -359,13 +360,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 {
                     NRF_LOG(c->role() << " Did not find target characteristic "
                                       << testutil::asText(c->scratchpad.target_characteristic));
-                    error = true;
+                    centralError = true;
                 }
                 else
                 {
                     if (c->startDescriptorDiscovery() != NRF_SUCCESS)
                     {
-                        error = true;
+                        centralError = true;
                     }
                 }
 
@@ -379,7 +380,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 {
                     NRF_LOG(c->role() << " Descriptor discovery failed. "
                                       << testutil::gattStatusToString(gattcEvent->gatt_status));
-                    error = true;
+                    centralError = true;
                     return true;
                 }
 
@@ -392,8 +393,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG(c->role() << " MTU exchange request failed, err_code: " << err_code);
-                    error = true;
+                    NRF_LOG(c->role() << " MTU exchange request failed, " << testutil::errorToString(err_code));
+                    centralError = true;
                 }
             }
                 return true;
@@ -404,7 +405,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 {
                     NRF_LOG(c->role() << " Error. Write operation failed.  "
                                       << testutil::gattStatusToString(gattcEvent->gatt_status));
-                    error = true;
+                    centralError = true;
                 }
                 else
                 {
@@ -430,7 +431,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 {
                     NRF_LOG(c->role()
                             << " Error writing data to characteristic. err_code: " << err_code);
-                    error = true;
+                    centralError = true;
                 }
             }
                 return true;
@@ -451,8 +452,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                     if (err_code != NRF_SUCCESS)
                     {
                         NRF_LOG(c->role()
-                                << " MTU exchange request reply failed, err_code: " << err_code);
-                        error = true;
+                                << " MTU exchange request reply failed, " << testutil::errorToString(err_code));
+                        centralError = true;
                     }
                 }
                     return true;
@@ -464,8 +465,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
     p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
         switch (eventId)
         {
-            case BLE_GAP_EVT_CONNECTED:
-                return true;
             case BLE_GAP_EVT_DISCONNECTED:
             {
                 // Use scratchpad defaults when advertising
@@ -474,12 +473,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 const auto err_code = p->startAdvertising();
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG(p->role() << " Error starting advertising after disconnect.");
-                    error = true;
+                    NRF_LOG(p->role() << " Error starting advertising after disconnect, " << testutil::errorToString(err_code));
+                    peripheralError = true;
                 }
             }
-                return true;
-            case BLE_GAP_EVT_TIMEOUT:
                 return true;
             case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
             {
@@ -489,7 +486,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    error = true;
+                    peripheralError = true;
                     NRF_LOG(p->role() << "Failed reply with GAP security parameters. "
                                       << testutil::errorToString(err_code));
                 }
@@ -502,7 +499,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    error = true;
+                    peripheralError = true;
                     NRF_LOG(p->role() << "Failed updating persistent sys attr info. "
                                       << testutil::errorToString(err_code));
                 }
@@ -524,7 +521,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        error = true;
+                        peripheralError = true;
                         NRF_LOG(p->role() << " MTU exchange request reply failed. "
                                           << testutil::errorToString(err_code));
                     }
@@ -551,13 +548,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
     // Wait for the test to complete
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    REQUIRE(error == false);
-    REQUIRE(testComplete == true);
+    CHECK(centralError == false);
+    CHECK(peripheralError == false);
+    CHECK(testComplete == true);
 
-    REQUIRE(c->close() == NRF_SUCCESS);
+    CHECK(c->close() == NRF_SUCCESS);
     sd_rpc_adapter_delete(c->unwrap());
 
-    REQUIRE(p->close() == NRF_SUCCESS);
+    CHECK(p->close() == NRF_SUCCESS);
     sd_rpc_adapter_delete(p->unwrap());
 }
 

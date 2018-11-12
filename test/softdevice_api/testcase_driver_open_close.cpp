@@ -74,9 +74,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        REQUIRE(c->open() == NRF_SUCCESS);
-        REQUIRE(c->open() == NRF_ERROR_INVALID_STATE);
-        REQUIRE(c->close() == NRF_SUCCESS);
+        CHECK(c->open() == NRF_SUCCESS);
+        CHECK(c->open() == NRF_ERROR_INVALID_STATE);
+        CHECK(c->close() == NRF_SUCCESS);
     }
 
     SECTION("close_already_closed_adapter")
@@ -88,10 +88,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
-        REQUIRE(c->open() == NRF_SUCCESS);
-        REQUIRE(c->close() == NRF_SUCCESS);
-        REQUIRE(c->close() == NRF_ERROR_INVALID_STATE);
+        CHECK(c->close() == NRF_ERROR_INVALID_STATE);
+        CHECK(c->open() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_ERROR_INVALID_STATE);
     }
 
     SECTION("open_close_open_iterations")
@@ -137,9 +137,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
             std::this_thread::sleep_for(std::chrono::seconds(2));
 
-            REQUIRE(error == false);
+            CHECK(error == false);
 
-            REQUIRE(c->close() == NRF_SUCCESS);
+            CHECK(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
 
             NRF_LOG("Iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "

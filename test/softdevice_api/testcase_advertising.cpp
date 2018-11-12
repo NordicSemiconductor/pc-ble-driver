@@ -308,12 +308,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        REQUIRE(error == false);
+        CHECK(error == false);
 
-        REQUIRE(c->close() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        REQUIRE(p->close() == NRF_SUCCESS);
+        CHECK(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
     }
 #endif // NRF_SD_BLE_API == 6

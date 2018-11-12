@@ -140,12 +140,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         auto silence_duration =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - adv_report_received)
                 .count();
-        REQUIRE(silence_duration < 1000);
+        CHECK(silence_duration < 1000);
 
-        REQUIRE(error == false);
+        CHECK(error == false);
 
         // Cleanup current adapter connection
-        REQUIRE(c->close() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
         NRF_LOG(c->role() << " Scan iteration #" << std::dec << static_cast<uint32_t>(i) << " of "

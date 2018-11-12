@@ -363,15 +363,15 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     CAPTURE(centralRssiReportsCount);
     CAPTURE(peripheralRssiReportsCount);
 
-    REQUIRE(centralError == false);
-    REQUIRE(peripheralError == false);
+    CHECK(centralError == false);
+    CHECK(peripheralError == false);
 
-    REQUIRE(testCompletePeripheral == true);
-    REQUIRE(testCompleteCentral == true);
+    CHECK(testCompletePeripheral == true);
+    CHECK(testCompleteCentral == true);
 
-    REQUIRE(c->close() == NRF_SUCCESS);
+    CHECK(c->close() == NRF_SUCCESS);
     sd_rpc_adapter_delete(c->unwrap());
 
-    REQUIRE(p->close() == NRF_SUCCESS);
+    CHECK(p->close() == NRF_SUCCESS);
     sd_rpc_adapter_delete(p->unwrap());
 }

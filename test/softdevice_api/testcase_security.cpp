@@ -318,13 +318,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(5));
 
-        REQUIRE(error == false);
-        REQUIRE(testComplete == true);
+        CHECK(error == false);
+        CHECK(testComplete == true);
 
-        REQUIRE(c->close() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        REQUIRE(p->close() == NRF_SUCCESS);
+        CHECK(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
     }
 }
