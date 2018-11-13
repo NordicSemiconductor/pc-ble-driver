@@ -53,7 +53,7 @@ static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &e
 
     if (adapterLayer == nullptr)
     {
-        return NRF_ERROR_INVALID_PARAM;
+        return NRF_ERROR_SD_RPC_INVALID_ARGUMENT;
     }
 
     RequestReplyCodecContext context(adapterLayer->transport);
