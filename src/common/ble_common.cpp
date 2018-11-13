@@ -106,7 +106,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
     if (AdapterInternal::isInternalError(err_code))
     {
         error_message << "Error sending packet to target. Code: 0x" << std::hex << err_code;
-        _adapter->statusHandler(PKT_SEND_ERROR, error_message.str().c_str());
+        _adapter->statusHandler(PKT_SEND_ERROR, error_message.str());
 
         switch (err_code)
         {
@@ -129,7 +129,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
     if (AdapterInternal::isInternalError(err_code))
     {
         error_message << "Not able to decode packet. Code 0x" << std::hex << err_code;
-        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str().c_str());
+        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str());
         return NRF_ERROR_SD_RPC_DECODE;
     }
 
