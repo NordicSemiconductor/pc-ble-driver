@@ -285,7 +285,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                                                         &lastRssi, &channelIndex);
 #else
                     auto err_code =
-                        sd_ble_gap_rssi_get(c->unwrap(), gapEvent->conn_handle, &lastRssi);
+                        sd_ble_gap_rssi_get(p->unwrap(), gapEvent->conn_handle, &lastRssi);
 #endif
 
                     if (err_code == BLE_ERROR_INVALID_CONN_HANDLE)
