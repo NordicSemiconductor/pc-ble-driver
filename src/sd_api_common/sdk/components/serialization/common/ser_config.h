@@ -66,7 +66,11 @@ extern "C" {
 
 /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
  *  packet length). */
-#define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (512UL)
+#if NRF_SD_BLE_API == 2
+    #define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (512UL)
+#else
+    #define SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE    (768UL)
+#endif
 #define SER_HAL_TRANSPORT_CONN_TO_APP_MAX_PKT_SIZE    (512UL)
 
 #define SER_HAL_TRANSPORT_MAX_PKT_SIZE ((SER_HAL_TRANSPORT_APP_TO_CONN_MAX_PKT_SIZE) >= \
