@@ -130,11 +130,7 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
         set(OPENCLOSE_ITERATIONS 10)
     endif()
 
-    if(APPLE)
-        set(BAUD_RATE 115200)
-    else()
-        set(BAUD_RATE 1000000)
-    endif()
+    set(BAUD_RATE 1000000)
 
     # Extract hex filename only
     get_filename_component(connfw_filename "${connfw}" NAME)
