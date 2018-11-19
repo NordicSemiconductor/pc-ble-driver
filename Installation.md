@@ -5,10 +5,13 @@
     * [SoftDevice and IC](#SoftDevice-and-IC)
 * [Installing drivers](#Prerequisites)
 * [Installing tools](#Prerequisites)
+* [Installing dependencies](#Prerequisites)
 * [Compiling pc-ble-driver from source](#Prerequisites)
 * [Compiling connectivity HEX files](#Prerequisites)
 * [Flashing connectivity HEX files](#Prerequisites)
 * [Known issues](#Known-Issues)
+
+---
 
 ## Support
 
@@ -30,11 +33,9 @@ The libraries generated are compatible with the following SoftDevice API version
 
 The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
-## Prerequisites
+---
 
-#### Hardware setup
-
-Installing driver
+## Installing driver
 
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
@@ -42,7 +43,38 @@ To set up the required J-Link drivers simply download and install the version ma
 * [SEGGER J-Link](https://www.segger.com/jlink-software.html)
 * [SEGGER J-Link](#Prerequisites)
 
-Installing tools
+After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically
+
+#### Validating on Windows
+
+The serial port will appear as `COMxx`.
+Simply check the "Ports (COM & LPT)" section in the Device Manager.
+
+#### Validating on Ubuntu Linux
+
+The serial port will appear as `/dev/ttyACMx`.
+
+> By default the port is not accessible to all users. Type the command below to add your user to the `dialout` group to give it access to the serial port. Note that re-login is required for this to take effect.
+
+```bash
+    $ sudo usermod -a -G dialout <username>
+```
+
+> To prevent the modemmanager service from trying to connect to the CDC ACM serial port:
+
+```bash
+    $ systemctl stop ModemManager.service
+    $ systemctl disable ModemManager.service
+```
+
+#### Validating macOS (OS X)
+
+The serial port will appear as `/dev/tty.usbmodemXXXX`.
+
+> There is a known issue, check it [HERE](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
+> if you met any problems.
+
+## Installing tools
 
 Additionally to flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
@@ -59,43 +91,6 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
 
     $ nrfjprog -f NRF5<x> -e
     $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s<x>_<a>.<b>.<c>.hex
-
-### J-Link USB CDC serial ports
-
-After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically
-
-#### Windows
-
-The serial port will appear as `COMxx`. Simply check the "Ports (COM & LPT)" section in the Device Manager.
-
-#### Ubuntu Linux
-
-The serial port will appear as `/dev/ttyACMx`. By default the port is not accessible to all users. Type the command below to add your user to the `dialout` group to give it access to the serial port. Note that re-login is required for this to take effect.
-
-    sudo usermod -a -G dialout <username>
-
-To prevent the modemmanager service from trying to connect to the CDC ACM serial port:
-
-    systemctl stop ModemManager.service
-    systemctl disable ModemManager.service
-
-#### macOS (OS X)
-
-The serial port will appear as `/dev/tty.usbmodemXXXX`.
-
-**IMPORTANT NOTE**
-
-On macOS (OS X) there is a known issue with the Segger J-Link firmware (that runs on the Debug probe on the board) related to USB packet sizes. This results in the timeout error `Failed to open nRF BLE Driver. Error code: 0x0D` when the serial port is attempted to be opened.
-
-There are two ways to solve this issue:
-
-1. Use the Segger firmware, but disable the Mass Storage Device (MSD) feature. Instructions are available [here](https://wiki.segger.com/index.php?title=J-Link-OB_SAM3U).
-
-2. Replace the firmware on the Debug probe with the mbed DAPLink firmware:
-    - Enter bootloader mode by powering off the nRF5 Development Kit and then pressing IF BOOT/RESET while you power on the kit.
-    - Drag and drop the [nrf5x_osx_fix.bin](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/tools/nrf5x_osx_fix.bin) file into the BOOTLOADER mass storage device.
-
-If you want to revert back to the Segger firmware you will have to download the it from [this location](http://www.nordicsemi.com/eng/nordic/Products/nRF51-DK/nRF5x-OB-JLink-IF/52276)
 
 ## Compiling the connectivity .hex files
 

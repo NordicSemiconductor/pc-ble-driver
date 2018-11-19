@@ -1,10 +1,12 @@
-# Windows Issues
+# Known Issues
 
-## /dev/null git apply issue
+## Windows Issues
+
+####/dev/null git apply issue
 
 New version of git is required to solve this issue.
 
-## CreateProcess issue
+#### CreateProcess issue
 
 ```
 echo  Makefile
@@ -21,7 +23,7 @@ Removing child 01DD8B10 PID 31536216 from chain.
 This issue is due to missing `sh` or `bash` in path.
 Adding `sh` or `bash` will fix the issue.
 
-## Long paths issue
+#### Long paths issue
 
 ```
 build   25-Oct-2018 17:17:07      Compiling file: ble_gap_evt_conn.c
@@ -32,9 +34,27 @@ build   25-Oct-2018 17:17:07      compilation terminated.
 build   25-Oct-2018 17:17:07      make: *** [../../../../../../components/toolchain/gcc/Makefile.common:272:
 ```
 
-# Segger Issues
+## macOS Issues
 
-## SEGGER OB sends invalid packet
+#### Timeout error related to the SEGGER J-Link firmware
+
+On macOS (OS X) there is a known issue with the SEGGER J-Link firmware (that runs on the Debug probe on the board) related to USB packet sizes. This results in the timeout error `Failed to open nRF BLE Driver. Error code: 0x0D` when the serial port is attempted to be opened.
+
+There are two ways to solve this issue:
+
+1. Use the SEGGER firmware, but disable the Mass Storage Device (MSD) feature. Instructions are available [here](https://wiki.segger.com/index.php?title=J-Link-OB_SAM3U).
+
+2. Replace the firmware on the Debug probe with the mbed DAPLink firmware:
+    - Enter bootloader mode by powering off the nRF5 Development Kit and then pressing IF BOOT/RESET while you power on the kit.
+    - Drag and drop the [nrf5x_osx_fix.bin](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/tools/nrf5x_osx_fix.bin) file into the BOOTLOADER mass storage device.
+
+If you want to revert back to the SEGGER firmware you will have to download the it from [this location](http://www.nordicsemi.com/eng/nordic/Products/nRF51-DK/nRF5x-OB-JLink-IF/52276)
+
+
+
+## SEGGER Issues
+
+#### SEGGER OB sends invalid packet
 
 ![USB Analyzer](./segger_ob_usb_analyzer.png)
 ![Logic Analyzer](./segger_ob_logic_analyzer.png)
