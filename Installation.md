@@ -23,7 +23,7 @@ The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDev
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
 
-* [Segger J-Link Downloads](https://www.segger.com/jlink-software.html)  
+* [Segger J-Link Downloads](https://www.segger.com/jlink-software.html)
 
 Additionally to flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
@@ -72,8 +72,8 @@ There are two ways to solve this issue:
 
 1. Use the Segger firmware, but disable the Mass Storage Device (MSD) feature. Instructions are available [here](https://wiki.segger.com/index.php?title=J-Link-OB_SAM3U).
 
-2. Replace the firmware on the Debug probe with the mbed DAPLink firmware: 
-    - Enter bootloader mode by powering off the nRF5 Development Kit and then pressing IF BOOT/RESET while you power on the kit. 
+2. Replace the firmware on the Debug probe with the mbed DAPLink firmware:
+    - Enter bootloader mode by powering off the nRF5 Development Kit and then pressing IF BOOT/RESET while you power on the kit.
     - Drag and drop the [nrf5x_osx_fix.bin](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/tools/nrf5x_osx_fix.bin) file into the BOOTLOADER mass storage device.
 
 If you want to revert back to the Segger firmware you will have to download the it from [this location](http://www.nordicsemi.com/eng/nordic/Products/nRF51-DK/nRF5x-OB-JLink-IF/52276)
@@ -126,7 +126,7 @@ Add the vcpkg location to the PATH environment variable.
 
 See the following sections for platform-specific instructions on the installation of the dependencies.
 
-#### Windows 
+#### Windows
 
 * Install the latest CMake stable release by downloading the Windows Installer from:
 
@@ -183,3 +183,7 @@ Then change to the root folder of the repository and issue the following command
     $ make
 
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
+## Issues
+
+When meeting problems during instalation `pc-ble-driver`, see [Issues.md](./issues/Issues.md).

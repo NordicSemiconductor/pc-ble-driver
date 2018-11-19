@@ -14,6 +14,8 @@ The C/C++ libraries can be interfaced with directly, but are also provided as hi
 
 For detailed guidelines on building and installing `pc-ble-driver` and it's dependencies see [Installation.md](./Installation.md).
 
+When meeting problems during instalation `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
+
 ## Getting started
 
 The [examples](./examples) serve as a great starting point for development with `pc-ble-driver`. Examples include a [heart rate monitor](./examples/heart_rate_monitor/) (BLE peripheral) and [heart rate collector](./examples/heart_rate_collector/) (BLE master) and show the basic structure of an application built on `pc-ble-driver`.
@@ -25,7 +27,7 @@ Now that you have successfully built and installed `pc-ble-driver`, you are read
     > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v5.a  libpc_ble_driver_shared_sd_api_v5.dylib test_uart ...
 
 To quickly get the examples up and running, see [examples/README.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/README.md).
-    
+
 ## Architecture
 
 ![alt tag](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/architecture_overview_serialization.svg)
