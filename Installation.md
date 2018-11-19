@@ -1,4 +1,24 @@
-## SoftDevice and IC support
+# Installation
+
+* [Support](#Support)
+    * [Operating system](#Operating-system)
+    * [SoftDevice and IC](#SoftDevice-and-IC)
+* [Installing drivers](#Prerequisites)
+* [Installing tools](#Prerequisites)
+* [Compiling pc-ble-driver from source](#Prerequisites)
+* [Compiling connectivity HEX files](#Prerequisites)
+* [Flashing connectivity HEX files](#Prerequisites)
+* [Known issues](#Known-Issues)
+
+## Support
+
+#### Operating system
+
+* Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
+* GNU/Linux (Ubuntu tested) 32 and 64-bit
+* macOS (OS X) 32 and 64-bit
+
+#### SoftDevice and IC
 
 The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
 
@@ -10,20 +30,19 @@ The libraries generated are compatible with the following SoftDevice API version
 
 The .hex files included in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware required to communicate with it.
 
-## Operating system support
+## Prerequisites
 
-* Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
-* GNU/Linux (Ubuntu tested) 32 and 64-bit
-* macOS (OS X) 32 and 64-bit
+#### Hardware setup
 
-## Hardware setup
-
-### Installing drivers and tools
+Installing driver
 
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
 
-* [Segger J-Link Downloads](https://www.segger.com/jlink-software.html)
+* [SEGGER J-Link](https://www.segger.com/jlink-software.html)
+* [SEGGER J-Link](#Prerequisites)
+
+Installing tools
 
 Additionally to flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
