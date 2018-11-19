@@ -86,13 +86,13 @@ CMake is used to build connectivity firmware. The .hex files are available in th
 ### Dependencies
 1. Follow instructions in `Compiling pc-ble-driver from source` and install all dependencies.
 2. A recent version of GNU Make.
-3. Install a recent version of [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) .
+3. Install a recent version of [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). And set its installation path as `GCCARMEMB_TOOLCHAIN_PATH`.
 
 #### Windows
 * Use chocolatey package manager for Windows to install Make.
 
 1. Install [Chocolatey](https://chocolatey.org/).
-2. Open cmd and type `choco install make`.
+2. Open cmd as `Administrator` and type `choco install make`.
 3. Make sure that make is exported in path variable.
 
 ### Compilation
@@ -186,4 +186,4 @@ Then change to the root folder of the repository and issue the following command
 
 ## Issues
 
-When meeting problems during instalation `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
+When meeting problems during installation `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
