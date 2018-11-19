@@ -6,6 +6,8 @@ project(connectivity)
     supported (v11 and v15) to supply information to targets and create them.
 ]]
 
+set(GIT_REQUIRED_VERSION "2.19.0")
+
 include(../cmake/nrf-download-distfile.cmake)
 include(../cmake/nrf-apply-patches.cmake)
 include(./cmake/util.cmake)
@@ -13,6 +15,7 @@ include(./cmake/util.cmake)
 find_program(MAKE "make")
 find_program(MERGEHEX "mergehex" HINTS "c:/Program Files (x86)/Nordic Semiconductor/nrf5x/bin")
 find_program(NRFUTIL "nrfutil")
+find_program(GIT "git")
 
 if(NOT DEFINED CONNECTIVITY_VERSION)
     message(FATAL_ERROR "CONNECTIVITY_VERSION not provided, terminating compilation.")
@@ -40,6 +43,24 @@ endif()
 
 if(NOT MAKE)
     message(FATAL_ERROR "make not found, not able to compile connectivity firmware.")
+endif()
+
+if(NOT GIT)
+    message(FATAL_ERROR "git not found, not able to compile connectivity firmware.")
+endif()
+
+execute_process(
+    COMMAND ${GIT} "--version"
+    OUTPUT_VARIABLE version_info
+    RESULT_VARIABLE result
+)
+
+string(STRIP "${version_info}" version_info)
+
+string(REGEX MATCH "([0-9]+\.[0-9]+\.[0-9]+)" found_version "${version_info}")
+
+if (found_version VERSION_LESS "2.19.0")
+    message(FATAL_ERROR "git version ${found_version} found, version ${GIT_REQUIRED_VERSION} or higher required.")
 endif()
 
 function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDEVICE_HEX_PATH)
