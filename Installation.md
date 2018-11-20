@@ -128,7 +128,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ .\bootstrap-vcpkg.bat
     ```
 
-    Then add the vcpkg location to the `PATH` environment variable.
+    Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
 
     And validate `vcpkg` installation
     ```bash
@@ -168,9 +168,80 @@ To compile `connectivity` HEX files you will need additional tools:
     * Install
     * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
+##### [Back to top](#)
+
 #### Installing dependencies on Ubuntu Linux
 
+1. Install `build-essential`.
+    ```bash
+    $ sudo apt-get -y install build-essential
+    ```
+
+2. Install `Cmake`.
+    ```bash
+    $ sudo apt-get -y install cmake
+    ```
+
+    > Install `Cmake` from source if the version is lower than required.
+
+3. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+    ```bash
+    $ git clone https://github.com/Microsoft/vcpkg.git
+    $ cd vcpkg
+    $ ./bootstrap-vcpkg.sh
+    ```
+
+    Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
+
+    And validate `vcpkg` installation
+    ```bash
+    $ vcpkg
+    ```
+
+> The following steps are needed only if you want to compile your own `connectivity` HEX files.
+
+4. Install `GNU Embedded Toolchain for Arm`
+    * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
+    * Install
+    * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+
+##### [Back to top](#)
+
 #### Installing dependencies on macOS
+
+1. Install `build-essential`.
+    ```bash
+    $ sudo apt-get -y install build-essential
+    ```
+
+2. Install `Cmake`.
+    ```bash
+    $ sudo apt-get -y install cmake
+    ```
+
+    > Install `Cmake` from source if the version is lower than required.
+
+3. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+    ```bash
+    $ git clone https://github.com/Microsoft/vcpkg.git
+    $ cd vcpkg
+    $ ./bootstrap-vcpkg.sh
+    ```
+
+    Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
+
+    And validate `vcpkg` installation
+    ```bash
+    $ vcpkg
+    ```
+
+> The following steps are needed only if you want to compile your own `connectivity` HEX files.
+
+4. Install `GNU Embedded Toolchain for Arm`
+    * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
+    * Install
+    * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+
 
 ##### [Back to top](#)
 ---
@@ -179,7 +250,7 @@ To compile `connectivity` HEX files you will need additional tools:
 
 ##### [Go to install dependencies](#Installing-dependencies) if you have not done that yet.
 
-#### Windows
+#### Compliing pc-ble-driver on Windows
 
 Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
 
@@ -190,28 +261,41 @@ $ vcpkg install asio
 $ vcpkg install catch2
 $ cmake \
     -G "Visual Studio 14 <Win64>" \
-    -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
     ..
 $ msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
 ```
 
-**Note**: Add `Win64` to the `-G` option to build a 64-bit version of the driver.
+**Note**:
 
-**Note**: Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+* Add `Win64` to the `-G` option to build a 64-bit version of the driver.
+* Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
 
-##### Examples
+For examples, compiling with 64-bit Visual Studio 2015 with default configuration:
 
-Building for with 64-bit Visual Studio 2015:
+```bash
+$ cmake \
+    -G "Visual Studio 14 Win64" \
+    -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
+    ..
+$ msbuild ALL_BUILD.vcxproj
+```
 
-    > cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
+##### [Back to top](#)
 
-#### Ubuntu Linux
+#### Compiling pc-ble-driver on Ubuntu Linux
 
-Install cmake:
-
-    $ sudo apt-get install cmake
-
-Then change to the root folder of the repository and issue the following commands:
+```bash
+# You are now in root directory of pc-ble-driver
+$ mkdir build && cd build
+$ vcpkg install asio
+$ vcpkg install catch2
+$ cmake \
+    -G "Unix Makefiles" \
+    -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+    ..
+$ msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
+```
 
     $ cd build
     $ vcpkg install asio
@@ -222,6 +306,8 @@ Then change to the root folder of the repository and issue the following command
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
 
 **Note**: Optionally select the target architecture (32 or 64-bit) using the `-DARCH` option.
+
+##### [Back to top](#)
 
 #### macOS (OS X) 10.11 and later
 
