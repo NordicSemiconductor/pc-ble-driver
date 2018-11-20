@@ -12,10 +12,14 @@ function(nrf_apply_patches)
         COMMAND "${GIT}" rev-parse --is-inside-work-tree
         WORKING_DIRECTORY ${nrf_apply_patches_SOURCE_PATH}
         RESULT_VARIABLE error_code
+        ERROR_VARIABLE error
+        OUTPUT_VARIABLE output
     )
      if(error_code)
         message(STATUS "Not inside a git work tree, applying patches.")
         message(STATUS "Applying patches in directory ${nrf_apply_patches_SOURCE_PATH}")
+        string(STRIP "${error}" error)
+        message(STATUS "git error: ${error}")
     else()
         message(FATAL_ERROR "Inside git work tree, not able to apply patches. Path is ${nrf_apply_patches_SOURCE_PATH}.")
     endif()
@@ -27,10 +31,14 @@ function(nrf_apply_patches)
             COMMAND "${GIT}" apply "${PATCH}" --ignore-whitespace
             WORKING_DIRECTORY ${nrf_apply_patches_SOURCE_PATH}
             RESULT_VARIABLE error_code
+            ERROR_VARIABLE error
+            OUTPUT_VARIABLE output
         )
 
         if(error_code)
             message(WARNING "Applying patch failed with error \"${error_code}\". This is expected if this patch was previously applied.")
+            string(STRIP "${error}" error)
+            message(STATUS "git error: ${error}")
         endif()
 
         math(EXPR PATCHNUM "${PATCHNUM}+1")

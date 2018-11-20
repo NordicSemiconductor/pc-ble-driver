@@ -30,7 +30,7 @@ execute_process(
     RESULT_VARIABLE result
 )
 
-message(STATUS "nrfjprog reports:\nversions:${version_info}\nexit_code:${result}\n")
+message(STATUS "nrfjprog reports:\nversion:${version_info}\nexit_code:${result}\n")
 
 set(BUILD_TYPE )
 if(NOT CMAKE_BUILD_TYPE)

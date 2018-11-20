@@ -1,6 +1,6 @@
 if(WIN32)
 	# CMAKE_EXPORT_COMPILE_COMMANDS is not working on Windows
-	message(clang-tidy is not supported on Windows)
+	message(STATUS "clang-tidy is not supported on Windows")
 
 	# For the target not to fail:
 	add_custom_target(tidy COMMAND echo "not supported on Windows")
