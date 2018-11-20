@@ -2,9 +2,9 @@
 
 ## Windows Issues
 
-####/dev/null git apply issue
+#### /dev/null git apply issue
 
-New version of git is required to solve this issue.
+`Git` >= 2.19.0 is required to solve this issue.
 
 #### CreateProcess issue
 
@@ -33,6 +33,8 @@ build   25-Oct-2018 17:17:07                ^~~~~~~~~~~~~~~~~~~~~~~~~
 build   25-Oct-2018 17:17:07      compilation terminated.
 build   25-Oct-2018 17:17:07      make: *** [../../../../../../components/toolchain/gcc/Makefile.common:272:
 ```
+
+[Reference](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#paths)
 
 ## macOS Issues
 
