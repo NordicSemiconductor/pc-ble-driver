@@ -5,10 +5,10 @@
     * [SoftDevice and IC](#SoftDevice-and-IC)
 * [Installing driver](#Installing-driver)
 * [Installing tools](#Installing-tools)
-* [Installing dependencies](#Prerequisites)
-    * [Installing on Windows](#Prerequisites)
-    * [Installing Ubuntu Linux](#Prerequisites)
-    * [Installing macOS](#Prerequisites)
+* [Installing dependencies](#Installing-dependencies)
+    * [Installing dependencies on Windows](#Installing-dependencies-on-Windows)
+    * [Installing dependencies Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
+    * [Installing dependencies on macOS](#Installing-dependencies-on-macOS)
 * [Compiling pc-ble-driver from source](#Prerequisites)
 * [Compiling connectivity HEX files](#Prerequisites)
 * [Flashing connectivity HEX files](#Prerequisites)
@@ -100,18 +100,22 @@ To compile `pc-ble-driver` you will need the following tools:
 
 * Visual Studio 2015 or later (on Windows)
 * A C/C++ toolchain (on Linux or macOS)
-* [Git](https://git-scm.com/)
+* [Git](https://git-scm.com/) (>=2.19)
 * [CMake](https://cmake.org/) (>=3.11)
 * [vcpkg](https://github.com/Microsoft/vcpkg)
+
+##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source)
 
 To compile `connectivity` HEX files you will need additional tools:
 * [Chocolatey](https://chocolatey.org/) (for installing GNU Make on Windows)
 * [GNU Make](https://www.gnu.org/software/make/)
 * [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm)
 
+##### [Go to compile `connectivity` HEX files](#Compiling-connectivity-hex-files)
+
 > Follow the steps to install dependencies on a specific platform:
 
-#### Installing on Windows
+#### Installing dependencies on Windows
 
 1. Download `Visual Studio` and install.
 
@@ -124,7 +128,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ .\bootstrap-vcpkg.bat
     ```
 
-    Then add the vcpkg location to the PATH environment variable.
+    Then add the vcpkg location to the `PATH` environment variable.
 
     And validate `vcpkg` installation
     ```bash
@@ -134,19 +138,15 @@ To compile `connectivity` HEX files you will need additional tools:
 > The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
 4. Install [Chocolatey](https://chocolatey.org/install/)
-    * Install with `cmd.exe` (Run as administrator), or
+    Install with `cmd.exe` (Run as administrator)
+
     ```bash
     # Copy everything below
     @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     ```
 
-    * Install with `PowerShell.exe` (Run as administrator)
-    ```bash
-    # Copy everything below
-    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-    ```
+    Validate `Chocolatey` installation
 
-    * Validate `Chocolatey` installation
     ```bash
     $ choco
     ```
@@ -168,74 +168,32 @@ To compile `connectivity` HEX files you will need additional tools:
     * Install
     * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
-#### Installing on Ubuntu Linux
+#### Installing dependencies on Ubuntu Linux
 
-#### Installing on macOS
+#### Installing dependencies on macOS
 
 ##### [Back to top](#)
 ---
 
-## Compiling the connectivity .hex files
-
-CMake is used to build connectivity firmware. The .hex files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
-
-[Compiling pc-ble-driver from source](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#compiling-the-connectivity-hex-files)
-### Dependencies
-1. Follow instructions in `Compiling pc-ble-driver from source` and install all dependencies.
-2. A recent version of GNU Make.
-3. Install a recent version of [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). And set its installation path as `GCCARMEMB_TOOLCHAIN_PATH`.
-
-#### Windows
-* Use chocolatey package manager for Windows to install Make.
-
-1. Install [Chocolatey](https://chocolatey.org/).
-2. Open cmd as `Administrator` and type `choco install make`.
-3. Make sure that make is exported in path variable.
-
-### Compilation
-Follow steps in `Compiling pc-ble-driver from source` for details on how to create project files for your platform. Two additional flags must be passed to CMake to create project files for connectivity firmware. `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
-
-* `COMPILE_CONNECTIVITY=1`
-* `CONNECTIVITY_VERSION=<version>`
-
-#### Example
-
-Compiling on Linux
-
-    $ cd build
-    $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
-    $ cd hex
-    $ make compile_connectivity
-
 ## Compiling pc-ble-driver from source
 
-### Dependencies
-
-To build this project you will need the following tools:
-
-* [CMake](https://cmake.org/) (>=3.11)
-* A C/C++ toolchain
-* [vcpkg](https://github.com/Microsoft/vcpkg)
-
-Install vcpkg as described [here](https://github.com/Microsoft/vcpkg).
-
-Add the vcpkg location to the PATH environment variable.
-
-See the following sections for platform-specific instructions on the installation of the dependencies.
+##### [Go to install dependencies](#Installing-dependencies) if you have not done that yet.
 
 #### Windows
-
-* Install the latest CMake stable release by downloading the Windows Installer from:
-
-[CMake Downloads](https://cmake.org/download/)
 
 Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
 
-    > vcpkg install asio
-    > vcpkg install catch2
-    > cd build
-    > cmake -G "Visual Studio 14 <Win64>" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake ..
-    > msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
+```bash
+# You are now in root directory of pc-ble-driver
+$ mkdir build && cd build
+$ vcpkg install asio
+$ vcpkg install catch2
+$ cmake \
+    -G "Visual Studio 14 <Win64>" \
+    -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake \
+    ..
+$ msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
+```
 
 **Note**: Add `Win64` to the `-G` option to build a 64-bit version of the driver.
 
@@ -276,10 +234,81 @@ Then change to the root folder of the repository and issue the following command
     $ vcpkg install asio
     $ vcpkg install catch2
     $ cd build
-    $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE= <build_type> ..
+    $ cmake \
+        -G "Unix Makefiles" \
+        -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_BUILD_TYPE= <build_type> \
+        ..
     $ make
 
 **Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
+##### [Back to top](#)
+---
+
+## Compiling connectivity HEX files
+
+##### [Go to install dependencies](#Installing-dependencies) if you have not done that yet.
+
+##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source) if you have not done that yet.
+
+Two additional flags must be passed to CMake to create project files for connectivity firmware. `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
+* `COMPILE_CONNECTIVITY=1`
+* `CONNECTIVITY_VERSION=<version>`
+
+The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
+
+> Follow the steps to install dependencies on a specific platform:
+
+#### Compiling on Windows
+
+```bash
+# You are now in root directory of pc-ble-driver
+SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+$ cd hex
+$ mkdir build && cd build
+# Remove everything in build directory and
+# re-run cmake command if it fails during cmake
+$ cmake \
+    -G "Visual Studio 14" \
+    -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake \
+    -DCOMPILE_CONNECTIVITY=1 \
+    -DCONNECTIVITY_VERSION=1.0.0 \
+    ..
+$ make compile_connectivity
+```
+
+#### Compiling on Windows
+
+```bash
+$ cd build
+$ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+$ cd hex
+$ make compile_connectivity
+```
+
+#### Compiling on Windows
+
+```bash
+$ cd build
+$ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+$ cd hex
+$ make compile_connectivity
+```
+
+#### Example
+
+Compiling on Linux
+
+    $ cd build
+    $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+    $ cd hex
+    $ make compile_connectivity
+
+
+##### [Back to top](#)
+---
 
 ## Flashing the connectivity firmware
 
@@ -289,6 +318,9 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
 
     $ nrfjprog -f NRF5<x> -e
     $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s<x>_<a>.<b>.<c>.hex
+
+##### [Back to top](#)
+---
 
 ## Known issues
 
