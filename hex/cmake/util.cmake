@@ -4,7 +4,7 @@ function(nrf_configure_sdk_affected_files SDK_VERSION SDK_DIRECTORY SER_CONFIG_P
     elseif(SDK_VERSION EQUAL 15)
         set(MAIN_PATH "${SDK_DIRECTORY}/examples/connectivity/ble_connectivity/main.c" PARENT_SCOPE)
     else()
-        message(STATUS "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown to me.")
+        message(FATAL_ERROR "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown to me.")
         return()
     endif()
 
@@ -30,13 +30,11 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
     nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_DIRECTORY} SER_CONFIG_PATH MAIN_PATH)
 
     if(NOT EXISTS ${SER_CONFIG_PATH})
-        message("Not able to find ser_config.h in path ${SER_CONFIG_PATH}")
-        return()
+        message(FATAL_ERROR "Not able to find ser_config.h in path ${SER_CONFIG_PATH}")
     endif()
 
     if(NOT EXISTS ${MAIN_PATH})
-        message("Not able to find main.c in path ${SER_CONFIG_PATH}")
-        return()
+        message(FATAL_ERROR "Not able to find main.c in path ${SER_CONFIG_PATH}")
     endif()
 
     file(READ ${SER_CONFIG_PATH} SER_CONFIG)
@@ -379,8 +377,7 @@ function(nrf_find_alternative_softdevice SOFTDEVICE_HEX_PATH ALTERNATIVE_SOFTDEV
     if(ALTERNATIVE_SOFTDEVICE_HEX)
         list(LENGTH ALTERNATIVE_SOFTDEVICE_HEX HEX_COUNT)
         if(HEX_COUNT GREATER 1)
-            message(STATUS "Found ${HEX_COUNT} alternative hex files, not able to process that.")
-            return()
+            message(FATAL_ERROR "Found ${HEX_COUNT} alternative hex files, not able to process that.")
         endif()
 
         set(ALTERNATIVE_SD_VERSION)
