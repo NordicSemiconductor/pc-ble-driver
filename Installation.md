@@ -7,7 +7,7 @@
 * [Installing tools](#Installing-tools)
 * [Installing dependencies](#Installing-dependencies)
     * [Installing on Windows](#Installing-dependencies-on-Windows)
-    * [Installing Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
+    * [Installing on Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
     * [Installing on macOS](#Installing-dependencies-on-macOS)
 * [Compiling pc-ble-driver from source](#Compiling-pc-ble-driver-from-source)
     * [Compiling on Windows](#Compiling-pc-ble-driver-on-Windows)
@@ -15,7 +15,7 @@
 * [Compiling connectivity HEX files](#Compiling-connectivity-HEX-files)
     * [Compiling on Windows](#Compiling-connectivity-HEX-files-on-Windows)
     * [Compiling on Ubuntu Linux or macOS](#Compiling-connectivity-HEX-files-on-Ubuntu-Linux-or-macOS)
-* [Flashing connectivity HEX files](#Prerequisites)
+* [Flashing connectivity HEX files](#Flashing-connectivity-HEX-files)
 * [Known issues](#Known-issues)
 
 ---
@@ -80,7 +80,7 @@ To prevent the modemmanager service from trying to connect to the CDC ACM serial
 
 The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
-> There is a known issue, check it [HERE](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
+> There is a known issue, check it [here](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
 > if you met any problems.
 
 ##### [Back to top](#)
@@ -127,9 +127,33 @@ To compile `connectivity` HEX files you will need additional tools:
 
 1. Download `Visual Studio 15` or later version and install.
 
-2. Doownload `Git (>=2.19)` from [here](https://git-scm.com/downloads) and install
+2. Install [Chocolatey](https://chocolatey.org/install/).
+    Install with `cmd.exe` (Run as administrator)
+    ```bash
+    # Copy everything below
+    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+    ```
 
-3. Download `Cmake (>=3.11)` from [here](https://cmake.org/download/) and install.
+    If `Chocolatey` has already been installed as described above, run:
+    ```bash
+    SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+    ```
+
+    Validate `Chocolatey` installation
+
+    ```bash
+    $ choco
+    ```
+
+2. Install `Git`.
+    ```bash
+    $ choco install -y git
+    ```
+
+3. Install `Cmake`.
+    ```bash
+    $ choco install -y cmake
+    ```
 
 4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
@@ -147,34 +171,22 @@ To compile `connectivity` HEX files you will need additional tools:
 
 > The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-5. Install [Chocolatey](https://chocolatey.org/install/)
-    Install with `cmd.exe` (Run as administrator)
+6. Install `make`.
     ```bash
-    # Copy everything below
-    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    ```
-
-    Validate `Chocolatey` installation
-
-    ```bash
-    $ choco
-    ```
-
-6. Install `make` by using `Chocolatey`
-    Run `cmd.exe` as administrator.
-    ```bash
-    $ choco install make
-    ```
-
-    Validate `make` installation
-    ```bash
-    $ make
+    $ choco install -y make
     ```
 
 7. Install `GNU Embedded Toolchain for Arm`
-    * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
-    * Install
-    * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    ```bash
+    $ choco install -y gcc-arm-embedded
+    ```
+
+    > Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    > By default:
+
+    ```bash
+    $ SET GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
+    ```
 
 8. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
@@ -232,8 +244,8 @@ To compile `connectivity` HEX files you will need additional tools:
 
 5. Install `GNU Embedded Toolchain for Arm`.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
-    * Install
-    * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    * Extract
+    * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
 6. Install `Python` and `pip`, and then install `nrfutil`.
     ```bash
@@ -282,8 +294,8 @@ To compile `connectivity` HEX files you will need additional tools:
 
 5. Install `GNU Embedded Toolchain for Arm`
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
-    * Install
-    * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    * Extract
+    * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
 6. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
@@ -318,19 +330,13 @@ To compile `connectivity` HEX files you will need additional tools:
 
     To build 32-bit version with Visual Studio 2015:
     ```bash
-    $ cmake \
-        -G "Visual Studio 14" \
-        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
-        ..
+    $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ..
     ```
 
     To build 64-bit version with Visual Studio 2015:
 
     ```bash
-    $ cmake \
-        -G "Visual Studio 14 Win64" \
-        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
-        ..
+    $ cmake -G "Visual Studio 14 Win64" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ..
     ```
 
     > Change `-G "Visual Studio 14"` to `-G "Visual Studio 15"` if you are using Visual Studio 2017.
@@ -414,6 +420,7 @@ Make sure the following environment variables are set:
 * `GCCARMEMB_TOOLCHAIN_PATH`
 
 Make sure the following paths have been added to PATH:
+* `VCPKG_ROOT`
 * `mergehex`
 
 > Follow the steps to install dependencies on a specific platform:
@@ -423,8 +430,6 @@ Make sure the following paths have been added to PATH:
 1. Check environment
     ```bash
     # You are now in root directory of pc-ble-driver
-    # Make sure environment variables have been set
-    # as described at beginning of this section
     $ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     $ cd hex
     $ mkdir build && cd build
@@ -432,13 +437,10 @@ Make sure the following paths have been added to PATH:
 
 2. CMake
     ```bash
+    # Make sure environment variables have been set
+    # as described at beginning of this section
     # Modify -DCONNECTIVITY_VERSION=a.b.c
-    $ cmake \
-        -G "Visual Studio 14" \
-        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
-        -DCOMPILE_CONNECTIVITY=1 \
-        -DCONNECTIVITY_VERSION=1.0.0 \
-        ..
+    $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
     ```
     Check more options at [compiling pc-ble-driver on Windows](#Compiling-pc-ble-driver-on-Windows)
 
@@ -447,20 +449,23 @@ Make sure the following paths have been added to PATH:
     $ msbuild compile_connectivity.vcxproj
     ```
 
+##### [Back to top](#)
+
 #### Compiling connectivity HEX files on Ubuntu Linux or macOS
 
 1. Check environment
     ```bash
     # You are now in root directory of pc-ble-driver
-    # Make sure environment variables have been set
-    # as described at beginning of this section
     $ cd hex
     $ mkdir build && cd build
     ```
 
 2. CMake
     ```bash
+    # Make sure environment variables have been set
+    # as described at beginning of this section
     # Modify -DCONNECTIVITY_VERSION=a.b.c
+    $ export TMP=/tmp
     $ cmake \
         -G "Unix Makefiles" \
         -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
@@ -478,7 +483,7 @@ Make sure the following paths have been added to PATH:
 ##### [Back to top](#)
 ---
 
-## Flashing the connectivity firmware
+## Flashing connectivity HEX files
 
 To use this library you will need to flash the connectivity firmware on a nRF5x IC
 
@@ -492,7 +497,7 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
 
 ## Known issues
 
-See [Issues.md](./issues/Issues.md) when meeting problems during installation `pc-ble-driver`
+When meeting problems during installing `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
 
 
 ##### [Back to top](#)
