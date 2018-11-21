@@ -128,7 +128,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ .\bootstrap-vcpkg.bat
     ```
 
-    Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
+    Then add the vcpkg location to the `PATH` and set it as `VCPKG_ROOT` environment variable.
 
     And validate `vcpkg` installation
     ```bash
@@ -214,12 +214,12 @@ To compile `connectivity` HEX files you will need additional tools:
     $ sudo apt-get -y install build-essential
     ```
 
-2. Install `Cmake`.
+2. Install `CMake`.
     ```bash
     $ sudo apt-get -y install cmake
     ```
 
-    > Install `Cmake` from source if the version is lower than required.
+    > Install `CMake` from source if the version is lower than required.
 
 3. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
@@ -252,60 +252,90 @@ To compile `connectivity` HEX files you will need additional tools:
 
 #### Compliing pc-ble-driver on Windows
 
-Open a Microsoft Visual Studio Command Prompt and issue the following from the root folder of the repository:
+1. Install vcpkg dependencies.
 
-```bash
-# You are now in root directory of pc-ble-driver
-$ mkdir build && cd build
-$ vcpkg install asio
-$ vcpkg install catch2
-$ cmake \
-    -G "Visual Studio 14 <Win64>" \
-    -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
-    ..
-$ msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
-```
+    ```bash
+    # You are now in root directory of pc-ble-driver
+    # Make sure %VCPKG_ROOT% is set and added to %PATH%
+    $ mkdir build && cd build
+    $ vcpkg install asio
+    $ vcpkg install catch2
+    ```
 
-**Note**:
+2. CMake
 
-* Add `Win64` to the `-G` option to build a 64-bit version of the driver.
-* Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+    To build 32-bit version with Visual Studio 2015:
+    ```bash
+    $ cmake \
+        -G "Visual Studio 14" \
+        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
+        ..
+    ```
 
-For examples, compiling with 64-bit Visual Studio 2015 with default configuration:
+    To build 64-bit version with Visual Studio 2015:
 
-```bash
-$ cmake \
-    -G "Visual Studio 14 Win64" \
-    -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
-    ..
-$ msbuild ALL_BUILD.vcxproj
-```
+    ```bash
+    $ cmake \
+        -G "Visual Studio 14 Win64" \
+        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
+        ..
+    ```
+
+    > Change `-G "Visual Studio 14"` to `-G "Visual Studio 15"` if you are using Visual Studio 2017.
+
+3. MSBuild
+
+    ```bash
+    $ msbuild ALL_BUILD.vcxproj
+    ```
+
+    > Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available. For example:
+
+    ```bash
+    $ msbuild ALL_BUILD.vcxproj /p:Configuration=Debug
+    ```
 
 ##### [Back to top](#)
 
 #### Compiling pc-ble-driver on Ubuntu Linux
 
-```bash
-# You are now in root directory of pc-ble-driver
-$ mkdir build && cd build
-$ vcpkg install asio
-$ vcpkg install catch2
-$ cmake \
-    -G "Unix Makefiles" \
-    -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-    ..
-$ msbuild ALL_BUILD.vcxproj </p:Configuration=<CFG>>
-```
+1. Install vcpkg dependencies.
 
-    $ cd build
+    ```bash
+    # You are now in root directory of pc-ble-driver
+    # Make sure $VCPKG_ROOT is set and added to $PATH
+    $ mkdir build && cd build
     $ vcpkg install asio
     $ vcpkg install catch2
-    $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake <-DCMAKE_BUILD_TYPE=<build_type>> <-DARCH=<x86_32,x86_64>>" ..
+    ```
+
+2. CMake
+
+    ```bash
+    $ cmake \
+        -G "Unix Makefiles" \
+        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+        ..
+    ```
+
+    > Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+    >
+    > Optionally select the target architecture (32 or 64-bit) using the `-DARCH` option. The values can be `x86_32`, `x86_64`, `x86_32,x86_64`.
+    > For example:
+
+    ```bash
+    $ cmake \
+        -G "Unix Makefiles" \
+        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_BUILD_TYPE=Debug
+        -DARCH=x86_32,x86_64
+        ..
+    ```
+
+3. Make
+    ```bash
     $ make
-
-**Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
-
-**Note**: Optionally select the target architecture (32 or 64-bit) using the `-DARCH` option.
+    ```
 
 ##### [Back to top](#)
 
