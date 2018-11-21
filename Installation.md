@@ -6,11 +6,15 @@
 * [Installing driver](#Installing-driver)
 * [Installing tools](#Installing-tools)
 * [Installing dependencies](#Installing-dependencies)
-    * [Installing dependencies on Windows](#Installing-dependencies-on-Windows)
-    * [Installing dependencies Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
-    * [Installing dependencies on macOS](#Installing-dependencies-on-macOS)
-* [Compiling pc-ble-driver from source](#Prerequisites)
-* [Compiling connectivity HEX files](#Prerequisites)
+    * [Installing on Windows](#Installing-dependencies-on-Windows)
+    * [Installing Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
+    * [Installing on macOS](#Installing-dependencies-on-macOS)
+* [Compiling pc-ble-driver from source](#Compiling-pc-ble-driver-from-source)
+    * [Compiling on Windows](#Compiling-pc-ble-driver-on-Windows)
+    * [Compiling on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
+* [Compiling connectivity HEX files](#Compiling-connectivity-HEX-files)
+    * [Compiling on Windows](#Compiling-connectivity-HEX-files-on-Windows)
+    * [Compiling on Ubuntu Linux or macOS](#Compiling-connectivity-HEX-files-on-Ubuntu-Linux-or-macOS)
 * [Flashing connectivity HEX files](#Prerequisites)
 * [Known issues](#Known-issues)
 
@@ -157,7 +161,7 @@ To compile `connectivity` HEX files you will need additional tools:
     ```
 
 6. Install `make` by using `Chocolatey`
-    Run `cmd.exe` or `PowerShell.exe` as administrator.
+    Run `cmd.exe` as administrator.
     ```bash
     $ choco install make
     ```
@@ -298,7 +302,7 @@ To compile `connectivity` HEX files you will need additional tools:
 
 ##### [Go to install dependencies](#Installing-dependencies) if you have not done that yet.
 
-#### Compliing pc-ble-driver on Windows
+#### Compiling pc-ble-driver on Windows
 
 1. Install vcpkg dependencies.
 
@@ -400,6 +404,7 @@ Two additional flags must be passed to CMake to create project files for connect
 * `CONNECTIVITY_VERSION=<version>`
 
 > `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
+>
 > `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
 
 The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
@@ -415,35 +420,60 @@ Make sure the following paths have been added to PATH:
 
 #### Compiling connectivity HEX files on Windows
 
-```bash
-# You are now in root directory of pc-ble-driver
-$ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-$ cd hex
-$ mkdir build && cd build
-# Modify -DCONNECTIVITY_VERSION=a.b.c
-$ cmake \
-    -G "Visual Studio 14" \
-    -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake \
-    -DCOMPILE_CONNECTIVITY=1 \
-    -DCONNECTIVITY_VERSION=1.0.0 \
-    ..
-$ msbuild compile_connectivity.vcxproj
-```
+1. Check environment
+    ```bash
+    # You are now in root directory of pc-ble-driver
+    # Make sure environment variables have been set
+    # as described at beginning of this section
+    $ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+    $ cd hex
+    $ mkdir build && cd build
+    ```
 
-#### Compiling connectivity HEX files on Unbuntu Linux or macOS
+2. CMake
+    ```bash
+    # Modify -DCONNECTIVITY_VERSION=a.b.c
+    $ cmake \
+        -G "Visual Studio 14" \
+        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
+        -DCOMPILE_CONNECTIVITY=1 \
+        -DCONNECTIVITY_VERSION=1.0.0 \
+        ..
+    ```
+    Check more options at [compiling pc-ble-driver on Windows](#Compiling-pc-ble-driver-on-Windows)
 
-```bash
-# You are now in root directory of pc-ble-driver
-$ cd hex
-$ mkdir build && cd build
-# Modify -DCONNECTIVITY_VERSION=a.b.c
-$ cmake -G "Unix Makefiles" \
-    -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-    -DCOMPILE_CONNECTIVITY=1 \
-    -DCONNECTIVITY_VERSION=1.0.0 \
-    ..
-$ make compile_connectivity
-```
+3. MSBuild
+    ```bash
+    $ msbuild compile_connectivity.vcxproj
+    ```
+
+#### Compiling connectivity HEX files on Ubuntu Linux or macOS
+
+1. Check environment
+    ```bash
+    # You are now in root directory of pc-ble-driver
+    # Make sure environment variables have been set
+    # as described at beginning of this section
+    $ cd hex
+    $ mkdir build && cd build
+    ```
+
+2. CMake
+    ```bash
+    # Modify -DCONNECTIVITY_VERSION=a.b.c
+    $ cmake \
+        -G "Visual Studio 14" \
+        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
+        -DCOMPILE_CONNECTIVITY=1 \
+        -DCONNECTIVITY_VERSION=1.0.0 \
+        ..
+    ```
+    Check more options at [compiling pc-ble-driver on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
+
+3. MSBuild
+    ```bash
+    $ make compile_connectivity
+    ```
 
 ##### [Back to top](#)
 ---
@@ -462,7 +492,7 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
 
 ## Known issues
 
-When meeting problems during installation `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
+See [Issues.md](./issues/Issues.md) when meeting problems during installation `pc-ble-driver`
 
 
 ##### [Back to top](#)
