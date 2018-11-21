@@ -98,8 +98,7 @@ To flash the connectivity firmware you will need `nrfjprog` which is bundled wit
 
 To compile `pc-ble-driver` you will need the following tools:
 
-* Visual Studio 2015 or later (on Windows)
-* A C/C++ toolchain (on Linux or macOS)
+* A C/C++ toolchain
 * [Git](https://git-scm.com/) (>=2.19)
 * [CMake](https://cmake.org/) (>=3.11)
 * [vcpkg](https://github.com/Microsoft/vcpkg)
@@ -110,6 +109,9 @@ To compile `connectivity` HEX files you will need additional tools:
 * [Chocolatey](https://chocolatey.org/) (for installing GNU Make on Windows)
 * [GNU Make](https://www.gnu.org/software/make/)
 * [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm)
+* [Python](https://www.python.org/)
+* [pip](https://pypi.org/project/pip/)
+* [nrfutil](https://github.com/NordicSemiconductor/pc-nrfutil)
 
 ##### [Go to compile `connectivity` HEX files](#Compiling-connectivity-hex-files)
 
@@ -117,11 +119,13 @@ To compile `connectivity` HEX files you will need additional tools:
 
 #### Installing dependencies on Windows
 
-1. Download `Visual Studio` and install.
+1. Download `Visual Studio 15` or later version and install.
 
-2. Download `Cmake` from [here](https://cmake.org/download/) and install.
+2. Doownload `Git (>=2.19)` from [here](https://git-scm.com/downloads) and install
 
-3. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+3. Download `Cmake (>=3.11)` from [here](https://cmake.org/download/) and install.
+
+4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
     $ git clone https://github.com/Microsoft/vcpkg.git
     $ cd vcpkg
@@ -137,9 +141,8 @@ To compile `connectivity` HEX files you will need additional tools:
 
 > The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-4. Install [Chocolatey](https://chocolatey.org/install/)
+5. Install [Chocolatey](https://chocolatey.org/install/)
     Install with `cmd.exe` (Run as administrator)
-
     ```bash
     # Copy everything below
     @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
@@ -151,8 +154,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ choco
     ```
 
-5. Install `make` by using `Chocolatey`
-
+6. Install `make` by using `Chocolatey`
     Run `cmd.exe` or `PowerShell.exe` as administrator.
     ```bash
     $ choco install make
@@ -163,10 +165,19 @@ To compile `connectivity` HEX files you will need additional tools:
     $ make
     ```
 
-6. Install `GNU Embedded Toolchain for Arm`
+7. Install `GNU Embedded Toolchain for Arm`
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Install
     * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+
+8. Install `Python` and `pip`, and then install `nrfutil`
+    ```bash
+    $ pip install nrfutil
+
+    # Validate installation
+    # Reboot if fail
+    $ nrfutil
+    ```
 
 ##### [Back to top](#)
 
@@ -177,14 +188,26 @@ To compile `connectivity` HEX files you will need additional tools:
     $ sudo apt-get -y install build-essential
     ```
 
-2. Install `Cmake`.
+2. Install `Git`
+    ```bash
+    $ sudo apt-get -y install git
+    ```
+
+    > If the installed version of `Git` is lower than required, then:
+    ```bash
+    $ sudo add-apt-repository ppa:git-core/ppa
+    $ sudo apt update
+    $ sudo apt install git
+    ```
+
+3. Install `Cmake`.
     ```bash
     $ sudo apt-get -y install cmake
     ```
 
     > Install `Cmake` from source if the version is lower than required.
 
-3. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
     $ git clone https://github.com/Microsoft/vcpkg.git
     $ cd vcpkg
@@ -200,28 +223,40 @@ To compile `connectivity` HEX files you will need additional tools:
 
 > The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-4. Install `GNU Embedded Toolchain for Arm`
+5. Install `GNU Embedded Toolchain for Arm`.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Install
     * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+
+6. Install `Python` and `pip`, and then install `nrfutil`.
+    ```bash
+    $ pip install nrfutil
+
+    # Validate installation
+    # Reboot if fail
+    $ nrfutil
+    ```
 
 ##### [Back to top](#)
 
 #### Installing dependencies on macOS
 
-1. Install `build-essential`.
+1. Install `Xcode (>=10.1)`.
+
+2. Install `gcc6` using  [HomeBrew](https://brew.sh/).
     ```bash
-    $ sudo apt-get -y install build-essential
+    $ brew install gcc6
     ```
 
-2. Install `CMake`.
+3. Install `CMake` using [HomeBrew](https://brew.sh/).
     ```bash
-    $ sudo apt-get -y install cmake
+    $ brew install cmake
+    $ brew upgrade cmake
     ```
 
     > Install `CMake` from source if the version is lower than required.
 
-3. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
     $ git clone https://github.com/Microsoft/vcpkg.git
     $ cd vcpkg
@@ -237,11 +272,19 @@ To compile `connectivity` HEX files you will need additional tools:
 
 > The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-4. Install `GNU Embedded Toolchain for Arm`
+5. Install `GNU Embedded Toolchain for Arm`
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Install
     * Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
+6. Install `Python` and `pip`, and then install `nrfutil`
+    ```bash
+    $ pip install nrfutil
+
+    # Validate installation
+    # Reboot if fail
+    $ nrfutil
+    ```
 
 ##### [Back to top](#)
 ---
@@ -297,7 +340,7 @@ To compile `connectivity` HEX files you will need additional tools:
 
 ##### [Back to top](#)
 
-#### Compiling pc-ble-driver on Ubuntu Linux
+#### Compiling pc-ble-driver on Ubuntu Linux or macOS
 
 1. Install vcpkg dependencies.
 
@@ -338,28 +381,6 @@ To compile `connectivity` HEX files you will need additional tools:
     ```
 
 ##### [Back to top](#)
-
-#### macOS (OS X) 10.11 and later
-
-Install cmake with Homebrew with the `brew` command on a terminal:
-
-    $ brew install cmake
-
-Then change to the root folder of the repository and issue the following commands:
-
-    $ vcpkg install asio
-    $ vcpkg install catch2
-    $ cd build
-    $ cmake \
-        -G "Unix Makefiles" \
-        -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake \
-        -DCMAKE_BUILD_TYPE= <build_type> \
-        ..
-    $ make
-
-**Note**: Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
-
-##### [Back to top](#)
 ---
 
 ## Compiling connectivity HEX files
@@ -368,24 +389,33 @@ Then change to the root folder of the repository and issue the following command
 
 ##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source) if you have not done that yet.
 
-Two additional flags must be passed to CMake to create project files for connectivity firmware. `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+Two additional flags must be passed to CMake to create project files for connectivity firmware.
 
 * `COMPILE_CONNECTIVITY=1`
 * `CONNECTIVITY_VERSION=<version>`
 
+> `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
+> `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
 The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
+
+Make sure the following environment variables are set:
+* `VCPKG_ROOT`
+* `GCCARMEMB_TOOLCHAIN_PATH`
+
+Make sure the following paths have been added to PATH:
+* `mergehex`
+* `GCCARMEMB_TOOLCHAIN_PATH`
 
 > Follow the steps to install dependencies on a specific platform:
 
-#### Compiling on Windows
+#### Compiling connectivity HEX files on Windows
 
 ```bash
 # You are now in root directory of pc-ble-driver
 SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 $ cd hex
 $ mkdir build && cd build
-# Remove everything in build directory and
-# re-run cmake command if it fails during cmake
 $ cmake \
     -G "Visual Studio 14" \
     -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake \
@@ -395,16 +425,23 @@ $ cmake \
 $ make compile_connectivity
 ```
 
-#### Compiling on Windows
+#### Compiling connectivity HEX files on Unbuntu Linux
 
 ```bash
-$ cd build
-$ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+# You are now in root directory of pc-ble-driver
+# Make sure $VCPKG_ROOT is set and added to $PATH
+# Make sure $GCCARMEMB_TOOLCHAIN_PATH is also set
 $ cd hex
+$ mkdir build && cd build
+$ cmake -G "Unix Makefiles" \
+    -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+    -DCOMPILE_CONNECTIVITY=1 \
+    -DCONNECTIVITY_VERSION=1.0.0 \
+    ..
 $ make compile_connectivity
 ```
 
-#### Compiling on Windows
+#### Compiling connectivity HEX files on macOS
 
 ```bash
 $ cd build
