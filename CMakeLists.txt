@@ -182,6 +182,9 @@ add_subdirectory(test)
 # Add examples
 add_subdirectory(examples)
 
+# Add install target
+include(cmake/install-target.cmake)
+
 if(COMPILE_CONNECTIVITY)
     add_subdirectory(hex)
 endif()
