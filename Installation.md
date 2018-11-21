@@ -91,6 +91,8 @@ To flash the connectivity firmware you will need `nrfjprog` which is bundled wit
 * [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
 * [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
+> Add `nrfjprog` and `mergehex` to `PATH` on Linux and macOS.
+
 ##### [Back to top](#)
 ---
 
@@ -175,8 +177,9 @@ To compile `connectivity` HEX files you will need additional tools:
     $ pip install nrfutil
 
     # Validate installation
-    # Reboot if fail
     $ nrfutil
+
+    # Reboot if installation succeeds but validation fails
     ```
 
 ##### [Back to top](#)
@@ -233,8 +236,9 @@ To compile `connectivity` HEX files you will need additional tools:
     $ pip install nrfutil
 
     # Validate installation
-    # Reboot if fail
     $ nrfutil
+
+    # Reboot if installation succeeds but validation fails
     ```
 
 ##### [Back to top](#)
@@ -282,8 +286,9 @@ To compile `connectivity` HEX files you will need additional tools:
     $ pip install nrfutil
 
     # Validate installation
-    # Reboot if fail
     $ nrfutil
+
+    # Reboot if installation succeeds but validation fails
     ```
 
 ##### [Back to top](#)
@@ -405,7 +410,6 @@ Make sure the following environment variables are set:
 
 Make sure the following paths have been added to PATH:
 * `mergehex`
-* `GCCARMEMB_TOOLCHAIN_PATH`
 
 > Follow the steps to install dependencies on a specific platform:
 
@@ -413,26 +417,26 @@ Make sure the following paths have been added to PATH:
 
 ```bash
 # You are now in root directory of pc-ble-driver
-SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+$ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 $ cd hex
 $ mkdir build && cd build
+# Modify -DCONNECTIVITY_VERSION=a.b.c
 $ cmake \
     -G "Visual Studio 14" \
     -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake \
     -DCOMPILE_CONNECTIVITY=1 \
     -DCONNECTIVITY_VERSION=1.0.0 \
     ..
-$ make compile_connectivity
+$ msbuild compile_connectivity.vcxproj
 ```
 
-#### Compiling connectivity HEX files on Unbuntu Linux
+#### Compiling connectivity HEX files on Unbuntu Linux or macOS
 
 ```bash
 # You are now in root directory of pc-ble-driver
-# Make sure $VCPKG_ROOT is set and added to $PATH
-# Make sure $GCCARMEMB_TOOLCHAIN_PATH is also set
 $ cd hex
 $ mkdir build && cd build
+# Modify -DCONNECTIVITY_VERSION=a.b.c
 $ cmake -G "Unix Makefiles" \
     -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
     -DCOMPILE_CONNECTIVITY=1 \
@@ -440,25 +444,6 @@ $ cmake -G "Unix Makefiles" \
     ..
 $ make compile_connectivity
 ```
-
-#### Compiling connectivity HEX files on macOS
-
-```bash
-$ cd build
-$ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
-$ cd hex
-$ make compile_connectivity
-```
-
-#### Example
-
-Compiling on Linux
-
-    $ cd build
-    $ cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
-    $ cd hex
-    $ make compile_connectivity
-
 
 ##### [Back to top](#)
 ---
@@ -478,3 +463,7 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
 ## Known issues
 
 When meeting problems during installation `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
+
+
+##### [Back to top](#)
+---
