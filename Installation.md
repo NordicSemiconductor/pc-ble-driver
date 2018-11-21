@@ -385,8 +385,8 @@ To compile `connectivity` HEX files you will need additional tools:
     $ cmake \
         -G "Unix Makefiles" \
         -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-        -DCMAKE_BUILD_TYPE=Debug
-        -DARCH=x86_32,x86_64
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DARCH=x86_32,x86_64 \
         ..
     ```
 
@@ -484,6 +484,8 @@ Make sure the following paths have been added to PATH:
 ---
 
 ## Flashing connectivity HEX files
+
+[Go to install tools](#Installing-tools) if the nRF5x Command-Line Tools have not been installed yet.
 
 To use this library you will need to flash the connectivity firmware on a nRF5x IC
 
