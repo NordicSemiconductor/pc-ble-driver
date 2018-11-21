@@ -50,7 +50,10 @@ To set up the required J-Link drivers simply download and install the version ma
 
 * [SEGGER J-Link](https://www.segger.com/jlink-software.html)
 
-After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically
+After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically.
+
+In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see here](./issues/Issues#Data-corruption-or-drops).
+
 
 #### Validating on Windows
 
@@ -79,6 +82,7 @@ To prevent the modemmanager service from trying to connect to the CDC ACM serial
 #### Validating macOS (OS X)
 
 The serial port will appear as `/dev/tty.usbmodemXXXX`.
+
 
 > There is a known issue, check it [here](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
 > if you met any problems.
