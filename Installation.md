@@ -462,15 +462,15 @@ Make sure the following paths have been added to PATH:
     ```bash
     # Modify -DCONNECTIVITY_VERSION=a.b.c
     $ cmake \
-        -G "Visual Studio 14" \
-        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake \
+        -G "Unix Makefiles" \
+        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
         -DCOMPILE_CONNECTIVITY=1 \
         -DCONNECTIVITY_VERSION=1.0.0 \
         ..
     ```
     Check more options at [compiling pc-ble-driver on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
 
-3. MSBuild
+3. Make
     ```bash
     $ make compile_connectivity
     ```
