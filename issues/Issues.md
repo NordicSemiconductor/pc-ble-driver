@@ -72,5 +72,9 @@ MSDDisable
 
 #### SEGGER OB sends invalid packet
 
+1. SEGGER OB does not send two packet terminations (0xC0) from UART to USB host. SEGGER OB does not send 0xC0,0x00 from UART to USB host.
+
+2. After d1 02 7d is received no more data is received in PC application, CTS is kept high. Assuming this is a side-effect of 1)
+
 ![USB Analyzer](./segger_ob_usb_analyzer.png)
 ![Logic Analyzer](./segger_ob_logic_analyzer.png)

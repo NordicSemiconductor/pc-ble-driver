@@ -52,7 +52,7 @@ To set up the required J-Link drivers simply download and install the version ma
 
 After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically.
 
-In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see here](./issues/Issues#Data-corruption-or-drops).
+In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see `data corruption or drops issue` here](./issues/Issues#Data-corruption-or-drops).
 
 
 #### Validating on Windows
@@ -138,7 +138,7 @@ To compile `connectivity` HEX files you will need additional tools:
     @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     ```
 
-    If `Chocolatey` has already been installed as described above, run:
+    If `Chocolatey` has already been installed as described above but has not been added to PATH, run:
     ```bash
     SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     ```
