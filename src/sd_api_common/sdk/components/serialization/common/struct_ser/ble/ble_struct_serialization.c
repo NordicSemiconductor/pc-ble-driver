@@ -49,13 +49,11 @@
 #include "cond_field_serialization.h"
 #ifdef SER_CONNECTIVITY
 #include "conn_ble_gap_sec_keys.h"
+#else
+#include "app_ble_gap.h"
 #endif
 #include <string.h>
 
-
-#if !defined(SER_CONNECTIVITY) && NRF_SD_BLE_API_VERSION > 5
-#include "app_ble_gap.h"
-#endif
 
 uint32_t ble_uuid_t_enc(void const * const p_void_struct,
                         uint8_t * const    p_buf,
@@ -475,16 +473,15 @@ uint32_t ble_data_t_enc(void const * const p_void_struct,
                         uint32_t * const   p_index)
 {
     SER_STRUCT_ENC_BEGIN(ble_data_t);
-    uint32_t buf_id = 0;
 
+    uint32_t buf_id = 0;
 #if NRF_SD_BLE_API_VERSION > 5
 #if defined(SER_CONNECTIVITY)
-    conn_ble_gap_ble_data_buf_free(p_struct->p_data);
+    buf_id = conn_ble_gap_ble_data_buf_free(p_struct->p_data);
 #else
     buf_id = app_ble_gap_adv_buf_register(p_struct->p_data);
 #endif
 #endif
-
     SER_PUSH_uint32(&buf_id);
     SER_PUSH_len16data(p_struct->p_data, p_struct->len);
 
@@ -502,16 +499,14 @@ uint32_t ble_data_t_dec(uint8_t const * const p_buf,
     SER_PULL_uint32(&buf_id);
 #if NRF_SD_BLE_API_VERSION > 5
 #if defined(SER_CONNECTIVITY)
-     if (buf_id)
+    if (buf_id && (p_struct->p_data == NULL))
      {
          p_struct->p_data = conn_ble_gap_ble_data_buf_alloc(buf_id);
      }
 #else
-    p_struct->p_data = app_ble_gap_adv_buf_unregister(buf_id);
+    p_struct->p_data = app_ble_gap_adv_buf_unregister(buf_id, true);
 #endif
 #endif
-
-    p_struct->len = 1024;
     SER_PULL_len16data(&p_struct->p_data, &p_struct->len);
 
     SER_STRUCT_DEC_END;

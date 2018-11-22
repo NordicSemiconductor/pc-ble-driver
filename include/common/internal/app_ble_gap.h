@@ -178,9 +178,8 @@ uint32_t app_ble_gap_state_reset();
  *
  * @param p_data Pointer to the buffer.
  *
- * @return NRF_SUCCESS or error in case pointer is already set.
  */
-uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data);
+void app_ble_gap_scan_data_set(const uint8_t *p_scan_data);
 
 /**
  * @brief Returns pointer to the buffer for storing report data. Returns error if not paired with
@@ -218,7 +217,10 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
                                         uint8_t **pp_scan_rsp_data);
 
 int app_ble_gap_adv_buf_register(void * p_buf);
-void *app_ble_gap_adv_buf_unregister(const int id);
+void *app_ble_gap_adv_buf_unregister(const int id, bool event_context);
+void app_ble_gap_adv_buf_addr_unregister(void * p_buf, bool event_context);
+
+void app_ble_gap_scan_data_unset(bool free);
 
 #endif // NRF_SD_BLE_API_VERSION >= 6
 /** @} */

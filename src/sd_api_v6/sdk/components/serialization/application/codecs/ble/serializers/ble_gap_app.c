@@ -650,6 +650,7 @@ uint32_t ble_gap_scan_start_rsp_dec(uint8_t const * const p_buf,
                                     uint32_t * const      p_result_code)
 {
     SER_RSP_DEC_RESULT_ONLY(SD_BLE_GAP_SCAN_START);
+
 }
 
 
@@ -978,6 +979,7 @@ uint32_t ble_gap_adv_set_configure_rsp_dec(uint8_t const * const  p_buf,
 {
     SER_RSP_DEC_BEGIN(SD_BLE_GAP_ADV_SET_CONFIGURE);
     SER_PULL_COND((void **)&p_adv_handle, uint8_t_dec);
+
     SER_RSP_DEC_END;
 }
 
