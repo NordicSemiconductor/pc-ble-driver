@@ -24,9 +24,9 @@
 
 #### Operating system
 
-* Windows (XP, 7, 8, 8.1, 10) 32 and 64-bit
-* GNU/Linux (Ubuntu tested) 32 and 64-bit
-* macOS (OS X) 32 and 64-bit
+* Windows (7, 8, 8.1, 10) 32 and 64-bit
+* GNU/Linux (Ubuntu tested) 64-bit
+* macOS (OS X) 64-bit
 
 #### SoftDevice and IC
 
