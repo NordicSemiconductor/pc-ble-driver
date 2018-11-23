@@ -36,6 +36,8 @@ build   25-Oct-2018 17:17:07      make: *** [../../../../../../components/toolch
 
 [Reference](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#paths)
 
+
+---
 ## macOS Issues
 
 #### Timeout error related to the SEGGER J-Link firmware
@@ -53,7 +55,7 @@ There are two ways to solve this issue:
 If you want to revert back to the SEGGER firmware you will have to download the it from [this location](http://www.nordicsemi.com/eng/nordic/Products/nRF51-DK/nRF5x-OB-JLink-IF/52276)
 
 
-
+---
 ## SEGGER Issues
 
 #### Data corruption or drops
