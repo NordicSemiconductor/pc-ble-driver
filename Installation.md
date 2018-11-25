@@ -154,13 +154,7 @@ To compile `connectivity` HEX files you will need additional tools:
 
     If `Chocolatey` has already been installed as described above but has not been added to PATH, run:
     ```bash
-    SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    ```
-
-    Validate `Chocolatey` installation
-
-    ```bash
-    $ choco
+    $ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     ```
 
 2. Install `Git`.
@@ -182,19 +176,14 @@ To compile `connectivity` HEX files you will need additional tools:
 
     Then add the vcpkg location to the `PATH` and set it as `VCPKG_ROOT` environment variable.
 
-    And validate `vcpkg` installation
-    ```bash
-    $ vcpkg
-    ```
+The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-> The following steps are needed only if you want to compile your own `connectivity` HEX files.
-
-6. Install `make`.
+1. Install `make`.
     ```bash
     $ choco install -y make
     ```
 
-7. Install `GNU Embedded Toolchain for Arm`
+2. Install `GNU Embedded Toolchain for Arm`
     ```bash
     $ choco install -y gcc-arm-embedded
     ```
@@ -206,12 +195,9 @@ To compile `connectivity` HEX files you will need additional tools:
     $ SET GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
     ```
 
-8. Install `Python` and `pip`, and then install `nrfutil`
+3. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
     $ pip install nrfutil
-
-    # Validate installation
-    $ nrfutil
 
     # Reboot if installation succeeds but validation fails
     ```
@@ -253,24 +239,16 @@ To compile `connectivity` HEX files you will need additional tools:
 
     Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
 
-    And validate `vcpkg` installation
-    ```bash
-    $ vcpkg
-    ```
+The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-> The following steps are needed only if you want to compile your own `connectivity` HEX files.
-
-5. Install `GNU Embedded Toolchain for Arm`.
+1. Install `GNU Embedded Toolchain for Arm`.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
-6. Install `Python` and `pip`, and then install `nrfutil`.
+2. Install `Python` and `pip`, and then install `nrfutil`.
     ```bash
     $ pip install nrfutil
-
-    # Validate installation
-    $ nrfutil
 
     # Reboot if installation succeeds but validation fails
     ```
@@ -303,24 +281,16 @@ To compile `connectivity` HEX files you will need additional tools:
 
     Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
 
-    And validate `vcpkg` installation
-    ```bash
-    $ vcpkg
-    ```
+ The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-> The following steps are needed only if you want to compile your own `connectivity` HEX files.
-
-5. Install `GNU Embedded Toolchain for Arm`
+1. Install `GNU Embedded Toolchain for Arm`
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
-6. Install `Python` and `pip`, and then install `nrfutil`
+2. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
     $ pip install nrfutil
-
-    # Validate installation
-    $ nrfutil
 
     # Reboot if installation succeeds but validation fails
     ```
@@ -337,7 +307,8 @@ To compile `connectivity` HEX files you will need additional tools:
 1. Install vcpkg dependencies.
 
     ```bash
-    # You are now in root directory of pc-ble-driver
+    # cd <pc-ble-driver-root-folder>
+
     # Make sure %VCPKG_ROOT% is set and added to %PATH%
     $ mkdir build && cd build
     $ vcpkg install asio
@@ -378,7 +349,8 @@ To compile `connectivity` HEX files you will need additional tools:
 1. Install vcpkg dependencies.
 
     ```bash
-    # You are now in root directory of pc-ble-driver
+    # cd <pc-ble-driver-root-folder>
+
     # Make sure $VCPKG_ROOT is set and added to $PATH
     $ mkdir build && cd build
     $ vcpkg install asio
@@ -422,17 +394,6 @@ To compile `connectivity` HEX files you will need additional tools:
 
 ##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source) if you have not done that yet.
 
-Two additional flags must be passed to CMake to create project files for connectivity firmware.
-
-* `COMPILE_CONNECTIVITY=1`
-* `CONNECTIVITY_VERSION=<version>`
-
-> `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
->
-> `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
-
-The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
-
 Make sure the following environment variables are set:
 * `VCPKG_ROOT`
 * `GCCARMEMB_TOOLCHAIN_PATH`
@@ -462,12 +423,20 @@ Make sure the following paths have been added to PATH:
     # Modify -DCONNECTIVITY_VERSION=a.b.c
     $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
     ```
+
+    > `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
+    >
+    > `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
     Check more options at [compiling pc-ble-driver on Windows](#Compiling-pc-ble-driver-on-Windows)
 
 3. MSBuild
     ```bash
     $ msbuild compile_connectivity.vcxproj
     ```
+
+    The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
+
 
 ##### [Back to top](#)
 
@@ -495,12 +464,20 @@ Make sure the following paths have been added to PATH:
         -DCONNECTIVITY_VERSION=1.0.0 \
         ..
     ```
+
+    > `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
+    >
+    > `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
     Check more options at [compiling pc-ble-driver on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
 
 3. Make
     ```bash
     $ make compile_connectivity
     ```
+
+    The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
+
 
 ##### [Back to top](#)
 ---
