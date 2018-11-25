@@ -4,6 +4,8 @@
     * [Operating system](#Operating-system)
     * [SoftDevice and IC](#SoftDevice-and-IC)
 * [Installing driver](#Installing-driver)
+    * [Driver installation](#Driver-installation)
+    * [Driver validation](#Driver-validation)
 * [Installing tools](#Installing-tools)
 * [Installing dependencies](#Installing-dependencies)
     * [Installing on Windows](#Installing-dependencies-on-Windows)
@@ -30,7 +32,9 @@
 
 #### SoftDevice and IC
 
-The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
+To use pc-ble-driver, your Development Kit needs to have the correct firmware. The needed firmwares are found in the hex/sd_api_v<x> folder and contain the SoftDevice and connectivity firmware required to communicate with pc-ble-driver.
+
+The generated libraries are compatible with the following SoftDevice API versions and nRF5x ICs:
 
 * SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
 * SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
@@ -38,22 +42,23 @@ The libraries generated are compatible with the following SoftDevice API version
 * SoftDevice s132 API version 6: `s132_nrf52_6.x.x` (only for nRF52 series ICs)
 * SoftDevice s140 API version 6: `s140_nrf52_6.x.x` (only for nRF52 series ICs)
 
-The HEX files in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware which is required on the device to communicate with the `pc-ble-driver`.
-
 ##### [Back to top](#)
 ---
 
 ## Installing driver
+
+### Driver installation
 
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
 
 * [SEGGER J-Link](https://www.segger.com/jlink-software.html)
 
-After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically.
+After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should be available.
 
 In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see `data corruption or drops issue` here](./issues/Issues#Data-corruption-or-drops).
 
+### Driver validation
 
 #### Validating on Windows
 
@@ -63,8 +68,6 @@ Simply check the "Ports (COM & LPT)" section in the Device Manager.
 #### Validating on Ubuntu Linux
 
 The serial port will appear as `/dev/ttyACMx`.
-
-**Note:** you need some extra steps to be able to use the device on Linux other than Windows and macOS.
 
 By default the port is not accessible to all users. Type the command below to add your user to the `dialout` group to give it access to the serial port. Note that re-login is required for this to take effect.
 
@@ -92,6 +95,8 @@ The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
 ## Installing tools
 
+#### nRF5x Command-Line Tools
+
 To flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
 * [nRF5x Command-Line Tools for Windows](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Win32/33444)
@@ -100,6 +105,15 @@ To flash the connectivity firmware you will need `nrfjprog` which is bundled wit
 * [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
 > Add `nrfjprog` and `mergehex` to `PATH` on Linux and macOS.
+
+#### nRF Connect Programmer (optional)
+
+Alternatively, `nRF Connect Programmer` can help you to flash the connectivty firmware with UI support.
+
+Download
+[nRF Connect Desktop]( https://www.nordicsemi.com/eng/Products/Bluetooth-low-energy/nRF-Connect-for-Desktop)
+and install `nRF Connect Programmer` there.
+
 
 ##### [Back to top](#)
 ---
@@ -431,18 +445,20 @@ Make sure the following paths have been added to PATH:
 
 #### Compiling connectivity HEX files on Windows
 
-1. Check environment
+1. Set environment
     ```bash
-    # You are now in root directory of pc-ble-driver
+    # cd <pc-ble-driver-root-folder>
     $ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    $ cd hex
-    $ mkdir build && cd build
+
+    # Make sure environment variables have been set
+    # as described at beginning of this section
     ```
 
 2. CMake
     ```bash
-    # Make sure environment variables have been set
-    # as described at beginning of this section
+    $ cd hex
+    $ mkdir build && cd build
+
     # Modify -DCONNECTIVITY_VERSION=a.b.c
     $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
     ```
@@ -457,19 +473,21 @@ Make sure the following paths have been added to PATH:
 
 #### Compiling connectivity HEX files on Ubuntu Linux or macOS
 
-1. Check environment
+1. Set environment
     ```bash
-    # You are now in root directory of pc-ble-driver
-    $ cd hex
-    $ mkdir build && cd build
+    # cd <pc-ble-driver-root-folder>
+    $ export TMP=/tmp
+
+    # Make sure environment variables have been set
+    # as described at beginning of this section
     ```
 
 2. CMake
     ```bash
-    # Make sure environment variables have been set
-    # as described at beginning of this section
+    $ cd hex
+    $ mkdir build && cd build
+
     # Modify -DCONNECTIVITY_VERSION=a.b.c
-    $ export TMP=/tmp
     $ cmake \
         -G "Unix Makefiles" \
         -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
@@ -493,10 +511,13 @@ Make sure the following paths have been added to PATH:
 
 To use this library you will need to flash the connectivity firmware on a nRF5x IC
 
-Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
+Use [nRF5x Command-Line Tools](#Installing-tools) to erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
     $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s<x>_<a>.<b>.<c>.hex
+
+Alternatively, use [nRF Connect Programmer](https://github.com/NordicSemiconductor/pc-nrfconnect-programmer)
+to erase and program the IC.
 
 ##### [Back to top](#)
 ---
