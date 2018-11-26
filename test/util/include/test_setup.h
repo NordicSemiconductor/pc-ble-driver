@@ -51,16 +51,28 @@
 #include <thread>
 #include <vector>
 
-#ifdef _WIN32
-#define DEFAULT_BAUD_RATE                                                                          \
-    1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
+constexpr uint32_t defaultRetransmissionInterval()
+{
+#ifdef NRF_SD_BLE_API == 2
+    return 300; // nRF51 devices use SDv2. They are a bit slower than the nRF52 series devices.
+#else
+    return 250;
 #endif
+}
+
+constexpr uint32_t defaultBaudRate()
+{
+#ifdef _WIN32
+    return 1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
+#endif
+
 #ifdef __APPLE__
-#define DEFAULT_BAUD_RATE 115200 /**< Baud rate 1M is not supported on MacOS. */
+    return 1000000; /**< Baud rate 1M is not supported on MacOS. */
 #endif
 #ifdef __linux__
-#define DEFAULT_BAUD_RATE 1000000
+    return 1000000;
 #endif
+}
 
 #define STR(s) #s
 #define EXPAND(s) STR(s)
@@ -81,8 +93,8 @@ struct Environment
     uint32_t numberOfIterations{10};
     sd_rpc_log_severity_t driverLogLevel{SD_RPC_LOG_INFO};
     bool driverLogLevelSet{false};
-    uint32_t baudRate{1000000};
-    uint32_t retransmissionInterval{250};
+    uint32_t baudRate{defaultBaudRate()};
+    uint32_t retransmissionInterval{defaultRetransmissionInterval()};
     uint32_t responseTimeout{1500};
     uint16_t mtu{150};
     std::string hardwareInfo{};
