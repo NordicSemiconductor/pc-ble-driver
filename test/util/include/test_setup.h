@@ -67,7 +67,7 @@ constexpr uint32_t defaultBaudRate()
 #endif
 
 #ifdef __APPLE__
-    return 1000000; /**< Baud rate 1M is not supported on MacOS. */
+    return 115200; /**< Baud rate 1M is not supported on MacOS. */
 #endif
 #ifdef __linux__
     return 1000000;
