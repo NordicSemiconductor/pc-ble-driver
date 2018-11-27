@@ -34,7 +34,8 @@ compilation terminated.
 make: *** [../../../../../../components/toolchain/gcc/Makefile.common:272:
 ```
 
-[Reference](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#paths)
+In the Windows API (with some exceptions discussed in the following paragraphs), the maximum length for a path is MAX_PATH, which is defined as 260 characters. If the path length exceeds MAX_PATH, then it will have this issue.
+[See more details here](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#paths)
 
 
 ---

@@ -19,9 +19,9 @@ Where `heart_rate_monitor_v2` and `heart_rate_monitor_v3` etc are the executable
 
 #### Running
 
-Plug your nRF5 DK into you're PC and [Flash the connectivity firmware](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#flashing-the-connectivity-firmware).
+Plug your nRF5 DK into your PC and [Program the connectivity firmware](/Installation.md#Programming-connectivity-HEX-files).
 
-Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you flash your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_115k2_with_s<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
+Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you program your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_115k2_with_s<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
 
 If you are on macOS or a recent version of Linux there is a known [J-Link issue](https://github.com/NordicSemiconductor/pc-ble-driver#macos-os-x) that you need to do a workaround for.
 
@@ -56,4 +56,4 @@ After connecting to the nRF5 device from nRF Connect, you should see:
 
 From here you can play around more and experiment with `pc-ble-driver`.
 
-When running the `heart_rate_collector` example, the nRF5 device is scanning as a BLE Master. You can experiment with this example more by flashing a separate nRF5 DK with the BLE Peripheral heart rate monitor example in the nRF5 SDK `nRF5_SDK_ROOT_PATH/examples/ble_peripheral/ble_app_hrs` so the two devices can interact.
+When running the `heart_rate_collector` example, the nRF5 device is scanning as a BLE Master. You can experiment with this example more by programming a separate nRF5 DK with the BLE Peripheral heart rate monitor example in the nRF5 SDK `nRF5_SDK_ROOT_PATH/examples/ble_peripheral/ble_app_hrs` so the two devices can interact.

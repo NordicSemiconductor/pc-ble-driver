@@ -4,6 +4,8 @@
     * [Operating system](#Operating-system)
     * [SoftDevice and IC](#SoftDevice-and-IC)
 * [Installing Device Drivers](#Installing-device-drivers)
+    * [Driver installation](#Driver-installation)
+    * [Driver validation](#Driver-validation)
 * [Installing Tools](#Installing-tools)
 * [Installing Dependencies](#Installing-dependencies)
     * [Installing on Windows](#Installing-dependencies-on-Windows)
@@ -30,7 +32,9 @@
 
 #### SoftDevice and IC
 
-The libraries generated are compatible with the following SoftDevice API versions and nRF5x ICs:
+To use pc-ble-driver, your Development Kit needs to have the correct firmware. The needed firmwares are found in the `hex/sd_api_v<x>` folder and contain the SoftDevice and connectivity firmware required to communicate with `pc-ble-driver`.
+
+The generated libraries are compatible with the following SoftDevice API versions and nRF5x ICs:
 
 * SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
 * SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
@@ -38,21 +42,22 @@ The libraries generated are compatible with the following SoftDevice API version
 * SoftDevice s132 API version 6: `s132_nrf52_6.x.x` (only for nRF52 series ICs)
 * SoftDevice s140 API version 6: `s140_nrf52_6.x.x` (only for nRF52 series ICs)
 
-The HEX files in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware which is required on the device to communicate with the `pc-ble-driver`.
-
 ---
 
 ## Installing Device Drivers
+
+### Driver installation
 
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
 
 * [SEGGER J-Link](https://www.segger.com/jlink-software.html)
 
-After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should appear automatically.
+After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should be available.
 
 In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see `data corruption or drops issue` here](./issues/Issues#Data-corruption-or-drops).
 
+### Driver validation
 
 #### Validating on Windows
 
@@ -62,8 +67,6 @@ Simply check the "Ports (COM & LPT)" section in the Device Manager.
 #### Validating on Ubuntu Linux
 
 The serial port will appear as `/dev/ttyACMx`.
-
-**Note:** you need some extra steps to be able to use the device on Linux other than Windows and macOS.
 
 By default the port is not accessible to all users. Type the command below to add your user to the `dialout` group to give it access to the serial port. Note that re-login is required for this to take effect.
 
@@ -83,12 +86,14 @@ To prevent the modemmanager service from trying to connect to the CDC ACM serial
 The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
 
-> There is a known issue, check it [here](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
-> if you met any problems.
+There is a known issue, check it [here](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
+if you met any problems.
 
 ---
 
-## Installing tools
+## Installing Tools
+
+#### nRF5x Command-Line Tools
 
 To program the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
@@ -97,11 +102,19 @@ To program the connectivity firmware you will need `nrfjprog` which is bundled w
 * [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
 * [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
-> Add `nrfjprog` and `mergehex` to `PATH` on Linux and macOS.
+Add `nrfjprog` and `mergehex` to `PATH` on Linux and macOS.
+
+#### nRF Connect Programmer (optional)
+
+Alternatively, `nRF Connect Programmer` can help you to program the connectivty firmware with UI support.
+
+Download
+[nRF Connect Desktop]( https://www.nordicsemi.com/eng/Products/Bluetooth-low-energy/nRF-Connect-for-Desktop)
+and install `nRF Connect Programmer` there.
 
 ---
 
-## Installing dependencies
+## Installing Dependencies
 
 To compile `pc-ble-driver` you will need the following tools:
 
@@ -122,7 +135,7 @@ To compile `connectivity` HEX files you will need additional tools:
 
 ##### [Go to compile `connectivity` HEX files](#Compiling-connectivity-hex-files)
 
-> Follow the steps to install dependencies on a specific platform:
+Follow the steps to install dependencies on a specific platform:
 
 #### Installing dependencies on Windows
 
@@ -137,13 +150,7 @@ To compile `connectivity` HEX files you will need additional tools:
 
     If `Chocolatey` has already been installed as described above but has not been added to PATH, run:
     ```bash
-    SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    ```
-
-    Validate `Chocolatey` installation
-
-    ```bash
-    $ choco
+    $ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     ```
 
 2. Install `Git`.
@@ -165,36 +172,28 @@ To compile `connectivity` HEX files you will need additional tools:
 
     Then add the vcpkg location to the `PATH` and set it as `VCPKG_ROOT` environment variable.
 
-    And validate `vcpkg` installation
-    ```bash
-    $ vcpkg
-    ```
+The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-> The following steps are needed only if you want to compile your own `connectivity` HEX files.
-
-6. Install `make`.
+1. Install `make`.
     ```bash
     $ choco install -y make
     ```
 
-7. Install `GNU Embedded Toolchain for Arm`
+2. Install `GNU Embedded Toolchain for Arm`
     ```bash
     $ choco install -y gcc-arm-embedded
     ```
 
-    > Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
-    > By default:
+    Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    By default:
 
     ```bash
     $ SET GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
     ```
 
-8. Install `Python` and `pip`, and then install `nrfutil`
+3. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
     $ pip install nrfutil
-
-    # Validate installation
-    $ nrfutil
 
     # Reboot if installation succeeds but validation fails
     ```
@@ -212,7 +211,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ sudo apt-get -y install git
     ```
 
-    > If the installed version of `Git` is lower than required, then:
+    If the installed version of `Git` is lower than required, then:
     ```bash
     $ sudo add-apt-repository ppa:git-core/ppa
     $ sudo apt update
@@ -224,7 +223,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ sudo apt-get -y install cmake
     ```
 
-    > Install `Cmake` from source if the version is lower than required.
+    Install `Cmake` from source if the version is lower than required.
 
 4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
@@ -235,24 +234,16 @@ To compile `connectivity` HEX files you will need additional tools:
 
     Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
 
-    And validate `vcpkg` installation
-    ```bash
-    $ vcpkg
-    ```
+The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-> The following steps are needed only if you want to compile your own `connectivity` HEX files.
-
-5. Install `GNU Embedded Toolchain for Arm`.
+1. Install `GNU Embedded Toolchain for Arm`.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
-6. Install `Python` and `pip`, and then install `nrfutil`.
+2. Install `Python` and `pip`, and then install `nrfutil`.
     ```bash
     $ pip install nrfutil
-
-    # Validate installation
-    $ nrfutil
 
     # Reboot if installation succeeds but validation fails
     ```
@@ -272,7 +263,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ brew upgrade cmake
     ```
 
-    > Install `CMake` from source if the version is lower than required.
+    Install `CMake` from source if the version is lower than required.
 
 4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
@@ -283,31 +274,23 @@ To compile `connectivity` HEX files you will need additional tools:
 
     Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
 
-    And validate `vcpkg` installation
-    ```bash
-    $ vcpkg
-    ```
+ The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-> The following steps are needed only if you want to compile your own `connectivity` HEX files.
-
-5. Install `GNU Embedded Toolchain for Arm`
+1. Install `GNU Embedded Toolchain for Arm`
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
 
-6. Install `Python` and `pip`, and then install `nrfutil`
+2. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
     $ pip install nrfutil
-
-    # Validate installation
-    $ nrfutil
 
     # Reboot if installation succeeds but validation fails
     ```
 
 ---
 
-## Compiling pc-ble-driver from source
+## Compiling pc-ble-driver from Source
 
 ##### [Go to install dependencies](#Installing-dependencies) if you have not done that yet.
 
@@ -316,7 +299,8 @@ To compile `connectivity` HEX files you will need additional tools:
 1. Install vcpkg dependencies.
 
     ```bash
-    # You are now in root directory of pc-ble-driver
+    # cd <pc-ble-driver-root-folder>
+
     # Make sure %VCPKG_ROOT% is set and added to %PATH%
     $ mkdir build && cd build
     $ vcpkg install asio
@@ -336,7 +320,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ cmake -G "Visual Studio 14 Win64" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ..
     ```
 
-    > Change `-G "Visual Studio 14"` to `-G "Visual Studio 15"` if you are using Visual Studio 2017.
+    Change `-G "Visual Studio 14"` to `-G "Visual Studio 15"` if you are using Visual Studio 2017.
 
 3. MSBuild
 
@@ -344,7 +328,7 @@ To compile `connectivity` HEX files you will need additional tools:
     $ msbuild ALL_BUILD.vcxproj
     ```
 
-    > Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available. For example:
+    Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available. For example:
 
     ```bash
     $ msbuild ALL_BUILD.vcxproj /p:Configuration=Debug
@@ -355,7 +339,8 @@ To compile `connectivity` HEX files you will need additional tools:
 1. Install vcpkg dependencies.
 
     ```bash
-    # You are now in root directory of pc-ble-driver
+    # cd <pc-ble-driver-root-folder>
+
     # Make sure $VCPKG_ROOT is set and added to $PATH
     $ mkdir build && cd build
     $ vcpkg install asio
@@ -371,10 +356,10 @@ To compile `connectivity` HEX files you will need additional tools:
         ..
     ```
 
-    > Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
-    >
-    > Optionally select the target architecture (32 or 64-bit) using the `-DARCH` option. The values can be `x86_32`, `x86_64`, `x86_32,x86_64`.
-    > For example:
+    Optionally Select the build configuration with the `-DCMAKE_BUILD_TYPE` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available.
+
+    Optionally select the target architecture (32 or 64-bit) using the `-DARCH` option. The values can be `x86_32`, `x86_64`, `x86_32,x86_64`.
+    For example:
 
     ```bash
     $ cmake \
@@ -398,17 +383,6 @@ To compile `connectivity` HEX files you will need additional tools:
 
 ##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source) if you have not done that yet.
 
-Two additional flags must be passed to CMake to create project files for connectivity firmware.
-
-* `COMPILE_CONNECTIVITY=1`
-* `CONNECTIVITY_VERSION=<version>`
-
-> `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
->
-> `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
-
-The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
-
 Make sure the following environment variables are set:
 * `VCPKG_ROOT`
 * `GCCARMEMB_TOOLCHAIN_PATH`
@@ -417,25 +391,32 @@ Make sure the following paths have been added to PATH:
 * `VCPKG_ROOT`
 * `mergehex`
 
-> Follow the steps to install dependencies on a specific platform:
+Follow the steps to install dependencies on a specific platform:
 
 #### Compiling connectivity HEX files on Windows
 
-1. Check environment
+1. Set environment
     ```bash
-    # You are now in root directory of pc-ble-driver
+    # cd <pc-ble-driver-root-folder>
     $ SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    $ cd hex
-    $ mkdir build && cd build
+
+    # Make sure environment variables have been set
+    # as described at beginning of this section
     ```
 
 2. CMake
     ```bash
-    # Make sure environment variables have been set
-    # as described at beginning of this section
+    $ cd hex
+    $ mkdir build && cd build
+
     # Modify -DCONNECTIVITY_VERSION=a.b.c
     $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
     ```
+
+    `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
+
+    `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
     Check more options at [compiling pc-ble-driver on Windows](#Compiling-pc-ble-driver-on-Windows)
 
 3. MSBuild
@@ -443,21 +424,25 @@ Make sure the following paths have been added to PATH:
     $ msbuild compile_connectivity.vcxproj
     ```
 
+    The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
+
 #### Compiling connectivity HEX files on Ubuntu Linux or macOS
 
-1. Check environment
+1. Set environment
     ```bash
-    # You are now in root directory of pc-ble-driver
-    $ cd hex
-    $ mkdir build && cd build
+    # cd <pc-ble-driver-root-folder>
+    $ export TMP=/tmp
+
+    # Make sure environment variables have been set
+    # as described at beginning of this section
     ```
 
 2. CMake
     ```bash
-    # Make sure environment variables have been set
-    # as described at beginning of this section
+    $ cd hex
+    $ mkdir build && cd build
+
     # Modify -DCONNECTIVITY_VERSION=a.b.c
-    $ export TMP=/tmp
     $ cmake \
         -G "Unix Makefiles" \
         -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
@@ -465,6 +450,11 @@ Make sure the following paths have been added to PATH:
         -DCONNECTIVITY_VERSION=1.0.0 \
         ..
     ```
+
+    `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
+
+    `CONNECTIVITY_VERSION` defines a version for the compiled connectivity firmware.
+
     Check more options at [compiling pc-ble-driver on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
 
 3. Make
@@ -472,24 +462,28 @@ Make sure the following paths have been added to PATH:
     $ make compile_connectivity
     ```
 
+    The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
+
 ---
 
-## Programming connectivity HEX files
+## Programming Connectivity HEX files
 
 [Go to install tools](#Installing-tools) if the nRF5x Command-Line Tools have not been installed yet.
 
 To use this library you will need to program the connectivity firmware on a nRF5x IC
 
-Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
+Use [nRF5x Command-Line Tools](#Installing-tools) to erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
     $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s<x>_<a>.<b>.<c>.hex
 
+Alternatively, use [nRF Connect Programmer](https://github.com/NordicSemiconductor/pc-nrfconnect-programmer)
+to erase and program the IC.
+
 ---
 
-## Known issues
+## Known Issues
 
-When meeting problems during installing `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
-
+If you meet problems during installation of pc-ble-driver, please see [Issues.md](./issues/Issues.md).
 
 ---

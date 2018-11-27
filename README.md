@@ -14,8 +14,6 @@ The C/C++ libraries can be interfaced with directly, but are also provided as hi
 
 For detailed guidelines on building and installing `pc-ble-driver` and its dependencies see [Installation.md](./Installation.md).
 
-When meeting problems during installing `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
-
 ## Examples
 
 The [examples](./examples) serve as a great starting point for development with `pc-ble-driver`. Examples include a [heart rate monitor](./examples/heart_rate_monitor/) (BLE peripheral) and [heart rate collector](./examples/heart_rate_collector/) (BLE master) and show the basic structure of an application built on `pc-ble-driver`.
