@@ -4,7 +4,7 @@
 
 Project files for `heart_rate_monitor` and `heart_rate_collector` examples are created and built together with `pc-ble-driver` by default. It is also possible to (re)build only the examples.
 
-If there is no Makefile in `build/examples`, follow `Compiling pc-ble-driver from source` in [Installation.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/Installation.md#compiling-pc-ble-driver-from-source) to create it.
+If there is no Makefile in `build/examples`, follow `Compiling pc-ble-driver from source` in [README.md](/README.md#Compiling-pc-ble-driver-from-source) to create it.
 
 From project root
     $ cd build/examples/
@@ -19,7 +19,7 @@ Where `heart_rate_monitor_v2` and `heart_rate_monitor_v3` etc are the executable
 
 #### Running
 
-Plug your nRF5 DK into your PC and [Program the connectivity firmware](/Installation.md#Programming-connectivity-HEX-files).
+Plug your nRF5 DK into your PC and [Program the connectivity firmware](/README.md#Programming-connectivity-HEX-files).
 
 Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you program your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_115k2_with_s<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
 

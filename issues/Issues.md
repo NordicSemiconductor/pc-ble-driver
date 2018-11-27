@@ -61,11 +61,11 @@ If you want to revert back to the SEGGER firmware you will have to download the 
 
 #### Data corruption or drops
 
-Due to a known issue in Segger’s J-Link firmware, depending on your operating system and version you might experience data corruption or drops if you use the USB CDC ACM Serial Port with packets larger than 64 bytes. This has been observed on both GNU/Linux and macOS (OS X).
+Due to a known issue in Segger’s J-Link firmware, depending on your operating system and version you might experience data corruption or drops if you use the USB CDC ACM Serial Port with packets larger than 64 bytes. This has been observed on both GNU/Linux and macOS.
 
 To avoid this, you can simply disable the Mass Storage Device by opening:
 
-On GNU/Linux or macOS (OS X) JLinkExe from a terminal
+On GNU/Linux or macOS JLinkExe from a terminal
 On Microsoft Windows the “JLink Commander” application
 And then typing the following:
 
