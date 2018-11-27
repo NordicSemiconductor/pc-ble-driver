@@ -10,11 +10,11 @@ The C/C++ libraries can be interfaced with directly, but are also provided as hi
 * [pc-ble-driver-js Node.JS bindings](https://github.com/NordicSemiconductor/pc-ble-driver-js)
 * [pc-ble-driver-py Python bindings](https://github.com/NordicSemiconductor/pc-ble-driver-py)
 
-## Installing
+## Installation
 
-For detailed guidelines on building and installing `pc-ble-driver` and it's dependencies see [Installation.md](./Installation.md).
+For detailed guidelines on building and installing `pc-ble-driver` and its dependencies see [Installation.md](./Installation.md).
 
-## Getting started
+## Examples
 
 The [examples](./examples) serve as a great starting point for development with `pc-ble-driver`. Examples include a [heart rate monitor](./examples/heart_rate_monitor/) (BLE peripheral) and [heart rate collector](./examples/heart_rate_collector/) (BLE master) and show the basic structure of an application built on `pc-ble-driver`.
 
@@ -24,11 +24,11 @@ Now that you have successfully built and installed `pc-ble-driver`, you are read
     $ ls build/
     > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v5.a  libpc_ble_driver_shared_sd_api_v5.dylib test_uart ...
 
-To quickly get the examples up and running, see [examples/README.md](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/README.md).
-    
+To quickly get the examples up and running, see [examples/README.md](./examples/README.md).
+
 ## Architecture
 
-![alt tag](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/architecture_overview_serialization.svg)
+![Architecture](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/architecture_overview_serialization.svg)
 
 Where the 'Application chip' is just generic hardware (i.e. a Windows, OS X or Linux device), although it could also be an Arduino or Raspberry Pi for example.
 
