@@ -28,7 +28,7 @@
 
 * Windows (7, 8, 8.1, 10) 32 and 64-bit
 * GNU/Linux (Ubuntu tested) 64-bit
-* macOS (OS X) 64-bit
+* macOS 64-bit
 
 #### SoftDevice and IC
 
@@ -81,7 +81,7 @@ To prevent the modemmanager service from trying to connect to the CDC ACM serial
     $ systemctl disable ModemManager.service
 ```
 
-#### Validating macOS (OS X)
+#### Validating on macOS
 
 The serial port will appear as `/dev/tty.usbmodemXXXX`.
 
@@ -100,7 +100,7 @@ To program the connectivity firmware you will need `nrfjprog` which is bundled w
 * [nRF5x Command-Line Tools for Windows](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Win32/33444)
 * [nRF5x Command-Line Tools for Linux 32-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux32/52615)
 * [nRF5x Command-Line Tools for Linux 64-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386)
-* [nRF5x Command-Line Tools for OS X](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
+* [nRF5x Command-Line Tools for macOS](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402)
 
 Add `nrfjprog` and `mergehex` to `PATH` on Linux and macOS.
 

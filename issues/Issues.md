@@ -43,7 +43,7 @@ In the Windows API (with some exceptions discussed in the following paragraphs),
 
 #### Timeout error related to the SEGGER J-Link firmware
 
-On macOS (OS X) there is a known issue with the SEGGER J-Link firmware (that runs on the Debug probe on the board) related to USB packet sizes. This results in the timeout error `Failed to open nRF BLE Driver. Error code: 0x0D` when the serial port is attempted to be opened.
+On macOS there is a known issue with the SEGGER J-Link firmware (that runs on the Debug probe on the board) related to USB packet sizes. This results in the timeout error `Failed to open nRF BLE Driver. Error code: 0x0D` when the serial port is attempted to be opened.
 
 There are two ways to solve this issue:
 
