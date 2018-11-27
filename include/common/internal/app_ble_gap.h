@@ -216,7 +216,25 @@ uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
 uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
                                         uint8_t **pp_scan_rsp_data);
 
+/**
+ * @brief Register an advertisement buffer pointer
+ * 
+ * @param[in] p_buf Advertisement buffer to create a pointer ID from
+ * @return -1 if there is no space left in buffer table, 0 of p_buf is nullptr, >0 with buffer location in buffer table
+ */
+
 int app_ble_gap_adv_buf_register(void * p_buf);
+
+/**
+ * @breif Unregister a buffer from advertisement buffer table
+ * 
+ * Unregister a buffer from the buffer table (ble_gap_adv_buf_addr)
+ * 
+ * @param[in] id buffer ID in the ble_gap_adv_buf_addr table
+ * @param[in] event_context true if EVENT context, false if it is in REQUEST_REPLOY context
+ * 
+ * @return Buffer pointer from advertisement buffer table, except nullptr if id == 0 or if the context for the current adapter is not set
+ */   
 void *app_ble_gap_adv_buf_unregister(const int id, bool event_context);
 void app_ble_gap_adv_buf_addr_unregister(void * p_buf, bool event_context);
 

@@ -45,6 +45,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <iostream>
 
 #include <sd_rpc_types.h>
 
@@ -462,7 +463,8 @@ int app_ble_gap_adv_buf_register(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
+        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context REQUEST_REPLY_CODEC_CONTEXT, terminating" << std::endl;
+        std::terminate();
     }
 
     if (p_buf == nullptr)
