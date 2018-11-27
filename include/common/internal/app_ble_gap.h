@@ -150,7 +150,7 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle);
  */
 uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index);
 
-/**@breif Gets key for given adapter and connection.
+/**@brief Gets key for given adapter and connection.
  *
  * @param[in] index key index
  * @param[out] Double pointer to keyset for given key index
@@ -226,7 +226,7 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
 int app_ble_gap_adv_buf_register(void * p_buf);
 
 /**
- * @breif Unregister a buffer from advertisement buffer table
+ * @brief Unregister a buffer from advertisement buffer table
  * 
  * Unregister a buffer from the buffer table (ble_gap_adv_buf_addr)
  * 
