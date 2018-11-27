@@ -20,8 +20,8 @@ make: *** [Makefile:323: _build] Error 2
 Removing child 01DD8B10 PID 31536216 from chain.
 ```
 
-This issue is due to missing `sh` or `bash` in path.
-Adding `sh` or `bash` will fix the issue.
+This issue is due to having `sh` or `bash` in PATH.
+`sh` or `bash` must not be in the PATH.
 
 #### Long paths issue
 
