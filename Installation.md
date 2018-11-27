@@ -1,26 +1,26 @@
 # Installation
 
-* [Supported environments](#Supported-environments)
+* [Supported Environments](#Supported-environments)
     * [Operating system](#Operating-system)
     * [SoftDevice and IC](#SoftDevice-and-IC)
-* [Installing driver](#Installing-driver)
-* [Installing tools](#Installing-tools)
-* [Installing dependencies](#Installing-dependencies)
+* [Installing Device Drivers](#Installing-device-drivers)
+* [Installing Tools](#Installing-tools)
+* [Installing Dependencies](#Installing-dependencies)
     * [Installing on Windows](#Installing-dependencies-on-Windows)
     * [Installing on Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
     * [Installing on macOS](#Installing-dependencies-on-macOS)
-* [Compiling pc-ble-driver from source](#Compiling-pc-ble-driver-from-source)
+* [Compiling pc-ble-driver from Source](#Compiling-pc-ble-driver-from-source)
     * [Compiling on Windows](#Compiling-pc-ble-driver-on-Windows)
     * [Compiling on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
-* [Compiling connectivity HEX files](#Compiling-connectivity-HEX-files)
+* [Compiling Connectivity HEX Files](#Compiling-connectivity-HEX-files)
     * [Compiling on Windows](#Compiling-connectivity-HEX-files-on-Windows)
     * [Compiling on Ubuntu Linux or macOS](#Compiling-connectivity-HEX-files-on-Ubuntu-Linux-or-macOS)
-* [Flashing connectivity HEX files](#Flashing-connectivity-HEX-files)
-* [Known issues](#Known-issues)
+* [Programming Connectivity HEX Files](#Programming-connectivity-HEX-files)
+* [Known Issues](#Known-issues)
 
 ---
 
-## Supported environments
+## Supported Environments
 
 #### Operating system
 
@@ -40,10 +40,9 @@ The libraries generated are compatible with the following SoftDevice API version
 
 The HEX files in the `hex/sd_api_v<x>` folder include both the SoftDevice and the connectivity firmware which is required on the device to communicate with the `pc-ble-driver`.
 
-##### [Back to top](#)
 ---
 
-## Installing driver
+## Installing Device Drivers
 
 This communication library works over any kind of serial port (UART), but it is most often used over a Segger J-Link USB CDC UART.
 To set up the required J-Link drivers simply download and install the version matching you operating system:
@@ -87,12 +86,11 @@ The serial port will appear as `/dev/tty.usbmodemXXXX`.
 > There is a known issue, check it [here](./issues/Issues.md#Timeout-error-related-to-the-SEGGER-J-Link-firmware)
 > if you met any problems.
 
-##### [Back to top](#)
 ---
 
 ## Installing tools
 
-To flash the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
+To program the connectivity firmware you will need `nrfjprog` which is bundled with the nRF5x Command-Line Tools, which can be downloaded from:
 
 * [nRF5x Command-Line Tools for Windows](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Win32/33444)
 * [nRF5x Command-Line Tools for Linux 32-bit](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux32/52615)
@@ -101,7 +99,6 @@ To flash the connectivity firmware you will need `nrfjprog` which is bundled wit
 
 > Add `nrfjprog` and `mergehex` to `PATH` on Linux and macOS.
 
-##### [Back to top](#)
 ---
 
 ## Installing dependencies
@@ -202,7 +199,6 @@ To compile `connectivity` HEX files you will need additional tools:
     # Reboot if installation succeeds but validation fails
     ```
 
-##### [Back to top](#)
 
 #### Installing dependencies on Ubuntu Linux
 
@@ -261,8 +257,6 @@ To compile `connectivity` HEX files you will need additional tools:
     # Reboot if installation succeeds but validation fails
     ```
 
-##### [Back to top](#)
-
 #### Installing dependencies on macOS
 
 1. Install `Xcode (>=10.1)`.
@@ -311,7 +305,6 @@ To compile `connectivity` HEX files you will need additional tools:
     # Reboot if installation succeeds but validation fails
     ```
 
-##### [Back to top](#)
 ---
 
 ## Compiling pc-ble-driver from source
@@ -357,8 +350,6 @@ To compile `connectivity` HEX files you will need additional tools:
     $ msbuild ALL_BUILD.vcxproj /p:Configuration=Debug
     ```
 
-##### [Back to top](#)
-
 #### Compiling pc-ble-driver on Ubuntu Linux or macOS
 
 1. Install vcpkg dependencies.
@@ -399,7 +390,6 @@ To compile `connectivity` HEX files you will need additional tools:
     $ make
     ```
 
-##### [Back to top](#)
 ---
 
 ## Compiling connectivity HEX files
@@ -453,8 +443,6 @@ Make sure the following paths have been added to PATH:
     $ msbuild compile_connectivity.vcxproj
     ```
 
-##### [Back to top](#)
-
 #### Compiling connectivity HEX files on Ubuntu Linux or macOS
 
 1. Check environment
@@ -484,21 +472,19 @@ Make sure the following paths have been added to PATH:
     $ make compile_connectivity
     ```
 
-##### [Back to top](#)
 ---
 
-## Flashing connectivity HEX files
+## Programming connectivity HEX files
 
 [Go to install tools](#Installing-tools) if the nRF5x Command-Line Tools have not been installed yet.
 
-To use this library you will need to flash the connectivity firmware on a nRF5x IC
+To use this library you will need to program the connectivity firmware on a nRF5x IC
 
 Once you have installed the nRF5x Command-Line Tools, you can erase and program the IC:
 
     $ nrfjprog -f NRF5<x> -e
     $ nrfjprog -f NRF5<x> --program hex/sd_api_v<x>/connectivity_<ver>_<baudrate>_with_s<x>_<a>.<b>.<c>.hex
 
-##### [Back to top](#)
 ---
 
 ## Known issues
@@ -506,5 +492,4 @@ Once you have installed the nRF5x Command-Line Tools, you can erase and program 
 When meeting problems during installing `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
 
 
-##### [Back to top](#)
 ---

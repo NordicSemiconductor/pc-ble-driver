@@ -26,12 +26,12 @@ Adding `sh` or `bash` will fix the issue.
 #### Long paths issue
 
 ```
-build   25-Oct-2018 17:17:07      Compiling file: ble_gap_evt_conn.c
-build   25-Oct-2018 17:17:07      ../../../../../../components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c:46:10: fatal error: conn_ble_gap_sec_keys.h: No such file or directory
-build   25-Oct-2018 17:17:07       #include "conn_ble_gap_sec_keys.h"
-build   25-Oct-2018 17:17:07                ^~~~~~~~~~~~~~~~~~~~~~~~~
-build   25-Oct-2018 17:17:07      compilation terminated.
-build   25-Oct-2018 17:17:07      make: *** [../../../../../../components/toolchain/gcc/Makefile.common:272:
+Compiling file: ble_gap_evt_conn.c
+../../../../../../components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c:46:10: fatal error: conn_ble_gap_sec_keys.h: No such file or directory
+#include "conn_ble_gap_sec_keys.h"
+^~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+make: *** [../../../../../../components/toolchain/gcc/Makefile.common:272:
 ```
 
 [Reference](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#paths)

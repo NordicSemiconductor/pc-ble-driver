@@ -12,7 +12,7 @@ The C/C++ libraries can be interfaced with directly, but are also provided as hi
 
 ## Installation
 
-For detailed guidelines on building and installing `pc-ble-driver` and it's dependencies see [Installation.md](./Installation.md).
+For detailed guidelines on building and installing `pc-ble-driver` and its dependencies see [Installation.md](./Installation.md).
 
 When meeting problems during installing `pc-ble-driver`, see [Issues.md](./issues/Issues.md).
 
