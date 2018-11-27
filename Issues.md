@@ -79,5 +79,5 @@ MSDDisable
 
 2. After d1 02 7d is received no more data is received in PC application, CTS is kept high. Assuming this is a side-effect of 1)
 
-![USB Analyzer](./segger_ob_usb_analyzer.png)
-![Logic Analyzer](./segger_ob_logic_analyzer.png)
+![USB Analyzer](./doc/segger_ob_usb_analyzer.png)
+![Logic Analyzer](./doc/segger_ob_logic_analyzer.png)
