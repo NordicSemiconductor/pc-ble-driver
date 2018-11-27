@@ -1,1 +1,1 @@
-See [README.md](/README.md)
+Deprecation notice. The contents of this file have been moved to [README.md](/README.md)
