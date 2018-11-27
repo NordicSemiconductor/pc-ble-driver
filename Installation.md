@@ -55,7 +55,7 @@ To set up the required J-Link drivers simply download and install the version ma
 
 After you have installed the required drivers and connected a J-Link enabled board (such as the Nordic Development Kits) the port should be available.
 
-In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see `data corruption or drops issue` here](./issues/Issues#Data-corruption-or-drops).
+In addition, you have to disable the `Mass Storage Device` in order to use `pc-ble-driver` to communicate with the device, [see `data corruption or drops issue`](./issues/Issues#Data-corruption-or-drops).
 
 ### Driver validation
 
