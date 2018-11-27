@@ -1,34 +1,34 @@
 # Installation
 
-* [Supported Environments](#Supported-environments)
+* [Supported environments](#Supported-environments)
     * [Operating system](#Operating-system)
     * [SoftDevice and IC](#SoftDevice-and-IC)
-* [Installing Device Drivers](#Installing-device-drivers)
+* [Installing device drivers](#Installing-device-drivers)
     * [Driver installation](#Driver-installation)
     * [Driver validation](#Driver-validation)
-* [Installing Tools](#Installing-tools)
-* [Installing Dependencies](#Installing-dependencies)
+* [Installing tools](#Installing-tools)
+* [Installing dependencies](#Installing-dependencies)
     * [Installing on Windows](#Installing-dependencies-on-Windows)
     * [Installing on Ubuntu Linux](#Installing-dependencies-on-Ubuntu-Linux)
     * [Installing on macOS](#Installing-dependencies-on-macOS)
-* [Compiling pc-ble-driver from Source](#Compiling-pc-ble-driver-from-source)
+* [Compiling pc-ble-driver from source](#Compiling-pc-ble-driver-from-source)
     * [Compiling on Windows](#Compiling-pc-ble-driver-on-Windows)
     * [Compiling on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
-* [Compiling Connectivity HEX Files](#Compiling-connectivity-HEX-files)
+* [Compiling connectivity HEX files](#Compiling-connectivity-HEX-files)
     * [Compiling on Windows](#Compiling-connectivity-HEX-files-on-Windows)
     * [Compiling on Ubuntu Linux or macOS](#Compiling-connectivity-HEX-files-on-Ubuntu-Linux-or-macOS)
-* [Programming Connectivity HEX Files](#Programming-connectivity-HEX-files)
-* [Known Issues](#Known-issues)
+* [Programming connectivity HEX files](#Programming-connectivity-HEX-files)
+* [Known issues](#Known-issues)
 
 ---
 
-## Supported Environments
+## Supported environments
 
 #### Operating system
 
-* Windows (7, 8, 8.1, 10) 32 and 64-bit
-* GNU/Linux (Ubuntu tested) 64-bit
-* macOS 64-bit
+* Windows 7, 8 and 10,  32 and 64-bit (tested on Windows 7)
+* Ubuntu Linux LTS 64-bit (tested on Ubuntu 18.04)
+* macOS 64-bit (tested on 10.14 Mojave)
 
 #### SoftDevice and IC
 
@@ -44,7 +44,7 @@ The generated libraries are compatible with the following SoftDevice API version
 
 ---
 
-## Installing Device Drivers
+## Installing device drivers
 
 ### Driver installation
 
@@ -91,7 +91,7 @@ if you met any problems.
 
 ---
 
-## Installing Tools
+## Installing tools
 
 #### nRF5x Command-Line Tools
 
@@ -114,7 +114,7 @@ and install `nRF Connect Programmer` there.
 
 ---
 
-## Installing Dependencies
+## Installing dependencies
 
 To compile `pc-ble-driver` you will need the following tools:
 
@@ -290,7 +290,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
 ---
 
-## Compiling pc-ble-driver from Source
+## Compiling pc-ble-driver from source
 
 ##### [Go to install dependencies](#Installing-dependencies) if you have not done that yet.
 
@@ -466,7 +466,7 @@ Follow the steps to install dependencies on a specific platform:
 
 ---
 
-## Programming Connectivity HEX files
+## Programming connectivity HEX files
 
 [Go to install tools](#Installing-tools) if the nRF5x Command-Line Tools have not been installed yet.
 
@@ -482,7 +482,7 @@ to erase and program the IC.
 
 ---
 
-## Known Issues
+## Known issues
 
 If you meet problems during installation of pc-ble-driver, please see [Issues.md](./issues/Issues.md).
 
