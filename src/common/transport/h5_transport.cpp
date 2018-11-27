@@ -1092,7 +1092,7 @@ std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet
            << std::setw(20) << "type:" << std::setw(20) << pktTypeToString(packet_type)
            << " reliable:" << std::setw(3) << (reliable_packet ? "yes" : "no")
            << " seq#:" << std::hex << +seq_num << " ack#:" << std::hex << +ack_num
-           << " payload_length:" << payload_length << " data_integrity:" << data_integrity;
+           << " payload_length:" << +payload_length << " data_integrity:" << data_integrity;
 
     if (data_integrity)
     {
