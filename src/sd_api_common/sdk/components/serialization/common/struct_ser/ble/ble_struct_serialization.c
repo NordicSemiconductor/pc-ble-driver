@@ -47,6 +47,7 @@
 #include "ble_types.h"
 #include "ble.h"
 #include "cond_field_serialization.h"
+#include "ser_config.h"
 #ifdef SER_CONNECTIVITY
 #include "conn_ble_gap_sec_keys.h"
 #else
@@ -480,6 +481,7 @@ uint32_t ble_data_t_enc(void const * const p_void_struct,
     buf_id = conn_ble_gap_ble_data_buf_free(p_struct->p_data);
 #else
     buf_id = app_ble_gap_adv_buf_register(p_struct->p_data);
+    SER_ASSERT(buf_id >= 0, NRF_ERROR_NO_MEM);
 #endif
 #endif
     SER_PUSH_uint32(&buf_id);
@@ -497,6 +499,7 @@ uint32_t ble_data_t_dec(uint8_t const * const p_buf,
 
     uint32_t buf_id;
     SER_PULL_uint32(&buf_id);
+    p_struct->len = SER_MAX_ADV_DATA;
 #if NRF_SD_BLE_API_VERSION > 5
 #if defined(SER_CONNECTIVITY)
     if (buf_id && (p_struct->p_data == NULL))
