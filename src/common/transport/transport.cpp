@@ -66,7 +66,7 @@ void Transport::log(const sd_rpc_log_severity_t severity, const std::string &mes
 {
     if (upperLogCallback)
     {
-        upperLogCallback(SD_RPC_LOG_TRACE, message);
+        upperLogCallback(severity, message);
     }
     else
     {

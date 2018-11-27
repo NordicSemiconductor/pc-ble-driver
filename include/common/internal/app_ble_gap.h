@@ -1,30 +1,30 @@
 /**
  * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,18 +35,20 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #ifndef _APP_BLE_GAP_SEC_KEYS_H
 #define _APP_BLE_GAP_SEC_KEYS_H
 
- /**@file
+/**@file
  *
- * @defgroup app_ble_gap_sec_keys GAP Functions for managing memory for security keys in the application device.
+ * @defgroup app_ble_gap_sec_keys GAP Functions for managing memory for security keys in the
+ * application device.
  * @{
  * @ingroup  ser_app_s130_codecs
  *
- * @brief    GAP Application auxiliary functions for synchronizing the GAP security keys with the ones stored in the connectivity device.
+ * @brief    GAP Application auxiliary functions for synchronizing the GAP security keys with the
+ * ones stored in the connectivity device.
  */
 
 #include "ble_gap.h"
@@ -64,42 +66,68 @@ extern "C" {
 
 /**@brief GAP connection - keyset mapping structure.
  *
- * @note  This structure is used to map keysets to connection instances and store them in a static table.
+ * @note  This structure is used to map keysets to connection instances and store them in a static
+ * table.
  */
 typedef struct
 {
-  uint16_t               conn_handle;    /**< Connection handle.*/
-  uint8_t                conn_active;    /**< Indication that keys for this connection are used by the SoftDevice. 0: keys used; 1: keys not used. */
-  ble_gap_sec_keyset_t   keyset;         /**< Keyset structure, see @ref ble_gap_sec_keyset_t.*/
+    uint16_t conn_handle; /**< Connection handle.*/
+    uint8_t conn_active;  /**< Indication that keys for this connection are used by the SoftDevice.
+                             0: keys used; 1: keys not used. */
+    ble_gap_sec_keyset_t keyset; /**< Keyset structure, see @ref ble_gap_sec_keyset_t.*/
 } ser_ble_gap_app_keyset_t;
 
-/**@brief GAP connection - keys table for storage.
+typedef enum {
+    REQUEST_REPLY_CODEC_CONTEXT,
+    EVENT_CODEC_CONTEXT
+} app_ble_gap_adapter_codec_context_t;
+
+/**
+ * @brief Create GAP states for a given adapter
  *
- * @note  This array is used to store keys.
+ * The purpose of this function is to create a GAP state for a given adapter.
+ *
+ * @param[in] key Key that represents the adapter, used by other functions to select GAP state for a
+ * adapter
  */
-extern ser_ble_gap_app_keyset_t m_app_keys_table[SER_MAX_CONNECTIONS];
+uint32_t app_ble_gap_state_create(void *key);
 
-/**@brief Sets root context for calls to *_context_create, *_context_destroy, *_context_find
-*
-* @param[in]     context             root pointer to use as key for finding keysets
-*/
-void app_ble_gap_sec_context_root_set(void *context);
+/**
+ * @brief Delete GAP states for a given adapter
+ *
+ * The purpose of this function is to delete the GAP state for a given adapter.
+ *
+ * @param[in] key Key that represents the adapter
+ */
+uint32_t app_ble_gap_state_delete(void *key);
 
+/**@brief Set the current GAP adapter to be used by codecs
+ *
+ * @param[in]     adapter_id    Adapter to be used by codecs
+ * @param[in]     codec_context Codec context
+ */
+void app_ble_gap_set_current_adapter_id(void *adapter_id,
+                                        const app_ble_gap_adapter_codec_context_t codec_context);
 
-/**@brief Release root context for calls to *_context_create, *_context_destroy, *_context_find
-*
-*/
-void app_ble_gap_sec_context_root_release();
+/**@brief Unset the current GAP adapter used by codecs
+ * @param[in]     codec_context Unset the given codec context
+ */
+void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_context_t codec_context);
+
+/**@brief Check if current adapter is set
+ * @param[in] codec_context       Check if adapter GAP state is set for codec context
+ */
+uint32_t app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context);
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
  * @param[in]     conn_handle         conn_handle
  * @param[out]    p_index             Pointer to the index of the allocated instance.
  *
- * @retval NRF_SUCCESS                Context allocated.
+ * @retval NRF_SUCCESS                Key storage allocated.
  * @retval NRF_ERROR_NO_MEM           No free instance available.
  */
-uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index);
+uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_index);
 
 /**@brief Release the instance identified by a connection handle.
  *
@@ -108,19 +136,41 @@ uint32_t app_ble_gap_sec_context_create(uint16_t conn_handle, uint32_t *p_index)
  * @retval NRF_SUCCESS                Context released.
  * @retval NRF_ERROR_NOT_FOUND        Instance with conn_handle not found.
  */
-uint32_t app_ble_gap_sec_context_destroy(uint16_t conn_handle);
+uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle);
 
-/**@brief Finds index of instance identified by a connection handle in m_app_keys_table[].
+/**@brief Finds index of instance identified by a connection handle.
  *
  * @param[in]     conn_handle         conn_handle
  *
- * @param[out]    p_index             Pointer to the index of the entry in the context table corresponding to the given conn_handle.
+ * @param[out]    p_index             Pointer to the index of the entry in the keys table
+ * corresponding to the given conn_handle.
  *
  * @retval NRF_SUCCESS                Context found.
  * @retval NRF_ERROR_NOT_FOUND        Instance with conn_handle not found.
  */
-uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index);
-/** @} */
+uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index);
+
+/**@breif Gets key for given adapter and connection.
+ *
+ * @param[in] index key index
+ * @param[out] Double pointer to keyset for given key index
+ */
+uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **keyset);
+
+/**@brief Updates key in given index. This function is used in REQUEST_REPLY_CODEC_CONTEXT.
+ *
+ * @param[in] index key index
+ * @param[out] Pointer to keyset for given key index
+ */
+uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset);
+
+/**
+ * @brief Reset internal values in app_ble_gap
+ *
+ * The purpose of this function is to clear internal values in this file
+ * when starting to use the adapter
+ */
+uint32_t app_ble_gap_state_reset();
 
 #if NRF_SD_BLE_API_VERSION >= 6
 /**
@@ -130,7 +180,7 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index);
  *
  * @return NRF_SUCCESS or error in case pointer is already set.
  */
-uint32_t app_ble_gap_scan_data_set(ble_data_t const * p_data);
+uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data);
 
 /**
  * @brief Returns pointer to the buffer for storing report data. Returns error if not paired with
@@ -139,7 +189,7 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const * p_data);
  * @param[out] p_data Stored data.
  * @return NRF_SUCCESS or error in case pointer is already cleared.
  */
-uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t * p_data);
+uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data);
 
 /**
  * @brief Function for registering data pointers related with given adv_handle.
@@ -151,8 +201,8 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t * p_data);
  * @return NRF_SUCCESS or error.
  *
  */
-uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t * p_adv_data, uint8_t * p_scan_rsp_data);
-
+uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
+                                      uint8_t *p_scan_rsp_data);
 
 /**
  * @brief Function for unregistering given .
@@ -164,8 +214,11 @@ uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t * p_adv_data, 
  * @return NRF_SUCCESS or error.
  *
  */
-uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t * * pp_adv_data, uint8_t **pp_scan_rsp_data);
-#endif
+uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
+                                        uint8_t **pp_scan_rsp_data);
+
+#endif // NRF_SD_BLE_API_VERSION >= 6
+/** @} */
 #ifdef __cplusplus
 }
 #endif

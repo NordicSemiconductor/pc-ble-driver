@@ -36,6 +36,7 @@
  */
 
 // Logging support
+#define NRF_LOG_SETUP
 #include "internal/log.h"
 
 // Test framework

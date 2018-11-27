@@ -1,15 +1,12 @@
-#ifndef TEST_UTIL_H__
-#define TEST_UTIL_H__
-
-#include "test_util_adapter_wrapper.h"
-#include "test_util_conversion.h"
-#include "test_util_role.h"
+#include "test_util.h"
 
 #include "ble.h"
 
 #include <algorithm>
 #include <cstring>
 #include <iterator>
+
+#include <cctype>
 #include <random>
 #include <vector>
 
@@ -24,8 +21,8 @@ namespace testutil {
  *
  * @return true if advertisement type was found, false if not.
  */
-static bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &advData,
-                           std::vector<uint8_t> &advTypeData)
+bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &advData,
+                    std::vector<uint8_t> &advTypeData)
 {
     auto typeDataBegin = advData.begin();
     while (typeDataBegin != advData.end())
@@ -42,16 +39,16 @@ static bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &ad
             return false;
         }
 
+        const auto advTypeDataLength = fieldLength - 1;
+        const auto distance          = std::distance(typeDataBegin, advData.end());
+
+        if (distance < advTypeDataLength)
+        {
+            return false;
+        }
+
         if (fieldType == advType)
         {
-            const auto advTypeDataLength = fieldLength - 1;
-            const auto distance          = std::distance(typeDataBegin, advData.end());
-
-            if (distance < advTypeDataLength)
-            {
-                return false;
-            }
-
             const auto typeDataEnd = typeDataBegin + advTypeDataLength;
             advTypeData.assign(typeDataBegin, typeDataEnd);
             return true;
@@ -63,8 +60,8 @@ static bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &ad
     return false;
 }
 
-static bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
-                                         std::vector<uint8_t> &manufacturer_specific_data)
+bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
+                                  std::vector<uint8_t> &manufacturer_specific_data)
 {
     std::vector<uint8_t> advData;
 
@@ -94,8 +91,7 @@ static bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_r
  *
  * @return true if name is found, false if not
  */
-static bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report,
-                        const std::string &name_to_find)
+bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report, const std::string &name_to_find)
 {
     std::vector<uint8_t> advData;
 
@@ -135,10 +131,9 @@ static bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report,
     return found(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME) || found(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME);
 }
 
-static void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
-                                                 const size_t additionalBytes,
-                                                 const bool extended    = false,
-                                                 const bool connectable = false)
+void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
+                                          const size_t additionalBytes, const bool extended,
+                                          const bool connectable)
 {
     auto valid            = true;
     const auto packetSize = existingPacket.size() + additionalBytes;
@@ -148,9 +143,10 @@ static void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> exis
         if (extended)
         {
 #if NRF_SD_BLE_API == 6
-            valid = packetSize > static_cast<size_t>(connectable
-                                      ? BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_CONNECTABLE_MAX_SUPPORTED
-                                      : BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED);
+            valid = packetSize >
+                    static_cast<size_t>(
+                        connectable ? BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_CONNECTABLE_MAX_SUPPORTED
+                                    : BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED);
 #else
             throw std::invalid_argument(
                 "Only SoftDevice API version 6 or newer support extended advertising.");
@@ -179,8 +175,8 @@ static void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> exis
  * @param[in,out] advertisingData std::vector to append advertisement data to
  * @param[in] name Name to append to advertisingData
  */
-static void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name,
-                                  const bool extended = false)
+void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name,
+                           const bool extended)
 {
     assertAdvertisementPacketSizeIsValid(advertisingData, 2 /* size + type */ + name.length(),
                                          extended);
@@ -196,8 +192,8 @@ static void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const s
  * @param[in,out] advertisingData std::vector to append advertisement flags to
  * @param[in] flags Flags to append to advertisingData
  */
-static void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
-                                     const bool extended = false)
+void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
+                              const bool extended)
 {
     assertAdvertisementPacketSizeIsValid(advertisingData, 3 /* size + type + flags */, extended);
 
@@ -212,9 +208,9 @@ static void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, cons
  * @param[in,out] advertisingData std::vector to append manufacturer specific data to
  * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData
  */
-static void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
-                                           const std::vector<uint8_t> manufacturerSpecificData,
-                                           const bool extended = false)
+void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
+                                    const std::vector<uint8_t> manufacturerSpecificData,
+                                    const bool extended)
 {
     assertAdvertisementPacketSizeIsValid(
         advertisingData, 2 /* size + type */ + manufacturerSpecificData.size(), extended);
@@ -231,7 +227,7 @@ static void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData
  * @param[in,out] data vector to populate with random values
  * @param[in] size number of random values to fill the vector with
  */
-static void appendRandomData(std::vector<uint8_t> &data, const size_t size)
+void appendRandomData(std::vector<uint8_t> &data, const size_t size)
 {
     data.resize(size);
     std::generate(data.begin(), data.end(), std::rand);
@@ -244,7 +240,7 @@ static void appendRandomData(std::vector<uint8_t> &data, const size_t size)
  * @param[in] size number of random values to fill the vector with
  */
 
-static void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size)
+void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size)
 {
     data.resize(size);
     std::generate(data.begin(), data.end(), [] {
@@ -294,5 +290,3 @@ bool operator!=(const ble_gap_phys_t &lhs, const ble_gap_phys_t &rhs)
 #endif // NRF_SD_BLE_API == 6
 
 } // namespace testutil
-
-#endif // TEST_UTIL_H__

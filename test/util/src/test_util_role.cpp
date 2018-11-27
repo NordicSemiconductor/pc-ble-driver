@@ -1,11 +1,6 @@
-#ifndef TEST_UTIL_ROLE_H__
-#define TEST_UTIL_ROLE_H__
-
-#include "ble.h"
-#include <iostream>
+#include "test_util_role.h"
 
 namespace testutil {
-enum Role { Central = BLE_GAP_ROLE_CENTRAL, Peripheral = BLE_GAP_ROLE_PERIPH };
 
 std::ostream &operator<<(std::ostream &s, const Role &role) {
     if (role == Role::Central)
@@ -21,4 +16,4 @@ std::ostream &operator<<(std::ostream &s, const Role &role) {
 }
 } //  namespace testutil
 
-#endif // TEST_UTIL_ROLE_H__
+

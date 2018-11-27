@@ -53,17 +53,19 @@
 // This stack overflow thread contains more info in regards to cmd.exe output:
 //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
 
-#ifndef NRF_LOG_SETUP
+#ifdef NRF_LOG_SETUP
 #ifndef NRF_LOG_FILENAME
     std::ostream &nrfLogStream(std::cout); \
-    static std::mutex nrfLogMutex;
+    std::mutex nrfLogMutex;
 #else
     std::fstream nrfLogStream(\
         NRF_LOG_FILENAME, \
         std::fstream::out | std::fstream::trunc); \
-    static std::mutex nrfLogMutex;
+    std::mutex nrfLogMutex;
 #endif
-#define NRF_LOG_SETUP
+#else
+extern std::ostream &nrfLogStream;
+extern std::mutex nrfLogMutex;
 #endif
 
 #ifndef NRF_LOG

@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.11)
 project(pc-ble-driver)
 
-include (cmake/pc-ble-driver.cmake)
+include(cmake/pc-ble-driver.cmake)
+
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+    message(FATAL_ERROR "Protocol implementation does not support big endian platforms.")
+endif()
 
 # Common source files
 file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")
@@ -32,7 +38,7 @@ endif()
 
 # Add connectivity firmware building
 if(NOT DEFINED CONNECTIVITY_VERSION)
-    message("CONNECTIVITY_VERSION not specified, using ${PC_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION}")
+    message(STATUS "CONNECTIVITY_VERSION not specified, using ${PC_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION}")
     set(CONNECTIVITY_VERSION "${PC_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION}" CACHE STRING "" FORCE)
 else()
     set(CONNECTIVITY_VERSION "${CONNECTIVITY_VERSION}" CACHE STRING "" FORCE)
@@ -175,6 +181,9 @@ add_subdirectory(test)
 
 # Add examples
 add_subdirectory(examples)
+
+# Add install target
+include(cmake/install-target.cmake)
 
 if(COMPILE_CONNECTIVITY)
     add_subdirectory(hex)

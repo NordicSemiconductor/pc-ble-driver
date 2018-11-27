@@ -36,10 +36,7 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
-
-#if NRF_SD_BLE_API >= 6
 
 // Logging support
 #include <internal/log.h>
@@ -55,29 +52,26 @@
 #include <sstream>
 #include <thread>
 
-using namespace testutil;
-
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-TEST_CASE("test_advertising_api")
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
+    advertising, [gap][known_error][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]))
 {
+    using namespace testutil;
+
     auto env = ::test::getEnvironment();
+    INFO(::test::getEnvironmentAsText(env));
+
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
 #if NRF_SD_BLE_API == 6
-    SECTION("test_extended")
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
+
+    SECTION("extended")
     {
-        const auto baudRate = central.baudRate;
-
-        INFO("Central serial port used: " << central.port);
-        INFO("Peripheral serial port used: " << peripheral.port);
-        INFO("Baud rate used: " << baudRate);
-
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
         const auto maxNumberOfAdvertisements = 20;
         const auto advertisementNameLength   = 40;
@@ -109,12 +103,14 @@ TEST_CASE("test_advertising_api")
         testutil::appendManufacturerSpecificData(scanResponse, randomData, true);
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, 150);
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
-        auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, 150);
+        auto p = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -185,12 +181,6 @@ TEST_CASE("test_advertising_api")
             }
         });
 
-        c->setEventCallback([&c](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(c->role() << " Received an un-handled event with ID: " << std::hex << eventId);
-            return true;
-        });
-
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
@@ -226,6 +216,7 @@ TEST_CASE("test_advertising_api")
                 case BLE_GAP_EVT_ADV_SET_TERMINATED:
                 {
                     const auto setTerminated = gapEvent->params.adv_set_terminated;
+
                     if (setTerminated.adv_handle != p->scratchpad.adv_handle)
                     {
                         NRF_LOG(p->role() << " BLE_GAP_EVT_ADV_SET_TERMINATED: Received "
@@ -233,59 +224,45 @@ TEST_CASE("test_advertising_api")
                                              "one setup with sd_ble_gap_adv_set_configure.");
                         error = true;
                     }
-                    else
+
+                    if (setTerminated.reason != BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
                     {
-                        if (setTerminated.num_completed_adv_events != maxLengthOfAdvData)
-                        {
-                            NRF_LOG(p->role()
-                                    << " BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
-                                       "advertisement events does not match max_adv_evts set in "
-                                       "sd_ble_gap_adv_set_configure.");
-                            error = true;
-                        }
-                        else
-                        {
-                            if (setTerminated.reason !=
-                                BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
-                            {
-                                NRF_LOG(p->role()
-                                        << " BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason was not "
-                                           "LIMIT_REACHED which it should be.");
-                                error = true;
-                            }
-                            else
-                            {
-                                std::vector<uint8_t> manufacturerSpecificData;
-                                const auto advReport = setTerminated.adv_data;
-
-                                std::vector<uint8_t> advData;
-                                const auto data       = advReport.adv_data.p_data;
-                                const auto dataLength = advReport.adv_data.len;
-                                advData.assign(data, data + dataLength);
-
-                                if (scanResponse != advData)
-                                {
-                                    NRF_LOG(p->role()
-                                            << " BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
-                                               "buffers set in sd_ble_gap_adv_set_configure does "
-                                               "not match.");
-                                    error = true;
-                                }
-                            }
-                        }
+                        NRF_LOG(p->role()
+                                << " BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason was not "
+                                   "LIMIT_REACHED which it should be.");
+                        error = true;
                     }
-                }
+
+                    if (setTerminated.num_completed_adv_events != maxNumberOfAdvertisements)
+                    {
+                        NRF_LOG(p->role()
+                                << " BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
+                                   "advertisement events does not match max_adv_evts set in "
+                                   "sd_ble_gap_adv_set_configure.");
+                        error = true;
+                    }
+
+                    std::vector<uint8_t> manufacturerSpecificData;
+                    const auto advReport = setTerminated.adv_data;
+
+                    std::vector<uint8_t> advData;
+                    const auto data       = advReport.adv_data.p_data;
+                    const auto dataLength = advReport.adv_data.len;
+                    advData.assign(data, data + dataLength);
+
+                    if (scanResponse != advData)
+                    {
+                        NRF_LOG(p->role() << " BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
+                                             "buffers set in sd_ble_gap_adv_set_configure does "
+                                             "not match with advertisement received.");
+                        error = true;
+                    }
 
                     return true;
+                }
                 default:
                     return false;
             }
-        });
-
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << std::hex << eventId);
-            return true;
         });
 
         c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
@@ -331,21 +308,13 @@ TEST_CASE("test_advertising_api")
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        REQUIRE(error == false);
+        CHECK(error == false);
 
-        REQUIRE(c->close() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        REQUIRE(p->close() == NRF_SUCCESS);
+        CHECK(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
     }
 #endif // NRF_SD_BLE_API == 6
 }
-
-#else
-TEST_CASE("test_advertising_api")
-{
-    INFO("Not relevant for SoftDevice API version < 3")
-}
-
-#endif // NRF_SD_BLE_API >= 6

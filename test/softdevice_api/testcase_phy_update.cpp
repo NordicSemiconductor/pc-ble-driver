@@ -36,7 +36,6 @@
  */
 
 // Test framework
-#define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
 #if NRF_SD_BLE_API >= 6
@@ -55,31 +54,26 @@
 #include <string>
 #include <thread>
 
-// Indicates if an error has occurred in a callback.
-// The test framework is not thread safe so this variable is used to communicate that an issues has
-// occurred in a callback.
-bool error = false;
-
-// Set to true when the test is complete
-bool testComplete = false;
-
 using namespace testutil;
 
-TEST_CASE("test_phy_update")
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059][nRF52840]))
 {
+    // Indicates if an error has occurred in a callback.
+    // The test framework is not thread safe so this variable is used to communicate that an issues
+    // has occurred in a callback.
+    auto error = false;
+
+    // Set to true when the test is complete
+    auto testComplete = false;
+
     auto env = ::test::getEnvironment();
+    INFO(::test::getEnvironmentAsText(env));
     REQUIRE(env.serialPorts.size() >= 2);
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
     SECTION("update_from_1mps_to_2mpb")
     {
-        const auto baudRate = central.baudRate;
-
-        INFO("Central serial port used: " << central.port);
-        INFO("Peripheral serial port used: " << peripheral.port);
-        INFO("Baud rate used: " << baudRate);
-
         const auto advertisementNameLength = 20;
         std::vector<uint8_t> peripheralAdvNameBuffer(advertisementNameLength);
         testutil::appendRandomAlphaNumeric(peripheralAdvNameBuffer, advertisementNameLength);
@@ -91,12 +85,14 @@ TEST_CASE("test_phy_update")
         ble_gap_phys_t requestedPhys{BLE_GAP_PHY_2MBPS, BLE_GAP_PHY_2MBPS};
 
         // Instantiate an adapter to use as BLE Central in the test
-        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, central.port,
-                                                            baudRate, 150);
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
-        auto p = std::make_shared<testutil::AdapterWrapper>(testutil::Peripheral, peripheral.port,
-                                                            baudRate, 150);
+        auto p = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -200,12 +196,6 @@ TEST_CASE("test_phy_update")
             }
         });
 
-        c->setEventCallback([&c](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(c->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
-        });
-
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
@@ -285,12 +275,6 @@ TEST_CASE("test_phy_update")
             }
         });
 
-        p->setEventCallback([&p](const ble_evt_t *p_ble_evt) -> bool {
-            const auto eventId = p_ble_evt->header.evt_id;
-            NRF_LOG(p->role() << " Received an un-handled event with ID: " << eventId);
-            return true;
-        });
-
         // Open the adapters
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(p->open() == NRF_SUCCESS);
@@ -311,13 +295,13 @@ TEST_CASE("test_phy_update")
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(5));
 
-        REQUIRE(error == false);
-        REQUIRE(testComplete == true);
+        CHECK(error == false);
+        CHECK(testComplete == true);
 
-        REQUIRE(c->close() == NRF_SUCCESS);
+        CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        REQUIRE(p->close() == NRF_SUCCESS);
+        CHECK(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
     }
 }

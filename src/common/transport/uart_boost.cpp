@@ -133,9 +133,9 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         //
         // Not sure if this is an OS issue or if it is an issue with the device USB stack.
         // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
-        // All of these devices use the Segger OB which at the time of testing has firmware version
+        // All of these devices use the SEGGER OB which at the time of testing has firmware version
         // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
         const auto flowControl   = uartSettingsBoost.getBoostFlowControl();
         const auto stopBits      = uartSettingsBoost.getBoostStopBits();
