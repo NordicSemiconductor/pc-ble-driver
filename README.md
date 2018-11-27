@@ -522,7 +522,7 @@ To quickly get the examples up and running, see [examples/README.md](./examples/
 
 ## Known issues
 
-If you meet problems during installation of pc-ble-driver, please see [Issues.md](./issues/Issues.md).
+If you meet problems during installation of pc-ble-driver, please see [Issues.md](./Issues.md).
 
 ---
 
