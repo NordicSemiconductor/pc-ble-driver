@@ -42,6 +42,7 @@
 #include "app_util.h"
 #include "app_ble_gap.h"
 #include "ble_gap_struct_serialization.h"
+#include "ble_struct_serialization.h"
 #include "cond_field_serialization.h"
 #include <string.h>
 
@@ -57,10 +58,10 @@ uint32_t ble_gap_evt_adv_report_dec(uint8_t const * const p_buf,
 
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION >= 6
     //get buffer stored during scan start.
-    err_code = app_ble_gap_scan_data_fetch_clear(&p_event->evt.gap_evt.params.adv_report.data);
-    SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+    app_ble_gap_scan_data_unset(false);
 #endif
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.adv_report, ble_gap_evt_adv_report_t_dec);
+
 
     SER_EVT_DEC_END;
 }
@@ -160,15 +161,7 @@ uint32_t ble_gap_evt_connected_dec(uint8_t const * const p_buf,
 
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.connected, ble_gap_evt_connected_t_dec);
-#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
-    if (BLE_GAP_ROLE_PERIPH == p_event->evt.gap_evt.params.connected.role)
-    {
-        err_code = app_ble_gap_adv_set_unregister(p_event->evt.gap_evt.params.connected.adv_handle,
-                                                 &p_event->evt.gap_evt.params.connected.adv_data.adv_data.p_data,
-                                                 &p_event->evt.gap_evt.params.connected.adv_data.scan_rsp_data.p_data);
-        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
-    }
-#endif
+
     SER_EVT_DEC_END;
 }
 
@@ -219,7 +212,7 @@ uint32_t ble_gap_evt_lesc_dhkey_request_dec(uint8_t const * const p_buf,
     err_code = app_ble_gap_sec_keys_get(conn_index, &keyset);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
-    p_event->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer = keyset->keys_peer.p_pk;
+p_event->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer = keyset->keys_peer.p_pk;
     SER_PULL_COND(&p_event->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer, ble_gap_lesc_p256_pk_t_dec);
 
     SER_PULL_uint8(&ser_data);
@@ -334,9 +327,7 @@ uint32_t ble_gap_evt_timeout_dec(uint8_t const * const p_buf,
 #if defined(NRF_SD_BLE_API_VERSION) && (NRF_SD_BLE_API_VERSION > 5) && !defined(S112)
     if (p_event->evt.gap_evt.params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
     {
-        SER_PULL_uint16(&p_event->evt.gap_evt.params.timeout.params.adv_report_buffer.len);
-        err_code = app_ble_gap_scan_data_fetch_clear(&p_event->evt.gap_evt.params.timeout.params.adv_report_buffer);
-        SER_ASSERT(err_code == NRF_SUCCESS, err_code);
+        SER_PULL_FIELD(&p_event->evt.gap_evt.params.timeout.params.adv_report_buffer, ble_data_t_dec);
     }
 #endif
     SER_EVT_DEC_END;
@@ -422,12 +413,6 @@ uint32_t ble_gap_evt_adv_set_terminated_dec(uint8_t const * const p_buf,
 
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.adv_set_terminated, ble_gap_evt_adv_set_terminated_t_dec);
-
-    err_code = app_ble_gap_adv_set_unregister(
-                       p_event->evt.gap_evt.params.adv_set_terminated.adv_handle,
-                       &p_event->evt.gap_evt.params.adv_set_terminated.adv_data.adv_data.p_data,
-                       &p_event->evt.gap_evt.params.adv_set_terminated.adv_data.scan_rsp_data.p_data);
-    SER_ERROR_CHECK(err_code == NRF_SUCCESS, err_code);
 
     SER_EVT_DEC_END;
 }

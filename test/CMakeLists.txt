@@ -112,13 +112,21 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
         OUTPUT ${COMMAND_NAME}
 
         COMMAND ${NRFJPROG} --version
-        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --eraseall
-        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --program ${connfw}
-        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --reset
+        COMMAND ${CMAKE_COMMAND} -E echo "Erasing ${DEVICE_A_SEGGER_SN}."
+        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --eraseall --log
+        COMMAND ${CMAKE_COMMAND} -E echo "Programming ${DEVICE_A_SEGGER_SN}."
+        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --program ${connfw} --log
+        COMMAND ${CMAKE_COMMAND} -E echo "Resetting ${DEVICE_A_SEGGER_SN}."
+        COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --reset --log
+        COMMAND ${CMAKE_COMMAND} -E echo "Resetting of ${DEVICE_B_SEGGER_SN} complete."
 
-        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall
-        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --program ${connfw}
-        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset
+        COMMAND ${CMAKE_COMMAND} -E echo "Erasing ${DEVICE_B_SEGGER_SN}."
+        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall --log
+        COMMAND ${CMAKE_COMMAND} -E echo "Programming ${DEVICE_B_SEGGER_SN}."
+        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --program ${connfw} --log
+        COMMAND ${CMAKE_COMMAND} -E echo "Resetting ${DEVICE_B_SEGGER_SN}."
+        COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset --log
+        COMMAND ${CMAKE_COMMAND} -E echo "Resetting of ${DEVICE_B_SEGGER_SN} complete."
         COMMAND ${CMAKE_COMMAND} -E sleep 2
 
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports" 

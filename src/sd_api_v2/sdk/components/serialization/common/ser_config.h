@@ -133,7 +133,9 @@ extern "C" {
 #define CONN_CHIP_RESET_TIME            50      /**< The time to keep the reset line to the nRF51822 low (in milliseconds). */
 #define CONN_CHIP_WAKEUP_TIME           500     /**< The time for nRF51822 to reset and become ready to receive serialized commands (in milliseconds). */
 
-#define SER_MAX_CONNECTIONS 1
+#ifndef SER_MAX_CONNECTIONS
+    #define SER_MAX_CONNECTIONS 8
+#endif
 
 #ifdef __cplusplus
 }

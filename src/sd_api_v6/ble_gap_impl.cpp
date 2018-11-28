@@ -48,6 +48,8 @@
 
 #include <cstdint>
 
+static void *mp_out_params[3];
+
 static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
                                   const decode_function_t &decode_function)
 {
@@ -67,19 +69,15 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
                                       ble_gap_adv_params_t const *p_adv_params)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        uint32_t err_code;
-        if (p_adv_data)
+        if (p_adv_handle)
         {
-            err_code = app_ble_gap_adv_set_register(*p_adv_handle, p_adv_data->adv_data.p_data,
-                                                    p_adv_data->scan_rsp_data.p_data);
+            mp_out_params[0] = p_adv_data->adv_data.p_data;
+            mp_out_params[1] = p_adv_data->scan_rsp_data.p_data;
         }
         else
         {
-            err_code = app_ble_gap_adv_set_register(*p_adv_handle, NULL, NULL);
-        }
-        if (err_code != NRF_SUCCESS)
-        {
-            return err_code;
+            mp_out_params[0] = NULL;
+            mp_out_params[1] = NULL;
         }
 
         return ble_gap_adv_set_configure_req_enc(p_adv_handle, p_adv_data, p_adv_params, buffer,
@@ -91,7 +89,8 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
         return ble_gap_adv_set_configure_rsp_dec(buffer, length, p_adv_handle, result);
     };
 
-    return gap_encode_decode(adapter, encode_function, decode_function);
+    uint32_t err = gap_encode_decode(adapter, encode_function, decode_function);
+    return err;
 }
 
 uint32_t sd_ble_gap_adv_start(adapter_t *adapter, uint8_t adv_handle, uint8_t conn_cfg_tag)
@@ -439,7 +438,12 @@ uint32_t sd_ble_gap_tx_power_set(adapter_t *adapter, uint8_t role, uint16_t hand
 uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gap_scan_stop_req_enc(buffer, length);
+        const auto err_code = ble_gap_scan_stop_req_enc(buffer, length);
+
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+        app_ble_gap_scan_data_unset(true);
+#endif
+        return err_code;
     };
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
@@ -485,22 +489,26 @@ uint32_t sd_ble_gap_scan_start(adapter_t *adapter, ble_gap_scan_params_t const *
                                ble_data_t const *p_adv_report_buffer)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        if (p_adv_report_buffer)
-        {
-            const auto err_code = app_ble_gap_scan_data_set(p_adv_report_buffer);
+        const auto err_code =
+            ble_gap_scan_start_req_enc(p_scan_params, p_adv_report_buffer, buffer, length);
 
-            if (err_code != NRF_SUCCESS)
-            {
-                return err_code;
-            }
-        }
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+        app_ble_gap_scan_data_set(p_adv_report_buffer->p_data);
+#endif
 
-        return ble_gap_scan_start_req_enc(p_scan_params, p_adv_report_buffer, buffer, length);
+        return err_code;
     };
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
                                             uint32_t *result) -> uint32_t {
-        return ble_gap_scan_start_rsp_dec(buffer, length, result);
+        const auto err_code = ble_gap_scan_start_rsp_dec(buffer, length, result);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            app_ble_gap_scan_data_unset(true);
+        }
+
+        return err_code;
     };
 
     return gap_encode_decode(adapter, encode_function, decode_function);
@@ -522,7 +530,8 @@ uint32_t sd_ble_gap_encrypt(adapter_t *adapter, uint16_t conn_handle,
     return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle, int8_t *p_rssi, uint8_t *p_ch_index)
+uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle, int8_t *p_rssi,
+                             uint8_t *p_ch_index)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_rssi_get_req_enc(conn_handle, p_rssi, p_ch_index, buffer, length);

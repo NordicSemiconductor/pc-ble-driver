@@ -58,7 +58,7 @@ typedef enum
     SER_PKT_TYPE_EVT,         /**< Event packet type. */
     SER_PKT_TYPE_DTM_CMD,     /**< DTM Command packet type. */
     SER_PKT_TYPE_DTM_RESP,    /**< DTM Response packet type. */
-    SER_PKT_TYPE_RESET_CMD,   /**< System Reset Command packet type. */
+    SER_PKT_TYPE_GENERIC_CMD, /**< GENERIC Command packet type. */
 #if defined(ANT_STACK_SUPPORT_REQD)
     SER_PKT_TYPE_ANT_CMD,     /**< ANT Command packet type. */
     SER_PKT_TYPE_ANT_RESP,    /**< ANT Response packet type. */
@@ -66,6 +66,12 @@ typedef enum
 #endif
     SER_PKT_TYPE_MAX          /**< Upper bound. */
 } ser_pkt_type_t;
+
+typedef enum
+{
+    SER_GENERIC_CMD_RESET,
+    SER_GENERIC_CMD_SOFT_RESET
+} ser_generic_cmd_t;
 
 #define  LOW16(a) ((uint16_t)((a & 0x0000FFFF) >> 0))
 #define HIGH16(a) ((uint16_t)((a & 0xFFFF0000) >> 16))

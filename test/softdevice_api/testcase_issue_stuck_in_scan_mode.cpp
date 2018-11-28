@@ -62,9 +62,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
 
     auto env = ::test::getEnvironment();
     INFO(::test::getEnvironmentAsText(env));
-    REQUIRE(!env.serialPorts.empty());
-    const auto serialPort = env.serialPorts.at(0);
-    INFO("Serial port used: " << serialPort.port);
+
+    REQUIRE(env.serialPorts.size() >= 2);
+    const auto central    = env.serialPorts.at(0);
+    const auto peripheral = env.serialPorts.at(1);
 
     const auto scanIterations = env.numberOfIterations;
     INFO("Purpose of this test:");
@@ -74,13 +75,43 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
          "0x00)");
     INFO("Running " << scanIterations << " adapter open -> scan -> adapter close iterations");
 
+    const auto advertisementNameLength = 20;
+
+    std::vector<uint8_t> peripheralAdvNameBuffer(advertisementNameLength);
+    testutil::appendRandomAlphaNumeric(peripheralAdvNameBuffer, advertisementNameLength);
+    const std::string peripheralAdvName(peripheralAdvNameBuffer.begin(),
+                                        peripheralAdvNameBuffer.end());
+
+    // Create advertising data and scan response data
+    std::vector<uint8_t> advertising;
+    std::vector<uint8_t> advertisingPacket;
+
+    testutil::appendAdvertisingName(advertisingPacket, peripheralAdvName);
+
+    // Instantiated an adapter to use as BLE Peripheral in the test
+    auto p = std::make_shared<testutil::AdapterWrapper>(
+        testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        env.responseTimeout);
+
+    REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
+    REQUIRE(p->open() == NRF_SUCCESS);
+    REQUIRE(p->configure() == NRF_SUCCESS);
+    REQUIRE(p->setupAdvertising(advertisingPacket, // advertising data
+                                {},                // scan response data
+                                40,                // interval
+                                0,                 // duration
+                                false,             // connectable
+                                false              // extended
+                                ) == NRF_SUCCESS);
+    REQUIRE(p->startAdvertising() == NRF_SUCCESS);
+
     for (auto i = static_cast<uint32_t>(0); i < scanIterations; i++)
     {
         auto adv_report_count = 0;
 
-        auto c = std::make_shared<testutil::AdapterWrapper>(testutil::Central, serialPort.port,
-                                                            env.baudRate, env.mtu, env.retransmissionInterval,
-                                                            env.responseTimeout);
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         NRF_LOG(c->role() << " Starting scan iteration #" << std::dec << static_cast<uint32_t>(i)
                           << " of " << static_cast<uint32_t>(scanIterations));

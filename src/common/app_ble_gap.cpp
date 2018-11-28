@@ -45,6 +45,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <iostream>
 
 #include <sd_rpc_types.h>
 
@@ -68,6 +69,8 @@ typedef struct
     adv_set_t adv_sets[BLE_GAP_ADV_SET_COUNT_MAX]{};
     // Buffer for scan data received
     ble_data_t scan_data = {nullptr, 0};
+    int scan_data_id{0};
+    void *ble_gap_adv_buf_addr[BLE_GAP_ADV_SET_COUNT_MAX]{};
 #endif // NRF_SD_BLE_API_VERSION >= 6
 } adapter_ble_gap_state_t;
 
@@ -86,8 +89,8 @@ static std::map<void *, std::shared_ptr<adapter_ble_gap_state_t>> adapters_gap_s
 typedef struct
 {
     /**
-     * @brief adapter_id that points to the @ref adapter_ble_gap_state_t [adapter GAP state] currently used
-     * by codecs
+     * @brief adapter_id that points to the @ref adapter_ble_gap_state_t [adapter GAP state]
+     * currently used by codecs
      */
     void *adapter_id{nullptr};
 
@@ -455,4 +458,113 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
+
+int app_ble_gap_adv_buf_register(void *p_buf)
+{
+    if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
+    {
+        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context REQUEST_REPLY_CODEC_CONTEXT, terminating" << std::endl;
+        std::terminate();
+    }
+
+    if (p_buf == nullptr)
+    {
+        return 0;
+    }
+
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+        auto id = 1;
+
+        // Find available location in ble_gap_adv_buf_addr for
+        // store this new buffer pointer.
+        for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+        {
+            if (addr == nullptr)
+            {
+                addr = p_buf;
+                return id;
+            }
+            id++;
+        }
+
+        return -1;
+    }
+    catch (const std::out_of_range &)
+    {
+        return -1;
+    }
+}
+
+void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
+{
+    if (!app_ble_gap_check_current_adapter_set(event_context ? EVENT_CODEC_CONTEXT
+                                                             : REQUEST_REPLY_CODEC_CONTEXT))
+    {
+        return nullptr;
+    }
+
+    if (id == 0)
+    {
+        return nullptr;
+    }
+
+    const auto gap_state =
+        adapters_gap_state.at(event_context ? current_event_context.adapter_id
+                                            : current_request_reply_context.adapter_id);
+
+    auto ret                                = gap_state->ble_gap_adv_buf_addr[id - 1];
+    gap_state->ble_gap_adv_buf_addr[id - 1] = nullptr;
+
+    return ret;
+}
+
+// Update the adapter gap state scan_data_id variable based on pointer received???
+void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
+{
+    if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
+    {
+        return;
+    }
+
+    // Find location for scan_data
+    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+    auto id = 0;
+
+    // Check if ptr to scan data is already registered???
+    for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+    {
+        if (addr == p_scan_data)
+        {
+            gap_state->scan_data_id = id + 1;
+            return;
+        }
+        id++;
+    }
+
+    gap_state->scan_data_id = 0;
+}
+
+void app_ble_gap_scan_data_unset(bool free)
+{
+    if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
+    {
+        return;
+    }
+
+    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+    if (gap_state->scan_data_id)
+    {
+        if (free)
+        {
+            app_ble_gap_adv_buf_unregister(gap_state->scan_data_id, false);
+        }
+        gap_state->scan_data_id = 0;
+    }
+}
+
 #endif // NRF_SD_BLE_API_VERSION >= 6

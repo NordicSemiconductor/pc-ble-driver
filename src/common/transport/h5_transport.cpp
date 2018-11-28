@@ -68,9 +68,6 @@
 #include <stdint.h>
 #include <thread>
 
-// Constants use for state machine states UNINITIALIZED and INITIALIZED
-const auto NON_ACTIVE_STATE_TIMEOUT =
-    std::chrono::milliseconds(250); // Duration to wait until resending a packet
 const uint8_t PACKET_RETRANSMISSIONS =
     6; // Number of times to send reliable packets before giving in
 
@@ -653,7 +650,7 @@ void H5Transport::setupStateMachine()
         {
             sendControlPacket(CONTROL_PKT_SYNC);
             exit->syncSent = true;
-            stateMachineChange.wait_for(stateMachineLock, NON_ACTIVE_STATE_TIMEOUT,
+            stateMachineChange.wait_for(stateMachineLock, retransmissionInterval,
                                         [&exit] { return exit->isFullfilled(); });
             syncRetransmission--;
         }
@@ -698,7 +695,7 @@ void H5Transport::setupStateMachine()
             sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
             exit->syncConfigSent = true;
 
-            stateMachineChange.wait_for(stateMachineLock, NON_ACTIVE_STATE_TIMEOUT,
+            stateMachineChange.wait_for(stateMachineLock, retransmissionInterval,
                                         [&exit] { return exit->isFullfilled(); });
 
             syncRetransmission--;
@@ -1095,7 +1092,7 @@ std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet
            << std::setw(20) << "type:" << std::setw(20) << pktTypeToString(packet_type)
            << " reliable:" << std::setw(3) << (reliable_packet ? "yes" : "no")
            << " seq#:" << std::hex << +seq_num << " ack#:" << std::hex << +ack_num
-           << " payload_length:" << payload_length << " data_integrity:" << data_integrity;
+           << " payload_length:" << +payload_length << " data_integrity:" << data_integrity;
 
     if (data_integrity)
     {

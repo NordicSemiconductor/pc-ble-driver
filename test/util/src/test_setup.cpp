@@ -42,7 +42,7 @@ Environment getEnvironment()
 {
     Environment env;
 
-    auto baudRate          = DEFAULT_BAUD_RATE;
+    auto baudRate          = defaultBaudRate();
     const auto envBaudRate = std::getenv("BLE_DRIVER_TEST_BAUD_RATE");
 
     if (envBaudRate != nullptr)

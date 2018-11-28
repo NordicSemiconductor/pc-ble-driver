@@ -68,7 +68,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an issues
     // has occurred in a callback.
-    auto error = false;
+    auto error       = false;
+    auto testSuccess = false;
 
     SECTION("extended")
     {
@@ -137,6 +138,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 NRF_LOG(c->role() << " Data configured in peripheral does not "
                                                      "match data received on central");
                                 error = true;
+                                return true;
                             }
                             else
                             {
@@ -152,6 +154,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                             << " Configured advertisement on peripheral does not "
                                                "match event received on central");
                                     error = true;
+                                    return true;
                                 }
                             }
                         }
@@ -195,6 +198,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                              "advertisement handle does not match the "
                                              "one setup with sd_ble_gap_adv_set_configure.");
                         error = true;
+                        return true;
                     }
                     else
                     {
@@ -223,6 +227,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                              "advertisement handle does not match the "
                                              "one setup with sd_ble_gap_adv_set_configure.");
                         error = true;
+                        return true;
                     }
 
                     if (setTerminated.reason != BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
@@ -231,6 +236,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 << " BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason was not "
                                    "LIMIT_REACHED which it should be.");
                         error = true;
+                        return true;
                     }
 
                     if (setTerminated.num_completed_adv_events != maxNumberOfAdvertisements)
@@ -240,14 +246,15 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                    "advertisement events does not match max_adv_evts set in "
                                    "sd_ble_gap_adv_set_configure.");
                         error = true;
+                        return true;
                     }
 
                     std::vector<uint8_t> manufacturerSpecificData;
                     const auto advReport = setTerminated.adv_data;
 
                     std::vector<uint8_t> advData;
-                    const auto data       = advReport.adv_data.p_data;
-                    const auto dataLength = advReport.adv_data.len;
+                    const auto data       = advReport.scan_rsp_data.p_data;
+                    const auto dataLength = advReport.scan_rsp_data.len;
                     advData.assign(data, data + dataLength);
 
                     if (scanResponse != advData)
@@ -256,7 +263,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                              "buffers set in sd_ble_gap_adv_set_configure does "
                                              "not match with advertisement received.");
                         error = true;
+                        return true;
                     }
+
+                    testSuccess = true;
 
                     return true;
                 }
@@ -309,6 +319,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
         CHECK(error == false);
+        CHECK(testSuccess == true);
 
         CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
