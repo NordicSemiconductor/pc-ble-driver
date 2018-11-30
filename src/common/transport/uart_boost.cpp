@@ -178,7 +178,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // get underlying boost serial port handle and apply baud rate directly
 
         // Set dummy baud rate
-        auto speed = (speed_t)DUMMY_BAUDRATE;
+        auto speed = (speed_t)DUMMY_BAUD_RATE;
         if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
         {
             const auto error = std::error_code(errno, std::system_category());
