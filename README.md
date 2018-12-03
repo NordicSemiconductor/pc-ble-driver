@@ -52,7 +52,7 @@ Where the 'Application chip' is just generic hardware (i.e. a Windows, Linux or 
 
 #### Operating system
 
-* Windows 7, 8 and 10,  32 and 64-bit (tested on Windows 7)
+* Windows 7, 8 and 10, 32 and 64-bit (tested on Windows 7)
 * Ubuntu Linux LTS 64-bit (tested on Ubuntu 18.04)
 * macOS 64-bit (tested on 10.14 Mojave)
 
@@ -62,11 +62,24 @@ To use pc-ble-driver, your Development Kit needs to have the correct firmware. T
 
 The generated libraries are compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* SoftDevice s130 API version 2: `s130_nrf51_2.x.x` (nRF51 and nRF52 series ICs)
-* SoftDevice s132 API version 3: `s132_nrf52_3.x.x` (only for nRF52 series ICs)
-* SoftDevice s132 API version 5: `s132_nrf52_5.x.x` (only for nRF52 series ICs)
-* SoftDevice s132 API version 6: `s132_nrf52_6.x.x` (only for nRF52 series ICs)
-* SoftDevice s140 API version 6: `s140_nrf52_6.x.x` (only for nRF52 series ICs)
+* SoftDevice s130 API version 2: `connectivity_<version>_<115k2|1m>_with_s130_2.x.x` (nRF51 and nRF52 series ICs)
+* SoftDevice s132 API version 3: `connectivity_<version>_<115k2|1m|*usb>_with_s132_3.x.x` (only for nRF52 series ICs)
+* SoftDevice s132 API version 5: `connectivity_<version>_<115k2|1m|*usb>_with_s132_5.x.x` (only for nRF52 series ICs)
+* SoftDevice s132 API version 6: `connectivity_<version>_<115k2|1m|*usb>_with_s132_6.x.x` (only for nRF52 series ICs)
+* SoftDevice s140 API version 6: `connectivity_<version>_<115k2|1m|*usb>_with_s140_6.x.x` (only for nRF52 series ICs)
+
+*usb) only for nRF52 series ICs with USBD peripheral
+
+###### Supported Development Kits
+| PCA      | Official name                | Article number | Notes    |
+-----------|------------------------------|----------------|----------|
+| PCA10028 | nRF51 DEVELOPMENT KIT        | nRF6824        |          |
+| PCA10031 | nRF51 DONGLE                 | nRF6825        |          |
+| PCA10040 | nRF52 DEVELOPMENT KIT        | nRF6827        |          |
+| PCA10056 | nRF52840 { Development Kit } | nRF6828        | *)       |
+| PCA10059 | nRF52840 { Dongle }          | nRF6829        | Can only use connectivity firmware with Nordic USB CDC serial port support  |
+
+*) Can use both Nordic USB CDC serial port version and SEGGER J-Link-OB (VCOM) version. Using Nordic USB CDC serial port version on PCA10056 requires that you connect pins P0.16 and P0.24. The pins to QSPI chip must also be in place (they are by default). The algorithm for detecting if it is PCA10056 or PCA10059 is to check if it is possible to communicate with the QSPI chip. PCA10059 does not have a QSPI chip. The detection is used by nRF Connect DFU trigger to determine what pin to use for resetting the device when changing between DFU and application mode.
 
 ---
 
