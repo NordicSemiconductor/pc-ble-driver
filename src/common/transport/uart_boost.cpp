@@ -46,12 +46,14 @@
 #include <system_error>
 
 #if defined(__APPLE__)
+#include <IOKit/serial/ioss.h>
 #include <cerrno>
 #include <system_error>
-#include <IOKit/serial/ioss.h>
 #endif
 
 #include <asio.hpp>
+
+constexpr uint32_t DUMMY_BAUD_RATE = 9600;
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport()
@@ -135,7 +137,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
         // All of these devices use the SEGGER OB which at the time of testing has firmware version
         // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         const auto flowControl   = uartSettingsBoost.getBoostFlowControl();
         const auto stopBits      = uartSettingsBoost.getBoostStopBits();
@@ -147,13 +149,45 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         serialPort->set_option(parity);
         serialPort->set_option(characterSize);
 
+        // SEGGER J-LINK-OB VCOM has an issue when auto-detecting UART flow control
+        // The VCOM implementation keeps the detected flow-control state if the baud rate
+        // is the same as the previous open of UART (MDK-1005).
+        if (uartSettingsBoost.getBoostBaudRate().value() == DUMMY_BAUD_RATE)
+        {
+            std::stringstream message;
+            message << "Error setting up serial port " << uartSettingsBoost.getPortName()
+                    << ". Baud rate requested (" << uartSettingsBoost.getBoostBaudRate().value()
+                    << ") is the dummy baud rate to circumvent a SEGGER J-LINK-OB issue. Please "
+                       "use a different baud rate.";
+
+            status(IO_RESOURCES_UNAVAILABLE, message.str());
+
+            return NRF_ERROR_SD_RPC_SERIAL_PORT;
+        }
+
 #if !defined(__APPLE__)
-        const auto baudRate = uartSettingsBoost.getBoostBaudRate();
+        // Set dummy baud rate
+        auto baudRate = asio::serial_port::baud_rate(DUMMY_BAUD_RATE);
+        serialPort->set_option(baudRate);
+
+        // Set requested baud rate
+        baudRate = uartSettingsBoost.getBoostBaudRate();
         serialPort->set_option(baudRate);
 #else
         // Workaround for setting non-standard baudrate on macOS
         // get underlying boost serial port handle and apply baud rate directly
-        auto speed = (speed_t)uartSettingsBoost.getBaudRate();
+
+        // Set dummy baud rate
+        auto speed = (speed_t)DUMMY_BAUD_RATE;
+        if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
+        {
+            const auto error = std::error_code(errno, std::system_category());
+            throw std::system_error(error, "Failed to set dummy baud rate (" +
+                                               std::to_string(speed) + ")");
+        }
+
+        // Set requested baud rate
+        speed = (speed_t)uartSettingsBoost.getBaudRate();
 
         if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
         {
