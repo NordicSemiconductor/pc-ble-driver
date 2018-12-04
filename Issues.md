@@ -57,11 +57,11 @@ If you want to revert back to the SEGGER firmware you will have to download the 
 
 
 ---
-## SEGGER Issues
+## SEGGER J-Link-OB Issues
 
 #### Data corruption or drops
 
-Due to a known issue in Segger’s J-Link firmware, depending on your operating system and version you might experience data corruption or drops if you use the USB CDC ACM Serial Port with packets larger than 64 bytes. This has been observed on both GNU/Linux and macOS.
+Due to a known issue in Segger’s J-Link-OB firmware, depending on your operating system and version you might experience data corruption or drops if you use the USB CDC ACM Serial Port with packets larger than 64 bytes. This has been observed on both GNU/Linux and macOS.
 
 To avoid this, you can simply disable the Mass Storage Device by opening:
 
@@ -73,11 +73,27 @@ And then typing the following:
 MSDDisable
 ```
 
-#### SEGGER OB sends invalid packet
+#### Invalid USB packets/drops data
 
-1. SEGGER OB does not send two packet terminations (0xC0) from UART to USB host. SEGGER OB does not send 0xC0,0x00 from UART to USB host.
+SEGGER J-Link-OB sends invalid USB packets from J-Link-OB UART to USB host and drops data.
 
-2. After d1 02 7d is received no more data is received in PC application, CTS is kept high. Assuming this is a side-effect of 1)
+For example, SEGGER J-Link-OB does not send 0xC0, 0x00 from UART to USB host.
+After 0xD1 0x02 0x7D is received no more data is received in PC application, CTS is kept high.
+This has been observed in Linux using VirtualBox with Oracle VM VirtualBox Extension Pack.
 
 ![USB Analyzer](./doc/segger_ob_usb_analyzer.png)
 ![Logic Analyzer](./doc/segger_ob_logic_analyzer.png)
+
+The only way to mitigate this is to not use VirtualBox.
+
+#### Starts clocking data at 9600 baud
+
+Sometimes SEGGER-J-Link-OB starts to clock UART data at 9600 baud even if a different baud rate is configured.
+
+This leads to timeout errors (NRF_ERROR_TIMEOUT) in pc-ble-driver since the connectivity firmware is not able to interpret the data.
+
+The only way to mitigate this is to close the serial port and try again.
+
+#### Hardware flow control detection
+
+Sometimes SEGGER-J-Link-OB gets the hardware flow control detection wrong. A generic way to circumvent this is to open the UART port and use a dummy baud rate first and then use the wanted baud rate. This will restart the hardware flow control detection. This mitigation is implemented in pc-ble-driver.
