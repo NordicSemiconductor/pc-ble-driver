@@ -236,8 +236,16 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
 
     if (eventType == SERIALIZATION_RESPONSE)
     {
-        std::memcpy(responseBuffer, startOfData, dataLength);
-        *responseLength = static_cast<uint32_t>(dataLength);
+        if (responseBuffer != nullptr)
+        {
+            std::memcpy(responseBuffer, startOfData, dataLength);
+            *responseLength = static_cast<uint32_t>(dataLength);
+        }
+        else
+        {
+            logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE but command did not provide a buffer for the reply.");
+            *responseLength = 0;
+        }
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
         rspReceived = true;
