@@ -244,7 +244,6 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
         else
         {
             logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE but command did not provide a buffer for the reply.");
-            *responseLength = 0;
         }
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
