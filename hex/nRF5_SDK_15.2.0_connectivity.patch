@@ -1,7 +1,7 @@
-diff --git nRF5_SDK_15.2.0_9412b96/components/boards/pca10056.h nRF5_SDK_15.2.0_f1f9329/components/boards/pca10056.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/boards/pca10056.h nRF5_SDK_15.2.0_f1cf792/components/boards/pca10056.h
 index 6b3f92f..7fbfbca 100644
 --- nRF5_SDK_15.2.0_9412b96/components/boards/pca10056.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/boards/pca10056.h
++++ nRF5_SDK_15.2.0_f1cf792/components/boards/pca10056.h
 @@ -90,6 +90,8 @@ extern "C" {
  #define RTS_PIN_NUMBER 5
  #define HWFC           true
@@ -11,10 +11,10 @@ index 6b3f92f..7fbfbca 100644
  #define BSP_QSPI_SCK_PIN   19
  #define BSP_QSPI_CSN_PIN   17
  #define BSP_QSPI_IO0_PIN   20
-diff --git nRF5_SDK_15.2.0_9412b96/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c nRF5_SDK_15.2.0_f1f9329/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c nRF5_SDK_15.2.0_f1cf792/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c
 index 755581d..23b34db 100644
 --- nRF5_SDK_15.2.0_9412b96/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c
++++ nRF5_SDK_15.2.0_f1cf792/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.c
 @@ -50,10 +50,6 @@
  #include "nrf_log.h"
  NRF_LOG_MODULE_REGISTER();
@@ -62,10 +62,10 @@ index 755581d..23b34db 100644
      m_dfu_info.wAddress       = CODE_START;
      m_dfu_info.wFirmwareSize  = CODE_SIZE;
      m_dfu_info.wVersionMajor  = APP_VERSION_MAJOR;
-diff --git nRF5_SDK_15.2.0_9412b96/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h nRF5_SDK_15.2.0_f1f9329/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h nRF5_SDK_15.2.0_f1cf792/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h
 index 5906a80..8befbe9 100644
 --- nRF5_SDK_15.2.0_9412b96/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h
++++ nRF5_SDK_15.2.0_f1cf792/components/libraries/bootloader/dfu/nrf_dfu_trigger_usb.h
 @@ -63,11 +63,12 @@
   *
   * @note  If @ref APP_USBD_CONFIG_EVENT_QUEUE_ENABLE is on (1), USB events must be handled manually.
@@ -80,10 +80,10 @@ index 5906a80..8befbe9 100644
  
  /** @} */
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/libraries/log/src/nrf_log_ctrl_internal.h nRF5_SDK_15.2.0_f1f9329/components/libraries/log/src/nrf_log_ctrl_internal.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/libraries/log/src/nrf_log_ctrl_internal.h nRF5_SDK_15.2.0_f1cf792/components/libraries/log/src/nrf_log_ctrl_internal.h
 index 3478d9f..660652b 100644
 --- nRF5_SDK_15.2.0_9412b96/components/libraries/log/src/nrf_log_ctrl_internal.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/libraries/log/src/nrf_log_ctrl_internal.h
++++ nRF5_SDK_15.2.0_f1cf792/components/libraries/log/src/nrf_log_ctrl_internal.h
 @@ -79,7 +79,7 @@
  #else // NRF_MODULE_ENABLED(NRF_LOG)
  #define NRF_LOG_INTERNAL_PROCESS()            false
@@ -93,10 +93,10 @@ index 3478d9f..660652b 100644
  #define NRF_LOG_INTERNAL_HANDLERS_SET(default_handler, bytes_handler) \
      UNUSED_PARAMETER(default_handler); UNUSED_PARAMETER(bytes_handler)
  #define NRF_LOG_INTERNAL_FINAL_FLUSH()
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/middleware/app_mw_ble.c nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/middleware/app_mw_ble.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/middleware/app_mw_ble.c nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/middleware/app_mw_ble.c
 index 033d974..94ff331 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/middleware/app_mw_ble.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/middleware/app_mw_ble.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/middleware/app_mw_ble.c
 @@ -44,6 +44,7 @@
  #include "ser_sd_transport.h"
  #include "app_error.h"
@@ -123,10 +123,10 @@ index 033d974..94ff331 100644
      tx_buf_alloc(&p_buffer, &buffer_length);
  
      const uint32_t err_code = ble_enable_req_enc(&(p_buffer[1]),
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c
 index 1fbb06f..c60d92d 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/middleware/app_mw_ble_gap.c
 @@ -1069,7 +1069,9 @@ uint32_t _sd_ble_gap_scan_stop(void)
                                                         &buffer_length);
      //@note: Should never fail.
@@ -219,10 +219,10 @@ index 1fbb06f..c60d92d 100644
      const uint32_t err_code = ble_gap_adv_set_configure_req_enc(p_adv_handle, p_adv_data, p_adv_params,
                                                                  &(p_buffer[1]), &buffer_length);
      //@note: Should never fail.
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c
 index cb0bd94..849a24d 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.c
 @@ -56,9 +56,22 @@ typedef struct {
  static adv_set_t m_adv_sets[4]; //todo configurable number of adv sets.
  
@@ -372,10 +372,10 @@ index cb0bd94..849a24d 100644
  }
 +
  #endif
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h
 index 58a0870..f2edf11 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/app_ble_gap_sec_keys.h
 @@ -53,6 +53,7 @@
  #include "ble_types.h"
  
@@ -447,10 +447,10 @@ index 58a0870..f2edf11 100644
  #endif
  #ifdef __cplusplus
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/ble_gap_app.c nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/ble_gap_app.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/ble_gap_app.c nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/ble_gap_app.c
 index 2eac945..24bd2cf 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/ble_gap_app.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/ble_gap_app.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/ble_gap_app.c
 @@ -650,6 +650,7 @@ uint32_t ble_gap_scan_start_rsp_dec(uint8_t const * const p_buf,
                                      uint32_t * const      p_result_code)
  {
@@ -467,10 +467,10 @@ index 2eac945..24bd2cf 100644
      SER_RSP_DEC_END;
  }
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c
 index c8cbc94..8b83d5d 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/ble/serializers/ble_gap_evt_app.c
 @@ -42,6 +42,7 @@
  #include "app_util.h"
  #include "app_ble_gap_sec_keys.h"
@@ -534,10 +534,10 @@ index c8cbc94..8b83d5d 100644
      SER_EVT_DEC_END;
  }
  #endif
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/common/conn_systemreset.c nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/common/conn_systemreset.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/common/conn_systemreset.c nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/common/conn_systemreset.c
 index ca012d2..f1088c4 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/application/codecs/common/conn_systemreset.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/application/codecs/common/conn_systemreset.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/application/codecs/common/conn_systemreset.c
 @@ -56,8 +56,9 @@ uint32_t conn_systemreset(void)
      }
  
@@ -550,10 +550,10 @@ index ca012d2..f1088c4 100644
  
      err_code = ser_sd_transport_cmd_write(p_tx_buf, tx_buf_len, NULL);
      if (err_code != NRF_SUCCESS)
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/ble_serialization.h nRF5_SDK_15.2.0_f1f9329/components/serialization/common/ble_serialization.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/ble_serialization.h nRF5_SDK_15.2.0_f1cf792/components/serialization/common/ble_serialization.h
 index dc37234..0787032 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/ble_serialization.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/ble_serialization.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/ble_serialization.h
 @@ -58,7 +58,7 @@ typedef enum
      SER_PKT_TYPE_EVT,         /**< Event packet type. */
      SER_PKT_TYPE_DTM_CMD,     /**< DTM Command packet type. */
@@ -576,10 +576,10 @@ index dc37234..0787032 100644
  #define  LOW16(a) ((uint16_t)((a & 0x0000FFFF) >> 0))
  #define HIGH16(a) ((uint16_t)((a & 0xFFFF0000) >> 16))
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/ser_config.h nRF5_SDK_15.2.0_f1f9329/components/serialization/common/ser_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/ser_config.h nRF5_SDK_15.2.0_f1cf792/components/serialization/common/ser_config.h
 index 2e6d502..0f6c4a9 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/ser_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/ser_config.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/ser_config.h
 @@ -66,8 +66,8 @@ extern "C" {
  
  /** Max packets size in serialization HAL Transport layer (packets before adding PHY header i.e.
@@ -610,10 +610,10 @@ index 2e6d502..0f6c4a9 100644
  #ifdef __cplusplus
  }
  #endif
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/ser_dbg_sd_str.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/ser_dbg_sd_str.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/ser_dbg_sd_str.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/ser_dbg_sd_str.c
 index 5fbf555..b7390f3 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/ser_dbg_sd_str.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/ser_dbg_sd_str.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/ser_dbg_sd_str.c
 @@ -54,10 +54,10 @@
  
  #if NRF_MODULE_ENABLED(NRF_LOG) && defined(BLE_STACK_SUPPORT_REQD)
@@ -657,10 +657,10 @@ index 5fbf555..b7390f3 100644
      "SD_EVT_UNKNOWN",                          /*0x27*/
      "SD_EVT_UNKNOWN",                          /*0x28*/
      "SD_EVT_UNKNOWN",                          /*0x29*/
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c
 index bd8943d..eed27e8 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c
 @@ -453,9 +453,7 @@ uint32_t ble_gap_evt_connected_t_enc(void const * const p_void_struct,
      SER_PUSH_uint8(&p_struct->role);
      SER_PUSH_FIELD(&p_struct->conn_params, ble_gap_conn_params_t_enc);
@@ -713,10 +713,10 @@ index bd8943d..eed27e8 100644
  
      SER_STRUCT_DEC_END;
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/struct_ser/ble/ble_struct_serialization.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/struct_ser/ble/ble_struct_serialization.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
 index 37f43ac..40ddda2 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
 @@ -46,8 +46,11 @@
  #include "ble_types.h"
  #include "ble.h"
@@ -764,10 +764,10 @@ index 37f43ac..40ddda2 100644
  #endif
      SER_PULL_len16data(&p_struct->p_data, &p_struct->len);
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_hal_transport.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_hal_transport.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_hal_transport.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_hal_transport.c
 index 9bcc818..5d97f88 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_hal_transport.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_hal_transport.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_hal_transport.c
 @@ -44,7 +44,7 @@
  #include "ser_config.h"
  #include "ser_phy.h"
@@ -800,10 +800,10 @@ index 9bcc818..5d97f88 100644
  uint32_t ser_hal_transport_open(ser_hal_transport_events_handler_t events_handler)
  {
      uint32_t err_code = NRF_SUCCESS;
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_hal_transport.h nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_hal_transport.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_hal_transport.h nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_hal_transport.h
 index d4da8b4..55d99d8 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_hal_transport.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_hal_transport.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_hal_transport.h
 @@ -162,6 +162,8 @@ typedef void (*ser_hal_transport_events_handler_t)(ser_hal_transport_evt_t event
   */
  uint32_t ser_hal_transport_open(ser_hal_transport_events_handler_t events_handler);
@@ -813,10 +813,10 @@ index d4da8b4..55d99d8 100644
  
  /**@brief Function for closing a transport channel.
   *
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
 index 06e7f9c..164a375 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/config/ser_phy_config_conn.h
 @@ -69,10 +69,10 @@ extern "C" {
  /* UART configuration */
  #define UART_IRQ_PRIORITY                       APP_IRQ_PRIORITY_LOWEST
@@ -832,10 +832,10 @@ index 06e7f9c..164a375 100644
  
  
  #ifdef __cplusplus
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 index 20e1eef..6996889 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci.c
 @@ -51,6 +51,17 @@
  #include "nrf_soc.h"
  #include "ser_config.h"
@@ -1131,10 +1131,10 @@ index 20e1eef..6996889 100644
      }
      return err_code;
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci.h nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci.h nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci.h
 index ab7f337..409491d 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci.h
 @@ -129,6 +129,8 @@ typedef void (*ser_phy_hci_slip_event_handler_t)(ser_phy_hci_slip_evt_t *p_event
   */
  uint32_t ser_phy_hci_slip_open(ser_phy_hci_slip_event_handler_t events_handler);
@@ -1144,10 +1144,10 @@ index ab7f337..409491d 100644
  
  /**@brief A function for transmitting a HCI SLIP packet.
   *
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
 index 857792b..7ad0537 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci_slip.c
 @@ -189,6 +189,7 @@ static void tx_buf_fill(void)
          {
              can_continue = tx_buf_put(tx_escaped_data);
@@ -1232,10 +1232,10 @@ index 857792b..7ad0537 100644
  
      APP_ERROR_CHECK(nrf_drv_uart_rx(&m_uart, m_rx_buf, 1));
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
 index ddbf926..d11c83e 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/common/transport/ser_phy/ser_phy_hci_slip_cdc.c
 @@ -67,10 +67,10 @@ NRF_LOG_MODULE_REGISTER();
  static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
                                      app_usbd_cdc_acm_user_event_t event);
@@ -1347,10 +1347,10 @@ index ddbf926..d11c83e 100644
  
      return NRF_SUCCESS;
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c
 index f8e4666..c7807ad 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble.c
 @@ -41,7 +41,7 @@
  #include "conn_mw_ble.h"
  #include "ble_serialization.h"
@@ -1369,10 +1369,10 @@ index f8e4666..c7807ad 100644
  #else
      err_code = ble_enable_req_dec(p_rx_buf, rx_buf_len);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c
 index 6999f20..940c5af 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/middleware/conn_mw_ble_gap.c
 @@ -136,14 +136,22 @@ uint32_t conn_mw_ble_gap_scan_start(uint8_t const * const p_rx_buf,
      err_code = ble_gap_scan_start_req_dec(p_rx_buf, rx_buf_len, &p_scan_params, &p_adv_report_buffer);
      SER_ASSERT(err_code == NRF_SUCCESS, err_code);
@@ -1421,10 +1421,10 @@ index 6999f20..940c5af 100644
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
  
     return err_code;
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c
 index ffe2ffe..5355070 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_event_enc.c
 @@ -46,6 +46,7 @@
  #include "ble_serialization.h"
  #include "app_util.h"
@@ -1442,10 +1442,10 @@ index ffe2ffe..5355070 100644
      switch (p_event->header.evt_id)
      {
  #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION < 4
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c
 index ff9a3ad..674a0bf 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.c
 @@ -671,10 +671,14 @@ uint32_t ble_gap_scan_start_req_dec(uint8_t const * const     p_buf,
  }
  
@@ -1475,10 +1475,10 @@ index ff9a3ad..674a0bf 100644
      SER_RSP_ENC_END;
  }
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h
 index f1eaa4d..3bfaf36 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_gap_conn.h
 @@ -850,6 +850,9 @@ uint32_t ble_gap_scan_start_req_dec(uint8_t const * const     p_buf,
   * @retval NRF_ERROR_INVALID_LENGTH   Encoding failure. Incorrect buffer length.
   */
@@ -1497,10 +1497,10 @@ index f1eaa4d..3bfaf36 100644
                                             uint8_t const * const p_adv_handle);
  
  #ifndef S112
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c
 index 9267b39..a96cff8 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/ble_gap_evt_conn.c
 @@ -43,6 +43,7 @@
  #include "ble_serialization.h"
  #include "cond_field_serialization.h"
@@ -1548,10 +1548,10 @@ index 9267b39..a96cff8 100644
  
      SER_EVT_ENC_END;
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c
 index 3f8c122..8b21066 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.c
 @@ -54,7 +54,25 @@ typedef struct
  
  ble_data_item_t m_ble_data_pool[8];
@@ -1636,10 +1636,10 @@ index 3f8c122..8b21066 100644
  }
  #endif
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h
 index 875de9a..348b54d 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_gap_sec_keys.h
 @@ -51,7 +51,7 @@
  
  #include "ble_gap.h"
@@ -1671,10 +1671,10 @@ index 875de9a..348b54d 100644
  
  #ifdef __cplusplus
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c
 index 2a54512..68623e4 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.c
 @@ -46,6 +46,16 @@
  
  sercon_ble_user_mem_t m_conn_user_mem_table[SER_MAX_CONNECTIONS];
@@ -1692,10 +1692,10 @@ index 2a54512..68623e4 100644
  uint32_t conn_ble_user_mem_context_create(uint32_t *p_index)
  {
    uint32_t err_code = NRF_ERROR_NO_MEM;
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h
 index bb53a2d..3de2b6f 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/codecs/ble/serializers/conn_ble_user_mem.h
 @@ -70,6 +70,9 @@ typedef struct
    uint8_t              mem_table[64];      /**< Memory table. */
  } sercon_ble_user_mem_t;
@@ -1706,10 +1706,10 @@ index bb53a2d..3de2b6f 100644
  /**@brief Allocates instance in m_user_mem_table[] for storage.
   *
   * @param[out]    p_index             Pointer to the index of allocated instance.
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_event_encoder.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_event_encoder.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_event_encoder.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_event_encoder.c
 index d784754..7d8e424 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_event_encoder.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_event_encoder.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_event_encoder.c
 @@ -46,6 +46,7 @@
  #include "ser_hal_transport.h"
  #include "ser_conn_event_encoder.h"
@@ -1746,10 +1746,10 @@ index d784754..7d8e424 100644
      }
      else
      {
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_handlers.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_handlers.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_handlers.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_handlers.c
 index f656ee2..f6656ea 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_handlers.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_handlers.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_handlers.c
 @@ -48,6 +48,8 @@
  #include "nrf_sdh.h"
  #ifdef BLE_STACK_SUPPORT_REQD
@@ -1782,10 +1782,10 @@ index f656ee2..f6656ea 100644
      {
          // Queue is full. Do not pull new events.
          nrf_sdh_suspend();
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_handlers.h nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_handlers.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_handlers.h nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_handlers.h
 index cc5777a..3f17f2f 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_handlers.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_handlers.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_handlers.h
 @@ -77,7 +77,7 @@ extern "C" {
  #endif
  
@@ -1805,10 +1805,10 @@ index cc5777a..3f17f2f 100644
  /**@brief A function for processing BLE SoftDevice events.
   *
   * @details BLE events are put into application scheduler queue to be processed at a later time.
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_pkt_decoder.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_pkt_decoder.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_pkt_decoder.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_pkt_decoder.c
 index c8a899c..d3e3fca 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_pkt_decoder.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_pkt_decoder.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_pkt_decoder.c
 @@ -86,9 +86,9 @@ uint32_t ser_conn_received_pkt_process(
                  break;
              }
@@ -1821,10 +1821,10 @@ index c8a899c..d3e3fca 100644
                  break;
              }
  
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
 index fcf4235..efc7244 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_reset_cmd_decoder.c
 @@ -39,9 +39,92 @@
   */
  #include "nrf_nvic.h"
@@ -1921,10 +1921,10 @@ index fcf4235..efc7244 100644
 +        break;
 +    }
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h
 index 6e9eb9c..2b654e1 100644
 --- nRF5_SDK_15.2.0_9412b96/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h
++++ nRF5_SDK_15.2.0_f1cf792/components/serialization/connectivity/ser_conn_reset_cmd_decoder.h
 @@ -58,7 +58,7 @@
  #define SER_CONN_RESET_CMD_DECODER_H__
  
@@ -1945,10 +1945,10 @@ index 6e9eb9c..2b654e1 100644
  
  #ifdef __cplusplus
  }
-diff --git nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh.c nRF5_SDK_15.2.0_f1f9329/components/softdevice/common/nrf_sdh.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh.c nRF5_SDK_15.2.0_f1cf792/components/softdevice/common/nrf_sdh.c
 index 63e7fea..f2fa7cf 100644
 --- nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/common/nrf_sdh.c
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/common/nrf_sdh.c
 @@ -204,7 +204,11 @@ ret_code_t nrf_sdh_enable_request(void)
          .source       = NRF_SDH_CLOCK_LF_SRC,
          .rc_ctiv      = NRF_SDH_CLOCK_LF_RC_CTIV,
@@ -1975,10 +1975,10 @@ index 63e7fea..f2fa7cf 100644
      // Enable event interrupt.
      // Interrupt priority has already been set by the stack.
      softdevices_evt_irq_enable();
-diff --git nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh_ble.c nRF5_SDK_15.2.0_f1f9329/components/softdevice/common/nrf_sdh_ble.c
+diff --git nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh_ble.c nRF5_SDK_15.2.0_f1cf792/components/softdevice/common/nrf_sdh_ble.c
 index d8ac161..db6379f 100644
 --- nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh_ble.c
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/common/nrf_sdh_ble.c
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/common/nrf_sdh_ble.c
 @@ -102,8 +102,9 @@ ret_code_t nrf_sdh_ble_app_ram_start_get(uint32_t * p_app_ram_start)
  
  ret_code_t nrf_sdh_ble_default_cfg_set(uint8_t conn_cfg_tag, uint32_t * p_ram_start)
@@ -2055,10 +2055,10 @@ index d8ac161..db6379f 100644
  
  /**@brief       Function for polling BLE events.
   *
-diff --git nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh_ble.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/common/nrf_sdh_ble.h
+diff --git nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh_ble.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/common/nrf_sdh_ble.h
 index 2970807..7c08450 100644
 --- nRF5_SDK_15.2.0_9412b96/components/softdevice/common/nrf_sdh_ble.h
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/common/nrf_sdh_ble.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/common/nrf_sdh_ble.h
 @@ -62,6 +62,12 @@
  extern "C" {
  #endif
@@ -2085,11 +2085,11 @@ index 2970807..7c08450 100644
  
  #ifdef __cplusplus
  }
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble.h
 new file mode 100644
 index 0000000..168d655
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble.h
 @@ -0,0 +1,681 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -2772,11 +2772,11 @@ index 0000000..168d655
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_err.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_err.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_err.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_err.h
 new file mode 100644
 index 0000000..9e70176
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_err.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_err.h
 @@ -0,0 +1,90 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -2868,11 +2868,11 @@ index 0000000..9e70176
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gap.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gap.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gap.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gap.h
 new file mode 100644
 index 0000000..54a33f0
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gap.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gap.h
 @@ -0,0 +1,1917 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -4791,11 +4791,11 @@ index 0000000..54a33f0
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gatt.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gatt.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gatt.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gatt.h
 new file mode 100644
 index 0000000..42d6cb6
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gatt.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gatt.h
 @@ -0,0 +1,220 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -5017,11 +5017,11 @@ index 0000000..42d6cb6
 +#endif // BLE_GATT_H__
 +
 +/** @} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gattc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gattc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gattc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gattc.h
 new file mode 100644
 index 0000000..859dcdf
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gattc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gattc.h
 @@ -0,0 +1,660 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -5683,11 +5683,11 @@ index 0000000..859dcdf
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gatts.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gatts.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gatts.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gatts.h
 new file mode 100644
 index 0000000..535332b
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_gatts.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_gatts.h
 @@ -0,0 +1,778 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -6467,11 +6467,11 @@ index 0000000..535332b
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_hci.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_hci.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_hci.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_hci.h
 new file mode 100644
 index 0000000..4c7a5d5
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_hci.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_hci.h
 @@ -0,0 +1,131 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -6604,11 +6604,11 @@ index 0000000..4c7a5d5
 +#endif // BLE_HCI_H__
 +
 +/** @} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_l2cap.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_l2cap.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_l2cap.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_l2cap.h
 new file mode 100644
 index 0000000..a180840
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_l2cap.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_l2cap.h
 @@ -0,0 +1,202 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -6812,11 +6812,11 @@ index 0000000..a180840
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_ranges.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_ranges.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_ranges.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_ranges.h
 new file mode 100644
 index 0000000..854898c
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_ranges.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_ranges.h
 @@ -0,0 +1,138 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -6956,11 +6956,11 @@ index 0000000..854898c
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_types.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_types.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_types.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_types.h
 new file mode 100644
 index 0000000..f5ccdb7
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/ble_types.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/ble_types.h
 @@ -0,0 +1,213 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -7175,11 +7175,11 @@ index 0000000..f5ccdb7
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf52/nrf_mbr.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf52/nrf_mbr.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf52/nrf_mbr.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf52/nrf_mbr.h
 new file mode 100644
 index 0000000..31a3a23
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf52/nrf_mbr.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf52/nrf_mbr.h
 @@ -0,0 +1,217 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -7398,11 +7398,11 @@ index 0000000..31a3a23
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error.h
 new file mode 100644
 index 0000000..55ce59e
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error.h
 @@ -0,0 +1,87 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -7491,11 +7491,11 @@ index 0000000..55ce59e
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error_sdm.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error_sdm.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error_sdm.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error_sdm.h
 new file mode 100644
 index 0000000..3881071
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error_sdm.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error_sdm.h
 @@ -0,0 +1,67 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -7564,11 +7564,11 @@ index 0000000..3881071
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error_soc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error_soc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error_soc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error_soc.h
 new file mode 100644
 index 0000000..b876fc4
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_error_soc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_error_soc.h
 @@ -0,0 +1,82 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -7652,11 +7652,11 @@ index 0000000..b876fc4
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_nvic.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_nvic.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_nvic.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_nvic.h
 new file mode 100644
 index 0000000..40a6f84
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_nvic.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_nvic.h
 @@ -0,0 +1,485 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -8143,11 +8143,11 @@ index 0000000..40a6f84
 +#endif // NRF_NVIC_H__
 +
 +/**@} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_sd_def.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_sd_def.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_sd_def.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_sd_def.h
 new file mode 100644
 index 0000000..58e699e
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_sd_def.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_sd_def.h
 @@ -0,0 +1,28 @@
 +/* Copyright (c) 2015 - 2018 Nordic Semiconductor ASA. All Rights Reserved.
 + *
@@ -8177,11 +8177,11 @@ index 0000000..58e699e
 +#endif
 +
 +#endif /* NRF_SD_DEF_H__ */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_sdm.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_sdm.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_sdm.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_sdm.h
 new file mode 100644
 index 0000000..bb98ce0
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_sdm.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_sdm.h
 @@ -0,0 +1,331 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -8514,11 +8514,11 @@ index 0000000..bb98ce0
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_soc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_soc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_soc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_soc.h
 new file mode 100644
 index 0000000..2e9e820
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_soc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_soc.h
 @@ -0,0 +1,906 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -9426,11 +9426,11 @@ index 0000000..2e9e820
 +#endif // NRF_SOC_H__
 +
 +/**@} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_svc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_svc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_svc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_svc.h
 new file mode 100644
 index 0000000..c7e3fbe
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers/nrf_svc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers/nrf_svc.h
 @@ -0,0 +1,88 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -9520,11 +9520,11 @@ index 0000000..c7e3fbe
 +}
 +#endif
 +#endif  // NRF_SVC__
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/ble_gap.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/ble_gap.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/ble_gap.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/ble_gap.h
 new file mode 100644
 index 0000000..e07ccef
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/ble_gap.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/ble_gap.h
 @@ -0,0 +1,1919 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -11445,11 +11445,11 @@ index 0000000..e07ccef
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/ble_gattc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/ble_gattc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/ble_gattc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/ble_gattc.h
 new file mode 100644
 index 0000000..9cd75e2
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/ble_gattc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/ble_gattc.h
 @@ -0,0 +1,674 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -12125,11 +12125,11 @@ index 0000000..9cd75e2
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/nrf_nvic.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/nrf_nvic.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/nrf_nvic.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/nrf_nvic.h
 new file mode 100644
 index 0000000..a29d008
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/nrf_nvic.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/nrf_nvic.h
 @@ -0,0 +1,546 @@
 +/*
 + * Copyright (c) Nordic Semiconductor ASA
@@ -12677,20 +12677,20 @@ index 0000000..a29d008
 +#endif // NRF_NVIC_H__
 +
 +/**@} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/test.rb nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/test.rb
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/test.rb nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/test.rb
 new file mode 100644
 index 0000000..f58ae1e
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/headers_replacement/test.rb
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/headers_replacement/test.rb
 @@ -0,0 +1,2 @@
 +a = 'xxx const * const*'
 +puts a.gsub('const','')
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/hex/s132_nrf52_3.0.0_softdevice.hex nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/hex/s132_nrf52_3.0.0_softdevice.hex
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/hex/s132_nrf52_3.0.0_softdevice.hex nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/hex/s132_nrf52_3.0.0_softdevice.hex
 new file mode 100644
 index 0000000..126407c
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/hex/s132_nrf52_3.0.0_softdevice.hex
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/hex/s132_nrf52_3.0.0_softdevice.hex
 @@ -0,0 +1,7694 @@
 +:020000040000FA
 +:1000000000040020E508000079050000C508000094
@@ -20386,11 +20386,11 @@ index 0000000..126407c
 +:10E720000100683720FB349B5F80041F80001002CB
 +:10E730002C01337F0102A029024410E431E00100E2
 +:00000001FF
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/toolchain/armgcc/armgcc_s132v3_nrf52832_xxaa.ld nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/toolchain/armgcc/armgcc_s132v3_nrf52832_xxaa.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/toolchain/armgcc/armgcc_s132v3_nrf52832_xxaa.ld nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/toolchain/armgcc/armgcc_s132v3_nrf52832_xxaa.ld
 new file mode 100644
 index 0000000..74140a9
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/toolchain/armgcc/armgcc_s132v3_nrf52832_xxaa.ld
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/toolchain/armgcc/armgcc_s132v3_nrf52832_xxaa.ld
 @@ -0,0 +1,33 @@
 +/* Linker script to configure memory regions. */
 +
@@ -20425,11 +20425,11 @@ index 0000000..74140a9
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/toolchain/iar/iar_s132v3_nrf52832_xxaa.icf nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/toolchain/iar/iar_s132v3_nrf52832_xxaa.icf
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/toolchain/iar/iar_s132v3_nrf52832_xxaa.icf nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/toolchain/iar/iar_s132v3_nrf52832_xxaa.icf
 new file mode 100644
 index 0000000..0cc668a
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v3/toolchain/iar/iar_s132v3_nrf52832_xxaa.icf
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v3/toolchain/iar/iar_s132v3_nrf52832_xxaa.icf
 @@ -0,0 +1,36 @@
 +/*###ICF### Section handled by ICF editor, don't touch! ****/
 +/*-Editor annotation file-*/
@@ -20467,11 +20467,11 @@ index 0000000..0cc668a
 +                        block CSTACK,
 +                        block HEAP };
 +
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble.h
 new file mode 100644
 index 0000000..ed16f6d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble.h
 @@ -0,0 +1,628 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -21101,11 +21101,11 @@ index 0000000..ed16f6d
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_err.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_err.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_err.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_err.h
 new file mode 100644
 index 0000000..2699abc
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_err.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_err.h
 @@ -0,0 +1,91 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -21198,11 +21198,11 @@ index 0000000..2699abc
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gap.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gap.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gap.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gap.h
 new file mode 100644
 index 0000000..fa61bb9
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gap.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gap.h
 @@ -0,0 +1,2189 @@
 +/*
 + * Copyright (c) 2011 - 2017, Nordic Semiconductor ASA
@@ -23393,11 +23393,11 @@ index 0000000..fa61bb9
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gatt.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gatt.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gatt.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gatt.h
 new file mode 100644
 index 0000000..f1651c8
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gatt.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gatt.h
 @@ -0,0 +1,228 @@
 +/*
 + * Copyright (c) 2013 - 2017, Nordic Semiconductor ASA
@@ -23627,11 +23627,11 @@ index 0000000..f1651c8
 +#endif // BLE_GATT_H__
 +
 +/** @} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gattc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gattc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gattc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gattc.h
 new file mode 100644
 index 0000000..f1428cd
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gattc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gattc.h
 @@ -0,0 +1,707 @@
 +/*
 + * Copyright (c) 2011 - 2017, Nordic Semiconductor ASA
@@ -24340,11 +24340,11 @@ index 0000000..f1428cd
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gatts.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gatts.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gatts.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gatts.h
 new file mode 100644
 index 0000000..1bba73d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_gatts.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_gatts.h
 @@ -0,0 +1,841 @@
 +/*
 + * Copyright (c) 2011 - 2017, Nordic Semiconductor ASA
@@ -25187,11 +25187,11 @@ index 0000000..1bba73d
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_hci.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_hci.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_hci.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_hci.h
 new file mode 100644
 index 0000000..b48d706
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_hci.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_hci.h
 @@ -0,0 +1,135 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -25328,11 +25328,11 @@ index 0000000..b48d706
 +#endif // BLE_HCI_H__
 +
 +/** @} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_l2cap.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_l2cap.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_l2cap.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_l2cap.h
 new file mode 100644
 index 0000000..96d833a
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_l2cap.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_l2cap.h
 @@ -0,0 +1,507 @@
 +/*
 + * Copyright (c) 2011 - 2017, Nordic Semiconductor ASA
@@ -25841,11 +25841,11 @@ index 0000000..96d833a
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_ranges.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_ranges.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_ranges.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_ranges.h
 new file mode 100644
 index 0000000..9bff917
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_ranges.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_ranges.h
 @@ -0,0 +1,156 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -26003,11 +26003,11 @@ index 0000000..9bff917
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_types.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_types.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_types.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_types.h
 new file mode 100644
 index 0000000..cd5fbaf
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/ble_types.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/ble_types.h
 @@ -0,0 +1,215 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -26224,11 +26224,11 @@ index 0000000..cd5fbaf
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf52/nrf_mbr.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf52/nrf_mbr.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf52/nrf_mbr.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf52/nrf_mbr.h
 new file mode 100644
 index 0000000..ea231b3
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf52/nrf_mbr.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf52/nrf_mbr.h
 @@ -0,0 +1,241 @@
 +/*
 + * Copyright (c) 2014 - 2017, Nordic Semiconductor ASA
@@ -26471,11 +26471,11 @@ index 0000000..ea231b3
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error.h
 new file mode 100644
 index 0000000..09d3044
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error.h
 @@ -0,0 +1,90 @@
 +/*
 + * Copyright (c) 2014 - 2017, Nordic Semiconductor ASA
@@ -26567,11 +26567,11 @@ index 0000000..09d3044
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error_sdm.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error_sdm.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error_sdm.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error_sdm.h
 new file mode 100644
 index 0000000..85e08f3
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error_sdm.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error_sdm.h
 @@ -0,0 +1,70 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -26643,11 +26643,11 @@ index 0000000..85e08f3
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error_soc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error_soc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error_soc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error_soc.h
 new file mode 100644
 index 0000000..ea9825e
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_error_soc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_error_soc.h
 @@ -0,0 +1,85 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -26734,11 +26734,11 @@ index 0000000..ea9825e
 +  @}
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_nvic.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_nvic.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_nvic.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_nvic.h
 new file mode 100644
 index 0000000..1705cb6
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_nvic.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_nvic.h
 @@ -0,0 +1,486 @@
 +/*
 + * Copyright (c) 2016 - 2017, Nordic Semiconductor ASA
@@ -27226,11 +27226,11 @@ index 0000000..1705cb6
 +#endif // NRF_NVIC_H__
 +
 +/**@} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_sd_def.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_sd_def.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_sd_def.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_sd_def.h
 new file mode 100644
 index 0000000..7bf0ff0
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_sd_def.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_sd_def.h
 @@ -0,0 +1,28 @@
 +/* Copyright (c) 2015 - 2018 Nordic Semiconductor ASA. All Rights Reserved.
 + *
@@ -27260,11 +27260,11 @@ index 0000000..7bf0ff0
 +#endif
 +
 +#endif /* NRF_SD_DEF_H__ */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_sdm.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_sdm.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_sdm.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_sdm.h
 new file mode 100644
 index 0000000..09eaecb
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_sdm.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_sdm.h
 @@ -0,0 +1,357 @@
 +/*
 + * Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
@@ -27623,11 +27623,11 @@ index 0000000..09eaecb
 +/**
 +  @}
 +*/
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_soc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_soc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_soc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_soc.h
 new file mode 100644
 index 0000000..60fff94
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_soc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_soc.h
 @@ -0,0 +1,934 @@
 +/*
 + * Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
@@ -28563,11 +28563,11 @@ index 0000000..60fff94
 +#endif // NRF_SOC_H__
 +
 +/**@} */
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_svc.h nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_svc.h
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_svc.h nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_svc.h
 new file mode 100644
 index 0000000..c26ce74
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers/nrf_svc.h
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers/nrf_svc.h
 @@ -0,0 +1,90 @@
 +/*
 + * Copyright (c) 2012 - 2017, Nordic Semiconductor ASA
@@ -28659,20 +28659,20 @@ index 0000000..c26ce74
 +}
 +#endif
 +#endif  // NRF_SVC__
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers_replacement/test.rb nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers_replacement/test.rb
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers_replacement/test.rb nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers_replacement/test.rb
 new file mode 100644
 index 0000000..f58ae1e
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/headers_replacement/test.rb
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/headers_replacement/test.rb
 @@ -0,0 +1,2 @@
 +a = 'xxx const * const*'
 +puts a.gsub('const','')
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/hex/s132_nrf52_5.1.0_softdevice.hex nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/hex/s132_nrf52_5.1.0_softdevice.hex
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/hex/s132_nrf52_5.1.0_softdevice.hex nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/hex/s132_nrf52_5.1.0_softdevice.hex
 new file mode 100644
 index 0000000..757b5f6
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/hex/s132_nrf52_5.1.0_softdevice.hex
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/hex/s132_nrf52_5.1.0_softdevice.hex
 @@ -0,0 +1,7843 @@
 +:020000040000FA
 +:1000000000040020E90800007D050000C908000088
@@ -36517,11 +36517,11 @@ index 0000000..757b5f6
 +:10F070001B201C041AA20401980912BF237F01025D
 +:04F080006B290000F8
 +:00000001FF
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/toolchain/armgcc/armgcc_s132v5_nrf52832_xxaa.ld nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/toolchain/armgcc/armgcc_s132v5_nrf52832_xxaa.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/toolchain/armgcc/armgcc_s132v5_nrf52832_xxaa.ld nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/toolchain/armgcc/armgcc_s132v5_nrf52832_xxaa.ld
 new file mode 100644
 index 0000000..cb45d8b
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/toolchain/armgcc/armgcc_s132v5_nrf52832_xxaa.ld
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/toolchain/armgcc/armgcc_s132v5_nrf52832_xxaa.ld
 @@ -0,0 +1,33 @@
 +/* Linker script to configure memory regions. */
 +
@@ -36556,11 +36556,11 @@ index 0000000..cb45d8b
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/toolchain/iar/iar_s132v5_nrf52832_xxaa.icf nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/toolchain/iar/iar_s132v5_nrf52832_xxaa.icf
+diff --git nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/toolchain/iar/iar_s132v5_nrf52832_xxaa.icf nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/toolchain/iar/iar_s132v5_nrf52832_xxaa.icf
 new file mode 100644
 index 0000000..55701b7
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/components/softdevice/s132v5/toolchain/iar/iar_s132v5_nrf52832_xxaa.icf
++++ nRF5_SDK_15.2.0_f1cf792/components/softdevice/s132v5/toolchain/iar/iar_s132v5_nrf52832_xxaa.icf
 @@ -0,0 +1,36 @@
 +/*###ICF### Section handled by ICF editor, don't touch! ****/
 +/*-Editor annotation file-*/
@@ -36598,10 +36598,10 @@ index 0000000..55701b7
 +                        block CSTACK,
 +                        block HEAP };
 +
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/main.c nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/main.c
-index fc7996c..a833d6a 100644
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/main.c nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/main.c
+index fc7996c..898d30e 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/main.c
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/main.c
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/main.c
 @@ -57,23 +57,34 @@
  #include "ser_conn_handlers.h"
  #include "boards.h"
@@ -36724,7 +36724,7 @@ index fc7996c..a833d6a 100644
      while (app_usbd_event_queue_process())
      {
          /* Nothing to do */
-@@ -155,18 +215,48 @@ static void on_idle(void)
+@@ -155,18 +215,62 @@ static void on_idle(void)
  #endif
  }
  
@@ -36733,7 +36733,14 @@ index fc7996c..a833d6a 100644
 +  return DWT->CYCCNT;
 +}
 +
-+     
++void pin_to_default(uint8_t pin)
++{
++    if (pin != NRF_QSPI_PIN_NOT_CONNECTED)
++    {
++        nrf_gpio_cfg_default(pin);
++    }
++}
++
  /**@brief Main function of the connectivity application. */
  int main(void)
  {
@@ -36768,14 +36775,21 @@ index fc7996c..a833d6a 100644
 +    }
 +    else if (err_code == NRF_ERROR_TIMEOUT)
 +    {
-+        pin_reset = PCA10059_PIN_RESET;
 +        //pca10059 assumed when no qspi memory
++        nrf_drv_qspi_uninit();
++        pin_reset = PCA10059_PIN_RESET;
++        pin_to_default(config.pins.csn_pin);
++        pin_to_default(config.pins.io0_pin);
++        pin_to_default(config.pins.io1_pin);
++        pin_to_default(config.pins.io2_pin);
++        pin_to_default(config.pins.io3_pin);
++        pin_to_default(config.pins.sck_pin);
 +    }
 +#endif //BOARD_DETECTION
  
  #if (defined(SER_PHY_HCI_DEBUG_ENABLE) || defined(SER_PHY_DEBUG_APP_ENABLE))
      debug_init(NULL);
-@@ -192,6 +282,8 @@ int main(void)
+@@ -192,6 +296,8 @@ int main(void)
      }
  
      nrf_drv_clock_hfclk_request(NULL);
@@ -36784,7 +36798,7 @@ index fc7996c..a833d6a 100644
      while (!nrf_drv_clock_hfclk_is_running())
      {}
  
-@@ -199,6 +291,10 @@ int main(void)
+@@ -199,6 +305,10 @@ int main(void)
      usbd_init();
  #endif
  
@@ -36795,7 +36809,7 @@ index fc7996c..a833d6a 100644
      /* Open serialization HAL Transport layer and subscribe for HAL Transport events. */
      err_code = ser_hal_transport_open(ser_conn_hal_transport_event_handle);
      APP_ERROR_CHECK(err_code);
-@@ -210,12 +306,14 @@ int main(void)
+@@ -210,12 +320,14 @@ int main(void)
      err_code = nrf_sdh_enable_request();
      APP_ERROR_CHECK(err_code);
  
@@ -36811,7 +36825,7 @@ index fc7996c..a833d6a 100644
          /* Process SoftDevice events. */
          app_sched_execute();
          if (nrf_sdh_is_suspended())
-@@ -235,6 +333,7 @@ int main(void)
+@@ -235,6 +347,7 @@ int main(void)
          APP_ERROR_CHECK(err_code);
  
          on_idle();
@@ -36819,10 +36833,10 @@ index fc7996c..a833d6a 100644
      }
  }
  /** @} */
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 index 611a3b6..0a1645f 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -6,11 +6,18 @@ GROUP(-lgcc -lc -lnosys)
  MEMORY
  {
@@ -36843,10 +36857,10 @@ index 611a3b6..0a1645f 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
 index c5caa64..19a16d1 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/config/sdk_config.h
 @@ -518,6 +518,136 @@
  
  // </e>
@@ -37117,10 +37131,10 @@ index c5caa64..19a16d1 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject
 index 7eccb28..8a0e048 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/ble_connectivity_s132_hci_pca10040.emProject
 @@ -27,8 +27,8 @@
        linker_printf_width_precision_supported="Yes"
        linker_printf_fmt_level="long"
@@ -37132,10 +37146,10 @@ index 7eccb28..8a0e048 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml
 index 6b7653b..95c368d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_hci/ses/flash_placement.xml
 @@ -43,4 +43,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -37144,10 +37158,10 @@ index 6b7653b..95c368d 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld
 index f67446c..57c5fcf 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -6,11 +6,18 @@ GROUP(-lgcc -lc -lnosys)
  MEMORY
  {
@@ -37168,10 +37182,10 @@ index f67446c..57c5fcf 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h
 index 878122b..9342e94 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/config/sdk_config.h
 @@ -747,6 +747,136 @@
  
  // </e>
@@ -37442,10 +37456,10 @@ index 878122b..9342e94 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject
 index 918459a..0eb8650 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/ble_connectivity_s132_spi_pca10040.emProject
 @@ -27,8 +27,8 @@
        linker_printf_width_precision_supported="Yes"
        linker_printf_fmt_level="long"
@@ -37457,10 +37471,10 @@ index 918459a..0eb8650 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -37469,10 +37483,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
 index f67446c..57c5fcf 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -6,11 +6,18 @@ GROUP(-lgcc -lc -lnosys)
  MEMORY
  {
@@ -37493,10 +37507,10 @@ index f67446c..57c5fcf 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h
 index 878122b..9342e94 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/config/sdk_config.h
 @@ -747,6 +747,136 @@
  
  // </e>
@@ -37767,10 +37781,10 @@ index 878122b..9342e94 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject
 index 4f3e9db..13cae61 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/ble_connectivity_s132_spi_5W_pca10040.emProject
 @@ -27,8 +27,8 @@
        linker_printf_width_precision_supported="Yes"
        linker_printf_fmt_level="long"
@@ -37782,10 +37796,10 @@ index 4f3e9db..13cae61 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_spi_5W/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -37794,10 +37808,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld
 index f67446c..57c5fcf 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -6,11 +6,18 @@ GROUP(-lgcc -lc -lnosys)
  MEMORY
  {
@@ -37818,10 +37832,10 @@ index f67446c..57c5fcf 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h
 index 17cad13..cad5969 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/config/sdk_config.h
 @@ -518,6 +518,136 @@
  
  // </e>
@@ -38092,10 +38106,10 @@ index 17cad13..cad5969 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject
 index 400fec8..8c8b417 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/ble_connectivity_s132_uart_pca10040.emProject
 @@ -27,8 +27,8 @@
        linker_printf_width_precision_supported="Yes"
        linker_printf_fmt_level="long"
@@ -38107,10 +38121,10 @@ index 400fec8..8c8b417 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132_uart/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -38119,11 +38133,11 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/Makefile
 new file mode 100644
 index 0000000..c33f1b4
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/Makefile
 @@ -0,0 +1,262 @@
 +PROJECT_NAME     := ble_connectivity_132v3_hci_pca10040
 +TARGETS          := nrf52832_xxaa
@@ -38387,11 +38401,11 @@ index 0000000..c33f1b4
 +CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 +sdk_config:
 +	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 new file mode 100644
 index 0000000..7110f07
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -0,0 +1,106 @@
 +/* Linker script to configure memory regions. */
 +
@@ -38499,11 +38513,11 @@ index 0000000..7110f07
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/config/sdk_config.h
 new file mode 100644
 index 0000000..19a16d1
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/config/sdk_config.h
 @@ -0,0 +1,4558 @@
 +/**
 + * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
@@ -43063,11 +43077,11 @@ index 0000000..19a16d1
 +// <<< end of configuration section >>>
 +#endif //SDK_CONFIG_H
 +
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emProject
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emProject
 new file mode 100644
 index 0000000..e320c53
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emProject
 @@ -0,0 +1,154 @@
 +<!DOCTYPE CrossStudio_Project_File>
 +<solution Name="ble_connectivity_132v3_hci_pca10040" target="8" version="2">
@@ -43223,11 +43237,11 @@ index 0000000..e320c53
 +    c_preprocessor_definitions="DEBUG; DEBUG_NRF"
 +    gcc_optimization_level="None"/>
 +</solution>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emSession nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emSession
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emSession nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emSession
 new file mode 100644
 index 0000000..c05cfb5
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emSession
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/ble_connectivity_132v3_hci_pca10040.emSession
 @@ -0,0 +1,7 @@
 +<!DOCTYPE CrossStudio_Session_File>
 +<session>
@@ -43237,11 +43251,11 @@ index 0000000..c05cfb5
 +  </Files>
 +</session>
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/flash_placement.xml
 new file mode 100644
 index 0000000..95c368d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v3_hci/ses/flash_placement.xml
 @@ -0,0 +1,49 @@
 +<!DOCTYPE Linker_Placement_File>
 +<Root name="Flash Section Placement">
@@ -43292,11 +43306,11 @@ index 0000000..95c368d
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
 +</Root>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/Makefile
 new file mode 100644
 index 0000000..25fcc18
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/Makefile
 @@ -0,0 +1,263 @@
 +PROJECT_NAME     := ble_connectivity_132v5_hci_pca10040
 +TARGETS          := nrf52832_xxaa
@@ -43561,11 +43575,11 @@ index 0000000..25fcc18
 +CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 +sdk_config:
 +	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 new file mode 100644
 index 0000000..9e0c093
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -0,0 +1,106 @@
 +/* Linker script to configure memory regions. */
 +
@@ -43673,11 +43687,11 @@ index 0000000..9e0c093
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/config/sdk_config.h
 new file mode 100644
 index 0000000..ffe8c67
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/config/sdk_config.h
 @@ -0,0 +1,4579 @@
 +/**
 + * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
@@ -48258,11 +48272,11 @@ index 0000000..ffe8c67
 +// <<< end of configuration section >>>
 +#endif //SDK_CONFIG_H
 +
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emProject
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emProject
 new file mode 100644
 index 0000000..ec91733
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emProject
 @@ -0,0 +1,155 @@
 +<!DOCTYPE CrossStudio_Project_File>
 +<solution Name="ble_connectivity_132v5_hci_pca10040" target="8" version="2">
@@ -48419,11 +48433,11 @@ index 0000000..ec91733
 +    c_preprocessor_definitions="DEBUG; DEBUG_NRF"
 +    gcc_optimization_level="None"/>
 +</solution>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emSession nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emSession
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emSession nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emSession
 new file mode 100644
 index 0000000..811c3c5
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emSession
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/ble_connectivity_132v5_hci_pca10040.emSession
 @@ -0,0 +1,7 @@
 +<!DOCTYPE CrossStudio_Session_File>
 +<session>
@@ -48433,11 +48447,11 @@ index 0000000..811c3c5
 +  </Files>
 +</session>
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/flash_placement.xml
 new file mode 100644
 index 0000000..95c368d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040/ser_s132v5_hci/ses/flash_placement.xml
 @@ -0,0 +1,49 @@
 +<!DOCTYPE Linker_Placement_File>
 +<Root name="Flash Section Placement">
@@ -48488,10 +48502,10 @@ index 0000000..95c368d
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
 +</Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 index e8a3735..7b95e77 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x19000, LENGTH = 0x17000
@@ -48510,10 +48524,10 @@ index e8a3735..7b95e77 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h
 index 6539e77..3119381 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/config/sdk_config.h
 @@ -397,6 +397,136 @@
  
  // </e>
@@ -48784,10 +48798,10 @@ index 6539e77..3119381 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject
 index bbf3d52..2a6c303 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/ble_connectivity_s112_hci_pca10040e.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -48797,10 +48811,10 @@ index bbf3d52..2a6c303 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml
 index 6b7653b..95c368d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_hci/ses/flash_placement.xml
 @@ -43,4 +43,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -48809,10 +48823,10 @@ index 6b7653b..95c368d 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld
 index 40d23f1..6b8f0fb 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x19000, LENGTH = 0x17000
@@ -48831,10 +48845,10 @@ index 40d23f1..6b8f0fb 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h
 index 4adb2af..00e28ae 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/config/sdk_config.h
 @@ -598,6 +598,136 @@
  
  // </e>
@@ -49105,10 +49119,10 @@ index 4adb2af..00e28ae 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject
 index 89c1d8f..0dc51b4 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/ble_connectivity_s112_spi_pca10040e.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -49118,10 +49132,10 @@ index 89c1d8f..0dc51b4 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -49130,10 +49144,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
 index 40d23f1..6b8f0fb 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x19000, LENGTH = 0x17000
@@ -49152,10 +49166,10 @@ index 40d23f1..6b8f0fb 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h
 index 4adb2af..00e28ae 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/config/sdk_config.h
 @@ -598,6 +598,136 @@
  
  // </e>
@@ -49426,10 +49440,10 @@ index 4adb2af..00e28ae 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject
 index d1b0172..552d665 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/ble_connectivity_s112_spi_5W_pca10040e.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -49439,10 +49453,10 @@ index d1b0172..552d665 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_spi_5W/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -49451,10 +49465,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld
 index 40d23f1..6b8f0fb 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x19000, LENGTH = 0x17000
@@ -49473,10 +49487,10 @@ index 40d23f1..6b8f0fb 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h
 index 7b74df4..f0c345a 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/config/sdk_config.h
 @@ -397,6 +397,136 @@
  
  // </e>
@@ -49747,10 +49761,10 @@ index 7b74df4..f0c345a 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject
 index 79da171..3d7b71f 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/ble_connectivity_s112_uart_pca10040e.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -49760,10 +49774,10 @@ index 79da171..3d7b71f 100644
        project_directory=""
        project_type="Executable" />
        <folder Name="Segger Startup Files">
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10040e/ser_s112_uart/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -49772,11 +49786,11 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/Makefile
 new file mode 100644
 index 0000000..29138b1
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/Makefile
 @@ -0,0 +1,282 @@
 +PROJECT_NAME     := ble_connectivity_132v3_usb_hci_pca10056
 +TARGETS          := nrf52840_xxaa
@@ -50060,11 +50074,11 @@ index 0000000..29138b1
 +CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 +sdk_config:
 +	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 new file mode 100644
 index 0000000..a7a64cd
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -0,0 +1,106 @@
 +/* Linker script to configure memory regions. */
 +
@@ -50172,11 +50186,11 @@ index 0000000..a7a64cd
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/config/sdk_config.h
 new file mode 100644
 index 0000000..14a8586
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/config/sdk_config.h
 @@ -0,0 +1,5223 @@
 +/**
 + * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
@@ -55401,11 +55415,11 @@ index 0000000..14a8586
 +// <<< end of configuration section >>>
 +#endif //SDK_CONFIG_H
 +
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emProject
 new file mode 100644
 index 0000000..bd45579
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emProject
 @@ -0,0 +1,169 @@
 +<!DOCTYPE CrossStudio_Project_File>
 +<solution Name="ble_connectivity_132v3_usb_hci_pca10056" target="8" version="2">
@@ -55576,11 +55590,11 @@ index 0000000..bd45579
 +    c_preprocessor_definitions="DEBUG; DEBUG_NRF"
 +    gcc_optimization_level="None"/>
 +</solution>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emSession nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emSession
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emSession nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emSession
 new file mode 100644
 index 0000000..ce75e3c
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emSession
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10056.emSession
 @@ -0,0 +1,7 @@
 +<!DOCTYPE CrossStudio_Session_File>
 +<session>
@@ -55590,11 +55604,11 @@ index 0000000..ce75e3c
 +  </Files>
 +</session>
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/flash_placement.xml
 new file mode 100644
 index 0000000..95c368d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v3_usb_hci/ses/flash_placement.xml
 @@ -0,0 +1,49 @@
 +<!DOCTYPE Linker_Placement_File>
 +<Root name="Flash Section Placement">
@@ -55645,11 +55659,11 @@ index 0000000..95c368d
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
 +</Root>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/Makefile
 new file mode 100644
 index 0000000..8d850ae
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/Makefile
 @@ -0,0 +1,283 @@
 +PROJECT_NAME     := ble_connectivity_132v5_usb_hci_pca10056
 +TARGETS          := nrf52840_xxaa
@@ -55934,11 +55948,11 @@ index 0000000..8d850ae
 +CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 +sdk_config:
 +	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 new file mode 100644
 index 0000000..1a80caf
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -0,0 +1,106 @@
 +/* Linker script to configure memory regions. */
 +
@@ -56046,11 +56060,11 @@ index 0000000..1a80caf
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/config/sdk_config.h
 new file mode 100644
 index 0000000..f0b6542
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/config/sdk_config.h
 @@ -0,0 +1,5244 @@
 +/**
 + * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
@@ -61296,11 +61310,11 @@ index 0000000..f0b6542
 +// <<< end of configuration section >>>
 +#endif //SDK_CONFIG_H
 +
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emProject
 new file mode 100644
 index 0000000..d93607c
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emProject
 @@ -0,0 +1,170 @@
 +<!DOCTYPE CrossStudio_Project_File>
 +<solution Name="ble_connectivity_132v5_usb_hci_pca10056" target="8" version="2">
@@ -61472,11 +61486,11 @@ index 0000000..d93607c
 +    c_preprocessor_definitions="DEBUG; DEBUG_NRF"
 +    gcc_optimization_level="None"/>
 +</solution>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emSession nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emSession
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emSession nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emSession
 new file mode 100644
 index 0000000..6c26dd1
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emSession
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/ble_connectivity_132v5_usb_hci_pca10056.emSession
 @@ -0,0 +1,7 @@
 +<!DOCTYPE CrossStudio_Session_File>
 +<session>
@@ -61486,11 +61500,11 @@ index 0000000..6c26dd1
 +  </Files>
 +</session>
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/flash_placement.xml
 new file mode 100644
 index 0000000..95c368d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s132v5_usb_hci/ses/flash_placement.xml
 @@ -0,0 +1,49 @@
 +<!DOCTYPE Linker_Placement_File>
 +<Root name="Flash Section Placement">
@@ -61541,10 +61555,10 @@ index 0000000..95c368d
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
 +</Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile
 index 87059cc..0d8cc08 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/Makefile
 @@ -85,6 +85,7 @@ SRC_FILES += \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
@@ -61553,10 +61567,10 @@ index 87059cc..0d8cc08 100644
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
    $(PROJ_DIR)/main.c \
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 index b877f5a..150d772 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0xda000
@@ -61575,10 +61589,10 @@ index b877f5a..150d772 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
 index 793e569..d43945e 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/config/sdk_config.h
 @@ -240,6 +240,134 @@
  
  // </e>
@@ -61999,10 +62013,10 @@ index 793e569..d43945e 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject
 index f64c3a0..0221ede 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/ble_connectivity_s140_hci_pca10056.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -62020,10 +62034,10 @@ index f64c3a0..0221ede 100644
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uart.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uarte.c" />
      </folder>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml
 index 6b7653b..95c368d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_hci/ses/flash_placement.xml
 @@ -43,4 +43,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -62032,10 +62046,10 @@ index 6b7653b..95c368d 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile
 index f5648fe..98f1192 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/Makefile
 @@ -83,6 +83,7 @@ SRC_FILES += \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
@@ -62044,10 +62058,10 @@ index f5648fe..98f1192 100644
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spis.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld
 index d3acaad..0b2a7eb 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0xda000
@@ -62066,10 +62080,10 @@ index d3acaad..0b2a7eb 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h
 index ba4721d..0c83e4d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/config/sdk_config.h
 @@ -347,6 +347,134 @@
  
  // </e>
@@ -62490,10 +62504,10 @@ index ba4721d..0c83e4d 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject
 index a71ed2f..430528f 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/ble_connectivity_s140_spi_pca10056.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -62511,10 +62525,10 @@ index a71ed2f..430528f 100644
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_spis.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uart.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uarte.c" />
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -62523,10 +62537,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile
 index e498e6c..1147b6f 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/Makefile
 @@ -83,6 +83,7 @@ SRC_FILES += \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
@@ -62535,10 +62549,10 @@ index e498e6c..1147b6f 100644
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spis.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
 index d3acaad..0b2a7eb 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0xda000
@@ -62557,10 +62571,10 @@ index d3acaad..0b2a7eb 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h
 index ba4721d..0c83e4d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/config/sdk_config.h
 @@ -347,6 +347,134 @@
  
  // </e>
@@ -62981,10 +62995,10 @@ index ba4721d..0c83e4d 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject
 index a95d1a5..44ff831 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/ble_connectivity_s140_spi_5W_pca10056.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -63002,10 +63016,10 @@ index a95d1a5..44ff831 100644
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_spis.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uart.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uarte.c" />
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_spi_5W/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -63014,10 +63028,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile
 index aad2de3..d3b8468 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/Makefile
 @@ -81,6 +81,7 @@ SRC_FILES += \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
@@ -63026,10 +63040,10 @@ index aad2de3..d3b8468 100644
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
    $(PROJ_DIR)/main.c \
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld
 index d3acaad..0b2a7eb 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0xda000
@@ -63048,10 +63062,10 @@ index d3acaad..0b2a7eb 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h
 index 36b0fe4..bc8c8d0 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/config/sdk_config.h
 @@ -240,6 +240,134 @@
  
  // </e>
@@ -63472,10 +63486,10 @@ index 36b0fe4..bc8c8d0 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject
 index 228cf40..29b2865 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/ble_connectivity_s140_uart_pca10056.emProject
 @@ -28,7 +28,7 @@
        linker_printf_fmt_level="long"
        linker_section_placement_file="flash_placement.xml"
@@ -63493,10 +63507,10 @@ index 228cf40..29b2865 100644
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uart.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uarte.c" />
      </folder>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml
 index a801e6e..3d9a769 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_uart/ses/flash_placement.xml
 @@ -42,4 +42,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -63505,10 +63519,10 @@ index a801e6e..3d9a769 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile
 index 07cf7c6..b4c2628 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/Makefile
 @@ -25,6 +25,7 @@ SRC_FILES += \
    $(SDK_ROOT)/components/libraries/usbd/app_usbd.c \
    $(SDK_ROOT)/components/libraries/usbd/class/cdc/acm/app_usbd_cdc_acm.c \
@@ -63577,10 +63591,10 @@ index 07cf7c6..b4c2628 100644
  ASMFLAGS += -DSOFTDEVICE_PRESENT
  ASMFLAGS += -DSWI_DISABLE0
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 index b877f5a..150d772 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0xda000
@@ -63599,10 +63613,10 @@ index b877f5a..150d772 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h
 index 994863b..14a8586 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/config/sdk_config.h
 @@ -46,6 +46,102 @@
  #ifdef USE_APP_CONFIG
  #include "app_config.h"
@@ -64149,10 +64163,10 @@ index 994863b..14a8586 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject
 index 571ebbb..6be7f69 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10056.emProject
 @@ -15,8 +15,8 @@
        arm_simulator_memory_simulation_parameter="RWX 00000000,00100000,FFFFFFFF;RWX 20000000,00010000,CDCDCDCD"
        arm_target_device_name="nRF52840_xxAA"
@@ -64197,10 +64211,10 @@ index 571ebbb..6be7f69 100644
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uart.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uarte.c" />
      </folder>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml
 index 6b7653b..95c368d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10056/ser_s140_usb_hci/ses/flash_placement.xml
 @@ -43,4 +43,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -64209,11 +64223,11 @@ index 6b7653b..95c368d 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/Makefile
 new file mode 100644
 index 0000000..b704d10
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/Makefile
 @@ -0,0 +1,282 @@
 +PROJECT_NAME     := ble_connectivity_132v3_usb_hci_pca10059
 +TARGETS          := nrf52840_xxaa
@@ -64497,11 +64511,11 @@ index 0000000..b704d10
 +CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 +sdk_config:
 +	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 new file mode 100644
 index 0000000..a7a64cd
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -0,0 +1,106 @@
 +/* Linker script to configure memory regions. */
 +
@@ -64609,11 +64623,11 @@ index 0000000..a7a64cd
 +} INSERT AFTER .text
 +
 +INCLUDE "nrf_common.ld"
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/config/sdk_config.h
 new file mode 100644
 index 0000000..c244199
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/config/sdk_config.h
 @@ -0,0 +1,5223 @@
 +/**
 + * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
@@ -69838,11 +69852,11 @@ index 0000000..c244199
 +// <<< end of configuration section >>>
 +#endif //SDK_CONFIG_H
 +
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emProject
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emProject
 new file mode 100644
 index 0000000..735cba9
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emProject
 @@ -0,0 +1,169 @@
 +<!DOCTYPE CrossStudio_Project_File>
 +<solution Name="ble_connectivity_132v3_usb_hci_pca10059" target="8" version="2">
@@ -70013,11 +70027,11 @@ index 0000000..735cba9
 +    c_preprocessor_definitions="DEBUG; DEBUG_NRF"
 +    gcc_optimization_level="None"/>
 +</solution>
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emSession nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emSession
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emSession nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emSession
 new file mode 100644
 index 0000000..22c73f1
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emSession
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/ble_connectivity_132v3_usb_hci_pca10059.emSession
 @@ -0,0 +1,7 @@
 +<!DOCTYPE CrossStudio_Session_File>
 +<session>
@@ -70027,11 +70041,11 @@ index 0000000..22c73f1
 +  </Files>
 +</session>
 \ No newline at end of file
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/flash_placement.xml
 new file mode 100644
 index 0000000..95c368d
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s132v3_usb_hci/ses/flash_placement.xml
 @@ -0,0 +1,49 @@
 +<!DOCTYPE Linker_Placement_File>
 +<Root name="Flash Section Placement">
@@ -70082,10 +70096,10 @@ index 0000000..95c368d
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
 +</Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile
 index 33053bc..b4bde15 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/Makefile
 @@ -96,6 +96,7 @@ SRC_FILES += \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power.c \
    $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
@@ -70110,10 +70124,10 @@ index 33053bc..b4bde15 100644
  ASMFLAGS += -DSOFTDEVICE_PRESENT
  ASMFLAGS += -DSWI_DISABLE0
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 index b877f5a..150d772 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 @@ -7,10 +7,17 @@ MEMORY
  {
    FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0xda000
@@ -70132,10 +70146,10 @@ index b877f5a..150d772 100644
  }
  
  SECTIONS
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
 index bb385de..c244199 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/config/sdk_config.h
 @@ -133,7 +133,7 @@
  // <i> gaps. Tailor this value to adhere to this limitation.
  
@@ -70574,10 +70588,10 @@ index bb385de..c244199 100644
  // <o> NRF_BLE_BMS_BLE_OBSERVER_PRIO  
  // <i> Priority with which BLE events are dispatched to the Bond Management Service.
  
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject
 index c7771fd..e6a0b2c 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/ble_connectivity_s140_usb_hci_pca10059.emProject
 @@ -16,7 +16,7 @@
        arm_target_device_name="nRF52840_xxAA"
        arm_target_interface_type="SWD"
@@ -70604,10 +70618,10 @@ index c7771fd..e6a0b2c 100644
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uart.c" />
        <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_uarte.c" />
      </folder>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml
+diff --git nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml
 index 6b7653b..95c368d 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml
-+++ nRF5_SDK_15.2.0_f1f9329/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml
++++ nRF5_SDK_15.2.0_f1cf792/examples/connectivity/ble_connectivity/pca10059/ser_s140_usb_hci/ses/flash_placement.xml
 @@ -43,4 +43,7 @@
      <ProgramSection alignment="8" size="__STACKSIZE__" load="No" place_from_segment_end="Yes" name=".stack"  address_symbol="__StackLimit" end_symbol="__StackTop"/>
      <ProgramSection alignment="8" size="__STACKSIZE_PROCESS__" load="No" name=".stack_process" />
@@ -70616,10 +70630,10 @@ index 6b7653b..95c368d 100644
 +    <ProgramSection alignment="4" keep="Yes" load="Yes" name=".connectivity_version_info" address_symbol="__start_connectivity_version_info" end_symbol="__stop_connectivity_version_info" start = "0x50000" size="0x18" />
 +  </MemorySegment>
  </Root>
-diff --git nRF5_SDK_15.2.0_9412b96/examples/dfu/dfu_public_key.c nRF5_SDK_15.2.0_f1f9329/examples/dfu/dfu_public_key.c
+diff --git nRF5_SDK_15.2.0_9412b96/examples/dfu/dfu_public_key.c nRF5_SDK_15.2.0_f1cf792/examples/dfu/dfu_public_key.c
 index e483589..8629005 100644
 --- nRF5_SDK_15.2.0_9412b96/examples/dfu/dfu_public_key.c
-+++ nRF5_SDK_15.2.0_f1f9329/examples/dfu/dfu_public_key.c
++++ nRF5_SDK_15.2.0_f1cf792/examples/dfu/dfu_public_key.c
 @@ -1,30 +1,51 @@
 +/**
 + * Copyright (c) 2010 - 2018, Nordic Semiconductor ASA
@@ -70694,11 +70708,11 @@ index e483589..8629005 100644
 -#else
 -#error "Debug public key not valid for production. Please see https://github.com/NordicSemiconductor/pc-nrfutil/blob/master/README.md to generate it"
 -#endif
-diff --git nRF5_SDK_15.2.0_f1f9329/examples/readme.txt nRF5_SDK_15.2.0_f1f9329/examples/readme.txt
+diff --git nRF5_SDK_15.2.0_f1cf792/examples/readme.txt nRF5_SDK_15.2.0_f1cf792/examples/readme.txt
 new file mode 100644
 index 0000000..ac71eca
 --- /dev/null
-+++ nRF5_SDK_15.2.0_f1f9329/examples/readme.txt
++++ nRF5_SDK_15.2.0_f1cf792/examples/readme.txt
 @@ -0,0 +1,14 @@
 +Matrix shows which board is supported by given example
 +
@@ -70714,10 +70728,10 @@ index 0000000..ac71eca
 +--------------------------------------------------------------------------
 +connectivity\ble_connectivity  |  *   |      |  *   |  *   |      |  *   |
 +--------------------------------------------------------------------------
-diff --git nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_power.c nRF5_SDK_15.2.0_f1f9329/integration/nrfx/legacy/nrf_drv_power.c
+diff --git nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_power.c nRF5_SDK_15.2.0_f1cf792/integration/nrfx/legacy/nrf_drv_power.c
 index bba3d13..139d375 100644
 --- nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_power.c
-+++ nRF5_SDK_15.2.0_f1f9329/integration/nrfx/legacy/nrf_drv_power.c
++++ nRF5_SDK_15.2.0_f1cf792/integration/nrfx/legacy/nrf_drv_power.c
 @@ -47,6 +47,14 @@
  #include "nrf_sdh_soc.h"
  #endif
@@ -70787,3 +70801,9 @@ index bba3d13..139d375 100644
      if (nrfx_power_usb_handler_get() != NULL)
      {
          ret_code_t err_code = nrf_drv_power_sd_usbevt_enable(true);
+diff --git nRF5_SDK_15.2.0_f1cf792/nRF5_SDK_15.2.0_9412b96-to-nRF5_SDK_15.2.0_f1cf92.patch nRF5_SDK_15.2.0_f1cf792/nRF5_SDK_15.2.0_9412b96-to-nRF5_SDK_15.2.0_f1cf92.patch
+new file mode 100644
+index 0000000..e69de29
+diff --git nRF5_SDK_15.2.0_f1cf792/patch-summary.txt nRF5_SDK_15.2.0_f1cf792/patch-summary.txt
+new file mode 100644
+index 0000000..e69de29
