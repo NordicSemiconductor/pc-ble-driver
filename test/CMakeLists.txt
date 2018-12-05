@@ -162,8 +162,7 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
             --hardware-info "hex:${connfw_filename},pca:${pca},segger_sn:${DEVICE_A_SEGGER_SN},${DEVICE_B_SEGGER_SN}"
             --reporter ${tests_reporter}
             --order lex
-            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml" 
-            -a || (exit 0)
+            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml" || (exit 0)
             DEPENDS ${integration_test}
         )
     endforeach()
