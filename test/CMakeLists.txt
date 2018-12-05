@@ -32,14 +32,6 @@ execute_process(
 
 message(STATUS "nrfjprog reports:\nversion:${version_info}\nexit_code:${result}\n")
 
-set(BUILD_TYPE )
-if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "CMAKE_BUILD_TYPE not set, probably because it is running in a multi target environment. Setting it to Debug.")
-    set(BUILD_TYPE "Debug")
-else()
-    set(BUILD_TYPE "${CMAKE_BUILD_TYPE}")
-endif()
-
 file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v2/connectivity_${CONNECTIVITY_VERSION}_1m_with_s130_2.0.1.hex" SD_API_V2_S130_HEX)
 file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v3/connectivity_${CONNECTIVITY_VERSION}_1m_with_s132_3.1.0.hex" SD_API_V3_S132_HEX)
 file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v3/connectivity_${CONNECTIVITY_VERSION}_usb_with_s132_3.1.0.hex" SD_API_V3_S132_PCA10056_USB_HEX)
@@ -128,8 +120,6 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --reset --log
         COMMAND ${CMAKE_COMMAND} -E echo "Resetting of ${pca}/${DEVICE_B_SEGGER_SN} complete."
         COMMAND ${CMAKE_COMMAND} -E sleep 2
-
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test-reports" 
     )
 
     if(BLE_DRIVER_TEST_OPENCLOSE_ITERATIONS)
@@ -148,6 +138,11 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
         add_custom_command(
             OUTPUT ${COMMAND_NAME}
             APPEND COMMAND ${CMAKE_COMMAND} -E echo "Running tests from $<TARGET_FILE:${integration_test}> with connectivity ${connfw}."
+        )
+
+        add_custom_command(
+            OUTPUT ${COMMAND_NAME}
+            APPEND COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${integration_test}>/test-reports"
         )
 
         add_custom_command(
