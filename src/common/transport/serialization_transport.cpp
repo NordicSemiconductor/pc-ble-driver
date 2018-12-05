@@ -235,7 +235,7 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
 
     if (eventType == SERIALIZATION_RESPONSE)
     {
-        if (!responseBuffer->empty())
+        if (responseBuffer && !responseBuffer->empty())
         {
             if (responseBuffer->size() >= dataLength)
             {
