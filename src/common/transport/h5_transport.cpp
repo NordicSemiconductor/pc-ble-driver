@@ -1088,8 +1088,8 @@ std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet
     }
 
     std::stringstream retval;
-    retval << count.str() << " [" << asHex(payload) << "]" << std::endl
-           << std::setw(20) << "type:" << std::setw(20) << pktTypeToString(packet_type)
+    retval << count.str() << " [" << asHex(payload) << "] "
+           << "type:" << std::setw(20) << pktTypeToString(packet_type)
            << " reliable:" << std::setw(3) << (reliable_packet ? "yes" : "no")
            << " seq#:" << std::hex << +seq_num << " ack#:" << std::hex << +ack_num
            << " payload_length:" << +payload_length << " data_integrity:" << data_integrity;
@@ -1103,7 +1103,7 @@ std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet
 
     if (packet_type == LINK_CONTROL_PACKET)
     {
-        retval << std::endl << std::setw(15) << "" << hciPacketLinkControlToString(payload);
+        retval << " " << hciPacketLinkControlToString(payload);
     }
 
     return retval.str();
