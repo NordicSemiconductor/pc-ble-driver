@@ -53,7 +53,7 @@
 
 constexpr uint32_t defaultRetransmissionInterval()
 {
-#ifdef NRF_SD_BLE_API == 2
+#if NRF_SD_BLE_API == 2
     return 300; // nRF51 devices use SDv2. They are a bit slower than the nRF52 series devices.
 #else
     return 250;
