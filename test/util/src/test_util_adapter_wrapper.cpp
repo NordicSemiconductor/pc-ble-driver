@@ -19,6 +19,10 @@
 #include <map>
 #include <thread>
 
+constexpr uint8_t MaxPeripheralConnections = 1;
+constexpr uint8_t MaxCentralConnections = 7;
+constexpr uint8_t MaxCentralSecureConnections = 1;
+
 namespace testutil {
 
 uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit)
@@ -881,9 +885,9 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.ble_enable_params.gatts_enable_params.attr_tab_size =
         BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     scratchpad.ble_enable_params.gatts_enable_params.service_changed   = false;
-    scratchpad.ble_enable_params.gap_enable_params.periph_conn_count   = 1;
-    scratchpad.ble_enable_params.gap_enable_params.central_conn_count  = 1;
-    scratchpad.ble_enable_params.gap_enable_params.central_sec_count   = 1;
+    scratchpad.ble_enable_params.gap_enable_params.periph_conn_count   = MaxPeripheralConnections;
+    scratchpad.ble_enable_params.gap_enable_params.central_conn_count  = MaxCentralConnections;
+    scratchpad.ble_enable_params.gap_enable_params.central_sec_count   = MaxCentralSecureConnections;
     scratchpad.ble_enable_params.common_enable_params.p_conn_bw_counts = nullptr;
     scratchpad.ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 
@@ -1028,9 +1032,9 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
 
     // Configure the connection roles.
     std::memset(&ble_cfg, 0, sizeof(ble_cfg));
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = MaxPeripheralConnections;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count = MaxCentralConnections;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = MaxCentralSecureConnections;
 
 #if NRF_SD_BLE_API == 6
     ble_cfg.gap_cfg.role_count_cfg.adv_set_count = 1;
@@ -1045,7 +1049,7 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
         return error_code;
     }
 
-    std::memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    std::memset(&ble_cfg, 0, sizeof(ble_cfg));
     ble_cfg.conn_cfg.conn_cfg_tag                 = conn_cfg_tag;
     ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = scratchpad.mtu;
 
