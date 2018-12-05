@@ -41,11 +41,11 @@
 #include <sstream>
 
 #include "adapter_internal.h"
+#include "app_ble_gap.h"
 #include "nrf_error.h"
 #include "ser_config.h"
-#include "app_ble_gap.h"
 
-//AdapterRequestReplyCodecContext
+// AdapterRequestReplyCodecContext
 
 RequestReplyCodecContext::RequestReplyCodecContext(void *adapterId)
 {
@@ -70,16 +70,16 @@ EventCodecContext::~EventCodecContext()
 uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
                        const decode_function_t &decode_function)
 {
-    uint32_t rx_buffer_length = 0;
-
-    // std::unique_ptr<uint8_t>
-    // tx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
-    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,hicpp-no-malloc)
-    std::unique_ptr<uint8_t> rx_buffer(
-        static_cast<uint8_t *>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
-
     std::stringstream error_message;
     auto _adapter = static_cast<AdapterInternal *>(adapter->internal);
+
+    // Create rx_buffer
+    std::shared_ptr<std::vector<uint8_t>> rx_buffer;
+    
+    if (decode_function)
+    {
+        rx_buffer = std::make_shared<std::vector<uint8_t>>(SER_HAL_TRANSPORT_MAX_PKT_SIZE );
+    }
 
     // Create tx_buffer
     uint32_t tx_buffer_length = SER_HAL_TRANSPORT_MAX_PKT_SIZE;
@@ -94,14 +94,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
         return NRF_ERROR_SD_RPC_ENCODE;
     }
 
-    if (decode_function != nullptr)
-    {
-        err_code = _adapter->transport->send(tx_buffer, rx_buffer.get(), &rx_buffer_length);
-    }
-    else
-    {
-        err_code = _adapter->transport->send(tx_buffer, nullptr, &rx_buffer_length);
-    }
+    err_code = _adapter->transport->send(tx_buffer, rx_buffer);
 
     if (AdapterInternal::isInternalError(err_code))
     {
@@ -121,9 +114,10 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
 
     uint32_t result_code = NRF_SUCCESS;
 
-    if (decode_function != nullptr)
+    if (decode_function)
     {
-        err_code = decode_function(rx_buffer.get(), rx_buffer_length, &result_code);
+        err_code = decode_function(rx_buffer->data(), static_cast<uint32_t>(rx_buffer->size()),
+                                   &result_code);
     }
 
     if (AdapterInternal::isInternalError(err_code))
