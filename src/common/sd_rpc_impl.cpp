@@ -217,8 +217,6 @@ uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
     }
 
     const uint32_t tx_buffer_length = 1; // This command has 1 byte payload, hence length 1
-    uint32_t rx_buffer_length = 0; // This command does not generate a response, hence length 0
-
     std::vector<uint8_t> tx_buffer(tx_buffer_length);
     tx_buffer[0] = static_cast<uint8_t>(reset_mode);
 
