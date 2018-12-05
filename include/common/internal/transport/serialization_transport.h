@@ -83,7 +83,8 @@ class SerializationTransport
     uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback,
                   const log_cb_t &log_callback);
     uint32_t close();
-    uint32_t send(const std::vector<uint8_t> &cmdBuffer, uint8_t *rspBuffer, uint32_t *rspLength,
+    uint32_t send(const std::vector<uint8_t> &cmdBuffer,
+                  std::shared_ptr<std::vector<uint8_t>> rspBuffer,
                   serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
 
   private:
@@ -99,9 +100,8 @@ class SerializationTransport
     std::shared_ptr<Transport> nextTransportLayer;
     uint32_t responseTimeout;
 
-    bool rspReceived;
-    uint8_t *responseBuffer;
-    uint32_t *responseLength;
+    bool responseReceived;
+    std::shared_ptr<std::vector<uint8_t>> responseBuffer;
 
     std::mutex sendMutex;
 

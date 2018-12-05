@@ -43,7 +43,6 @@
 
 #include "ble_common.h"
 
-#include <cstring> // Do not remove! Required by gcc.
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -52,9 +51,8 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     : statusCallback(nullptr)
     , eventCallback(nullptr)
     , logCallback(nullptr)
-    , rspReceived(false)
+    , responseReceived(false)
     , responseBuffer(nullptr)
-    , responseLength(nullptr)
     , runEventThread(false)
     , isOpen(false)
 {
@@ -132,8 +130,9 @@ uint32_t SerializationTransport::close()
     return nextTransportLayer->close();
 }
 
-uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer, uint8_t *rspBuffer,
-                                      uint32_t *rspLength, serialization_pkt_type_t pktType)
+uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
+                                      std::shared_ptr<std::vector<uint8_t>> rspBuffer,
+                                      serialization_pkt_type_t pktType)
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
 
@@ -144,9 +143,8 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer, uin
 
     // Mutex to avoid multiple threads sending commands at the same time.
     std::lock_guard<std::mutex> sendGuard(sendMutex);
-    rspReceived    = false;
-    responseBuffer = rspBuffer;
-    responseLength = rspLength;
+    responseReceived = false;
+    responseBuffer   = rspBuffer;
 
     std::vector<uint8_t> commandBuffer(cmdBuffer.size() + 1);
     commandBuffer[0] = pktType;
@@ -158,7 +156,8 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer, uin
     {
         return errCode;
     }
-    else if (rspBuffer == nullptr)
+
+    if (!rspBuffer)
     {
         return NRF_SUCCESS;
     }
@@ -169,9 +168,9 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer, uin
     const std::chrono::system_clock::time_point wakeupTime =
         std::chrono::system_clock::now() + timeout;
 
-    responseWaitCondition.wait_until(responseGuard, wakeupTime, [&] { return rspReceived; });
+    responseWaitCondition.wait_until(responseGuard, wakeupTime, [&] { return responseReceived; });
 
-    if (!rspReceived)
+    if (!responseReceived)
     {
         logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
         return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_NO_RESPONSE;
@@ -216,8 +215,8 @@ void SerializationTransport::eventHandlingRunner()
             if (errCode != NRF_SUCCESS)
             {
                 std::stringstream logMessage;
-                logMessage << "Failed to decode event, error code is " << std::dec << errCode << "/0x"
-                           << std::hex << errCode << "." << std::endl;
+                logMessage << "Failed to decode event, error code is " << std::dec << errCode
+                           << "/0x" << std::hex << errCode << "." << std::endl;
                 logCallback(SD_RPC_LOG_ERROR, logMessage.str());
                 statusCallback(PKT_DECODE_ERROR, logMessage.str());
             }
@@ -236,18 +235,27 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
 
     if (eventType == SERIALIZATION_RESPONSE)
     {
-        if (responseBuffer != nullptr)
+        if (!responseBuffer->empty())
         {
-            std::memcpy(responseBuffer, startOfData, dataLength);
-            *responseLength = static_cast<uint32_t>(dataLength);
+            if (responseBuffer->size() >= dataLength)
+            {
+                std::copy(startOfData, startOfData + dataLength, responseBuffer->begin());
+                responseBuffer->resize(dataLength);
+            }
+            else
+            {
+                logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE with a packet that "
+                                              "is larger than the allocated buffer.");
+            }
         }
         else
         {
-            logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE but command did not provide a buffer for the reply.");
+            logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE but command did not "
+                                          "provide a buffer for the reply.");
         }
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
-        rspReceived = true;
+        responseReceived = true;
         responseWaitCondition.notify_one();
     }
     else if (eventType == SERIALIZATION_EVENT)
