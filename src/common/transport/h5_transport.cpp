@@ -571,7 +571,8 @@ void H5Transport::setupStateMachine()
     // All states lock on mutex stateMachineMutex.
     // The lock is released when values are ready to be updated and when the states goes out of
     // scope.
-    stateActions[STATE_START] = [this]() -> h5_state_t {
+
+    const auto stateActionStart = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<StartExitCriterias *>(exitCriterias[STATE_START].get());
 
@@ -604,7 +605,7 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_RESET] = [this]() -> h5_state_t {
+    auto const stateActionReset = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<ResetExitCriterias *>(exitCriterias[STATE_RESET].get());
 
@@ -640,7 +641,7 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_UNINITIALIZED] = [this]() -> h5_state_t {
+    auto const stateActionUninitialized = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit =
             dynamic_cast<UninitializedExitCriterias *>(exitCriterias[STATE_UNINITIALIZED].get());
@@ -683,11 +684,11 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_INITIALIZED] = [this]() -> h5_state_t {
+    const auto stateActionInitialized = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit =
             dynamic_cast<InitializedExitCriterias *>(exitCriterias[STATE_INITIALIZED].get());
-        uint8_t syncRetransmission = PACKET_RETRANSMISSIONS;
+        auto syncRetransmission = PACKET_RETRANSMISSIONS;
 
         // Send a package immediately
         while (!exit->isFullfilled() && syncRetransmission > 0)
@@ -729,7 +730,7 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_ACTIVE] = [this]() -> h5_state_t {
+    const auto stateActionActive = [this]() -> h5_state_t {
         std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
         auto exit = dynamic_cast<ActiveExitCriterias *>(exitCriterias[STATE_ACTIVE].get());
 
@@ -757,20 +758,35 @@ void H5Transport::setupStateMachine()
         return STATE_FAILED;
     };
 
-    stateActions[STATE_FAILED] = [this]() -> h5_state_t {
-        log(SD_RPC_LOG_FATAL, "Entered state failed. No exit exists from this state.");
+    const auto stateActionFailed = [this]() -> h5_state_t {
+        std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
+        log(SD_RPC_LOG_FATAL,
+            "Entered state failed. No exit exists from this state."); // Assumed thread #2,
+                                                                      // H5Transport::setupStateMachine()::$_5
         return STATE_FAILED;
     };
 
-    stateActions[STATE_CLOSED] = [this]() -> h5_state_t {
+    const auto stateActionClosed = [this]() -> h5_state_t {
+        std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
         log(SD_RPC_LOG_DEBUG, "Entered state closed.");
         return STATE_CLOSED;
     };
 
-    stateActions[STATE_NO_RESPONSE] = [this]() -> h5_state_t {
+    const auto stateActionNoResponse = [this]() -> h5_state_t {
+        std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
         log(SD_RPC_LOG_DEBUG, "No response to data sent to device.");
         return STATE_NO_RESPONSE;
     };
+
+    // Setup state actions
+    stateActions[STATE_START]         = stateActionStart;
+    stateActions[STATE_RESET]         = stateActionReset;
+    stateActions[STATE_UNINITIALIZED] = stateActionUninitialized;
+    stateActions[STATE_INITIALIZED]   = stateActionInitialized;
+    stateActions[STATE_ACTIVE]        = stateActionActive;
+    stateActions[STATE_FAILED]        = stateActionFailed;
+    stateActions[STATE_CLOSED]        = stateActionClosed;
+    stateActions[STATE_NO_RESPONSE]   = stateActionNoResponse;
 
     // Setup exit criteria
     exitCriterias[STATE_START] = std::shared_ptr<ExitCriterias>(new StartExitCriterias());
@@ -794,7 +810,7 @@ void H5Transport::startStateMachine()
         stateMachineThread = std::thread([this] { stateMachineWorker(); });
 
         // Wait for the state machine to be ready
-        stateMachineChange.wait(stateMachineLock, [this]() { return stateMachineReady; });
+        stateMachineChange.wait(stateMachineLock, [this] { return stateMachineReady; });
     }
     else
     {

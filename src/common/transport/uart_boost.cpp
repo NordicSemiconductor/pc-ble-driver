@@ -222,7 +222,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             std::terminate();
         }
 
-        ioServiceThread = new std::thread([&]() {
+        const auto asioWorker = [&]() {
             try
             {
                 const auto count = ioService->run();
@@ -236,7 +236,9 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
                 message << "serial io_context error: " << e.what() << ".";
                 log(SD_RPC_LOG_ERROR, message.str());
             }
-        });
+        };
+
+        ioServiceThread = new std::thread(asioWorker);
     }
     catch (std::exception &ex)
     {

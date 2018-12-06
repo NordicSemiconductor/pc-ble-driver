@@ -165,8 +165,7 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
     std::unique_lock<std::mutex> responseGuard(responseMutex);
 
     const std::chrono::milliseconds timeout(responseTimeout);
-    const std::chrono::system_clock::time_point wakeupTime =
-        std::chrono::system_clock::now() + timeout;
+    const auto wakeupTime = std::chrono::system_clock::now() + timeout;
 
     responseWaitCondition.wait_until(responseGuard, wakeupTime, [&] { return responseReceived; });
 
