@@ -22,11 +22,11 @@ namespace testutil {
  *
  * @return true if advertisement type was found, false if not.
  */
- bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &advData,
-                           std::vector<uint8_t> &advTypeData);
+bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &advData,
+                    std::vector<uint8_t> &advTypeData);
 
- bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
-                                         std::vector<uint8_t> &manufacturer_specific_data);
+bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
+                                  std::vector<uint8_t> &manufacturer_specific_data);
 
 /**
  * @brief Function that search for advertisement name in BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME or
@@ -37,13 +37,11 @@ namespace testutil {
  *
  * @return true if name is found, false if not
  */
-bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report,
-                        const std::string &name_to_find);
+bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report, const std::string &name_to_find);
 
 void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
-                                                 const size_t additionalBytes,
-                                                 const bool extended    = false,
-                                                 const bool connectable = false);
+                                          const size_t additionalBytes, const bool extended = false,
+                                          const bool connectable = false);
 
 /**
  * @brief Function that append name to advertise to advertisement type
@@ -61,8 +59,8 @@ void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::str
  * @param[in,out] advertisingData std::vector to append advertisement flags to
  * @param[in] flags Flags to append to advertisingData
  */
- void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
-                                     const bool extended = false);
+void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
+                              const bool extended = false);
 
 /**
  * @brief Function that append manufacturer specifid data to advertisement
@@ -70,9 +68,9 @@ void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::str
  * @param[in,out] advertisingData std::vector to append manufacturer specific data to
  * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData
  */
- void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
-                                           const std::vector<uint8_t> manufacturerSpecificData,
-                                           const bool extended = false);
+void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
+                                    const std::vector<uint8_t> manufacturerSpecificData,
+                                    const bool extended = false);
 
 /*
  * @brief Function that fills a std::vector<uint8_t> with random values
@@ -90,6 +88,9 @@ void appendRandomData(std::vector<uint8_t> &data, const size_t size);
  */
 
 void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size);
+
+std::string createRandomAdvertisingName(const std::string &prefix = "periph",
+                                        const uint8_t length      = 10);
 
 bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs);
 

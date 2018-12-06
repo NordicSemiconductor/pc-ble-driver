@@ -251,6 +251,23 @@ void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size)
     });
 }
 
+std::string createRandomAdvertisingName(const std::string &prefix, const uint8_t length)
+{
+    std::vector<uint8_t> data;
+    data.reserve(10);
+
+    std::copy(prefix.begin(), prefix.end(), std::back_inserter(data));
+    const auto randomLength = length - prefix.length();
+    std::generate_n(std::back_inserter(data), randomLength, [] {
+        char c;
+        while (!std::isalnum(c = static_cast<char>(std::rand())))
+            ;
+        return c;
+    });
+
+    return std::string(data.begin(), data.end());
+}
+
 bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs)
 {
     const auto addressIsSame = std::memcmp(lhs.addr, rhs.addr, BLE_GAP_ADDR_LEN) == 0;

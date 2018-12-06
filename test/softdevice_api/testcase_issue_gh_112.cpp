@@ -150,7 +150,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                                                &(p->scratchpad.gatts_characteristic_handle));
     };
 
-    const auto peripheralAdvName = "peripheral";
+    const auto peripheralAdvName = testutil::createRandomAdvertisingName();
 
     // Instantiate an adapter to use as BLE Central in the test
     auto c = std::make_shared<testutil::AdapterWrapper>(
