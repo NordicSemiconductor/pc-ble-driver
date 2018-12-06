@@ -168,6 +168,16 @@ class H5Transport : public Transport
 
     bool isOpen;
     std::mutex publicMethodMutex;
+
+    // Actions associated with each state
+    h5_state_t stateActionStart();
+    h5_state_t stateActionReset();
+    h5_state_t stateActionUninitialized();
+    h5_state_t stateActionInitialized();
+    h5_state_t stateActionActive();
+    h5_state_t stateActionFailed();
+    h5_state_t stateActionClosed();
+    h5_state_t stateActionNoResponse();
 };
 
 #endif // H5_TRANSPORT_H

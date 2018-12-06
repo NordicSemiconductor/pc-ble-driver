@@ -566,227 +566,231 @@ void H5Transport::incrementAckNum()
 #pragma endregion Processing of incoming packets from UART
 
 #pragma region State machine
+
+h5_state_t H5Transport::stateActionStart()
+{
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+    auto exit = dynamic_cast<StartExitCriterias *>(exitCriterias[STATE_START].get());
+
+    stateMachineReady = true;
+
+    // Notify other threads that the state machine is ready
+    stateMachineLock.unlock();
+    stateMachineChange.notify_all();
+    stateMachineLock.lock();
+
+    // Wait for notification of a stateMachineChange that exists the state
+    stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
+
+    // Order is of importance when returning state
+    if (exit->ioResourceError)
+    {
+        return STATE_FAILED;
+    }
+
+    if (exit->close)
+    {
+        return STATE_CLOSED;
+    }
+
+    if (exit->isOpened)
+    {
+        return STATE_RESET;
+    }
+
+    return STATE_FAILED;
+}
+
+h5_state_t H5Transport::stateActionReset()
+{
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+    auto exit = dynamic_cast<ResetExitCriterias *>(exitCriterias[STATE_RESET].get());
+
+    // Send the reset packet, and wait for the device to reboot and ready for receiving commands
+    sendControlPacket(CONTROL_PKT_RESET);
+
+    if (statusCallback)
+    {
+        statusCallback(RESET_PERFORMED, "Target Reset performed");
+    }
+
+    exit->resetSent = true;
+    stateMachineChange.wait_for(stateMachineLock, RESET_WAIT_DURATION,
+                                [&exit] { return exit->isFullfilled(); });
+    exit->resetWait = true;
+
+    // Order is of importance when returning state
+    if (exit->ioResourceError)
+    {
+        return STATE_FAILED;
+    }
+
+    if (exit->close)
+    {
+        return STATE_CLOSED;
+    }
+
+    if (exit->resetSent && exit->resetWait)
+    {
+        return STATE_UNINITIALIZED;
+    }
+
+    return STATE_FAILED;
+};
+
+h5_state_t H5Transport::stateActionUninitialized()
+{
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+    auto exit =
+        dynamic_cast<UninitializedExitCriterias *>(exitCriterias[STATE_UNINITIALIZED].get());
+    auto syncRetransmission = PACKET_RETRANSMISSIONS;
+
+    while (!exit->isFullfilled() && syncRetransmission > 0)
+    {
+        sendControlPacket(CONTROL_PKT_SYNC);
+        exit->syncSent = true;
+        stateMachineChange.wait_for(stateMachineLock, retransmissionInterval,
+                                    [&exit] { return exit->isFullfilled(); });
+        syncRetransmission--;
+    }
+
+    // Order is of importance when returning state
+    if (exit->ioResourceError)
+    {
+        return STATE_FAILED;
+    }
+
+    if (exit->close)
+    {
+        return STATE_CLOSED;
+    }
+
+    if (exit->syncSent && exit->syncRspReceived)
+    {
+        return STATE_INITIALIZED;
+    }
+
+    if (syncRetransmission == 0)
+    {
+        std::stringstream status;
+        status << "No response from device. Tried to send packet "
+               << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
+        statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+        return STATE_NO_RESPONSE;
+    }
+
+    return STATE_FAILED;
+};
+
+h5_state_t H5Transport::stateActionInitialized()
+{
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+    auto exit = dynamic_cast<InitializedExitCriterias *>(exitCriterias[STATE_INITIALIZED].get());
+    auto syncRetransmission = PACKET_RETRANSMISSIONS;
+
+    // Send a package immediately
+    while (!exit->isFullfilled() && syncRetransmission > 0)
+    {
+        sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
+        exit->syncConfigSent = true;
+
+        stateMachineChange.wait_for(stateMachineLock, retransmissionInterval,
+                                    [&exit] { return exit->isFullfilled(); });
+
+        syncRetransmission--;
+    }
+
+    // Order is of importance when returning state
+    if (exit->ioResourceError)
+    {
+        return STATE_FAILED;
+    }
+
+    if (exit->close)
+    {
+        return STATE_CLOSED;
+    }
+
+    if (exit->syncConfigSent && exit->syncConfigRspReceived)
+    {
+        return STATE_ACTIVE;
+    }
+
+    if (syncRetransmission == 0)
+    {
+        std::stringstream status;
+        status << "No response from device. Tried to send packet "
+               << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
+        statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+        return STATE_NO_RESPONSE;
+    }
+
+    return STATE_FAILED;
+};
+h5_state_t H5Transport::stateActionActive()
+{
+    std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
+    auto exit = dynamic_cast<ActiveExitCriterias *>(exitCriterias[STATE_ACTIVE].get());
+
+    seqNum = 0;
+    ackNum = 0;
+
+    statusHandler(CONNECTION_ACTIVE, "Connection active");
+    stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
+
+    if (exit->ioResourceError)
+    {
+        return STATE_FAILED;
+    }
+
+    if (exit->close)
+    {
+        return STATE_CLOSED;
+    }
+
+    if (exit->syncReceived || exit->irrecoverableSyncError)
+    {
+        return STATE_RESET;
+    }
+
+    return STATE_FAILED;
+};
+
+h5_state_t H5Transport::stateActionFailed()
+{
+    std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
+    log(SD_RPC_LOG_FATAL, "Entered state failed. No exit exists from this state.");
+    return STATE_FAILED;
+};
+
+h5_state_t H5Transport::stateActionClosed()
+{
+    std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
+    log(SD_RPC_LOG_DEBUG, "Entered state closed.");
+    return STATE_CLOSED;
+};
+h5_state_t H5Transport::stateActionNoResponse()
+{
+    std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
+    log(SD_RPC_LOG_DEBUG, "No response to data sent to device.");
+    return STATE_NO_RESPONSE;
+};
+
 void H5Transport::setupStateMachine()
 {
-    // All states lock on mutex stateMachineMutex.
-    // The lock is released when values are ready to be updated and when the states goes out of
-    // scope.
-
-    const auto stateActionStart = [this]() -> h5_state_t {
-        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        auto exit = dynamic_cast<StartExitCriterias *>(exitCriterias[STATE_START].get());
-
-        stateMachineReady = true;
-
-        // Notify other threads that the state machine is ready
-        stateMachineLock.unlock();
-        stateMachineChange.notify_all();
-        stateMachineLock.lock();
-
-        // Wait for notification of a stateMachineChange that exists the state
-        stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
-
-        // Order is of importance when returning state
-        if (exit->ioResourceError)
-        {
-            return STATE_FAILED;
-        }
-
-        if (exit->close)
-        {
-            return STATE_CLOSED;
-        }
-
-        if (exit->isOpened)
-        {
-            return STATE_RESET;
-        }
-
-        return STATE_FAILED;
-    };
-
-    auto const stateActionReset = [this]() -> h5_state_t {
-        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        auto exit = dynamic_cast<ResetExitCriterias *>(exitCriterias[STATE_RESET].get());
-
-        // Send the reset packet, and wait for the device to reboot and ready for receiving commands
-        sendControlPacket(CONTROL_PKT_RESET);
-
-        if (statusCallback)
-        {
-            statusCallback(RESET_PERFORMED, "Target Reset performed");
-        }
-
-        exit->resetSent = true;
-        stateMachineChange.wait_for(stateMachineLock, RESET_WAIT_DURATION,
-                                    [&exit] { return exit->isFullfilled(); });
-        exit->resetWait = true;
-
-        // Order is of importance when returning state
-        if (exit->ioResourceError)
-        {
-            return STATE_FAILED;
-        }
-
-        if (exit->close)
-        {
-            return STATE_CLOSED;
-        }
-
-        if (exit->resetSent && exit->resetWait)
-        {
-            return STATE_UNINITIALIZED;
-        }
-
-        return STATE_FAILED;
-    };
-
-    auto const stateActionUninitialized = [this]() -> h5_state_t {
-        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        auto exit =
-            dynamic_cast<UninitializedExitCriterias *>(exitCriterias[STATE_UNINITIALIZED].get());
-        auto syncRetransmission = PACKET_RETRANSMISSIONS;
-
-        while (!exit->isFullfilled() && syncRetransmission > 0)
-        {
-            sendControlPacket(CONTROL_PKT_SYNC);
-            exit->syncSent = true;
-            stateMachineChange.wait_for(stateMachineLock, retransmissionInterval,
-                                        [&exit] { return exit->isFullfilled(); });
-            syncRetransmission--;
-        }
-
-        // Order is of importance when returning state
-        if (exit->ioResourceError)
-        {
-            return STATE_FAILED;
-        }
-
-        if (exit->close)
-        {
-            return STATE_CLOSED;
-        }
-
-        if (exit->syncSent && exit->syncRspReceived)
-        {
-            return STATE_INITIALIZED;
-        }
-
-        if (syncRetransmission == 0)
-        {
-            std::stringstream status;
-            status << "No response from device. Tried to send packet "
-                   << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
-            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
-            return STATE_NO_RESPONSE;
-        }
-
-        return STATE_FAILED;
-    };
-
-    const auto stateActionInitialized = [this]() -> h5_state_t {
-        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        auto exit =
-            dynamic_cast<InitializedExitCriterias *>(exitCriterias[STATE_INITIALIZED].get());
-        auto syncRetransmission = PACKET_RETRANSMISSIONS;
-
-        // Send a package immediately
-        while (!exit->isFullfilled() && syncRetransmission > 0)
-        {
-            sendControlPacket(CONTROL_PKT_SYNC_CONFIG);
-            exit->syncConfigSent = true;
-
-            stateMachineChange.wait_for(stateMachineLock, retransmissionInterval,
-                                        [&exit] { return exit->isFullfilled(); });
-
-            syncRetransmission--;
-        }
-
-        // Order is of importance when returning state
-        if (exit->ioResourceError)
-        {
-            return STATE_FAILED;
-        }
-
-        if (exit->close)
-        {
-            return STATE_CLOSED;
-        }
-
-        if (exit->syncConfigSent && exit->syncConfigRspReceived)
-        {
-            return STATE_ACTIVE;
-        }
-
-        if (syncRetransmission == 0)
-        {
-            std::stringstream status;
-            status << "No response from device. Tried to send packet "
-                   << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
-            statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
-            return STATE_NO_RESPONSE;
-        }
-
-        return STATE_FAILED;
-    };
-
-    const auto stateActionActive = [this]() -> h5_state_t {
-        std::unique_lock<std::mutex> stateMachineLock(stateMachineMutex);
-        auto exit = dynamic_cast<ActiveExitCriterias *>(exitCriterias[STATE_ACTIVE].get());
-
-        seqNum = 0;
-        ackNum = 0;
-
-        statusHandler(CONNECTION_ACTIVE, "Connection active");
-        stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
-
-        if (exit->ioResourceError)
-        {
-            return STATE_FAILED;
-        }
-
-        if (exit->close)
-        {
-            return STATE_CLOSED;
-        }
-
-        if (exit->syncReceived || exit->irrecoverableSyncError)
-        {
-            return STATE_RESET;
-        }
-
-        return STATE_FAILED;
-    };
-
-    const auto stateActionFailed = [this]() -> h5_state_t {
-        std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
-        log(SD_RPC_LOG_FATAL,
-            "Entered state failed. No exit exists from this state."); // Assumed thread #2,
-                                                                      // H5Transport::setupStateMachine()::$_5
-        return STATE_FAILED;
-    };
-
-    const auto stateActionClosed = [this]() -> h5_state_t {
-        std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
-        log(SD_RPC_LOG_DEBUG, "Entered state closed.");
-        return STATE_CLOSED;
-    };
-
-    const auto stateActionNoResponse = [this]() -> h5_state_t {
-        std::lock_guard<std::mutex> stateMachineLock(stateMachineMutex);
-        log(SD_RPC_LOG_DEBUG, "No response to data sent to device.");
-        return STATE_NO_RESPONSE;
-    };
-
     // Setup state actions
-    stateActions[STATE_START]         = stateActionStart;
-    stateActions[STATE_RESET]         = stateActionReset;
-    stateActions[STATE_UNINITIALIZED] = stateActionUninitialized;
-    stateActions[STATE_INITIALIZED]   = stateActionInitialized;
-    stateActions[STATE_ACTIVE]        = stateActionActive;
-    stateActions[STATE_FAILED]        = stateActionFailed;
-    stateActions[STATE_CLOSED]        = stateActionClosed;
-    stateActions[STATE_NO_RESPONSE]   = stateActionNoResponse;
+    //
+    // The reason for using lambdas calling data member functions is to be able to easier debug when
+    // compiling the project as a release build Doing it this way allows us to see the symbol name
+    // when debugging
+    stateActions[STATE_START]         = [this] { return stateActionStart(); };
+    stateActions[STATE_RESET]         = [this] { return stateActionReset(); };
+    stateActions[STATE_UNINITIALIZED] = [this] { return stateActionUninitialized(); };
+    stateActions[STATE_INITIALIZED]   = [this] { return stateActionInitialized(); };
+    stateActions[STATE_ACTIVE]        = [this] { return stateActionActive(); };
+    stateActions[STATE_FAILED]        = [this] { return stateActionFailed(); };
+    stateActions[STATE_CLOSED]        = [this] { return stateActionClosed(); };
+    stateActions[STATE_NO_RESPONSE]   = [this] { return stateActionNoResponse(); };
 
     // Setup exit criteria
     exitCriterias[STATE_START] = std::shared_ptr<ExitCriterias>(new StartExitCriterias());
