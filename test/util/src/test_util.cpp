@@ -254,7 +254,12 @@ void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size)
 std::string createRandomAdvertisingName(const std::string &prefix, const uint8_t length)
 {
     std::vector<uint8_t> data;
-    data.reserve(10);
+    data.reserve(length);
+
+    if (prefix.length() > length)
+    {
+        return std::string(prefix.begin(), prefix.begin() + length);
+    }
 
     std::copy(prefix.begin(), prefix.end(), std::back_inserter(data));
     const auto randomLength = length - prefix.length();
