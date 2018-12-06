@@ -53,7 +53,6 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     , logCallback(nullptr)
     , responseReceived(false)
     , responseBuffer(nullptr)
-    , runEventThread(false)
     , isOpen(false)
 {
     // SerializationTransport takes ownership of dataLinkLayer provided object
@@ -90,8 +89,7 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
     // Thread should not be running from before when calling this
     if (!eventThread.joinable())
     {
-        runEventThread = true;
-        eventThread    = std::thread(std::bind(&SerializationTransport::eventHandlingRunner, this));
+        eventThread = std::thread([this] { eventHandlingRunner(); });
     }
     else
     {
@@ -111,8 +109,6 @@ uint32_t SerializationTransport::close()
     }
 
     isOpen = false;
-
-    runEventThread = false;
     eventWaitCondition.notify_all();
 
     if (eventThread.joinable())
@@ -181,17 +177,26 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
 // Event Thread
 void SerializationTransport::eventHandlingRunner()
 {
-    while (runEventThread)
+    std::unique_lock<std::mutex> eventLock(eventMutex);
+
+    while (isOpen)
     {
-        std::unique_lock<std::mutex> eventLock(eventMutex);
-        eventWaitCondition.wait(eventLock); // T#4
+        // Suspend this thread until event wait condition
+        // is notified. This can happen from ::close and
+        // ::readHandler (thread in H5Transport)
+        eventWaitCondition.wait(eventLock);
 
         while (!eventQueue.empty() && isOpen)
         {
+            // Get oldest event received from UART thread
             const auto eventData     = eventQueue.front();
             const auto eventDataSize = static_cast<uint32_t>(eventData.size());
 
+            // Remove oldest event received from H5Transport thread
             eventQueue.pop();
+
+            // Let UART thread add data to eventQueue
+            // while popped event is processed
             eventLock.unlock();
 
             // Set codec context

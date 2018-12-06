@@ -109,8 +109,6 @@ class SerializationTransport
     std::mutex responseMutex;
     std::condition_variable responseWaitCondition;
 
-    // Variable to control if eventThread shall run, used by several threads
-    std::atomic<bool> runEventThread;
     std::mutex eventMutex;
     std::condition_variable eventWaitCondition;
     std::thread eventThread;
