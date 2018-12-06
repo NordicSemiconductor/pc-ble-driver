@@ -736,7 +736,7 @@ h5_state_t H5Transport::stateActionActive()
     ackNum = 0;
 
     statusHandler(CONNECTION_ACTIVE, "Connection active");
-    stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); });
+    stateMachineChange.wait(stateMachineLock, [&exit] { return exit->isFullfilled(); }); // T#2
 
     if (exit->ioResourceError)
     {

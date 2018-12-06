@@ -42,6 +42,7 @@
 
 #include "ble.h"
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -108,14 +109,14 @@ class SerializationTransport
     std::mutex responseMutex;
     std::condition_variable responseWaitCondition;
 
-    bool runEventThread; // Variable to control if thread shall run, used in thread to exit/keep
-                         // running inthread
+    // Variable to control if eventThread shall run, used by several threads
+    std::atomic<bool> runEventThread;
     std::mutex eventMutex;
     std::condition_variable eventWaitCondition;
     std::thread eventThread;
     std::queue<std::vector<uint8_t>> eventQueue;
 
-    bool isOpen;
+    std::atomic<bool> isOpen; // Variable is shared between threads
     std::mutex publicMethodMutex;
 };
 

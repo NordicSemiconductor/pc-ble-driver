@@ -124,7 +124,7 @@ uint32_t SerializationTransport::close()
             return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT;
         }
 
-        eventThread.join();
+        eventThread.join(); // T#1
     }
 
     return nextTransportLayer->close();
@@ -184,7 +184,7 @@ void SerializationTransport::eventHandlingRunner()
     while (runEventThread)
     {
         std::unique_lock<std::mutex> eventLock(eventMutex);
-        eventWaitCondition.wait(eventLock);
+        eventWaitCondition.wait(eventLock); // T#4
 
         while (!eventQueue.empty() && isOpen)
         {
