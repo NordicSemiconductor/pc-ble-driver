@@ -271,7 +271,7 @@ function(nrf_create_connectivity_compile_targets)
                         endif()
 
                         # Make the last target added to list of targets a dependency to this target
-                        # We need to make sure that the targets are compile in sequence
+                        # We need to make sure that the targets are compiled in sequence
                         # since the source code changes in every target (configuration of .in files)
                         list(LENGTH CONNECTIVITY_BUILD_TARGETS CONNECTIVITY_BUILD_TARGETS_LENGTH)
                         if(CONNECTIVITY_BUILD_TARGETS_LENGTH GREATER_EQUAL 1)

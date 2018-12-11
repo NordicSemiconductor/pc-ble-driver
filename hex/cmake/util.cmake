@@ -4,7 +4,7 @@ function(nrf_configure_sdk_affected_files SDK_VERSION SDK_DIRECTORY SER_CONFIG_P
     elseif(SDK_VERSION EQUAL 15)
         set(MAIN_PATH "${SDK_DIRECTORY}/examples/connectivity/ble_connectivity/main.c" PARENT_SCOPE)
     else()
-        message(FATAL_ERROR "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown to me.")
+        message(FATAL_ERROR "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown.")
         return()
     endif()
 
