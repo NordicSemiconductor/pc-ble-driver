@@ -131,7 +131,7 @@ uint32_t SerializationTransport::close()
             return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT;
         }
 
-        eventThread.join(); // T#1
+        eventThread.join();
     }
 
     return nextTransportLayer->close();
