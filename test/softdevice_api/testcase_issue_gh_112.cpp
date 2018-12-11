@@ -70,7 +70,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an
-    // issues has occurred in a callback.
+    // issue has occurred in a callback.
     auto centralError = false;
     auto peripheralError = false;
 
