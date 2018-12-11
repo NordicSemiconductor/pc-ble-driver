@@ -291,7 +291,6 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             << "Parity: " << parity_string.str() << "." << std::endl;
 
     log(SD_RPC_LOG_INFO, message.str());
-    isOpen = true;
 
     return NRF_SUCCESS;
 }
@@ -345,22 +344,16 @@ uint32_t UartBoost::send(const std::vector<uint8_t> &data)
 
     if (!isOpen)
     {
+        std::stringstream message;
+        message << "Trying to send packets to device when serial device is closed is not "
+                   "supported.";
+        log(SD_RPC_LOG_ERROR, message.str());
+
         return NRF_ERROR_SD_RPC_SERIAL_PORT_STATE;
     }
 
     {
         std::lock_guard<std::mutex> guard(queueMutex);
-
-        if (!isOpen)
-        {
-            std::stringstream message;
-            message << "Trying to send packets to device when serial device is closed is not "
-                       "supported.";
-            log(SD_RPC_LOG_ERROR, message.str());
-
-            return NRF_ERROR_SD_RPC_SERIAL_PORT_STATE;
-        }
-
         writeQueue.insert(writeQueue.end(), data.begin(), data.end());
     }
 
