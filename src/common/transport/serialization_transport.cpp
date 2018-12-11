@@ -89,7 +89,18 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
     // Thread should not be running from before when calling this
     if (!eventThread.joinable())
     {
+        // If ::close is called when this method (::open) returns 
+        // and eventThread is executing somewhere between while (isOpen) 
+        // and eventWaitCondition notification we could get a deadlock.
+        //
+        // To prevent this, lock eventMutex in this thread, let eventThread
+        // wait until eventMutex is unlocked (.wait in this thread).
+        // When eventThread is started and outside critical region, 
+        // let eventThread notify eventWaitCondition, making .wait 
+        // return
+        std::unique_lock<std::mutex> eventLock(eventMutex);
         eventThread = std::thread([this] { eventHandlingRunner(); });
+        eventWaitCondition.wait(eventLock);
     }
     else
     {
@@ -184,6 +195,7 @@ void SerializationTransport::eventHandlingRunner()
         // Suspend this thread until event wait condition
         // is notified. This can happen from ::close and
         // ::readHandler (thread in H5Transport)
+        eventWaitCondition.notify_all();
         eventWaitCondition.wait(eventLock);
 
         while (!eventQueue.empty() && isOpen)
@@ -195,7 +207,7 @@ void SerializationTransport::eventHandlingRunner()
             // Remove oldest event received from H5Transport thread
             eventQueue.pop();
 
-            // Let UART thread add data to eventQueue
+            // Let UART thread add events to eventQueue
             // while popped event is processed
             eventLock.unlock();
 
@@ -208,6 +220,7 @@ void SerializationTransport::eventHandlingRunner()
             eventDecodeBuffer.reserve(MaxPossibleEventLength);
             const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
 
+            // Decode event
             const auto errCode =
                 ble_event_dec(eventData.data(), eventDataSize, event, &possibleEventLength);
 
@@ -225,6 +238,7 @@ void SerializationTransport::eventHandlingRunner()
                 statusCallback(PKT_DECODE_ERROR, logMessage.str());
             }
 
+            // Prevent UART from adding events to eventQueue
             eventLock.lock();
         }
     }
