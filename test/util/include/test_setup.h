@@ -60,19 +60,7 @@ constexpr uint32_t defaultRetransmissionInterval()
 #endif
 }
 
-constexpr uint32_t defaultBaudRate()
-{
-#ifdef _WIN32
-    return 1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
-#endif
-
-#ifdef __APPLE__
-    return 115200; /**< Baud rate 1M is not supported on MacOS. */
-#endif
-#ifdef __linux__
-    return 1000000;
-#endif
-}
+constexpr uint32_t defaultBaudRate = 1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #define STR(s) #s
 #define EXPAND(s) STR(s)
@@ -93,7 +81,7 @@ struct Environment
     uint32_t numberOfIterations{10};
     sd_rpc_log_severity_t driverLogLevel{SD_RPC_LOG_INFO};
     bool driverLogLevelSet{false};
-    uint32_t baudRate{defaultBaudRate()};
+    uint32_t baudRate{defaultBaudRate};
     uint32_t retransmissionInterval{defaultRetransmissionInterval()};
     uint32_t responseTimeout{1500};
     uint16_t mtu{150};

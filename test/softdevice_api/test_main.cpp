@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     auto serialPortA = std::string{};
     auto serialPortB = std::string{};
     auto hardwareInfo = std::string{};
-    auto baudRate    = defaultBaudRate();
+    auto baudRate    = defaultBaudRate;
 
     using namespace Catch::clara;
 
