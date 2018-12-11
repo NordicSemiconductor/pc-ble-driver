@@ -204,7 +204,7 @@ void H5TransportWrapper::openThread(status_cb_t status_callback, data_cb_t data_
 
 // Runs open in a separate thread, call waitForResult to wait for the result of opening.
 //
-// It does not override open becase we can not provide a return value that
+// It does not override open because we can not provide a return value that
 // is of the same type as H5Transport::open
 void H5TransportWrapper::wrappedOpen(status_cb_t status_callback, data_cb_t data_callback,
                                      log_cb_t log_callback)

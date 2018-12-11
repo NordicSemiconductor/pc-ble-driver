@@ -14,13 +14,13 @@
 namespace testutil {
 
 /**
- * @brief Function that find advertisement type data based on specified specified advertisement type
+ * @brief Function that find advertising type data based on specified specified advertising type
  *
- * @param[in]  advType Advertisment type to search for
- * @param[in]  advData Advertisement data to parse
- * @param[in,out] advTypeData Advertisement data found for provided advertisement type
+ * @param[in]  advType Advertising type to search for
+ * @param[in]  advData Advertising data to parse
+ * @param[in,out] advTypeData Advertising data found for provided advertising type
  *
- * @return true if advertisement type was found, false if not.
+ * @return true if advertising type was found, false if not.
  */
 bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &advData,
                     std::vector<uint8_t> &advTypeData);
@@ -29,41 +29,41 @@ bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
                                   std::vector<uint8_t> &manufacturer_specific_data);
 
 /**
- * @brief Function that search for advertisement name in BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME or
+ * @brief Function that search for advertising name in BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME or
  * BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME
  *
- * @param[in] p_adv_report Pointer to advertisement report to search in
- * @param[in] name_to_find Advertisement name to search for
+ * @param[in] p_adv_report Pointer to advertising report to search in
+ * @param[in] name_to_find Advertising name to search for
  *
  * @return true if name is found, false if not
  */
 bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report, const std::string &name_to_find);
 
-void assertAdvertisementPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
+void assertAdvertisingPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
                                           const size_t additionalBytes, const bool extended = false,
                                           const bool connectable = false);
 
 /**
- * @brief Function that append name to advertise to advertisement type
+ * @brief Function that append name to advertise to advertising type
  * BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME
  *
- * @param[in,out] advertisingData std::vector to append advertisement data to
+ * @param[in,out] advertisingData std::vector to append advertising data to
  * @param[in] name Name to append to advertisingData
  */
 void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name,
                            const bool extended = false);
 
 /**
- * @brief Function that append flags to advertisement type
+ * @brief Function that append flags to advertising type
  *
- * @param[in,out] advertisingData std::vector to append advertisement flags to
+ * @param[in,out] advertisingData std::vector to append advertising flags to
  * @param[in] flags Flags to append to advertisingData
  */
-void appendAdvertisementFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
+void appendAdvertisingFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
                               const bool extended = false);
 
 /**
- * @brief Function that append manufacturer specifid data to advertisement
+ * @brief Function that append manufacturer specifid data to advertising
  *
  * @param[in,out] advertisingData std::vector to append manufacturer specific data to
  * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData

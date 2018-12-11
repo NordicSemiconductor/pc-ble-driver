@@ -37,8 +37,8 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef _APP_BLE_GAP_SEC_KEYS_H
-#define _APP_BLE_GAP_SEC_KEYS_H
+#ifndef _APP_BLE_GAP_H
+#define _APP_BLE_GAP_H
 
 /**@file
  *
@@ -246,4 +246,4 @@ void app_ble_gap_scan_data_unset(bool free);
 }
 #endif
 
-#endif //_APP_BLE_GAP_SEC_KEYS_H
+#endif //_APP_BLE_GAP_H
