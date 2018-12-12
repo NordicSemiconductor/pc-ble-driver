@@ -1,14 +1,41 @@
-/* Copyright (c) 2015 Nordic Semiconductor. All Rights Reserved.
+/*
+ * copyright (c) 2012 - 2018, nordic semiconductor asa
+ * all rights reserved.
  *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ * redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
  *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
+ * 1. redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
  *
+ * 2. redistributions in binary form, except as embedded into a nordic
+ *    semiconductor asa integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ *
+ * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * 4. This software, with or without modification, must only be used with a
+ *    Nordic Semiconductor ASA integrated circuit.
+ *
+ * 5. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**@example examples/heart_rate_collector
  *
  * @brief Heart Rate Collector Sample Application main file.
@@ -16,8 +43,18 @@
  * This file contains the source code for a sample application that acts as a BLE Central device.
  * This application scans for a Heart Rate Sensor device and reads it's heart rate data.
  * https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.heart_rate.xml
+ *
+ * Structure of this file
+ * - Includes
+ * - Definitions
+ * - Global variables
+ * - Global functions
+ * - Event functions
+ * - Event dispatcher
+ * - Main
  */
 
+/** Includes */
 #include "ble.h"
 #include "sd_rpc.h"
 
@@ -25,6 +62,8 @@
 #include <stdio.h>
 #include <string.h>
 
+
+/** Definitions */
 #ifdef _WIN32
 #define DEFAULT_UART_PORT_NAME "COM1"
 #define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
@@ -37,7 +76,6 @@
 #define DEFAULT_UART_PORT_NAME "/dev/ttyACM0"
 #define DEFAULT_BAUD_RATE 1000000
 #endif
-
 
 enum
 {
@@ -73,30 +111,52 @@ typedef struct
     uint16_t      data_len; /**< Length of data. */
 } data_t;
 
-static uint8_t     m_connected_devices = 0;
-static uint16_t    m_connection_handle = 0;
-static uint16_t    m_service_start_handle = 0;
-static uint16_t    m_service_end_handle = 0;
-static uint16_t    m_hrm_char_handle = 0;
-static uint16_t    m_hrm_cccd_handle = 0;
-static bool        m_connection_is_in_progress = false;
-static adapter_t * m_adapter = NULL;
-static uint32_t    m_config_id = 1;
+
+/** Global variables */
+static uint8_t     m_connected_devices          = 0;
+static uint16_t    m_connection_handle          = 0;
+static uint16_t    m_service_start_handle       = 0;
+static uint16_t    m_service_end_handle         = 0;
+static uint16_t    m_hrm_char_handle            = 0;
+static uint16_t    m_hrm_cccd_handle            = 0;
+static bool        m_connection_is_in_progress  = false;
+static adapter_t * m_adapter                    = NULL;
+
+#if NRF_SD_BLE_API >= 5
+static uint32_t    m_config_id                  = 1;
+#endif
+
+#if NRF_SD_BLE_API >= 6
+static uint8_t     mp_data[100]                 = { 0 };
+static ble_data_t  m_adv_report_buffer;
+#endif
 
 static const ble_gap_scan_params_t m_scan_param =
 {
-     1,                       // Active scanning set.
-     0,                       // Selective scanning not set.
+#if NRF_SD_BLE_API >= 6
+    0,                       // Set if accept extended advertising packetets.
+    0,                       // Set if report inomplete reports.
+#endif
+    0,                       // Set if active scanning.
+#if NRF_SD_BLE_API < 6
+    0,                       // Set if selective scanning.
+#endif
+#if NRF_SD_BLE_API >= 6
+    BLE_GAP_SCAN_FP_ACCEPT_ALL,
+    BLE_GAP_PHY_1MBPS,
+#endif
 #if NRF_SD_BLE_API == 2
-     NULL,                    // White-list not set.
+    NULL,                    // Set white-list.
 #endif
-#if NRF_SD_BLE_API >= 3
-     0,                       // adv_dir_report not set.
+#if NRF_SD_BLE_API == 3 || NRF_SD_BLE_API == 5
+    0,                       // Set adv_dir_report.
 #endif
-
-     (uint16_t)SCAN_INTERVAL,
-     (uint16_t)SCAN_WINDOW,
-     (uint16_t)SCAN_TIMEOUT
+    (uint16_t)SCAN_INTERVAL,
+    (uint16_t)SCAN_WINDOW,
+    (uint16_t)SCAN_TIMEOUT
+#if NRF_SD_BLE_API >= 6
+    , { 0 }                  // Set chennel mask.
+#endif
 };
 
 static const ble_gap_conn_params_t m_connection_param =
@@ -107,16 +167,8 @@ static const ble_gap_conn_params_t m_connection_param =
     (uint16_t)CONNECTION_SUPERVISION_TIMEOUT
 };
 
-/* Local function forward declarations */
-static uint32_t ble_stack_init();
-static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata);
-static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find);
-static uint32_t scan_start();
-static uint32_t service_discovery_start();
-static uint32_t char_discovery_start();
-static uint32_t descr_discovery_start();
-static uint32_t hrm_cccd_set(uint8_t value);
-static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer);
+
+/** Global functions */
 
 /**@brief Function for handling error message events from sd_rpc.
  *
@@ -162,6 +214,386 @@ static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, con
     }
 }
 
+/**@brief Function for initializing serial communication with the target nRF5 Bluetooth slave.
+ *
+ * @param[in] serial_port The serial port the target nRF5 device is connected to.
+ *
+ * @return The new transport adapter.
+ */
+static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
+{
+    physical_layer_t  * phy;
+    data_link_layer_t * data_link_layer;
+    transport_layer_t * transport_layer;
+
+    phy = sd_rpc_physical_layer_create_uart(serial_port,
+                                            baud_rate,
+                                            SD_RPC_FLOW_CONTROL_NONE,
+                                            SD_RPC_PARITY_NONE);
+    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
+    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
+    return sd_rpc_adapter_create(transport_layer);
+}
+
+/**@brief Function for converting a BLE address to a string.
+ *
+ * @param[in] address       Bluetooth Low Energy address.
+ * @param[out] string_buffer The serial port the target nRF5 device is connected to.
+ */
+static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer)
+{
+    const int address_length = 6;
+    char      temp_str[3];
+
+    for (int i = address_length - 1; i >= 0; --i)
+    {
+        sprintf(temp_str, "%02X", address.addr[i]);
+        strcat((char *)string_buffer, temp_str);
+    }
+}
+
+/**
+ * @brief Parses advertisement data, providing length and location of the field in case
+ *        matching data is found.
+ *
+ * @param[in]  Type of data to be looked for in advertisement data.
+ * @param[in]  Advertisement report length and pointer to report.
+ * @param[out] If data type requested is found in the data report, type data length and
+ *             pointer to data will be populated here.
+ *
+ * @retval NRF_SUCCESS if the data type is found in the report.
+ * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
+ */
+static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
+{
+    uint32_t  index = 0;
+    uint8_t * p_data;
+
+    p_data = p_advdata->p_data;
+
+    while (index < p_advdata->data_len)
+    {
+        uint8_t field_length = p_data[index];
+        uint8_t field_type   = p_data[index + 1];
+
+        if (field_type == type)
+        {
+            p_typedata->p_data   = &p_data[index + 2];
+            p_typedata->data_len = field_length - 1;
+            return NRF_SUCCESS;
+        }
+        index += field_length + 1;
+    }
+    return NRF_ERROR_NOT_FOUND;
+}
+
+/**@brief Function for searching a given name in the advertisement packets.
+ *
+ * @details Use this function to parse received advertising data and to find a given
+ * name in them either as 'complete_local_name' or as 'short_local_name'.
+ *
+ * @param[in]   p_adv_report   advertising data to parse.
+ * @param[in]   name_to_find   name to search.
+ * @return   true if the given name was found, false otherwise.
+ */
+static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find)
+{
+    uint32_t err_code;
+    data_t   adv_data;
+    data_t   dev_name;
+
+    // Initialize advertisement report for parsing
+#if NRF_SD_BLE_API >= 6
+    adv_data.p_data     = (uint8_t *)p_adv_report->data.p_data;
+    adv_data.data_len   = p_adv_report->data.len;
+#else
+    adv_data.p_data     = (uint8_t *)p_adv_report->data;
+    adv_data.data_len   = p_adv_report->dlen;
+#endif
+
+    //search for advertising names
+    err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
+                                &adv_data,
+                                &dev_name);
+    if (err_code == NRF_SUCCESS)
+    {
+        if (memcmp(name_to_find, dev_name.p_data, dev_name.data_len )== 0)
+        {
+            return true;
+        }
+    }
+    else
+    {
+        // Look for the short local name if it was not found as complete
+        err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
+                                    &adv_data,
+                                    &dev_name);
+        if (err_code != NRF_SUCCESS)
+        {
+            return false;
+        }
+        if (memcmp(name_to_find, dev_name.p_data, dev_name.data_len )== 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**@brief Function for initializing the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t ble_stack_init()
+{
+    uint32_t            err_code;
+    uint32_t *          app_ram_base = NULL;
+
+#if NRF_SD_BLE_API <= 3
+    ble_enable_params_t ble_enable_params;
+    memset(&ble_enable_params, 0, sizeof(ble_enable_params));
+#endif
+
+#if NRF_SD_BLE_API == 3
+    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
+#elif NRF_SD_BLE_API < 3
+    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+    ble_enable_params.gatts_enable_params.service_changed   = false;
+    ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
+    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
+#endif
+
+#if NRF_SD_BLE_API <= 3
+    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
+    ble_enable_params.gap_enable_params.central_conn_count  = 1;
+    ble_enable_params.gap_enable_params.central_sec_count   = 1;
+
+    err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
+#else
+    err_code = sd_ble_enable(m_adapter, app_ram_base);
+#endif
+
+    switch (err_code) {
+        case NRF_SUCCESS:
+            break;
+        case NRF_ERROR_INVALID_STATE:
+            printf("BLE stack already enabled\n");
+            fflush(stdout);
+            break;
+        default:
+            printf("Failed to enable BLE stack. Error code: %d\n", err_code);
+            fflush(stdout);
+            break;
+    }
+
+    return err_code;
+}
+
+#if NRF_SD_BLE_API < 5
+/**@brief Set BLE option for the BLE role and connection bandwidth.
+ *
+ * @return NRF_SUCCESS on option set successfully, otherwise an error code.
+ */
+static uint32_t ble_options_set()
+{
+#if NRF_SD_BLE_API <= 3
+    ble_opt_t        opt;
+    ble_common_opt_t common_opt;
+
+    common_opt.conn_bw.role                 = BLE_GAP_ROLE_CENTRAL;
+    common_opt.conn_bw.conn_bw.conn_bw_rx   = BLE_CONN_BW_HIGH;
+    common_opt.conn_bw.conn_bw.conn_bw_tx   = BLE_CONN_BW_HIGH;
+    opt.common_opt                          = common_opt;
+
+    return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
+#else
+    return NRF_ERROR_NOT_SUPPORTED;
+#endif
+}
+#endif
+
+#if NRF_SD_BLE_API >= 5
+/**@brief Function for setting configuration for the BLE stack.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
+{
+    const uint32_t ram_start = 0; // Value is not used by ble-driver
+    uint32_t error_code;
+    ble_cfg_t ble_cfg;
+
+    // Configure the connection roles.
+    memset(&ble_cfg, 0, sizeof(ble_cfg));
+
+#if NRF_SD_BLE_API >= 6
+    ble_cfg.gap_cfg.role_count_cfg.adv_set_count        = BLE_GAP_ADV_SET_COUNT_DEFAULT;
+#endif
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count    = 0;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count   = 1;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count    = 0;
+
+    error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                 = conn_cfg_tag;
+    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = 150;
+
+    error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT. Error code: 0x%02X\n", error_code);
+        fflush(stdout);
+        return error_code;
+    }
+
+    return NRF_SUCCESS;
+}
+#endif
+
+/**@brief Start scanning (GAP Discovery procedure, Observer Procedure).
+ * *
+ * @return NRF_SUCCESS on successfully initiating scanning procedure, otherwise an error code.
+ */
+static uint32_t scan_start()
+{
+#if NRF_SD_BLE_API >= 6
+    m_adv_report_buffer.p_data = mp_data;
+    m_adv_report_buffer.len = sizeof(mp_data);
+#endif
+
+    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param
+#if NRF_SD_BLE_API >= 6
+    , &m_adv_report_buffer
+#endif
+    );
+
+    if (error_code != NRF_SUCCESS)
+    {
+        printf("Scan start failed with error code: %d\n", error_code);
+        fflush(stdout);
+    } else
+    {
+        printf("Scan started\n");
+        fflush(stdout);
+    }
+
+    return error_code;
+}
+
+/**@brief Function called upon connecting to BLE peripheral.
+ *
+ * @details Initiates primary service discovery.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t service_discovery_start()
+{
+    uint32_t   err_code;
+    uint16_t   start_handle = 0x01;
+    ble_uuid_t srvc_uuid;
+
+    printf("Discovering primary services\n");
+    fflush(stdout);
+
+    srvc_uuid.type = BLE_UUID_TYPE_BLE;
+    srvc_uuid.uuid = BLE_UUID_HEART_RATE_SERVICE;
+
+    // Initiate procedure to find the primary BLE_UUID_HEART_RATE_SERVICE.
+    err_code = sd_ble_gattc_primary_services_discover(m_adapter,
+                                                      m_connection_handle, start_handle,
+                                                      &srvc_uuid);
+    if (err_code != NRF_SUCCESS)
+    {
+        printf("Failed to initiate or continue a GATT Primary Service Discovery procedure\n");
+        fflush(stdout);
+    }
+
+    return err_code;
+}
+
+/**@brief Function called upon discovering a BLE peripheral's primary service(s).
+ *
+ * @details Initiates service's (m_service) characteristic discovery.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t char_discovery_start()
+{
+    ble_gattc_handle_range_t handle_range;
+
+    printf("Discovering characteristics\n");
+    fflush(stdout);
+
+    handle_range.start_handle = m_service_start_handle;
+    handle_range.end_handle = m_service_end_handle;
+
+    return sd_ble_gattc_characteristics_discover(m_adapter, m_connection_handle, &handle_range);
+}
+
+/**@brief Function called upon discovering service's characteristics.
+ *
+ * @details Initiates heart rate monitor (m_hrm_char_handle) characteristic's descriptor discovery.
+ *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t descr_discovery_start()
+{
+    ble_gattc_handle_range_t handle_range;
+
+    printf("Discovering characteristic's descriptors\n");
+    fflush(stdout);
+
+    if (m_hrm_char_handle == 0)
+    {
+        printf("No heart rate measurement characteristic handle found\n");
+        fflush(stdout);
+        return NRF_ERROR_INVALID_STATE;
+    }
+
+    handle_range.start_handle   = m_hrm_char_handle;
+    handle_range.end_handle     = m_service_end_handle;
+
+    return sd_ble_gattc_descriptors_discover(m_adapter, m_connection_handle, &handle_range);
+}
+
+/**@brief Function that write's the HRM characteristic's CCCD.
+ * *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t hrm_cccd_set(uint8_t value)
+{
+    ble_gattc_write_params_t write_params;
+    uint8_t                  cccd_value[2] = {value, 0};
+
+    printf("Setting HRM CCCD\n");
+    fflush(stdout);
+
+    if (m_hrm_cccd_handle == 0)
+    {
+        printf("Error. No CCCD handle has been found\n");
+        fflush(stdout);
+        return NRF_ERROR_INVALID_STATE;
+    }
+
+    write_params.handle     = m_hrm_cccd_handle;
+    write_params.len        = 2;
+    write_params.p_value    = cccd_value;
+    write_params.write_op   = BLE_GATT_OP_WRITE_REQ;
+    write_params.offset     = 0;
+
+    return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
+}
+
+
+/** Event functions */
+
 /**@brief Function called on BLE_GAP_EVT_CONNECTED event.
  *
  * @details Update connection state and proceed to discovering the peer's GATT services.
@@ -174,7 +606,7 @@ static void on_connected(const ble_gap_evt_t * const p_ble_gap_evt)
     fflush(stdout);
 
     m_connected_devices++;
-    m_connection_handle = p_ble_gap_evt->conn_handle;
+    m_connection_handle         = p_ble_gap_evt->conn_handle;
     m_connection_is_in_progress = false;
 
     service_discovery_start();
@@ -220,6 +652,23 @@ static void on_adv_report(const ble_gap_evt_t * const p_ble_gap_evt)
 
         m_connection_is_in_progress = true;
     }
+#if NRF_SD_BLE_API >= 6
+    else {
+        err_code = sd_ble_gap_scan_start(m_adapter, NULL, &m_adv_report_buffer);
+
+        if (err_code != NRF_SUCCESS)
+        {
+            printf("Scan start failed with error code: %d\n", err_code);
+            fflush(stdout);
+        }
+        else
+        {
+            printf("Scan started\n");
+            fflush(stdout);
+        }
+    }
+#endif
+
 }
 
 /**@brief Function called on BLE_GAP_EVT_TIMEOUT event.
@@ -464,356 +913,8 @@ static void on_exchange_mtu_response(const ble_gattc_evt_t * const p_ble_gattc_e
 }
 #endif
 
-/**@brief Function for initializing serial communication with the target nRF5 Bluetooth slave.
- *
- * @param[in] serial_port The serial port the target nRF5 device is connected to.
- *
- * @return The new transport adapter.
- */
-static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
-{
-    physical_layer_t  * phy;
-    data_link_layer_t * data_link_layer;
-    transport_layer_t * transport_layer;
 
-    phy = sd_rpc_physical_layer_create_uart(serial_port, baud_rate, SD_RPC_FLOW_CONTROL_NONE,
-                                            SD_RPC_PARITY_NONE);
-    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
-    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
-    return sd_rpc_adapter_create(transport_layer);
-}
-
-/**@brief Function for converting a BLE address to a string.
- *
- * @param[in] address       Bluetooth Low Energy address.
- * @param[out] string_buffer The serial port the target nRF5 device is connected to.
- */
-static void ble_address_to_string_convert(ble_gap_addr_t address, uint8_t * string_buffer)
-{
-    const int address_length = 6;
-    char      temp_str[3];
-
-    for (int i = address_length - 1; i >= 0; --i)
-    {
-        sprintf(temp_str, "%02X", address.addr[i]);
-        strcat((char *)string_buffer, temp_str);
-    }
-}
-
-/**
- * @brief Parses advertisement data, providing length and location of the field in case
- *        matching data is found.
- *
- * @param[in]  Type of data to be looked for in advertisement data.
- * @param[in]  Advertisement report length and pointer to report.
- * @param[out] If data type requested is found in the data report, type data length and
- *             pointer to data will be populated here.
- *
- * @retval NRF_SUCCESS if the data type is found in the report.
- * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
- */
-static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
-{
-    uint32_t  index = 0;
-    uint8_t * p_data;
-
-    p_data = p_advdata->p_data;
-
-    while (index < p_advdata->data_len)
-    {
-        uint8_t field_length = p_data[index];
-        uint8_t field_type   = p_data[index + 1];
-
-        if (field_type == type)
-        {
-            p_typedata->p_data   = &p_data[index + 2];
-            p_typedata->data_len = field_length - 1;
-            return NRF_SUCCESS;
-        }
-        index += field_length + 1;
-    }
-    return NRF_ERROR_NOT_FOUND;
-}
-
-/**@brief Function for searching a given name in the advertisement packets.
- *
- * @details Use this function to parse received advertising data and to find a given
- * name in them either as 'complete_local_name' or as 'short_local_name'.
- *
- * @param[in]   p_adv_report   advertising data to parse.
- * @param[in]   name_to_find   name to search.
- * @return   true if the given name was found, false otherwise.
- */
-static bool find_adv_name(const ble_gap_evt_adv_report_t *p_adv_report, const char * name_to_find)
-{
-    uint32_t err_code;
-    data_t   adv_data;
-    data_t   dev_name;
-
-    // Initialize advertisement report for parsing
-    adv_data.p_data     = (uint8_t *)p_adv_report->data;
-    adv_data.data_len   = p_adv_report->dlen;
-
-
-    //search for advertising names
-    err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
-                                &adv_data,
-                                &dev_name);
-    if (err_code == NRF_SUCCESS)
-    {
-        if (memcmp(name_to_find, dev_name.p_data, dev_name.data_len )== 0)
-        {
-            return true;
-        }
-    }
-    else
-    {
-        // Look for the short local name if it was not found as complete
-        err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
-                                    &adv_data,
-                                    &dev_name);
-        if (err_code != NRF_SUCCESS)
-        {
-            return false;
-        }
-        if (memcmp(name_to_find, dev_name.p_data, dev_name.data_len )== 0)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**@brief Function for initializing the BLE stack.
- *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t ble_stack_init()
-{
-    uint32_t            err_code;
-    uint32_t *          app_ram_base = NULL;
-
-#if NRF_SD_BLE_API <= 3
-    ble_enable_params_t ble_enable_params;
-    memset(&ble_enable_params, 0, sizeof(ble_enable_params));
-#endif
-
-#if NRF_SD_BLE_API == 3
-    ble_enable_params.gatt_enable_params.att_mtu = GATT_MTU_SIZE_DEFAULT;
-#elif NRF_SD_BLE_API < 3
-    ble_enable_params.gatts_enable_params.attr_tab_size     = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    ble_enable_params.gatts_enable_params.service_changed   = false;
-    ble_enable_params.gap_enable_params.periph_conn_count   = 1;
-    ble_enable_params.gap_enable_params.central_conn_count  = 1;
-    ble_enable_params.gap_enable_params.central_sec_count   = 1;
-    ble_enable_params.common_enable_params.p_conn_bw_counts = NULL;
-    ble_enable_params.common_enable_params.vs_uuid_count    = 1;
-#endif
-
-#if NRF_SD_BLE_API <= 3
-    err_code = sd_ble_enable(m_adapter, &ble_enable_params, app_ram_base);
-#else
-    err_code = sd_ble_enable(m_adapter, app_ram_base);
-#endif
-
-    switch (err_code) {
-        case NRF_SUCCESS:
-            break;
-        case NRF_ERROR_INVALID_STATE:
-            printf("BLE stack already enabled\n");
-            fflush(stdout);
-            break;
-        default:
-            printf("Failed to enable BLE stack. Error code: %d\n", err_code);
-            fflush(stdout);
-            break;
-    }
-
-    return err_code;
-}
-
-/**@brief Set BLE option for the BLE role and connection bandwidth.
- *
- * @return NRF_SUCCESS on option set successfully, otherwise an error code.
- */
-static uint32_t ble_options_set()
-{
-#if NRF_SD_BLE_API <= 3
-    ble_opt_t        opt;
-    ble_common_opt_t common_opt;
-
-    common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
-    common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
-    common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
-    opt.common_opt = common_opt;
-
-    return sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &opt);
-#else
-    return NRF_ERROR_NOT_SUPPORTED;
-#endif
-}
-
-#if NRF_SD_BLE_API >= 5
-uint32_t ble_cfg_set(uint8_t conn_cfg_tag)
-{
-    const uint32_t ram_start = 0; // Value is not used by ble-driver
-    uint32_t error_code;
-    ble_cfg_t ble_cfg;
-
-    // Configure the connection roles.
-    memset(&ble_cfg, 0, sizeof(ble_cfg));
-    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 1;
-    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 1;
-
-    error_code = sd_ble_cfg_set(m_adapter, BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-        return error_code;
-    }
-
-    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
-    ble_cfg.conn_cfg.conn_cfg_tag                 = conn_cfg_tag;
-    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = 150;
-
-    error_code = sd_ble_cfg_set(m_adapter, BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT. Error code: 0x%02X\n", error_code);
-        fflush(stdout);
-        return error_code;
-    }
-
-    return NRF_SUCCESS;
-}
-#endif
-
-/**@brief Start scanning (GAP Discovery procedure, Observer Procedure).
- * *
- * @return NRF_SUCCESS on successfully initiating scanning procedure, otherwise an error code.
- */
-static uint32_t scan_start()
-{
-    uint32_t error_code = sd_ble_gap_scan_start(m_adapter, &m_scan_param);
-
-    if (error_code != NRF_SUCCESS)
-    {
-        printf("Scan start failed\n");
-        fflush(stdout);
-    } else
-    {
-        printf("Scan started\n");
-        fflush(stdout);
-    }
-
-    return error_code;
-}
-
-/**@brief Function called upon connecting to BLE peripheral.
- *
- * @details Initiates primary service discovery.
- *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t service_discovery_start()
-{
-    uint32_t   err_code;
-    uint16_t   start_handle = 0x01;
-    ble_uuid_t srvc_uuid;
-
-    printf("Discovering primary services\n");
-    fflush(stdout);
-
-    srvc_uuid.type = BLE_UUID_TYPE_BLE;
-    srvc_uuid.uuid = BLE_UUID_HEART_RATE_SERVICE;
-
-    // Initiate procedure to find the primary BLE_UUID_HEART_RATE_SERVICE.
-    err_code = sd_ble_gattc_primary_services_discover(m_adapter,
-                                                      m_connection_handle, start_handle,
-                                                      &srvc_uuid);
-    if (err_code != NRF_SUCCESS)
-    {
-        printf("Failed to initiate or continue a GATT Primary Service Discovery procedure\n");
-        fflush(stdout);
-    }
-
-    return err_code;
-}
-
-/**@brief Function called upon discovering a BLE peripheral's primary service(s).
- *
- * @details Initiates service's (m_service) characteristic discovery.
- *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t char_discovery_start()
-{
-    ble_gattc_handle_range_t handle_range;
-
-    printf("Discovering characteristics\n");
-    fflush(stdout);
-
-    handle_range.start_handle = m_service_start_handle;
-    handle_range.end_handle = m_service_end_handle;
-
-    return sd_ble_gattc_characteristics_discover(m_adapter, m_connection_handle, &handle_range);
-}
-
-/**@brief Function called upon discovering service's characteristics.
- *
- * @details Initiates heart rate monitor (m_hrm_char_handle) characteristic's descriptor discovery.
- *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t descr_discovery_start()
-{
-    ble_gattc_handle_range_t handle_range;
-
-    printf("Discovering characteristic's descriptors\n");
-    fflush(stdout);
-
-    if (m_hrm_char_handle == 0)
-    {
-        printf("No heart rate measurement characteristic handle found\n");
-        fflush(stdout);
-        return NRF_ERROR_INVALID_STATE;
-    }
-
-    handle_range.start_handle = m_hrm_char_handle;
-    handle_range.end_handle = m_service_end_handle;
-
-    return sd_ble_gattc_descriptors_discover(m_adapter, m_connection_handle, &handle_range);
-}
-
-/**@brief Function that write's the HRM characteristic's CCCD.
- * *
- * @return NRF_SUCCESS on success, otherwise an error code.
- */
-static uint32_t hrm_cccd_set(uint8_t value)
-{
-    ble_gattc_write_params_t write_params;
-    uint8_t                  cccd_value[2] = {value, 0};
-
-    printf("Setting HRM CCCD\n");
-    fflush(stdout);
-
-    if (m_hrm_cccd_handle == 0)
-    {
-        printf("Error. No CCCD handle has been found\n");
-        fflush(stdout);
-        return NRF_ERROR_INVALID_STATE;
-    }
-
-    write_params.handle = m_hrm_cccd_handle;
-    write_params.len = 2;
-    write_params.p_value = cccd_value;
-    write_params.write_op = BLE_GATT_OP_WRITE_REQ;
-    write_params.offset = 0;
-
-    return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
-}
+/** Event dispatcher */
 
 /**@brief Function for handling the Application's BLE Stack events.
  *
@@ -892,6 +993,9 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
     }
 }
 
+
+/** Main */
+
 /**@brief Function for application main entry.
  *
  * @param[in] argc Number of arguments (program expects 0 or 1 arguments).
@@ -969,7 +1073,7 @@ int main(int argc, char * argv[])
     }
 
     // Endlessly loop.
-    for (; ;)
+    for (;;)
     {
         char c = (char)getchar();
         if (c == 'q' || c == 'Q')

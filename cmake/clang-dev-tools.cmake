@@ -1,12 +1,12 @@
 if(WIN32)
 	# CMAKE_EXPORT_COMPILE_COMMANDS is not working on Windows
-	message(clang-tidy is not supported on Windows)
+	message(STATUS "clang-tidy is not supported on Windows")
 
 	# For the target not to fail:
 	add_custom_target(tidy COMMAND echo "not supported on Windows")
 
 else()
-	find_program(CLANG_TIDY run-clang-tidy.py)
+	find_program(CLANG_TIDY NAMES run-clang-tidy.py run-clang-tidy-6.0.py)
 	if(NOT CLANG_TIDY)
 
 		message(STATUS "Did not find clang-tidy, target tidy is disabled.")

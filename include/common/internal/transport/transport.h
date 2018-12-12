@@ -46,18 +46,25 @@
 
 #include <stdint.h>
 
-typedef std::function<void(sd_rpc_app_status_t code, const char *message)> status_cb_t;
-typedef std::function<void(uint8_t *data, size_t length)> data_cb_t;
-typedef std::function<void(sd_rpc_log_severity_t severity, std::string message)> log_cb_t;
+typedef std::function<void(const sd_rpc_app_status_t code, const std::string &message)> status_cb_t;
+typedef std::function<void(const uint8_t *data, const size_t length)> data_cb_t;
+typedef std::function<void(const sd_rpc_log_severity_t severity, const std::string &message)>
+    log_cb_t;
 
-class Transport {
-public:
+class Transport
+{
+  public:
     virtual ~Transport();
-    virtual uint32_t open(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);
-    virtual uint32_t close();
+    virtual uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                          const log_cb_t &log_callback);
+    virtual uint32_t close() = 0;
+
     virtual uint32_t send(const std::vector<uint8_t> &data) = 0;
 
-protected:
+    void log(const sd_rpc_log_severity_t severity, const std::string &message) const;
+    void status(const sd_rpc_app_status_t code, const std::string &message) const;
+
+  protected:
     Transport();
 
     status_cb_t upperStatusCallback;
@@ -65,4 +72,4 @@ protected:
     log_cb_t upperLogCallback;
 };
 
-#endif //TRANSPORT_H
+#endif // TRANSPORT_H

@@ -5,6 +5,11 @@ _build
 *.pyc
 **/build
 /sdk/
+build*/
+
+# Temporary files
+*.bak
+*.TMP
 
 # Object files
 *.o

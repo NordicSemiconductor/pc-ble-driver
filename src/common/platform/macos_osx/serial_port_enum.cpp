@@ -69,7 +69,6 @@
 #include <errno.h>
 #include <termios.h>
 
-#include <assert.h>
 #include <vector>
 #include <iostream>
 
@@ -111,7 +110,6 @@ const char* SEGGER_VENDOR_ID = "1366";
 typedef vector<serial_device_t*> adapter_list_t;
 
 static mach_port_t masterPort;
-static io_registry_entry_t root;
 
 // Function prototypes
 static void FindModems(io_iterator_t *matchingServices);
@@ -120,7 +118,6 @@ static adapter_list_t* GetAdapters();
 
 static void FindModems(io_iterator_t *matchingServices)
 {
-    kern_return_t     kernResult;
     CFMutableDictionaryRef  classesToMatch;
 
     classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue);
@@ -135,14 +132,20 @@ static void FindModems(io_iterator_t *matchingServices)
     kern_return_t status;
 
     status = IOMasterPort(MACH_PORT_NULL, &masterPort);
-    assert(status == kIOReturnSuccess);
 
-    /*
-    root = IORegistryGetRootEntry(masterPort);
-    assert(root != MACH_PORT_NULL); */
+    if (status != kIOReturnSuccess)
+    {
+        std::cerr << "Error calling IOMasterPort: " << std::hex << "0x" << status << std::endl;
+        std::abort();
+    }
 
     status = IOServiceGetMatchingServices(masterPort, classesToMatch, matchingServices);
-    assert(status == kIOReturnSuccess);
+
+    if (status != kIOReturnSuccess)
+    {
+        std::cerr << "Error calling IOServiceGetMatchingServices: " << std::hex << "0x" << status << std::endl;
+        std::abort();
+    }
 }
 
 static io_registry_entry_t GetUsbDevice(char* pathName)
@@ -156,7 +159,12 @@ static io_registry_entry_t GetUsbDevice(char* pathName)
         io_iterator_t matchingServices;
 
         kern_return_t status = IOServiceGetMatchingServices(masterPort, classesToMatch, &matchingServices);
-        assert(status == kIOReturnSuccess);
+
+        if (status != kIOReturnSuccess)
+        {
+            std::cerr << "Error calling IOServiceGetMatchingServices: " << std::hex << "0x" << status << std::endl;
+            std::abort();
+        }
 
         io_service_t service;
         Boolean deviceFound = false;
@@ -245,8 +253,6 @@ static adapter_list_t* GetAdapters()
     // Initialize the returned path
     *bsdPath = '\0';
 
-    int length = 0;
-
     while ((modemService = IOIteratorNext(serialPortIterator)))
     {
         CFTypeRef bsdPathAsCFString;
@@ -265,7 +271,11 @@ static adapter_list_t* GetAdapters()
                                         kCFStringEncodingUTF8);
             CFRelease(bsdPathAsCFString);
 
-            assert(result);
+            if (!result)
+            {
+                std::cerr << "Error calling CFStringGetCString: " << std::hex << "0x" << result << std::endl;
+                std::abort();
+            }
 
             serial_device_t *serial_device = (serial_device_t*)malloc(sizeof(serial_device_t));
             memset(serial_device, 0, sizeof(serial_device_t));
@@ -386,24 +396,25 @@ static adapter_list_t* GetAdapters()
     return devices;
 }
 
-uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
+std::list<SerialPortDesc> EnumSerialPorts()
 {
+    std::list<SerialPortDesc> descs;
     adapter_list_t* devices = GetAdapters();
 
     for(auto device : *devices)
     {
-        if((strcmp(device->manufacturer,"SEGGER") == 0)
-            || (strcasecmp(device->manufacturer, "arm") == 0)
-            || (strcasecmp(device->manufacturer, "mbed") == 0))
+        if((strncmp(device->manufacturer, "SEGGER", 6) == 0)
+            || (strncasecmp(device->manufacturer, "arm", 3) == 0)
+            || (strncasecmp(device->manufacturer, "mbed", 4) == 0))
         {
-            SerialPortDesc* resultItem = new SerialPortDesc();
+            SerialPortDesc resultItem = {};
 
-            resultItem->comName = device->port;
-            resultItem->locationId = device->locationId;
-            resultItem->vendorId = device->vendorId;
-            resultItem->productId = device->productId;
-            resultItem->manufacturer = device->manufacturer;
-            resultItem->serialNumber = device->serialNumber;
+            resultItem.comName = device->port;
+            resultItem.locationId = device->locationId;
+            resultItem.vendorId = device->vendorId;
+            resultItem.productId = device->productId;
+            resultItem.manufacturer = device->manufacturer;
+            resultItem.serialNumber = device->serialNumber;
 
             descs.push_back(resultItem);
         }
@@ -414,5 +425,5 @@ uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs)
     devices->clear();
     delete devices;
 
-    return 0;
+    return descs;
 }

@@ -42,15 +42,18 @@
 
 #include "ble.h"
 
-#include <thread>
-#include <mutex>
+#include <atomic>
 #include <condition_variable>
+#include <mutex>
+#include <thread>
 
+#include <cstdint>
 #include <queue>
-#include <stdint.h>
 
-typedef uint32_t(*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
-typedef std::function<void(ble_evt_t * p_ble_evt)> evt_cb_t;
+typedef uint32_t (*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
+typedef std::function<void(ble_evt_t *p_ble_evt)> evt_cb_t;
+
+constexpr uint32_t MaxPossibleEventLength = 700;
 
 struct eventData_t
 {
@@ -58,50 +61,61 @@ struct eventData_t
     uint32_t dataLength;
 };
 
-typedef enum
-{
-    SERIALIZATION_COMMAND = 0,
-    SERIALIZATION_RESPONSE = 1,
-    SERIALIZATION_EVENT = 2
+typedef enum {
+    SERIALIZATION_COMMAND   = 0,
+    SERIALIZATION_RESPONSE  = 1,
+    SERIALIZATION_EVENT     = 2,
+    SERIALIZATION_DTM_CMD   = 3, // Direct test mode command
+    SERIALIZATION_DTM_RESP  = 4, // Direct test mode response
+    SERIALIZATION_RESET_CMD = 5
 } serialization_pkt_type_t;
 
-class SerializationTransport {
-public:
-    SerializationTransport() = delete;
-    SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
-    ~SerializationTransport();
-    
-    uint32_t open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback);
-    uint32_t close();
-    uint32_t send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength);
+class SerializationTransport
+{
+  public:
+    SerializationTransport(const SerializationTransport &) = delete;
+    SerializationTransport &operator=(const SerializationTransport &) = delete;
+    SerializationTransport(SerializationTransport &&)                 = delete;
+    SerializationTransport &operator=(SerializationTransport &&) = delete;
 
-private:
-    void readHandler(uint8_t *data, size_t length);
+    SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
+    ~SerializationTransport() = default;
+
+    uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback,
+                  const log_cb_t &log_callback);
+    uint32_t close();
+    uint32_t send(const std::vector<uint8_t> &cmdBuffer,
+                  std::shared_ptr<std::vector<uint8_t>> rspBuffer,
+                  serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
+
+  private:
+    void readHandler(const uint8_t *data, const size_t length);
     void eventHandlingRunner();
 
     status_cb_t statusCallback;
     evt_cb_t eventCallback;
     log_cb_t logCallback;
-    
+
     data_cb_t dataCallback;
 
     std::shared_ptr<Transport> nextTransportLayer;
     uint32_t responseTimeout;
 
-    bool rspReceived;
-    uint8_t *responseBuffer;
-    uint32_t *responseLength;
+    bool responseReceived;
+    std::shared_ptr<std::vector<uint8_t>> responseBuffer;
 
     std::mutex sendMutex;
 
     std::mutex responseMutex;
     std::condition_variable responseWaitCondition;
 
-    bool runEventThread; // Variable to control if thread shall run, used in thread to exit/keep running inthread
     std::mutex eventMutex;
     std::condition_variable eventWaitCondition;
     std::thread eventThread;
-    std::queue<eventData_t> eventQueue;
+    std::queue<std::vector<uint8_t>> eventQueue;
+
+    std::atomic<bool> isOpen; // Variable is shared between threads
+    std::mutex publicMethodMutex;
 };
 
-#endif //SERIALIZATION_TRANSPORT_H
+#endif // SERIALIZATION_TRANSPORT_H

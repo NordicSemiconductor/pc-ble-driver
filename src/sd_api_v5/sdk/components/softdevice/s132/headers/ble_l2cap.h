@@ -287,7 +287,7 @@ typedef struct
   uint16_t conn_handle;                                     /**< Connection Handle on which the event occured. */
   uint16_t local_cid;                                       /**< Local Channel ID of the L2CAP channel, or
                                                                  @ref BLE_L2CAP_CID_INVALID if not present. */
-  union l2cap_evt_params_union
+  union
   {
     ble_l2cap_evt_ch_setup_request_t    ch_setup_request;   /**< L2CAP Channel Setup Request Event Parameters. */
     ble_l2cap_evt_ch_setup_refused_t    ch_setup_refused;   /**< L2CAP Channel Setup Refused Event Parameters. */

@@ -5,4 +5,3 @@ add_definitions(
 
 # Issue with VC and disabling of C4200: https://connect.microsoft.com/VisualStudio/feedback/details/1114440
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4200")
-

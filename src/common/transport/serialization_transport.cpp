@@ -43,35 +43,43 @@
 
 #include "ble_common.h"
 
+#include <iterator>
 #include <memory>
-#include <iostream>
 #include <sstream>
-#include <cstring> // Do not remove! Required by gcc.
 
 SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout)
-    : statusCallback(nullptr), eventCallback(nullptr),
-    logCallback(nullptr), rspReceived(false),
-    responseBuffer(nullptr), responseLength(nullptr),
-    runEventThread(false)
+    : statusCallback(nullptr)
+    , eventCallback(nullptr)
+    , logCallback(nullptr)
+    , responseReceived(false)
+    , responseBuffer(nullptr)
+    , isOpen(false)
 {
-    // SerializationTransport takes owership of dataLinkLayer provided object
+    // SerializationTransport takes ownership of dataLinkLayer provided object
     nextTransportLayer = std::shared_ptr<Transport>(dataLinkLayer);
-    responseTimeout = response_timeout;
+    responseTimeout    = response_timeout;
 }
 
-SerializationTransport::~SerializationTransport()
+uint32_t SerializationTransport::open(const status_cb_t &status_callback,
+                                      const evt_cb_t &event_callback, const log_cb_t &log_callback)
 {
-}
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
 
-uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t event_callback, log_cb_t log_callback)
-{
+    if (isOpen)
+    {
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_OPEN;
+    }
+
+    isOpen = true;
+
     statusCallback = status_callback;
-    eventCallback = event_callback;
-    logCallback = log_callback;
+    eventCallback  = event_callback;
+    logCallback    = log_callback;
 
-    auto dataCallback = std::bind(&SerializationTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
+    const auto dataCallback = std::bind(&SerializationTransport::readHandler, this,
+                                        std::placeholders::_1, std::placeholders::_2);
 
-    uint32_t errorCode = nextTransportLayer->open(status_callback, dataCallback, log_callback);
+    const auto errorCode = nextTransportLayer->open(status_callback, dataCallback, log_callback);
 
     if (errorCode != NRF_SUCCESS)
     {
@@ -81,12 +89,22 @@ uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t even
     // Thread should not be running from before when calling this
     if (!eventThread.joinable())
     {
-        runEventThread = true;
-        eventThread = std::thread(std::bind(&SerializationTransport::eventHandlingRunner, this));
+        // If ::close is called when this method (::open) returns 
+        // and eventThread is executing somewhere between while (isOpen) 
+        // and eventWaitCondition notification we could get a deadlock.
+        //
+        // To prevent this, lock eventMutex in this thread, let eventThread
+        // wait until eventMutex is unlocked (.wait in this thread).
+        // When eventThread is started and outside critical region, 
+        // let eventThread notify eventWaitCondition, making .wait 
+        // return
+        std::unique_lock<std::mutex> eventLock(eventMutex);
+        eventThread = std::thread([this] { eventHandlingRunner(); });
+        eventWaitCondition.wait(eventLock);
     }
     else
     {
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT;
     }
 
     return NRF_SUCCESS;
@@ -94,15 +112,23 @@ uint32_t SerializationTransport::open(status_cb_t status_callback, evt_cb_t even
 
 uint32_t SerializationTransport::close()
 {
-    runEventThread = false;
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (!isOpen)
+    {
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
+    }
+
+    isOpen = false;
     eventWaitCondition.notify_all();
 
     if (eventThread.joinable())
     {
         if (std::this_thread::get_id() == eventThread.get_id())
         {
-            //log "ser_app_hal_pc_event_handling_stop was called from an event callback, causing the event thread to stop itself. This will cause a resource leak."
-            return NRF_ERROR_INTERNAL;
+            // log "ser_app_hal_pc_event_handling_stop was called from an event callback, causing
+            // the event thread to stop itself. This will cause a resource leak."
+            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT;
         }
 
         eventThread.join();
@@ -111,45 +137,49 @@ uint32_t SerializationTransport::close()
     return nextTransportLayer->close();
 }
 
-uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, uint8_t *rspBuffer, uint32_t *rspLength)
+uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
+                                      std::shared_ptr<std::vector<uint8_t>> rspBuffer,
+                                      serialization_pkt_type_t pktType)
 {
+    std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    if (!isOpen)
+    {
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_INVALID_STATE;
+    }
+
     // Mutex to avoid multiple threads sending commands at the same time.
     std::lock_guard<std::mutex> sendGuard(sendMutex);
-    rspReceived = false;
-    responseBuffer = rspBuffer;
-    responseLength = rspLength;
+    responseReceived = false;
+    responseBuffer   = rspBuffer;
 
-    std::vector<uint8_t> commandBuffer(cmdLength + 1);
-    commandBuffer[0] = SERIALIZATION_COMMAND;
-    memcpy(&commandBuffer[1], cmdBuffer, cmdLength * sizeof(uint8_t));
+    std::vector<uint8_t> commandBuffer(cmdBuffer.size() + 1);
+    commandBuffer[0] = pktType;
+    std::copy(cmdBuffer.begin(), cmdBuffer.end(), commandBuffer.begin() + 1);
 
-    auto errCode = nextTransportLayer->send(commandBuffer);
+    const auto errCode = nextTransportLayer->send(commandBuffer);
 
-    if (errCode != NRF_SUCCESS) {
+    if (errCode != NRF_SUCCESS)
+    {
         return errCode;
     }
-    else if (rspBuffer == nullptr)
+
+    if (!rspBuffer)
     {
         return NRF_SUCCESS;
     }
 
     std::unique_lock<std::mutex> responseGuard(responseMutex);
 
-    std::chrono::milliseconds timeout(responseTimeout);
-    std::chrono::system_clock::time_point wakeupTime = std::chrono::system_clock::now() + timeout;
+    const std::chrono::milliseconds timeout(responseTimeout);
+    const auto wakeupTime = std::chrono::system_clock::now() + timeout;
 
-    responseWaitCondition.wait_until(
-        responseGuard,
-        wakeupTime,
-        [&] {
-            return rspReceived;
-        }
-    );
+    responseWaitCondition.wait_until(responseGuard, wakeupTime, [&] { return responseReceived; });
 
-    if (!rspReceived)
+    if (!responseReceived)
     {
         logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
-        return NRF_ERROR_INTERNAL;
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_NO_RESPONSE;
     }
 
     return NRF_SUCCESS;
@@ -158,72 +188,106 @@ uint32_t SerializationTransport::send(uint8_t *cmdBuffer, uint32_t cmdLength, ui
 // Event Thread
 void SerializationTransport::eventHandlingRunner()
 {
-    while (runEventThread) {
+    std::unique_lock<std::mutex> eventLock(eventMutex);
 
-        std::unique_lock<std::mutex> eventLock(eventMutex);
+    while (isOpen)
+    {
+        // Suspend this thread until event wait condition
+        // is notified. This can happen from ::close and
+        // ::readHandler (thread in H5Transport)
+        eventWaitCondition.notify_all();
         eventWaitCondition.wait(eventLock);
 
-        while (!eventQueue.empty())
+        while (!eventQueue.empty() && isOpen)
         {
-            eventData_t eventData = eventQueue.front();
+            // Get oldest event received from UART thread
+            const auto eventData     = eventQueue.front();
+            const auto eventDataSize = static_cast<uint32_t>(eventData.size());
+
+            // Remove oldest event received from H5Transport thread
             eventQueue.pop();
+
+            // Let UART thread add events to eventQueue
+            // while popped event is processed
             eventLock.unlock();
 
+            // Set codec context
+            EventCodecContext context(this);
+
             // Allocate memory to store decoded event including an unknown quantity of padding
+            auto possibleEventLength = MaxPossibleEventLength;
+            std::vector<uint8_t> eventDecodeBuffer;
+            eventDecodeBuffer.reserve(MaxPossibleEventLength);
+            const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
 
-            // Set security context
-            BLESecurityContext context(this);
+            // Decode event
+            const auto errCode =
+                ble_event_dec(eventData.data(), eventDataSize, event, &possibleEventLength);
 
-            uint32_t possibleEventLength = 700;
-            std::unique_ptr<ble_evt_t> event(static_cast<ble_evt_t*>(std::malloc(possibleEventLength)));
-            uint32_t errCode = ble_event_dec(eventData.data, eventData.dataLength, event.get(), &possibleEventLength);
-
-            if (eventCallback != nullptr && errCode == NRF_SUCCESS)
+            if (eventCallback && errCode == NRF_SUCCESS)
             {
-                eventCallback(event.get());
+                eventCallback(event);
             }
 
             if (errCode != NRF_SUCCESS)
             {
                 std::stringstream logMessage;
-                logMessage << "Failed to decode event, error code is " << errCode << "." << std::endl;
-                logCallback(SD_RPC_LOG_ERROR, logMessage.str().c_str());
+                logMessage << "Failed to decode event, error code is " << std::dec << errCode
+                           << "/0x" << std::hex << errCode << "." << std::endl;
+                logCallback(SD_RPC_LOG_ERROR, logMessage.str());
+                statusCallback(PKT_DECODE_ERROR, logMessage.str());
             }
 
-            free(eventData.data);
-
+            // Prevent UART from adding events to eventQueue
             eventLock.lock();
         }
     }
 }
 
-void SerializationTransport::readHandler(uint8_t *data, size_t length)
+void SerializationTransport::readHandler(const uint8_t *data, const size_t length)
 {
-    auto eventType = static_cast<serialization_pkt_type_t>(data[0]);
-    data += 1;
-    length -= 1;
+    const auto eventType = static_cast<serialization_pkt_type_t>(data[0]);
 
-    if (eventType == SERIALIZATION_RESPONSE) {
-        memcpy(responseBuffer, data, length);
-        *responseLength = (uint32_t) length;
+    const auto startOfData  = data + 1;
+    const size_t dataLength = length - 1;
+
+    if (eventType == SERIALIZATION_RESPONSE)
+    {
+        if (responseBuffer && !responseBuffer->empty())
+        {
+            if (responseBuffer->size() >= dataLength)
+            {
+                std::copy(startOfData, startOfData + dataLength, responseBuffer->begin());
+                responseBuffer->resize(dataLength);
+            }
+            else
+            {
+                logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE with a packet that "
+                                              "is larger than the allocated buffer.");
+            }
+        }
+        else
+        {
+            logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE but command did not "
+                                          "provide a buffer for the reply.");
+        }
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
-        rspReceived = true;
+        responseReceived = true;
         responseWaitCondition.notify_one();
     }
     else if (eventType == SERIALIZATION_EVENT)
     {
-        eventData_t eventData;
-        eventData.data = static_cast<uint8_t *>(malloc(length));
-        memcpy(eventData.data, data, length);
-        eventData.dataLength = (uint32_t) length;
-
+        std::vector<uint8_t> event;
+        event.reserve(dataLength);
+        std::copy(startOfData, startOfData + dataLength, std::back_inserter(event));
         std::lock_guard<std::mutex> eventLock(eventMutex);
-        eventQueue.push(eventData);
+        eventQueue.push(std::move(event));
         eventWaitCondition.notify_one();
     }
     else
     {
-        logCallback(SD_RPC_LOG_WARNING, "Unknown Nordic Semiconductor vendor specific packet received");
+        logCallback(SD_RPC_LOG_WARNING,
+                    "Unknown Nordic Semiconductor vendor specific packet received");
     }
 }

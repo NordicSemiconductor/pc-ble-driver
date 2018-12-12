@@ -33,29 +33,28 @@ if(NOT MSVC)
     message(STATUS "Building with build type: ${CMAKE_BUILD_TYPE}.")
 endif()
 
+# Set C++ standard to use
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Compiler specific
-if(MSVC)
-    include(${CMAKE_CURRENT_LIST_DIR}/msvc.cmake)
-elseif(APPLE)
-    include(${CMAKE_CURRENT_LIST_DIR}/apple.cmake)
-else()
-    # Linux
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    include(${CMAKE_CURRENT_LIST_DIR}/clang.cmake)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    include(${CMAKE_CURRENT_LIST_DIR}/msvc.cmake)
 endif()
 
-# Use multithreaded Boost libraries
-set(Boost_USE_MULTITHREADED ON)
-
-# Use static boost libraries so the dynamic library 
-# can run anywhere
-set(Boost_USE_STATIC_LIBS   ON)
-
-# Find the necessary boost components on the system.
-# Minimum version required is 1.67.0
-find_package ( Boost 1.67.0 REQUIRED COMPONENTS thread system regex date_time chrono )
+if(APPLE)
+    include(${CMAKE_CURRENT_LIST_DIR}/apple.cmake)
+endif()
 
 # Add or remove SD API versions here
-set(SD_API_VER_NUMS 2 5)
+if(NOT SD_API_VER_NUMS)
+    set(SD_API_VER_NUMS 2 3 5 6)
+endif()
+
 list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
 
 set(SD_API_VER_PREFIX "SD_API_V")
@@ -149,8 +148,6 @@ function(build_metadata dir dst)
     string(CONCAT str ${str} "* C Compiler: " "${CMAKE_C_COMPILER_ID} (${ARCH_BITS}-bit)" "\n") 
     string(CONCAT str ${str} "* C++ Compiler: " "${CMAKE_CXX_COMPILER_ID} (${ARCH_BITS}-bit)" "\n") 
     string(CONCAT str ${str} "* CMake version: " ${CMAKE_VERSION} "\n") 
-    string(CONCAT str ${str} "* Boost version: " ${Boost_MAJOR_VERSION} "." ${Boost_MINOR_VERSION} "." ${Boost_SUBMINOR_VERSION} "\n") 
-    string(CONCAT str ${str} "* Boost libs: " ${Boost_LIBRARY_DIRS} "\n") 
     string(CONCAT str ${str} "* SD API Versions:") 
     foreach(SD_API_VER ${SD_API_VERS})
         string(CONCAT str ${str} " <${SD_API_VER}>") 
