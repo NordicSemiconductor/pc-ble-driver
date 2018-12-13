@@ -30,7 +30,7 @@
 
 ## Overview
 
-`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](https://www.nordicsemi.com/en/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_serialization).
+`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](https://www.nordicsemi.com/DocLib/Content/SoftDevice_API_Doc/S140/v6-1-0/modules) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](https://www.nordicsemi.com/en/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_serialization).
 
 The C/C++ libraries can be interfaced with directly, but are also provided as higher-level bindings that ease development at the cost of reduced control (acceptable in most cases):
 
