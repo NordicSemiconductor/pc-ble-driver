@@ -30,7 +30,7 @@
 
 ## Overview
 
-`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.softdevices52/dita/nrf52/softdevices.html?cp=2_3) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/lib_serialization.html?cp=4_0_0_3_33).
+`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](https://www.nordicsemi.com/DocLib/Content/SoftDevice_API_Doc/S140/v6-1-0/modules) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](https://www.nordicsemi.com/en/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_serialization).
 
 The C/C++ libraries can be interfaced with directly, but are also provided as higher-level bindings that ease development at the cost of reduced control (acceptable in most cases):
 
@@ -42,7 +42,7 @@ The C/C++ libraries can be interfaced with directly, but are also provided as hi
 
 ## Architecture
 
-![Architecture](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/architecture_overview_serialization.svg)
+![Architecture](https://www.nordicsemi.com/en/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/-/media/0905BE636D5E4B27B19F4F179B241DB8.ashx)
 
 Where the 'Application chip' is just generic hardware (i.e. a Windows, Linux or macOS device), although it could also be an Arduino or Raspberry Pi for example.
 
@@ -507,6 +507,7 @@ Follow the steps to install dependencies on a specific platform:
 
 ## Programming connectivity HEX files
 
+### SEGGER J-Link-OB based kits
 [Go to install tools](#Installing-tools) if the nRF5x Command-Line Tools have not been installed yet.
 
 To use this library you will need to program the connectivity firmware on a nRF5x IC
@@ -519,17 +520,27 @@ Use [nRF5x Command-Line Tools](#Installing-tools) to erase and program the IC:
 Alternatively, use [nRF Connect Programmer](https://github.com/NordicSemiconductor/pc-nrfconnect-programmer)
 to erase and program the IC.
 
+### Nordic USB based kits
+
+#### Installing drivers and tools
+Some kits, like the pca10059 nRF52 dongle, do not have onboard debugger and will have to be programmed via serial DFU.
+On Windows, device drivers are required for the kits to be detected correctly by the operating system. To install the required drivers, please make sure you have the latest [nRF Connect for Desktop](http://www.nordicsemi.com/eng/Products/Bluetooth-low-energy/nRF-Connect-for-desktop) installed.
+
+#### Programming the connectivity firmware via serial DFU
+
+Programming the connectivity firmware via serial DFU can be done from command line or from nRF Connect for Desktop.
+
+##### Programming from command line with nrfutil
+
+Device Firmware Upgrade with [nrfutil](https://www.nordicsemi.com/DocLib/Content/User_Guides/nrfutil/latest/UG/nrfutil/nrfutil_dfu_serial_usb) is normally done in two steps: 1: generating the DFU zip package, and 2: performing the DFU procedure. A DFU zip package has been pre-made and is included in this repository. To run the DFU procedure with nrfutil with the pre-made DFU package:
+
+    nrfutil dfu usb_serial -pkg connectivity_x.x.x_usb_with_s<x>_<a>.<b>.<c>_dfu_pkg.zip -p <serial port>
+
 ---
 
 ## Examples
 
 The [examples](./examples) serve as a great starting point for development with `pc-ble-driver`. Examples include a [heart rate monitor](./examples/heart_rate_monitor/) (BLE peripheral) and [heart rate collector](./examples/heart_rate_collector/) (BLE master) and show the basic structure of an application built on `pc-ble-driver`.
-
-Now that you have successfully built and installed `pc-ble-driver`, you are ready to run the examples in `pc-ble-driver/examples/`. First verify that the static and shared libraries exist in the directory the examples expect them to be in.
-
-    $ cd pc-ble-driver/
-    $ ls build/
-    > libpc_ble_driver_static_sd_api_v2.a libpc_ble_driver_shared_sd_api_v2.dylib libpc_ble_driver_static_sd_api_v5.a  libpc_ble_driver_shared_sd_api_v5.dylib test_uart ...
 
 To quickly get the examples up and running, see [examples/README.md](./examples/README.md).
 
