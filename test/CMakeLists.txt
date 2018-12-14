@@ -38,7 +38,7 @@ file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v3/connectivity_${CONNECTIVITY_
 file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v5/connectivity_${CONNECTIVITY_VERSION}_1m_with_s132_5.1.0.hex" SD_API_V5_S132_HEX)
 file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_1m_with_s132_6.1.0.hex" SD_API_V6_S132_HEX)
 file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_1m_with_s140_6.1.0.hex" SD_API_V6_S140_HEX)
-file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_1m_with_s140_usb_6.1.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
+file(TO_NATIVE_PATH "${CONNECTIVITY_ROOT}/sd_api_v6/connectivity_${CONNECTIVITY_VERSION}_usb_with_s140_6.1.0.hex" SD_API_V6_S140_PCA10056_USB_HEX)
 
 function(parse_device_id device_id parse_error segger_sn serial_port)
     set(INVALID_FORMAT_MESSAGE "Device id ${device_id} is in an invalid format, must be <SEGGER_SERIAL_NUMBER>:<SERIAL_PORT>")
