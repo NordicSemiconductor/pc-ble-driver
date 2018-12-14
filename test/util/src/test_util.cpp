@@ -264,8 +264,8 @@ std::string createRandomAdvertisingName(const std::string &prefix, const uint8_t
     std::copy(prefix.begin(), prefix.end(), std::back_inserter(data));
     const auto randomLength = length - prefix.length();
     std::generate_n(std::back_inserter(data), randomLength, [] {
-        char c;
-        while (!std::isalnum(c = static_cast<char>(std::rand())))
+        uint8_t c;
+        while (!std::isalnum(c = static_cast<uint8_t>(std::rand())))
             ;
         return c;
     });
