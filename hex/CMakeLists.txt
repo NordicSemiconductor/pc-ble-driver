@@ -178,7 +178,8 @@ function(nrf_create_connectivity_compile_targets)
                     set(SD_ID)
                     nrf_extract_softdevice_info("${SOFTDEVICE_HEX_PATH}" SD_VERSION SOC_FAMILY SD_API_VERSION SD_ID)
 
-                    set(TARGET_NAME "connectivity_${VERSION}_${TRANSPORT}_with_${SD_VERSION}_${SD_API_VERSION}")
+                    set(CONNECTIVITY_NAME "connectivity_${VERSION}_${TRANSPORT}")
+                    set(TARGET_NAME "${CONNECTIVITY_NAME}_with_${SD_VERSION}_${SD_API_VERSION}")
 
                     # Check if target name already exists
                     list(FIND CONNECTIVITY_BUILD_TARGETS "compile_${TARGET_NAME}" FOUND_TARGET)
@@ -246,6 +247,12 @@ function(nrf_create_connectivity_compile_targets)
                                 APPEND COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIRECTORY}
                             )
                         endif()
+
+                        # Copy connectivty hex file to binary make_directory
+                        add_custom_command(
+                            OUTPUT "${COMMAND_NAME}"
+                            APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}.hex"
+                        )
 
                         # Copy merged file to binary directory
                         add_custom_command(
