@@ -248,12 +248,6 @@ function(nrf_create_connectivity_compile_targets)
                             )
                         endif()
 
-                        # Copy connectivty hex file to binary make_directory
-                        add_custom_command(
-                            OUTPUT "${COMMAND_NAME}"
-                            APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}.hex"
-                        )
-
                         # Copy merged file to binary directory
                         add_custom_command(
                             OUTPUT "${COMMAND_NAME}"
@@ -273,6 +267,12 @@ function(nrf_create_connectivity_compile_targets)
                                 add_custom_command(
                                     OUTPUT "${COMMAND_NAME}"
                                     APPEND COMMAND ${CMAKE_COMMAND} -E copy "${DFU_PKG}" "${OUTPUT_DIRECTORY}"
+                                )
+
+                                # Copy connectivity hex file to binary make_directory
+                                add_custom_command(
+                                    OUTPUT "${COMMAND_NAME}"
+                                    APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}.hex"
                                 )
                             endif()
                         endif()
