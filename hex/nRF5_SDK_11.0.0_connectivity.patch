@@ -490,10 +490,10 @@ index 84d5ff8..9a72955 100644
  /**@brief     Function for registering for System (SOC) events.
   *
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/main.c nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/main.c
-index 83241ef..1c48018 100644
+index 83241ef..85d6acb 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/main.c
-@@ -28,9 +28,43 @@
+@@ -28,9 +28,47 @@
  #include "ser_hal_transport.h"
  #include "ser_conn_handlers.h"
  #include "boards.h"
@@ -501,7 +501,6 @@ index 83241ef..1c48018 100644
  
  #include "ser_phy_debug_comm.h"
  
-+#if defined ( __CC_ARM )
 +typedef struct __attribute__((packed))
 +{
 +        uint32_t    magic_number;               /* Magic number to verify the presence of this structure in memory */
@@ -517,8 +516,14 @@ index 83241ef..1c48018 100644
 +        uint32_t    rfu2               : 16;    /* Reserved for future use, shall be 0xFFFF */
 +        uint32_t    baud_rate;                  /* UART transport baud rate */
 +} version_info_t;
-+
-+static const version_info_t version_info __attribute__((at(0x20000))) = {
++#if defined ( __CC_ARM )
++static const version_info_t version_info __attribute__((at(0x20000))) =
++#elif defined ( __GNUC__ ) || defined ( __SES_ARM )
++volatile static const version_info_t version_info  __attribute__ ((section(".connectivity_version_info"))) =
++#elif defined ( __ICCARM__ )
++__root    const version_info_t version_info @ 0x20000 =
++#endif
++{
 +    .magic_number       = 0x46D8A517,
 +    .struct_version     = 2,
 +    .rfu0               = 0xFFFFFF,
@@ -532,12 +537,11 @@ index 83241ef..1c48018 100644
 +    .rfu2               = 0xFFFF,
 +    .baud_rate          = SER_PHY_UART_BAUDRATE_VAL,
 +};
-+#endif
 +
  /**@brief Main function of the connectivity application. */
  int main(void)
  {
-@@ -65,6 +99,15 @@ int main(void)
+@@ -65,6 +103,15 @@ int main(void)
      {   
          /* Process SoftDevice events. */
          app_sched_execute();
@@ -579,6 +583,31 @@ index f02d9d2..cc9dd3f 100644
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld
+index 52c6617..4654217 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld
+@@ -5,12 +5,19 @@ GROUP(-lgcc -lc -lnosys)
+ 
+ MEMORY
+ {
+-  FLASH (rx) : ORIGIN = 0x1b000, LENGTH = 0x25000
++  FLASH (rx) : ORIGIN = 0x1b000, LENGTH = 0x1e000
+   RAM (rwx) :  ORIGIN = 0x20004300, LENGTH = 0x3d00
++  connectivity_version_info (r) : ORIGIN = 0x39000, LENGTH = 0x18
+ }
+ 
+ SECTIONS
+ {
++  .connectivity_version_info :
++  {
++    PROVIDE(__start_connectivity_version_info = .);
++    KEEP(*(SORT(.connectivity_version_info*)))
++    PROVIDE(__stop_connectivity_version_info = .);
++  } > connectivity_version_info
+   .fs_data :
+   {
+     PROVIDE(__start_fs_data = .);
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
 index 39a998a..c8dc2a6 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_spi/armgcc/Makefile
@@ -683,6 +712,31 @@ index f4b3fc1..ab9016d 100644
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
+diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+index 3c6e5b1..996be3c 100644
+--- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
++++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
+@@ -5,12 +5,19 @@ GROUP(-lgcc -lc -lnosys)
+ 
+ MEMORY
+ {
+-  FLASH (rx) : ORIGIN = 0x1c000, LENGTH = 0x64000
++  FLASH (rx) : ORIGIN = 0x1c000, LENGTH = 0x34000
+   RAM (rwx) :  ORIGIN = 0x20004300, LENGTH = 0xbd00
++  connectivity_version_info (r) : ORIGIN = 0x50000, LENGTH = 0x18
+ }
+ 
+ SECTIONS
+ {
++  .connectivity_version_info :
++  {
++    PROVIDE(__start_connectivity_version_info = .);
++    KEEP(*(SORT(.connectivity_version_info*)))
++    PROVIDE(__stop_connectivity_version_info = .);
++  } > connectivity_version_info
+   .fs_data :
+   {
+     PROVIDE(__start_fs_data = .);
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
 index 5ef79e6..9618498 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_spi/armgcc/Makefile
