@@ -79,7 +79,7 @@ The generated libraries are compatible with the following SoftDevice API version
 | PCA10056 | nRF52840 { Development Kit } | nRF6828        | *)       |
 | PCA10059 | nRF52840 { Dongle }          | nRF6829        | Can only use connectivity firmware with Nordic USB CDC serial port support  |
 
-*) Can use both Nordic USB CDC serial port version and SEGGER J-Link-OB (VCOM) version. Using Nordic USB CDC serial port version on PCA10056 requires that you connect pins P0.16 and P0.24. The pins to QSPI chip must also be in place (they are by default). The algorithm for detecting if it is PCA10056 or PCA10059 is to check if it is possible to communicate with the QSPI chip. PCA10059 does not have a QSPI chip. The detection is used by nRF Connect DFU trigger to determine what pin to use for resetting the device when changing between DFU and application mode.
+*) Can use both Nordic USB CDC serial port version and SEGGER J-Link-OB (VCOM) version. Using Nordic USB CDC serial port version on PCA10056 requires that you connect pins P0.18 and P0.24. The pins to QSPI chip must also be in place (they are by default). The algorithm for detecting if it is PCA10056 or PCA10059 is to check if it is possible to communicate with the QSPI chip. PCA10059 does not have a QSPI chip. The detection is used by nRF Connect DFU trigger to determine what pin to use for resetting the device when changing between DFU and application mode.
 
 ---
 
