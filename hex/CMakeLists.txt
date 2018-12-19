@@ -218,10 +218,17 @@ function(nrf_create_connectivity_compile_targets)
 
                         message(STATUS "Running make:${MAKE} in ARMGCC_PROJECT_DIRECTORY:${ARMGCC_PROJECT_DIRECTORY}")
 
+                        # Add CFLAGS that specify application version, used by SDFU
+                        set(MAJOR)
+                        set(MINOR)
+                        set(PATCH)
+                        nrf_extract_version_number("${CONNECTIVITY_VERSION}" MAJOR MINOR PATCH)
+                        set(VERSION_CFLAGS "-DAPP_VERSION_MAJOR=${MAJOR} -DAPP_VERSION_MINOR=${MINOR} -DAPP_VERSION_PATCH=${PATCH}")
+
                         # Compile project
                         add_custom_command(
                             OUTPUT "${COMMAND_NAME}"
-                            APPEND COMMAND ${MAKE}
+                            APPEND COMMAND ${CMAKE_COMMAND} -E env CFLAGS=${VERSION_CFLAGS} ${MAKE}
                         )
 
                         set(HEX_MERGED "${TARGET_NAME}.hex")
@@ -272,7 +279,7 @@ function(nrf_create_connectivity_compile_targets)
                                 # Copy connectivity hex file to binary make_directory
                                 add_custom_command(
                                     OUTPUT "${COMMAND_NAME}"
-                                    APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}.hex"
+                                    APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}_for_${SD_VERSION}_${SD_API_VERSION}.hex"
                                 )
                             endif()
                         endif()
