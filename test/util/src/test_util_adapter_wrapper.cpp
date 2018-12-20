@@ -903,8 +903,9 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.common_opt.conn_bw.conn_bw.conn_bw_rx = BLE_CONN_BW_HIGH;
     scratchpad.common_opt.conn_bw.conn_bw.conn_bw_tx = BLE_CONN_BW_HIGH;
     scratchpad.opt.common_opt                        = scratchpad.common_opt;
-    scratchpad.mtu                                   = mtu == 0 ? DEFAULT_MTU_SIZE : mtu;
 #endif
+
+    scratchpad.mtu                                   = mtu == 0 ? DEFAULT_MTU_SIZE : mtu;
 
 #if NRF_SD_BLE_API == 3
     scratchpad.ble_enable_params.gatt_enable_params.att_mtu = scratchpad.mtu;
