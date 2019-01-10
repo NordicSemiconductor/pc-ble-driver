@@ -11,9 +11,13 @@ install(
 # Directory include/common/sdk_compat is included without sdk_compat
 # in SoftDevice. Moving those header files to common remove an extra
 # include to think about
-#install(
-#    DIRECTORY include/common/sdk_compat DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/common
-#)
+install(
+    FILES 
+        include/common/sdk_compat/nrf.h
+        include/common/sdk_compat/compiler_abstraction.h
+        include/common/sdk_compat/nrf_svc.h
+    DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/common
+)
 
 install(FILES "LICENSE" DESTINATION ${NRF_BLE_DRIVER_INSTALL_ROOT})
 
