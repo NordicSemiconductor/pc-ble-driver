@@ -70,7 +70,7 @@ typedef struct
     // Buffer for scan data received
     ble_data_t scan_data = {nullptr, 0};
     int scan_data_id{0};
-    void *ble_gap_adv_buf_addr[BLE_GAP_ADV_SET_COUNT_MAX]{};
+    void *ble_gap_adv_buf_addr[APP_BLE_GAP_ADV_BUF_COUNT]{};
 #endif // NRF_SD_BLE_API_VERSION >= 6
 } adapter_ble_gap_state_t;
 
@@ -482,7 +482,7 @@ int app_ble_gap_adv_buf_register(void *p_buf)
         // store this new buffer pointer.
         for (auto &addr : gap_state->ble_gap_adv_buf_addr)
         {
-            if (addr == nullptr)
+            if ((addr == nullptr) || (addr == p_buf))
             {
                 addr = p_buf;
                 return id;

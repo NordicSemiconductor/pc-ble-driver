@@ -64,6 +64,10 @@ extern "C" {
 #define SER_MAX_CONNECTIONS 8
 #endif
 
+#ifndef APP_BLE_GAP_ADV_BUF_COUNT
+#define APP_BLE_GAP_ADV_BUF_COUNT 8 // Keep in sync with connectivity in SDK
+#endif
+
 /**@brief GAP connection - keyset mapping structure.
  *
  * @note  This structure is used to map keysets to connection instances and store them in a static
