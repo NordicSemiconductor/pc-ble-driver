@@ -12,15 +12,6 @@
 
 namespace testutil {
 
-/**
- * @brief Function that find advertising type data based on specified specified advertising type
- *
- * @param[in]  advType Advertisment type to search for
- * @param[in]  advData Advertising data to parse
- * @param[in,out] advTypeData Advertising data found for provided advertising type
- *
- * @return true if advertising type was found, false if not.
- */
 bool advReportParse(const uint8_t advType, const std::vector<uint8_t> &advData,
                     std::vector<uint8_t> &advTypeData)
 {
@@ -82,15 +73,6 @@ bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
                           manufacturer_specific_data);
 }
 
-/**
- * @brief Function that search for advertising name in BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME or
- * BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME
- *
- * @param[in] p_adv_report Pointer to advertising report to search in
- * @param[in] name_to_find Advertising name to search for
- *
- * @return true if name is found, false if not
- */
 bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report, const std::string &name_to_find)
 {
     std::vector<uint8_t> advData;
@@ -132,8 +114,8 @@ bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report, const std::string 
 }
 
 void assertAdvertisingPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
-                                          const size_t additionalBytes, const bool extended,
-                                          const bool connectable)
+                                        const size_t additionalBytes, const bool extended,
+                                        const bool connectable)
 {
     auto valid            = true;
     const auto packetSize = existingPacket.size() + additionalBytes;
@@ -168,32 +150,19 @@ void assertAdvertisingPacketSizeIsValid(const std::vector<uint8_t> existingPacke
     }
 }
 
-/**
- * @brief Function that append name to advertise to advertising type
- * BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME
- *
- * @param[in,out] advertisingData std::vector to append advertising data to
- * @param[in] name Name to append to advertisingData
- */
 void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name,
                            const bool extended)
 {
     assertAdvertisingPacketSizeIsValid(advertisingData, 2 /* size + type */ + name.length(),
-                                         extended);
+                                       extended);
 
     advertisingData.push_back(1 /* type */ + static_cast<uint8_t>(name.length()));
     advertisingData.push_back(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME);
     std::copy(name.begin(), name.end(), std::back_inserter(advertisingData));
 }
 
-/**
- * @brief Function that append flags to advertising type
- *
- * @param[in,out] advertisingData std::vector to append advertising flags to
- * @param[in] flags Flags to append to advertisingData
- */
 void appendAdvertisingFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
-                              const bool extended)
+                            const bool extended)
 {
     assertAdvertisingPacketSizeIsValid(advertisingData, 3 /* size + type + flags */, extended);
 
@@ -202,14 +171,8 @@ void appendAdvertisingFlags(std::vector<uint8_t> &advertisingData, const uint8_t
     advertisingData.push_back(flags);
 }
 
-/**
- * @brief Function that append manufacturer specifid data to advertising
- *
- * @param[in,out] advertisingData std::vector to append manufacturer specific data to
- * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData
- */
 void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
-                                    const std::vector<uint8_t> manufacturerSpecificData,
+                                    const std::vector<uint8_t> &manufacturerSpecificData,
                                     const bool extended)
 {
     assertAdvertisingPacketSizeIsValid(
@@ -221,24 +184,11 @@ void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
               std::back_inserter(advertisingData));
 }
 
-/*
- * @brief Function that fills a std::vector<uint8_t> with random values
- *
- * @param[in,out] data vector to populate with random values
- * @param[in] size number of random values to fill the vector with
- */
 void appendRandomData(std::vector<uint8_t> &data, const size_t size)
 {
     data.resize(size);
     std::generate(data.begin(), data.end(), std::rand);
 }
-
-/*
- * @brief Function that fills a std::vector<uint8_t> with random ASCII values
- *
- * @param[in,out] data vector to populate with random ASCII values
- * @param[in] size number of random values to fill the vector with
- */
 
 void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size)
 {
@@ -271,6 +221,25 @@ std::string createRandomAdvertisingName(const std::string &prefix, const uint8_t
     });
 
     return std::string(data.begin(), data.end());
+}
+
+void createRandomAdvertisingData(std::vector<uint8_t> &advertisingData,
+                                 std::string &advertisingName, std::vector<uint8_t> &randomData,
+                                 const size_t advertisingNameLength,
+                                 const size_t manufacturerDataLength, const bool extended)
+{
+    randomData.clear();
+    randomData.resize(manufacturerDataLength);
+
+    std::vector<uint8_t> peripheralAdvNameBuffer(advertisingNameLength);
+    appendRandomAlphaNumeric(peripheralAdvNameBuffer, advertisingNameLength);
+    const std::string peripheralAdvName(peripheralAdvNameBuffer.begin(),
+                                        peripheralAdvNameBuffer.end());
+    testutil::appendAdvertisingName(advertisingData, peripheralAdvName);
+    advertisingName = peripheralAdvName;
+
+    testutil::appendRandomData(randomData, manufacturerDataLength);
+    testutil::appendManufacturerSpecificData(advertisingData, randomData, extended);
 }
 
 bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs)

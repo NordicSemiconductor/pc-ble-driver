@@ -76,6 +76,9 @@ class AdapterWrapper
 
     uint32_t startAdvertising();
 
+    uint32_t changeAdvertisingData(const std::vector<uint8_t> &advertisingData,
+                                   const std::vector<uint8_t> &scanResponseData);
+
     uint32_t startServiceDiscovery(const uint8_t type, const uint16_t uuid);
 
     uint32_t startAuthentication(const bool bond = true, const bool mitm = true,

@@ -76,8 +76,8 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
         }
         else
         {
-            mp_out_params[0] = NULL;
-            mp_out_params[1] = NULL;
+            mp_out_params[0] = nullptr;
+            mp_out_params[1] = nullptr;
         }
 
         return ble_gap_adv_set_configure_req_enc(p_adv_handle, p_adv_data, p_adv_params, buffer,
