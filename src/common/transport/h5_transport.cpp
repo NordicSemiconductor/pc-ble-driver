@@ -92,7 +92,6 @@ H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransm
     , stateMachineReady(false)
     , isOpen(false)
 {
-    setupStateMachine();
 }
 
 H5Transport::~H5Transport() noexcept
@@ -119,14 +118,17 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
         return errorCode;
     }
 
-    if (currentState != STATE_START)
+    if (!(currentState == STATE_START || currentState == STATE_CLOSED))
     {
-        log(SD_RPC_LOG_FATAL, std::string("Not able to open, current state is not valid"));
+        std::stringstream ss;
+        ss << "Not able to open, current state is not valid (" << stateToString(currentState) << ")";
+        log(SD_RPC_LOG_FATAL, ss.str());
         return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
 
     // State machine starts in a separate thread.
     // Wait for the state machine to be ready
+    setupStateMachine();
     startStateMachine();
 
     lastPacket.clear();
@@ -885,6 +887,8 @@ void H5Transport::stateMachineWorker()
         // Inform interested parties that new current state is set and ready
         stateWaitCondition.notify_all();
     }
+
+    stateMachineReady = false;
 }
 
 bool H5Transport::waitForState(h5_state_t state, std::chrono::milliseconds timeout)
