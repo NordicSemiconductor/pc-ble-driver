@@ -1,5 +1,10 @@
 #Create install target
-set(NRF_BLE_DRIVER_INSTALL_ROOT ${CMAKE_BINARY_DIR}/artifacts/pc-ble-driver-${PC_BLE_DRIVER_VERSION})
+if(NOT CMAKE_INSTALL_PREFIX)
+    set(NRF_BLE_DRIVER_INSTALL_ROOT ${CMAKE_BINARY_DIR}/artifacts/pc-ble-driver-${PC_BLE_DRIVER_VERSION})
+else()
+    set(NRF_BLE_DRIVER_INSTALL_ROOT ${CMAKE_INSTALL_PREFIX})
+endif()
+
 set(NRF_BLE_DRIVER_INCLUDE_PREFIX "${NRF_BLE_DRIVER_INSTALL_ROOT}/include/nrf/ble/driver")
 
 install(
