@@ -111,8 +111,9 @@ std::string createRandomAdvertisingName(const std::string &prefix = "periph",
 void createRandomAdvertisingData(
     std::vector<uint8_t> &advertisingData, std::string &advertisingName,
     std::vector<uint8_t> &randomData, const size_t advertisingNameLength = 20,
-    const size_t manufacturerDataLength = testutil::ADV_DATA_BUFFER_SIZE - 20 -
-                                          2 /* length and AD type */,
+    const size_t manufacturerDataLength = testutil::ADV_DATA_BUFFER_SIZE -
+                                          20 /* advertisingNameLength */ -
+                                          2 /* length and AD type */ - 2 /* length and AD type */,
     const bool extended = false);
 
 bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs);

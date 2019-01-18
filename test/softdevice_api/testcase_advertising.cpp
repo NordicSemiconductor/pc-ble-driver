@@ -91,7 +91,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         // Append max number of bytes in advertisement packet with manufacturer specific random data
         // after the peripheral name
         const auto remainingSpace = maxLengthOfAdvData -
-                                    (peripheralAdvName.length() + 2) /* AD header size */ -
+                                    (advertisementNameLength + 2) /* AD header size */ -
                                     2 /* AD header size manufacturer specific data */;
 
         testutil::createRandomAdvertisingData(scanResponseData, peripheralAdvName, randomData,
