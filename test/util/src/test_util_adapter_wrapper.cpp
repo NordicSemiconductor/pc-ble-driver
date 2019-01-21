@@ -374,41 +374,50 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
         return NRF_ERROR_INVALID_PARAM;
     }
 
+    ble_data_t adv_data{};
+
     if (advertisingDataSize == 0)
     {
-        scratchpad.adv_report_adv_data.p_data = nullptr;
-        scratchpad.adv_report_adv_data.len    = 0;
+        adv_data.p_data = nullptr;
+        adv_data.len    = 0;
     }
     else
     {
-        std::copy(advertisingData.begin(), advertisingData.end(),
-                  scratchpad.adv_report_adv_data_buffer);
-        scratchpad.adv_report_adv_data.p_data = scratchpad.adv_report_adv_data_buffer;
-        scratchpad.adv_report_adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
+        uint8_t temporary_adv_data_buffer[ADV_DATA_BUFFER_SIZE]{};
+        std::copy(advertisingData.begin(), advertisingData.end(), temporary_adv_data_buffer);
+
+        adv_data.p_data = temporary_adv_data_buffer;
+        adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
     }
 
     const auto scanResponseDataSize = scanResponseData.size();
 
+    ble_data_t scan_rsp_data{};
+
     if (scanResponseDataSize == 0)
     {
-        scratchpad.adv_report_scan_rsp_data.p_data = nullptr;
-        scratchpad.adv_report_scan_rsp_data.len    = 0;
+        scan_rsp_data.p_data = nullptr;
+        scan_rsp_data.len    = 0;
     }
     else
     {
-        std::copy(scanResponseData.begin(), scanResponseData.end(),
-                  scratchpad.adv_report_scan_rsp_data_buffer);
-        scratchpad.adv_report_scan_rsp_data.p_data = scratchpad.adv_report_scan_rsp_data_buffer;
-        scratchpad.adv_report_scan_rsp_data.len    = static_cast<uint16_t>(scanResponseDataSize);
+        uint8_t temporary_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{};
+        std::copy(scanResponseData.begin(), scanResponseData.end(), temporary_scan_rsp_data_buffer);
+        scan_rsp_data.p_data = temporary_scan_rsp_data_buffer;
+        scan_rsp_data.len    = static_cast<uint16_t>(scanResponseDataSize);
     }
 
     // Tie together the advertisement setup
-    scratchpad.adv_report_data.adv_data      = scratchpad.adv_report_adv_data;
-    scratchpad.adv_report_data.scan_rsp_data = scratchpad.adv_report_scan_rsp_data;
+    const auto adv_report_data = std::make_shared<ble_gap_adv_data_t>();
+
+    adv_report_data->adv_data      = adv_data;
+    adv_report_data->scan_rsp_data = scan_rsp_data;
+
+    NRF_LOG(role() << " Changing advertisement data to instance with address " << static_cast<void*>(adv_report_data.get()));
 
     // Support only undirected advertisement for now
     const auto err_code = sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
-                                                 &(scratchpad.adv_report_data), nullptr);
+                                                       adv_report_data.get(), nullptr);
 
     if (err_code != NRF_SUCCESS)
     {

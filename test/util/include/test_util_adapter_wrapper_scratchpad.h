@@ -5,6 +5,8 @@
 
 #include "ble.h"
 
+constexpr size_t SCAN_RSP_DATA_BUFFER_SIZE = 1000;
+
 #if NRF_SD_BLE_API == 4 || NRF_SD_BLE_API > 6
 #error "wrapper does not take into account this version of the SoftDevice API."
 #endif
@@ -105,7 +107,7 @@ struct AdapterWrapperScratchpad
     ble_gap_adv_data_t adv_report_data{};                       // Data used for advertising
     ble_data_t adv_report_adv_data{};                           // Advertisement data
     uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE]{}; // Advertisement data buffer
-    uint8_t adv_report_scan_rsp_data_buffer[1000]{};            // Advertisement data buffer
+    uint8_t adv_report_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{};            // Advertisement data buffer
     ble_data_t adv_report_scan_rsp_data{};                      // Scan report data
     ble_gap_adv_properties_t adv_properties{};                  // Properties used for advertising
 #endif

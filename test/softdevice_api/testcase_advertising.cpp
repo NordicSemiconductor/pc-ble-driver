@@ -155,6 +155,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 advertisingData.clear();
                                 testutil::createRandomAdvertisingData(
                                     advertisingData, peripheralAdvName, randomData);
+                                NRF_LOG(c->role() << " Changing advertisement data in BLE_GAP_EVT_ADV_REPORT");
+
                                 const auto err_code = p->changeAdvertisingData(
                                     std::vector<uint8_t>(), advertisingData);
 
