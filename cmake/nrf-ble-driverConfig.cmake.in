@@ -1,0 +1,25 @@
+# nrf-ble-driver cmake module
+#
+# The following import targets are created
+#
+# ::
+#
+#   nrf-ble-driver-static
+#   nrf-ble-driver
+#
+# This module sets the following variables in your project::
+#
+#   nrf-ble-driver_FOUND - true if nrf-ble-driver is found on the system
+#   nrf-ble-driver_INCLUDE_DIR - the directory containing nrf-ble-driver headers
+#   nrf-ble-driver_LIBRARY
+#   nrf-ble-driver_STATIC_LIBRARY
+
+@PACKAGE_INIT@
+
+if(NOT TARGET nrf-ble-driver AND NOT TARGET nrf-ble-driver-static)
+  include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+  get_target_property(@PROJECT_NAME@_INCLUDE_DIR nrf-ble-driver INTERFACE_INCLUDE_DIRECTORIES)
+  get_target_property(@PROJECT_NAME@_LIBRARY nrf-ble-driver LOCATION)
+  get_target_property(@PROJECT_NAME@_STATIC_LIBRARY nrf-ble-driver-static LOCATION)
+endif()

@@ -8,9 +8,7 @@ function(setup_example example_directory)
         add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCE_FILES})
 
         target_compile_definitions(${EXAMPLE_NAME} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER})
-        target_include_directories(${EXAMPLE_NAME} PRIVATE ../src/sd_api_v${SD_API_VER}/sdk/components/softdevice/s130/headers)
-        target_include_directories(${EXAMPLE_NAME} PRIVATE ../src/sd_api_v${SD_API_VER}/sdk/components/softdevice/s132/headers)
-        target_include_directories(${EXAMPLE_NAME} PRIVATE ../src/sd_api_v${SD_API_VER}/sdk/components/softdevice/s140/headers)
+        target_include_directories(${EXAMPLE_NAME} PRIVATE ../include/sd_api_v${SD_API_VER})
 
         if(WIN32)
             target_link_libraries(${EXAMPLE_NAME} PRIVATE pc_ble_driver_static_sd_api_v${SD_API_VER})

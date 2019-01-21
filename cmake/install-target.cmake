@@ -1,57 +1,66 @@
 #Create install target
 set(NRF_BLE_DRIVER_INCLUDE_PREFIX "include/nrf/ble/driver")
 
-install(
-    DIRECTORY include/common DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}
-    PATTERN "internal" EXCLUDE
-    PATTERN "sdk_compat" EXCLUDE
-)
-
-# Directory include/common/sdk_compat is included without sdk_compat
-# in SoftDevice. Moving those header files to common remove an extra
-# include to think about
-install(
-    FILES 
-        include/common/sdk_compat/nrf.h
-        include/common/sdk_compat/compiler_abstraction.h
-        include/common/sdk_compat/nrf_svc.h
-    DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/common
-)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 install(FILES "LICENSE" DESTINATION share)
+
+message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR} CMAKE_INSTALL_INCLUDEDIR: ${CMAKE_INSTALL_INCLUDEDIR}")
 
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
 
     install(
-        TARGETS ${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB}
-        LIBRARY DESTINATION lib/shared
-        ARCHIVE DESTINATION lib/shared
-        RUNTIME DESTINATION lib/shared
+        TARGETS ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB}
+        EXPORT ${PROJECT_NAME}-targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${SD_API_VER_L}
         COMPONENT SDK
     )
 
     install(
-        TARGETS ${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB}
-        ARCHIVE DESTINATION lib/static
+        TARGETS ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB}
+        EXPORT ${PROJECT_NAME}-targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${SD_API_VER_L}
         COMPONENT SDK
     )
-
-    if(SD_API_VER STREQUAL "SD_API_V6")
-        install(
-            DIRECTORY 
-                src/${SD_API_VER_L}/sdk/components/softdevice/s140/headers/
-            DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/${SD_API_VER_L}
-            COMPONENT SDK
-        )
-    endif()
-
-    if(NOT SD_API_VER STREQUAL "SD_API_V6")
-        install(
-            DIRECTORY 
-                src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers/
-            DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/${SD_API_VER_L}
-            COMPONENT SDK
-        )
-    endif()
 endforeach(SD_API_VER)
+
+if(WIN32)
+  set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "CMake" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
+else()
+  # GNUInstallDirs "DATADIR" wrong here; CMake search path wants "share".
+  set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "share/cmake/${PROJECT_NAME}" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
+endif()
+
+configure_package_config_file(cmake/${PROJECT_NAME}Config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
+)
+
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${NRF_BLE_DRIVER_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
+)
+
+export(
+    EXPORT ${PROJECT_NAME}-targets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake"
+)
+
+install(
+    EXPORT ${PROJECT_NAME}-targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
+)
