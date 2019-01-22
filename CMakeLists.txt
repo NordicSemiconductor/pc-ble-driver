@@ -119,6 +119,7 @@ foreach(SD_API_VER ${SD_API_VERS})
         include/common/sdk_compat/nrf.h
         include/common/sdk_compat/compiler_abstraction.h
         include/common/sdk_compat/nrf_svc.h
+        include/common/config/platform.h
         include/${SD_API_VER_L}/ble.h
         include/${SD_API_VER_L}/ble_err.h
         include/${SD_API_VER_L}/ble_gap.h
@@ -159,6 +160,7 @@ find_path(ASIO_INCLUDE_DIR asio.hpp)
 
 include_directories(
         include/common
+        include/common/config
         include/common/sdk_compat
         include/common/internal
         include/common/internal/transport
