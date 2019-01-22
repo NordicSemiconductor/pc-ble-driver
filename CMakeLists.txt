@@ -1,13 +1,16 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(nrf-ble-driver)
-
 set(NRF_BLE_DRIVER_DEFAULT_VERSION "0.0.0")
 
 if(NOT DEFINED NRF_BLE_DRIVER_VERSION)
     message(STATUS "NRF_BLE_DRIVER_VERSION not specified, setting it to ${NRF_BLE_DRIVER_DEFAULT_VERSION}")
     set(NRF_BLE_DRIVER_VERSION "${NRF_BLE_DRIVER_DEFAULT_VERSION}")
 endif()
+
+project(
+    nrf-ble-driver
+    VERSION ${NRF_BLE_DRIVER_VERSION}
+)
 
 include(cmake/nrf-ble-driver.cmake)
 
@@ -101,34 +104,47 @@ foreach(SD_API_VER ${SD_API_VERS})
     add_library(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} SHARED $<TARGET_OBJECTS:${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
     add_library(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} STATIC $<TARGET_OBJECTS:${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
 
-    set(${SD_API_VER}_public_headers
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+
+    set(${SD_API_VER}_PUBLIC_HEADERS
         include/common/sd_rpc.h
         include/common/sd_rpc_types.h
         include/common/adapter.h
         include/common/sdk_compat/nrf.h
         include/common/sdk_compat/compiler_abstraction.h
         include/common/sdk_compat/nrf_svc.h
-        include/${SD_API_VER}/ble.h
-        include/${SD_API_VER}/ble_err.h
-        include/${SD_API_VER}/ble_gap.h
-        include/${SD_API_VER}/ble_gatt.h
-        include/${SD_API_VER}/ble_gattc.h
-        include/${SD_API_VER}/ble_gatts.h
-        include/${SD_API_VER}/ble_hci.h
-        include/${SD_API_VER}/ble_l2cap.h
-        include/${SD_API_VER}/ble_ranges.h
-        include/${SD_API_VER}/ble_types.h
-        include/${SD_API_VER}/nrf_error.h
+        include/${SD_API_VER_L}/ble.h
+        include/${SD_API_VER_L}/ble_err.h
+        include/${SD_API_VER_L}/ble_gap.h
+        include/${SD_API_VER_L}/ble_gatt.h
+        include/${SD_API_VER_L}/ble_gattc.h
+        include/${SD_API_VER_L}/ble_gatts.h
+        include/${SD_API_VER_L}/ble_hci.h
+        include/${SD_API_VER_L}/ble_l2cap.h
+        include/${SD_API_VER_L}/ble_ranges.h
+        include/${SD_API_VER_L}/ble_types.h
+        include/${SD_API_VER_L}/nrf_error.h
     )
 
     set_target_properties(
         ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTIES
-        PUBLIC_HEADER "${${SD_API_VER}_public_headers}"
+        PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+        OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+        RELEASE_POSTFIX "${MSVC_TOOLSET}-mt-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        RELWITHDEBINFO_POSTFIX "${MSVC_TOOLSET}-mt-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        MINSIZEREL_POSTFIX "${MSVC_TOOLSET}-mt-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-gd-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     )
 
     set_target_properties(
         ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PROPERTIES
-        PUBLIC_HEADER "${${SD_API_VER}_public_headers}"
+        PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+        OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+        RELEASE_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        RELWITHDEBINFO_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        MINSIZEREL_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+        DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-static-gd-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
     )
 endforeach(SD_API_VER)
 

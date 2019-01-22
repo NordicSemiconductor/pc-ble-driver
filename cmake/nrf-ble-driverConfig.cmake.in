@@ -1,12 +1,6 @@
 # nrf-ble-driver cmake module
 #
 # The following import targets are created
-#
-# ::
-#
-#   nrf-ble-driver-static
-#   nrf-ble-driver
-#
 # This module sets the following variables in your project::
 #
 #   nrf-ble-driver_FOUND - true if nrf-ble-driver is found on the system
@@ -16,10 +10,88 @@
 
 @PACKAGE_INIT@
 
-if(NOT TARGET nrf-ble-driver AND NOT TARGET nrf-ble-driver-static)
-  include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 
-  get_target_property(@PROJECT_NAME@_INCLUDE_DIR nrf-ble-driver INTERFACE_INCLUDE_DIRECTORIES)
-  get_target_property(@PROJECT_NAME@_LIBRARY nrf-ble-driver LOCATION)
-  get_target_property(@PROJECT_NAME@_STATIC_LIBRARY nrf-ble-driver-static LOCATION)
-endif()
+foreach(SD_API_VER ${SD_API_VERS})
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+
+    get_target_property(@PROJECT_NAME@_${SD_API_VER} @NRF_BLE_DRIVER_SD_API_V2_SHARED_LIB INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(@PROJECT_NAME@_SD_API_V2_LIBRARY pc_ble_driver_shared_sd_api_v2 LOCATION)
+    get_target_property(@PROJECT_NAME@_SD_API_V2_STATIC_LIBRARY pc_ble_driver_static_sd_api_v2 LOCATION)
+endforeach(SD_API_VER)
+
+# SDv2 related properties
+get_target_property(
+    @PROJECT_NAME@_SD_API_V2_INCLUDE_DIR 
+    NRF_BLE_DRIVER_SD_API_V2_SHARED_LIB
+    INTERFACE_INCLUDE_DIRECTORIES
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V2_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V2_SHARED_LIB
+    LOCATION
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V2_STATIC_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V2_STATIC_LIB
+    LOCATION
+)
+
+# SDv3 related properties
+get_target_property(
+    @PROJECT_NAME@_SD_API_V3_INCLUDE_DIR 
+    NRF_BLE_DRIVER_SD_API_V3_SHARED_LIB
+    INTERFACE_INCLUDE_DIRECTORIES
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V3_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V3_SHARED_LIB
+    LOCATION
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V3_STATIC_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V3_STATIC_LIB
+    LOCATION
+)
+
+# SDv5 related properties
+get_target_property(
+    @PROJECT_NAME@_SD_API_V5_INCLUDE_DIR 
+    NRF_BLE_DRIVER_SD_API_V5_SHARED_LIB
+    INTERFACE_INCLUDE_DIRECTORIES
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V5_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V5_SHARED_LIB
+    LOCATION
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V5_STATIC_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V5_STATIC_LIB
+    LOCATION
+)
+
+# SDv6 related properties
+get_target_property(
+    @PROJECT_NAME@_SD_API_V6_INCLUDE_DIR 
+    NRF_BLE_DRIVER_SD_API_V6_SHARED_LIB
+    INTERFACE_INCLUDE_DIRECTORIES
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V6_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V6_SHARED_LIB
+    LOCATION
+)
+
+get_target_property(
+    @PROJECT_NAME@_SD_API_V6_STATIC_LIBRARY
+    NRF_BLE_DRIVER_SD_API_V6_STATIC_LIB
+    LOCATION
+)
