@@ -41,7 +41,7 @@ configure_package_config_file(
 )
 
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
     VERSION ${NRF_BLE_DRIVER_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
@@ -49,7 +49,7 @@ write_basic_package_version_file(
 install(
     FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    ${PROJECT_NAME}ConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
 )
 
