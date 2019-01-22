@@ -165,24 +165,23 @@ foreach(SD_API_VER ${SD_API_VERS})
 
     # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
     if(SD_API_VER STRGREATER "SD_API_V2")
-        target_include_directories (${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+        target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
             src/sd_api_common/sdk/components/libraries/util
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
             src/sd_api_common/sdk/components/serialization/common
             src/sd_api_common/sdk/components/serialization/common/struct_ser/ble
-            src/${SD_API_VER_L}
-            include/${SD_API_VER_L}
+            SYSTEM PUBLIC include/${SD_API_VER_L}
         )
     else()
-        target_include_directories (${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+        target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
             src/${SD_API_VER_L}/sdk/components/libraries/util
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
             src/${SD_API_VER_L}/sdk/components/serialization/common
             src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
-            include/${SD_API_VER_L}
+            SYSTEM PUBLIC include/${SD_API_VER_L}
         )
     endif()
 
