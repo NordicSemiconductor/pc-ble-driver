@@ -32,7 +32,7 @@ foreach(SD_API_VER ${SD_API_VERS})
     )
 endforeach(SD_API_VER)
 
-set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "share/cmake" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
+set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "share/${PROJECT_NAME}" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
 
 configure_package_config_file(
     cmake/${PROJECT_NAME}Config.cmake.in
