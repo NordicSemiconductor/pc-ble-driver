@@ -34,17 +34,21 @@ endforeach(SD_API_VER)
 
 set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "share/cmake" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
 
-configure_package_config_file(cmake/${PROJECT_NAME}Config.cmake.in
+configure_package_config_file(
+    cmake/${PROJECT_NAME}Config.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     INSTALL_DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
 )
 
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     VERSION ${NRF_BLE_DRIVER_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+install(
+    FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
     ${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
 )
@@ -52,5 +56,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
 install(
     EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE nrf::
     DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
 )
