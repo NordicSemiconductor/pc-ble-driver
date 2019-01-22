@@ -61,14 +61,10 @@ foreach(SD_API_VER ${SD_API_VERS})
         list(APPEND LIB_${SD_API_VER}_C_SRC_FILES ${LIB_NEWER_SDK_API_COMMON_C_SRC_FILES})
     endif()
 
-    #message(STATUS "SD: ${SD_API_VER}: C_SRC: ${LIB_${SD_API_VER}_C_SRC_FILES}")
-
     set(LIB_${SD_API_VER}_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
                           ${LIB_SDK_${SD_API_VER}_CPP_SRC_FILES}
                           ${LIB_TRANSPORT_CPP_SRC_FILES}
     )
-
-    #message(STATUS "SD: ${SD_API_VER}: CPP_SRC: ${LIB_${SD_API_VER}_CPP_SRC_FILES}")
 
     # Force .c files to be compiled with the C++ compiler
     if(NOT APPLE)
@@ -105,6 +101,16 @@ foreach(SD_API_VER ${SD_API_VERS})
     add_library(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} STATIC $<TARGET_OBJECTS:${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
 
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+
+    target_include_directories(
+        ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} INTERFACE
+        $<INSTALL_INTERFACE:include/${SD_API_VER_L}>
+    )
+
+    target_include_directories(
+        ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} INTERFACE
+        $<INSTALL_INTERFACE:include/${SD_API_VER_L}>
+    )
 
     set(${SD_API_VER}_PUBLIC_HEADERS
         include/common/sd_rpc.h
@@ -172,7 +178,7 @@ foreach(SD_API_VER ${SD_API_VERS})
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
             src/sd_api_common/sdk/components/serialization/common
             src/sd_api_common/sdk/components/serialization/common/struct_ser/ble
-            SYSTEM PUBLIC include/${SD_API_VER_L}
+            include/${SD_API_VER_L}
         )
     else()
         target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
@@ -181,7 +187,7 @@ foreach(SD_API_VER ${SD_API_VERS})
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
             src/${SD_API_VER_L}/sdk/components/serialization/common
             src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
-            SYSTEM PUBLIC include/${SD_API_VER_L}
+            include/${SD_API_VER_L}
         )
     endif()
 
