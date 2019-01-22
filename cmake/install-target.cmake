@@ -1,6 +1,4 @@
 #Create install target
-set(NRF_BLE_DRIVER_INCLUDE_PREFIX "include/nrf/ble/driver")
-
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -34,8 +32,26 @@ endforeach(SD_API_VER)
 
 set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "share/${PROJECT_NAME}" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
 
+# Create a template package config file
+# This part is required because SoftDevice to compile is dynamic
+set(CONFIG_TEMPLATE "@PACKAGE_INIT@\n\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake\")\n\n")
+set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\n")
+
+foreach(SD_API_VER ${SD_API_VERS})
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\n# ${SD_API_VER} related properties")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\nget_target_property(@PROJECT_NAME@_${SD_API_VER}_INCLUDE_DIR nrf::nrf_ble_driver_${SD_API_VER_L}_shared INTERFACE_INCLUDE_DIRECTORIES)")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\nget_target_property(@PROJECT_NAME@_${SD_API_VER}_LIBRARY nrf::nrf_ble_driver_${SD_API_VER_L}_shared LOCATION)")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\nget_target_property(@PROJECT_NAME@_${SD_API_VER}_STATIC_LIBRARY nrf::nrf_ble_driver_${SD_API_VER_L}_static LOCATION)")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\n")
+endforeach(SD_API_VER)
+
+set(CONFIG_TEMPLATE_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in")
+file(WRITE ${CONFIG_TEMPLATE_FILENAME} "${CONFIG_TEMPLATE}")
+
 configure_package_config_file(
-    cmake/${PROJECT_NAME}Config.cmake.in
+    ${CONFIG_TEMPLATE_FILENAME}
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     INSTALL_DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
 )
