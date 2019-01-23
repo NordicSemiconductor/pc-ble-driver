@@ -1,63 +1,77 @@
 #Create install target
-if(NOT CMAKE_INSTALL_PREFIX)
-    set(NRF_BLE_DRIVER_INSTALL_ROOT ${CMAKE_BINARY_DIR}/artifacts/pc-ble-driver-${PC_BLE_DRIVER_VERSION})
-else()
-    set(NRF_BLE_DRIVER_INSTALL_ROOT ${CMAKE_INSTALL_PREFIX})
-endif()
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-set(NRF_BLE_DRIVER_INCLUDE_PREFIX "${NRF_BLE_DRIVER_INSTALL_ROOT}/include/nrf/ble/driver")
+install(FILES "LICENSE" DESTINATION share)
 
-install(
-    DIRECTORY include/common DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}
-    PATTERN "internal" EXCLUDE
-    PATTERN "sdk_compat" EXCLUDE
-)
-
-# Directory include/common/sdk_compat is included without sdk_compat
-# in SoftDevice. Moving those header files to common remove an extra
-# include to think about
-install(
-    FILES 
-        include/common/sdk_compat/nrf.h
-        include/common/sdk_compat/compiler_abstraction.h
-        include/common/sdk_compat/nrf_svc.h
-    DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/common
-)
-
-install(FILES "LICENSE" DESTINATION ${NRF_BLE_DRIVER_INSTALL_ROOT})
+message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR} CMAKE_INSTALL_INCLUDEDIR: ${CMAKE_INSTALL_INCLUDEDIR}")
 
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
 
     install(
-        TARGETS ${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB}
-        LIBRARY DESTINATION ${NRF_BLE_DRIVER_INSTALL_ROOT}/lib/shared
-        ARCHIVE DESTINATION ${NRF_BLE_DRIVER_INSTALL_ROOT}/lib/shared
-        RUNTIME DESTINATION ${NRF_BLE_DRIVER_INSTALL_ROOT}/lib/shared
+        TARGETS ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB}
+        EXPORT ${PROJECT_NAME}-targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${SD_API_VER_L}
         COMPONENT SDK
     )
 
     install(
-        TARGETS ${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB}
-        ARCHIVE DESTINATION ${NRF_BLE_DRIVER_INSTALL_ROOT}/lib/static
+        TARGETS ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB}
+        EXPORT ${PROJECT_NAME}-targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${SD_API_VER_L}
         COMPONENT SDK
     )
-
-    if(SD_API_VER STREQUAL "SD_API_V6")
-        install(
-            DIRECTORY 
-                src/${SD_API_VER_L}/sdk/components/softdevice/s140/headers/
-            DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/${SD_API_VER_L}
-            COMPONENT SDK
-        )
-    endif()
-
-    if(NOT SD_API_VER STREQUAL "SD_API_V6")
-        install(
-            DIRECTORY 
-                src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers/
-            DESTINATION ${NRF_BLE_DRIVER_INCLUDE_PREFIX}/${SD_API_VER_L}
-            COMPONENT SDK
-        )
-    endif()
 endforeach(SD_API_VER)
+
+set(NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR "share/${PROJECT_NAME}" CACHE STRING "install path for nrf-ble-driverConfig.cmake")
+
+# Create a template package config file
+# This part is required because SoftDevice to compile is dynamic
+set(CONFIG_TEMPLATE "@PACKAGE_INIT@\n\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake\")\n\n")
+set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\n")
+
+foreach(SD_API_VER ${SD_API_VERS})
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\n# ${SD_API_VER} related properties")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\nget_target_property(@PROJECT_NAME@_${SD_API_VER}_INCLUDE_DIR nrf::nrf_ble_driver_${SD_API_VER_L}_shared INTERFACE_INCLUDE_DIRECTORIES)")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\nget_target_property(@PROJECT_NAME@_${SD_API_VER}_LIBRARY nrf::nrf_ble_driver_${SD_API_VER_L}_shared LOCATION)")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\nget_target_property(@PROJECT_NAME@_${SD_API_VER}_STATIC_LIBRARY nrf::nrf_ble_driver_${SD_API_VER_L}_static LOCATION)")
+    set(CONFIG_TEMPLATE "${CONFIG_TEMPLATE}\n")
+endforeach(SD_API_VER)
+
+set(CONFIG_TEMPLATE_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in")
+file(WRITE ${CONFIG_TEMPLATE_FILENAME} "${CONFIG_TEMPLATE}")
+
+configure_package_config_file(
+    ${CONFIG_TEMPLATE_FILENAME}
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    VERSION ${NRF_BLE_DRIVER_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(
+    FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
+)
+
+install(
+    EXPORT ${PROJECT_NAME}-targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE nrf::
+    DESTINATION ${NRF_BLE_DRIVER_CMAKECONFIG_INSTALL_DIR}
+)

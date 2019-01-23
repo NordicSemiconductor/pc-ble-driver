@@ -365,17 +365,16 @@ function(setup_test)
     add_executable(${test_name} ${source_file} ${source_testcases} ${test_util_src})
 
     target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver})
-    target_include_directories(${test_name} SYSTEM PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s132/headers)
-    target_include_directories(${test_name} SYSTEM PRIVATE ../src/sd_api_v${softdevice_api_ver}/sdk/components/softdevice/s140/headers)
+    target_include_directories(${test_name} SYSTEM PRIVATE ../include/sd_api_v${softdevice_api_ver})
     target_include_directories(${test_name} SYSTEM PRIVATE util/include)
 
     if(WIN32)
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} Catch2::Catch2)
+        target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static Catch2::Catch2)
     elseif(APPLE)
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} Catch2::Catch2)
+        target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static Catch2::Catch2)
     else()
         # Assume Linux
-        target_link_libraries(${test_name} PRIVATE pc_ble_driver_static_sd_api_v${softdevice_api_ver} "pthread" Catch2::Catch2)
+        target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static "pthread" Catch2::Catch2)
     endif()
 
     if(NOT ${test_name} STREQUAL "test_uart_boost_v2")
