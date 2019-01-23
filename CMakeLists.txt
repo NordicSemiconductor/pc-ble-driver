@@ -133,6 +133,7 @@ foreach(SD_API_VER ${SD_API_VERS})
         include/${SD_API_VER_L}/nrf_error.h
     )
 
+if(WIN32)
     set_target_properties(
         ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTIES
         PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
@@ -153,6 +154,25 @@ foreach(SD_API_VER ${SD_API_VERS})
         MINSIZEREL_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
         DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-static-gd-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
     )
+else()
+    set_target_properties(
+        ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTIES
+        COMPILE_DEFINITIONS "DLL_EXPORT"
+        PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+        OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+        VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+        SOVERSION "${PROJECT_VERSION_MAJOR}"
+        PREFIX "lib"
+    )
+
+    set_target_properties(
+        ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PROPERTIES
+        PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+        OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+        PREFIX "lib"
+    )
+endif()
+
 endforeach(SD_API_VER)
 
 # Set common include directories
