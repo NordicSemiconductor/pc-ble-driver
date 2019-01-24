@@ -374,7 +374,7 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
         return NRF_ERROR_INVALID_PARAM;
     }
 
-    ble_data_t adv_data{};
+    ble_data_t adv_data;
 
     if (advertisingDataSize == 0)
     {
@@ -392,7 +392,7 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
 
     const auto scanResponseDataSize = scanResponseData.size();
 
-    ble_data_t scan_rsp_data{};
+    ble_data_t scan_rsp_data;
 
     if (scanResponseDataSize == 0)
     {
@@ -408,16 +408,21 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     }
 
     // Tie together the advertisement setup
-    const auto adv_report_data = std::make_shared<ble_gap_adv_data_t>();
+    m_gap_data_buffers_index = m_gap_data_buffers_index % GAP_ADV_DATA_ROTATING_BUFFER_COUNT;
+    m_gap_adv_data_buffers[m_gap_data_buffers_index].adv_data      = adv_data;
+    m_gap_adv_data_buffers[m_gap_data_buffers_index].scan_rsp_data = scan_rsp_data;
 
-    adv_report_data->adv_data      = adv_data;
-    adv_report_data->scan_rsp_data = scan_rsp_data;
-
-    NRF_LOG(role() << " Changing advertisement data to instance with address " << static_cast<void*>(adv_report_data.get()));
+    NRF_LOG(role() << " Changing advertisement data to instance with address "
+                   << static_cast<void *>(&m_gap_adv_data_buffers[m_gap_data_buffers_index]));
 
     // Support only undirected advertisement for now
-    const auto err_code = sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
-                                                       adv_report_data.get(), nullptr);
+    const auto err_code =
+        sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
+                                     &m_gap_adv_data_buffers[m_gap_data_buffers_index], nullptr);
+
+    // Use a different buffer next time since the SoftDevice API v6 requires a new pointer
+    // to detect that advertising data has changed.
+    m_gap_data_buffers_index++;
 
     if (err_code != NRF_SUCCESS)
     {

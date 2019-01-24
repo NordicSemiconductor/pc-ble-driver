@@ -15,6 +15,7 @@
 
 #include "test_util_adapter_wrapper_scratchpad.h"
 
+#include <array>
 #include <cstring>
 #include <functional>
 #include <map>
@@ -40,6 +41,8 @@ using sd_api_time_unit_t = enum {
 };
 
 uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit);
+
+constexpr uint8_t GAP_ADV_DATA_ROTATING_BUFFER_COUNT = 2;
 
 class AdapterWrapper
 {
@@ -169,6 +172,14 @@ class AdapterWrapper
 
 #if NRF_SD_BLE_API >= 5
     uint32_t setBLECfg(uint8_t conn_cfg_tag);
+#endif
+
+    // This data member is a way to change the advertising data while advertising is in progress.
+    // The way SoftDevice V6 works is that the pointer address needs to be different when changing
+    // the advertising data while advertising.
+#if NRF_SD_BLE_API > 5
+    ble_gap_adv_data_t m_gap_adv_data_buffers[GAP_ADV_DATA_ROTATING_BUFFER_COUNT]{};
+    uint8_t m_gap_data_buffers_index{0};
 #endif
 
     adapter_t *adapterInit(const char *serial_port, const uint32_t baud_rate,
