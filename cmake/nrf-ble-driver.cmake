@@ -1,8 +1,8 @@
 # include guard
-if(PC_BLE_DRIVER_CMAKE_INCLUDED)
+if(NRF_BLE_DRIVER_CMAKE_INCLUDED)
     return()
-endif(PC_BLE_DRIVER_CMAKE_INCLUDED)
-set(PC_BLE_DRIVER_CMAKE_INCLUDED true)
+endif(NRF_BLE_DRIVER_CMAKE_INCLUDED)
+set(NRF_BLE_DRIVER_CMAKE_INCLUDED true)
   
 math(EXPR COMPILER_ARCH_BITS "8*${CMAKE_SIZEOF_VOID_P}")
 # Default to compiler architecture
@@ -67,41 +67,26 @@ foreach(SD_API_VER_NUM ${SD_API_VER_NUMS})
     # Append it to the list
     list(APPEND SD_API_VERS ${_SD_API_VER})
     # Set project and variable names
-    set(PC_BLE_DRIVER_${_SD_API_VER}_PROJECT_NAME "pc_ble_driver_${_SD_API_VER_L}")
-    set(PC_BLE_DRIVER_${_SD_API_VER}_OBJ_LIB "pc_ble_driver_obj_${_SD_API_VER_L}")
-    set(PC_BLE_DRIVER_${_SD_API_VER}_STATIC_LIB "pc_ble_driver_static_${_SD_API_VER_L}")
-    set(PC_BLE_DRIVER_${_SD_API_VER}_SHARED_LIB "pc_ble_driver_shared_${_SD_API_VER_L}")
+    set(NRF_BLE_DRIVER_${_SD_API_VER}_PROJECT_NAME "nrf_ble_driver_${_SD_API_VER_L}")
+    set(NRF_BLE_DRIVER_${_SD_API_VER}_OBJ_LIB "nrf_ble_driver_obj_${_SD_API_VER_L}")
+    set(NRF_BLE_DRIVER_${_SD_API_VER}_STATIC_LIB "nrf_ble_driver_${_SD_API_VER_L}_static")
+    set(NRF_BLE_DRIVER_${_SD_API_VER}_SHARED_LIB "nrf_ble_driver_${_SD_API_VER_L}_shared")
 endforeach(SD_API_VER_NUM)
 
 set(SD_API_VER_COMPILER_DEF "NRF_SD_BLE_API_VERSION")
 
-#MESSAGE( STATUS "list1: " "${SD_API_VER_NUMS}" )
-#MESSAGE( STATUS "list2: " "${SD_API_VERS}" )
-#MESSAGE( STATUS "proj2: " "${PC_BLE_DRIVER_SD_API_V2_PROJECT_NAME}" )
-#MESSAGE( STATUS "proj5: " "${PC_BLE_DRIVER_SD_API_V5_PROJECT_NAME}" )
-
 # pc-ble-driver root folder
-set(PC_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
+set(NRF_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
 # pc-ble-driver hex folder
-set(PC_BLE_DRIVER_HEX_DIR ${PC_BLE_DRIVER_ROOT_DIR}/hex)
+set(NRF_BLE_DRIVER_HEX_DIR ${NRF_BLE_DRIVER_ROOT_DIR}/hex)
 
 # pc-ble-driver include path
-set(PC_BLE_DRIVER_INCLUDE_DIR ${PC_BLE_DRIVER_ROOT_DIR}/include)
-
-# Set public include folders
-foreach(SD_API_VER ${SD_API_VERS})
-    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    set(PC_BLE_DRIVER_${SD_API_VER}_PUBLIC_INCLUDE_DIRS ${PC_BLE_DRIVER_ROOT_DIR}/include
-                                                        ${PC_BLE_DRIVER_ROOT_DIR}/include/common
-                                                        ${PC_BLE_DRIVER_ROOT_DIR}/include/common/sdk_compat
-                                                        ${PC_BLE_DRIVER_ROOT_DIR}/src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers)
-endforeach(SD_API_VER)
+set(NRF_BLE_DRIVER_INCLUDE_DIR ${NRF_BLE_DRIVER_ROOT_DIR}/include)
 
 find_package(Git REQUIRED)
 
 function(git_repo_metadata dir commit branch remotes)
-
     # Get the latest abbreviated commit hash of the working branch
     execute_process(
       COMMAND ${GIT_EXECUTABLE} log -1 --format=%H
@@ -131,11 +116,9 @@ function(git_repo_metadata dir commit branch remotes)
     )
 
     set(${remotes} ${GIT_REMOTES} PARENT_SCOPE)
-
 endfunction()
 
 function(build_metadata dir dst)
-
     cmake_host_system_information(RESULT BUILD_MD_HOSTNAME QUERY HOSTNAME)
     string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S (YY-MM-DD HH:MM:SS, UTC)" UTC)
 
@@ -155,6 +138,4 @@ function(build_metadata dir dst)
     string(CONCAT str ${str} "\n") 
      
     set(${dst} ${str} PARENT_SCOPE)
- 
-
 endfunction()

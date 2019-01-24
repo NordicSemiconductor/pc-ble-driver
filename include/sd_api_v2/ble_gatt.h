@@ -43,7 +43,7 @@
 #ifndef BLE_GATT_H__
 #define BLE_GATT_H__
 
-#include "config/platform.h"
+#include "platform.h"
 
 #include "ble_types.h"
 #include "ble_ranges.h"

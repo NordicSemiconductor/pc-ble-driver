@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Nordic Semiconductor ASA
+ * Copyright (c) 2018-2019 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -94,7 +94,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
         CHECK(c->close() == NRF_ERROR_INVALID_STATE);
     }
 
-    SECTION("open_close_open_iterations")
+    SECTION("open_close_open_with_teardown_iterations")
     {
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
@@ -145,5 +145,30 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             NRF_LOG("Iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
                                   << numberOfIterations << " complete.");
         }
+    }
+
+    SECTION("open_close_open_iterations")
+    {
+        auto c = std::make_shared<testutil::AdapterWrapper>(
+            testutil::Central, serialPort.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
+
+        REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
+                NRF_SUCCESS);
+
+        for (uint32_t i = 0; i < numberOfIterations; i++)
+        {
+            NRF_LOG("Starting iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
+                                           << numberOfIterations);
+
+            REQUIRE(c->open() == NRF_SUCCESS);
+            REQUIRE(c->configure() == NRF_SUCCESS);
+            CHECK(c->close() == NRF_SUCCESS);
+
+            NRF_LOG("Iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
+                                  << numberOfIterations << " complete.");
+        }
+
+        sd_rpc_adapter_delete(c->unwrap());
     }
 }

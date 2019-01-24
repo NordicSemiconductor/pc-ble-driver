@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nordic Semiconductor ASA
+ * Copyright (c) 2016-2019 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -57,14 +57,7 @@ constexpr uint32_t DUMMY_BAUD_RATE = 9600;
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport()
-    , readBuffer()
-    , writeBufferVector()
-    , writeQueue()
-    , queueMutex()
-    , isOpen(false)
-    , callbackReadHandle()
-    , callbackWriteHandle()
-    , uartSettingsBoost(communicationParameters)
+    , readBuffer(), isOpen(false), uartSettingsBoost(communicationParameters)
     , asyncWriteInProgress(false)
     , ioServiceThread(nullptr)
 {
@@ -225,6 +218,12 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         const auto asioWorker = [&]() {
             try
             {
+                // If ioService has ran before it needs to be restarted
+                if (ioService->stopped())
+                {
+                    ioService->restart();
+                }
+
                 const auto count = ioService->run();
                 std::stringstream message;
                 message << "serial io_context executed " << count << " handlers.";
@@ -318,6 +317,7 @@ uint32_t UartBoost::close()
                 ioServiceThread->join();
             }
 
+            delete ioServiceThread;
             ioServiceThread = nullptr;
         }
 

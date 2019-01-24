@@ -45,7 +45,7 @@
 
 #include "adapter.h"
 
-#include "config/platform.h"
+#include "platform.h"
 
 #include "ble_gatt.h"
 #include "ble_types.h"

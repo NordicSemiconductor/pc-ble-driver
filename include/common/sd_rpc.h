@@ -43,7 +43,7 @@
 #ifndef SD_RPC_H__
 #define SD_RPC_H__
 
-#include "config/platform.h"
+#include "platform.h"
 #include "sd_rpc_types.h"
 #include "adapter.h"
 
