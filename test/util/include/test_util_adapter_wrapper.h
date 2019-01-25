@@ -42,7 +42,9 @@ using sd_api_time_unit_t = enum {
 
 uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit);
 
-constexpr uint8_t GAP_ADV_DATA_ROTATING_BUFFER_COUNT = 2;
+constexpr uint8_t DATA_ROTATING_BUFFER_COUNT = 4;
+using data_buffer =std::vector<uint8_t>;
+using data_buffers = std::vector<data_buffer>;
 
 class AdapterWrapper
 {
@@ -178,8 +180,10 @@ class AdapterWrapper
     // The way SoftDevice V6 works is that the pointer address needs to be different when changing
     // the advertising data while advertising.
 #if NRF_SD_BLE_API > 5
-    ble_gap_adv_data_t m_gap_adv_data_buffers[GAP_ADV_DATA_ROTATING_BUFFER_COUNT]{};
-    uint8_t m_gap_data_buffers_index{0};
+    data_buffers m_data_buffers{};
+    uint8_t m_data_buffers_index{0};
+    data_buffer &nextDataBuffer();
+    uint32_t m_changeCount{0};
 #endif
 
     adapter_t *adapterInit(const char *serial_port, const uint32_t baud_rate,

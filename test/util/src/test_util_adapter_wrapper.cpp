@@ -44,6 +44,18 @@ AdapterWrapper::AdapterWrapper(const Role &role, const std::string &port, const 
 
     AdapterWrapper::adapters[m_adapter->internal] = this;
 
+#if NRF_SD_BLE_API > 5
+    //
+    // Create a fixed memory area to support SoftDevice API v6
+    // advertising data change during advertising
+    //
+    m_data_buffers.resize(DATA_ROTATING_BUFFER_COUNT);
+    for (auto buffer : m_data_buffers)
+    {
+        buffer.reserve(ADV_DATA_BUFFER_SIZE);
+    }
+#endif
+
     // Setup scratchpad with default values
     setupScratchpad(mtu);
 };
@@ -362,6 +374,15 @@ uint32_t AdapterWrapper::startAdvertising()
     return err_code;
 }
 
+#if NRF_SD_BLE_API > 5
+data_buffer &AdapterWrapper::nextDataBuffer()
+{
+    m_data_buffers_index++;
+    m_data_buffers_index = m_data_buffers_index % DATA_ROTATING_BUFFER_COUNT;
+    return m_data_buffers[m_data_buffers_index];
+}
+#endif
+
 uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &advertisingData,
                                                const std::vector<uint8_t> &scanResponseData)
 {
@@ -383,10 +404,11 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     }
     else
     {
-        uint8_t temporary_adv_data_buffer[ADV_DATA_BUFFER_SIZE]{};
-        std::copy(advertisingData.begin(), advertisingData.end(), temporary_adv_data_buffer);
+        auto data_buffer = nextDataBuffer();
+        data_buffer.resize(advertisingDataSize);
+        std::copy(advertisingData.begin(), advertisingData.end(), data_buffer.begin());
 
-        adv_data.p_data = temporary_adv_data_buffer;
+        adv_data.p_data = data_buffer.data();
         adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
     }
 
@@ -401,28 +423,28 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     }
     else
     {
-        uint8_t temporary_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{};
-        std::copy(scanResponseData.begin(), scanResponseData.end(), temporary_scan_rsp_data_buffer);
-        scan_rsp_data.p_data = temporary_scan_rsp_data_buffer;
+        auto data_buffer = nextDataBuffer();
+        data_buffer.resize(scanResponseDataSize);
+        std::copy(scanResponseData.begin(), scanResponseData.end(), data_buffer.begin());
+        scan_rsp_data.p_data = data_buffer.data();
         scan_rsp_data.len    = static_cast<uint16_t>(scanResponseDataSize);
     }
 
     // Tie together the advertisement setup
-    m_gap_data_buffers_index = m_gap_data_buffers_index % GAP_ADV_DATA_ROTATING_BUFFER_COUNT;
-    m_gap_adv_data_buffers[m_gap_data_buffers_index].adv_data      = adv_data;
-    m_gap_adv_data_buffers[m_gap_data_buffers_index].scan_rsp_data = scan_rsp_data;
+    ble_gap_adv_data_t advertising_data;
 
-    NRF_LOG(role() << " Changing advertisement data to instance with address "
-                   << static_cast<void *>(&m_gap_adv_data_buffers[m_gap_data_buffers_index]));
+    advertising_data.adv_data      = adv_data;
+    advertising_data.scan_rsp_data = scan_rsp_data;
+
+    NRF_LOG(role() << " Changing advertisement data to instance with addresses"
+                   << " adv_data.p_data:" << static_cast<void *>(advertising_data.adv_data.p_data)
+                   << " adv_data.len:" << static_cast<uint32_t>(adv_data.len) << " scan_rsp.p_data:"
+                   << static_cast<void *>(&advertising_data.scan_rsp_data.p_data)
+                   << " scan_rsp_data.len:" << static_cast<uint32_t>(scan_rsp_data.len));
 
     // Support only undirected advertisement for now
-    const auto err_code =
-        sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
-                                     &m_gap_adv_data_buffers[m_gap_data_buffers_index], nullptr);
-
-    // Use a different buffer next time since the SoftDevice API v6 requires a new pointer
-    // to detect that advertising data has changed.
-    m_gap_data_buffers_index++;
+    const auto err_code = sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
+                                                       &advertising_data, nullptr);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -431,7 +453,8 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     }
     else
     {
-        NRF_LOG(role() << " Changing advertisement data succeeded.");
+        m_changeCount++;
+        NRF_LOG(role() << " Changing advertisement data succeeded (#" << m_changeCount << ")");
     }
 
     return err_code;
