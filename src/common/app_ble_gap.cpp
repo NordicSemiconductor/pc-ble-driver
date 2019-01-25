@@ -498,6 +498,44 @@ int app_ble_gap_adv_buf_register(void *p_buf)
     }
 }
 
+int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
+{
+    if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
+    {
+        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context REQUEST_REPLY_CODEC_CONTEXT, terminating" << std::endl;
+        std::terminate();
+    }
+
+    if (p_buf == nullptr)
+    {
+        return 0;
+    }
+
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+        auto id = 1;
+
+        // Find available location in ble_gap_adv_buf_addr for
+        // store this new buffer pointer.
+        for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+        {
+            if (addr == p_buf)
+            {
+                addr = nullptr;
+                return id;
+            }
+        }
+
+        return -1;
+    }
+    catch (const std::out_of_range &)
+    {
+        return -1;
+    }
+}
+
 void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
 {
     if (!app_ble_gap_check_current_adapter_set(event_context ? EVENT_CODEC_CONTEXT

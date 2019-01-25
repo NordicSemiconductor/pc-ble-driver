@@ -228,7 +228,7 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
  */
 
 int app_ble_gap_adv_buf_register(void * p_buf);
-
+int app_ble_gap_adv_buf_addr_unregister(void * p_buf);
 /**
  * @brief Unregister a buffer from advertisement buffer table
  * 
@@ -240,7 +240,6 @@ int app_ble_gap_adv_buf_register(void * p_buf);
  * @return Buffer pointer from advertisement buffer table, except nullptr if id == 0 or if the context for the current adapter is not set
  */   
 void *app_ble_gap_adv_buf_unregister(const int id, bool event_context);
-void app_ble_gap_adv_buf_addr_unregister(void * p_buf, bool event_context);
 
 void app_ble_gap_scan_data_unset(bool free);
 

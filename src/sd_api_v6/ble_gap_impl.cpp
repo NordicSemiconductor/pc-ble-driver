@@ -64,6 +64,53 @@ static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &e
     return encode_decode(adapter, encode_function, decode_function);
 }
 
+typedef struct
+{
+    uint8_t adv_handle;
+    uint8_t * buf1;
+    uint8_t * buf2;
+} adv_set_data_t;
+static adv_set_data_t adv_set_data[] = {0xff,0,0};
+
+void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t * buf1, uint8_t * buf2)
+{
+    if (adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
+    {
+        return;
+    }
+
+    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
+    {
+        if (adv_set_data[i].adv_handle == adv_handle)
+        {
+            /* If adv_set is already configured replace old buffers with new one. */
+            if (adv_set_data[i].buf1 != buf1) {
+                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf1);
+            }
+
+            if (adv_set_data[i].buf2 != buf2) {
+                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf2);
+            }
+
+            adv_set_data[i].buf1 = buf1;
+            adv_set_data[i].buf2 = buf2;
+
+            return;
+        }
+    }
+
+    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
+    {
+        if (adv_set_data[i].adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
+        {
+            adv_set_data[i].adv_handle = adv_handle;
+            adv_set_data[i].buf1 = buf1;
+            adv_set_data[i].buf2 = buf2;
+            return;
+        }
+    }
+}
+
 uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
                                       ble_gap_adv_data_t const *p_adv_data,
                                       ble_gap_adv_params_t const *p_adv_params)
@@ -86,7 +133,12 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
                                             uint32_t *result) -> uint32_t {
-        return ble_gap_adv_set_configure_rsp_dec(buffer, length, p_adv_handle, result);
+        uint32_t err = ble_gap_adv_set_configure_rsp_dec(buffer, length, p_adv_handle, result);
+        if (err == 0)
+        {
+            app_ble_gap_set_adv_data_set(*p_adv_handle,(uint8_t *)mp_out_params[0], (uint8_t *)mp_out_params[1]);
+        }
+        return err;
     };
 
     uint32_t err = gap_encode_decode(adapter, encode_function, decode_function);
