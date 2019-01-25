@@ -39,13 +39,11 @@
  */
 #include "app_ble_gap.h"
 #include "nrf_error.h"
-#include "ser_config.h"
 
 #include <cstring>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <iostream>
 
 #include <sd_rpc_types.h>
 
@@ -345,6 +343,8 @@ uint32_t app_ble_gap_state_reset()
 }
 
 #if NRF_SD_BLE_API_VERSION >= 6
+static adv_set_data_t adv_set_data[] = {BLE_GAP_ADV_SET_HANDLE_NOT_SET, nullptr, nullptr};
+
 uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
@@ -463,7 +463,9 @@ int app_ble_gap_adv_buf_register(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context REQUEST_REPLY_CODEC_CONTEXT, terminating" << std::endl;
+        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context "
+                     "REQUEST_REPLY_CODEC_CONTEXT, terminating"
+                  << std::endl;
         std::terminate();
     }
 
@@ -502,7 +504,9 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context REQUEST_REPLY_CODEC_CONTEXT, terminating" << std::endl;
+        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context "
+                     "REQUEST_REPLY_CODEC_CONTEXT, terminating"
+                  << std::endl;
         std::terminate();
     }
 
@@ -557,6 +561,47 @@ void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
     gap_state->ble_gap_adv_buf_addr[id - 1] = nullptr;
 
     return ret;
+}
+
+void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *buf2)
+{
+    if (adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
+    {
+        return;
+    }
+
+    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
+    {
+        if (adv_set_data[i].adv_handle == adv_handle)
+        {
+            /* If adv_set is already configured replace old buffers with new one. */
+            if (adv_set_data[i].buf1 != buf1)
+            {
+                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf1);
+            }
+
+            if (adv_set_data[i].buf2 != buf2)
+            {
+                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf2);
+            }
+
+            adv_set_data[i].buf1 = buf1;
+            adv_set_data[i].buf2 = buf2;
+
+            return;
+        }
+    }
+
+    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
+    {
+        if (adv_set_data[i].adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
+        {
+            adv_set_data[i].adv_handle = adv_handle;
+            adv_set_data[i].buf1       = buf1;
+            adv_set_data[i].buf2       = buf2;
+            return;
+        }
+    }
 }
 
 // Update the adapter gap state scan_data_id variable based on pointer received???
