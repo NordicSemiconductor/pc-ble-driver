@@ -43,7 +43,8 @@ using sd_api_time_unit_t = enum {
 uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit);
 
 constexpr uint8_t DATA_ROTATING_BUFFER_COUNT = 4;
-using data_buffer =std::vector<uint8_t>;
+
+using data_buffer  = std::vector<uint8_t>;
 using data_buffers = std::vector<data_buffer>;
 
 class AdapterWrapper

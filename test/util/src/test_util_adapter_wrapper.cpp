@@ -50,7 +50,7 @@ AdapterWrapper::AdapterWrapper(const Role &role, const std::string &port, const 
     // advertising data change during advertising
     //
     m_data_buffers.resize(DATA_ROTATING_BUFFER_COUNT);
-    for (auto buffer : m_data_buffers)
+    for (auto &buffer : m_data_buffers)
     {
         buffer.reserve(ADV_DATA_BUFFER_SIZE);
     }
@@ -404,11 +404,12 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     }
     else
     {
-        auto data_buffer = nextDataBuffer();
-        data_buffer.resize(advertisingDataSize);
-        std::copy(advertisingData.begin(), advertisingData.end(), data_buffer.begin());
+        auto &adv_data_buffer = nextDataBuffer();
 
-        adv_data.p_data = data_buffer.data();
+        adv_data_buffer.resize(advertisingDataSize);
+        std::copy(advertisingData.begin(), advertisingData.end(), adv_data_buffer.begin());
+
+        adv_data.p_data = adv_data_buffer.data();
         adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
     }
 
@@ -423,10 +424,10 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     }
     else
     {
-        auto data_buffer = nextDataBuffer();
-        data_buffer.resize(scanResponseDataSize);
-        std::copy(scanResponseData.begin(), scanResponseData.end(), data_buffer.begin());
-        scan_rsp_data.p_data = data_buffer.data();
+        auto &scan_rsp_data_buffer = nextDataBuffer();
+        scan_rsp_data_buffer.resize(scanResponseDataSize);
+        std::copy(scanResponseData.begin(), scanResponseData.end(), scan_rsp_data_buffer.begin());
+        scan_rsp_data.p_data = scan_rsp_data_buffer.data();
         scan_rsp_data.len    = static_cast<uint16_t>(scanResponseDataSize);
     }
 
@@ -439,7 +440,7 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     NRF_LOG(role() << " Changing advertisement data to instance with addresses"
                    << " adv_data.p_data:" << static_cast<void *>(advertising_data.adv_data.p_data)
                    << " adv_data.len:" << static_cast<uint32_t>(adv_data.len) << " scan_rsp.p_data:"
-                   << static_cast<void *>(&advertising_data.scan_rsp_data.p_data)
+                   << static_cast<void *>(advertising_data.scan_rsp_data.p_data)
                    << " scan_rsp_data.len:" << static_cast<uint32_t>(scan_rsp_data.len));
 
     // Support only undirected advertisement for now
