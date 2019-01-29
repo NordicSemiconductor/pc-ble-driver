@@ -44,6 +44,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <iostream>
 
 #include <sd_rpc_types.h>
 
