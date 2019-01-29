@@ -152,13 +152,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 }
 
                                 // Change advertising data in peripheral
-                                advertisingData.clear();
+                                scanResponseData.clear();
                                 testutil::createRandomAdvertisingData(
-                                    advertisingData, peripheralAdvName, randomData);
+                                    scanResponseData, peripheralAdvName, randomData);
                                 NRF_LOG(c->role() << " Changing advertisement data in BLE_GAP_EVT_ADV_REPORT");
 
                                 const auto err_code = p->changeAdvertisingData(
-                                    std::vector<uint8_t>(), advertisingData);
+                                    std::vector<uint8_t>(), scanResponseData);
 
                                 if (err_code != NRF_SUCCESS)
                                 {
@@ -265,12 +265,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     std::vector<uint8_t> manufacturerSpecificData;
                     const auto advReport = setTerminated.adv_data;
 
-                    std::vector<uint8_t> advData;
+                    std::vector<uint8_t> scan_rsp_data;
                     const auto data       = advReport.scan_rsp_data.p_data;
                     const auto dataLength = advReport.scan_rsp_data.len;
-                    advData.assign(data, data + dataLength);
+                    scan_rsp_data.assign(data, data + dataLength);
 
-                    if (scanResponseData != advData)
+                    if (scanResponseData != scan_rsp_data)
                     {
                         NRF_LOG(p->role() << " BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
                                              "buffers set in sd_ble_gap_adv_set_configure does "
