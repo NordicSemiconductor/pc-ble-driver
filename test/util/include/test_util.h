@@ -40,8 +40,8 @@ bool findManufacturerSpecificData(const ble_gap_evt_adv_report_t &p_adv_report,
 bool findAdvName(const ble_gap_evt_adv_report_t p_adv_report, const std::string &name_to_find);
 
 void assertAdvertisingPacketSizeIsValid(const std::vector<uint8_t> existingPacket,
-                                          const size_t additionalBytes, const bool extended = false,
-                                          const bool connectable = false);
+                                        const size_t additionalBytes, const bool extended = false,
+                                        const bool connectable = false);
 
 /**
  * @brief Function that append name to advertise to advertising type
@@ -49,6 +49,7 @@ void assertAdvertisingPacketSizeIsValid(const std::vector<uint8_t> existingPacke
  *
  * @param[in,out] advertisingData std::vector to append advertising data to
  * @param[in] name Name to append to advertisingData
+ * @param[in] extended specifies if packet type is extended or not
  */
 void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::string &name,
                            const bool extended = false);
@@ -58,21 +59,23 @@ void appendAdvertisingName(std::vector<uint8_t> &advertisingData, const std::str
  *
  * @param[in,out] advertisingData std::vector to append advertising flags to
  * @param[in] flags Flags to append to advertisingData
+ * @param[in] extended specifies if packet type is extended or not
  */
 void appendAdvertisingFlags(std::vector<uint8_t> &advertisingData, const uint8_t flags,
-                              const bool extended = false);
+                            const bool extended = false);
 
 /**
  * @brief Function that append manufacturer specifid data to advertising
  *
  * @param[in,out] advertisingData std::vector to append manufacturer specific data to
  * @param[in] manufacturerSpecificData Manufacturer specific data to append to advertisingData
+ * @param[in] extended specifies if packet type is extended or not
  */
 void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
-                                    const std::vector<uint8_t> manufacturerSpecificData,
+                                    const std::vector<uint8_t> &manufacturerSpecificData,
                                     const bool extended = false);
 
-/*
+/**
  * @brief Function that fills a std::vector<uint8_t> with random values
  *
  * @param[in,out] data vector to populate with random values
@@ -80,17 +83,38 @@ void appendManufacturerSpecificData(std::vector<uint8_t> &advertisingData,
  */
 void appendRandomData(std::vector<uint8_t> &data, const size_t size);
 
-/*
+/**
  * @brief Function that fills a std::vector<uint8_t> with random ASCII values
  *
  * @param[in,out] data vector to populate with random ASCII values
  * @param[in] size number of random values to fill the vector with
  */
-
 void appendRandomAlphaNumeric(std::vector<uint8_t> &data, const size_t size);
 
+/**
+ * @brief Function that create a random advertising name
+ *
+ * @param[in] prefix A prefix added to the advertising name
+ * @param[in] length Total length of advertising name (including prefix)
+ */
 std::string createRandomAdvertisingName(const std::string &prefix = "periph",
                                         const uint8_t length      = 10);
+
+/**
+ * @brief Function that append random advertising data
+ *
+ * @param[out] advertisingData vector to append advertising data to
+ * @param[out] advertisingName vector to populate with randomly created advertising name
+ * @param[out] manufacturerData vector to populate with randomly created manufacturer data
+ *
+ */
+void createRandomAdvertisingData(
+    std::vector<uint8_t> &advertisingData, std::string &advertisingName,
+    std::vector<uint8_t> &randomData, const size_t advertisingNameLength = 20,
+    const size_t manufacturerDataLength = testutil::ADV_DATA_BUFFER_SIZE -
+                                          20 /* advertisingNameLength */ -
+                                          2 /* length and AD type */ - 2 /* length and AD type */,
+    const bool extended = false);
 
 bool operator==(const ble_gap_addr_t &lhs, const ble_gap_addr_t &rhs);
 

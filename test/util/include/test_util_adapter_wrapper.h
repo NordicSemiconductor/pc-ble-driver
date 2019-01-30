@@ -15,6 +15,7 @@
 
 #include "test_util_adapter_wrapper_scratchpad.h"
 
+#include <array>
 #include <cstring>
 #include <functional>
 #include <map>
@@ -40,6 +41,11 @@ using sd_api_time_unit_t = enum {
 };
 
 uint16_t millisecondsToUnits(const double milliseconds, const sd_api_time_unit_t timeunit);
+
+constexpr uint8_t DATA_ROTATING_BUFFER_COUNT = 4;
+
+using data_buffer  = std::vector<uint8_t>;
+using data_buffers = std::vector<data_buffer>;
 
 class AdapterWrapper
 {
@@ -75,6 +81,9 @@ class AdapterWrapper
                               const uint32_t max_adv_events = 0);
 
     uint32_t startAdvertising();
+
+    uint32_t changeAdvertisingData(const std::vector<uint8_t> &advertisingData,
+                                   const std::vector<uint8_t> &scanResponseData);
 
     uint32_t startServiceDiscovery(const uint8_t type, const uint16_t uuid);
 
@@ -166,6 +175,16 @@ class AdapterWrapper
 
 #if NRF_SD_BLE_API >= 5
     uint32_t setBLECfg(uint8_t conn_cfg_tag);
+#endif
+
+    // This data member is a way to change the advertising data while advertising is in progress.
+    // The way SoftDevice V6 works is that the pointer address needs to be different when changing
+    // the advertising data while advertising.
+#if NRF_SD_BLE_API > 5
+    data_buffers m_data_buffers{};
+    uint8_t m_data_buffers_index{0};
+    data_buffer &nextDataBuffer();
+    uint32_t m_changeCount{0};
 #endif
 
     adapter_t *adapterInit(const char *serial_port, const uint32_t baud_rate,

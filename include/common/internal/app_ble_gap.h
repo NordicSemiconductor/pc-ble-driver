@@ -64,6 +64,10 @@ extern "C" {
 #define SER_MAX_CONNECTIONS 8
 #endif
 
+#ifndef APP_BLE_GAP_ADV_BUF_COUNT
+#define APP_BLE_GAP_ADV_BUF_COUNT 8 // Keep in sync with connectivity in SDK
+#endif
+
 /**@brief GAP connection - keyset mapping structure.
  *
  * @note  This structure is used to map keysets to connection instances and store them in a static
@@ -117,7 +121,8 @@ void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_contex
 /**@brief Check if current adapter is set
  * @param[in] codec_context       Check if adapter GAP state is set for codec context
  */
-uint32_t app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context);
+uint32_t
+app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context);
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
@@ -173,6 +178,19 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
 uint32_t app_ble_gap_state_reset();
 
 #if NRF_SD_BLE_API_VERSION >= 6
+
+/**
+ * @brief Data structure to store advertising set data
+ */
+typedef struct
+{
+    uint8_t adv_handle;
+    uint8_t *buf1;
+    uint8_t *buf2;
+} adv_set_data_t;
+
+void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *buf2);
+
 /**
  * @brief Stores buffer for adv report data.
  *
@@ -218,25 +236,26 @@ uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_dat
 
 /**
  * @brief Register an advertisement buffer pointer
- * 
+ *
  * @param[in] p_buf Advertisement buffer to create a pointer ID from
- * @return -1 if there is no space left in buffer table, 0 of p_buf is nullptr, >0 with buffer location in buffer table
+ * @return -1 if there is no space left in buffer table, 0 of p_buf is nullptr, >0 with buffer
+ * location in buffer table
  */
 
-int app_ble_gap_adv_buf_register(void * p_buf);
-
+int app_ble_gap_adv_buf_register(void *p_buf);
+int app_ble_gap_adv_buf_addr_unregister(void *p_buf);
 /**
  * @brief Unregister a buffer from advertisement buffer table
- * 
+ *
  * Unregister a buffer from the buffer table (ble_gap_adv_buf_addr)
- * 
+ *
  * @param[in] id buffer ID in the ble_gap_adv_buf_addr table
  * @param[in] event_context true if EVENT context, false if it is in REQUEST_REPLOY context
- * 
- * @return Buffer pointer from advertisement buffer table, except nullptr if id == 0 or if the context for the current adapter is not set
- */   
+ *
+ * @return Buffer pointer from advertisement buffer table, except nullptr if id == 0 or if the
+ * context for the current adapter is not set
+ */
 void *app_ble_gap_adv_buf_unregister(const int id, bool event_context);
-void app_ble_gap_adv_buf_addr_unregister(void * p_buf, bool event_context);
 
 void app_ble_gap_scan_data_unset(bool free);
 

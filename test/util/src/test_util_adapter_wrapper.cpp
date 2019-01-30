@@ -17,10 +17,11 @@
 
 #include <cstring>
 #include <map>
+#include <test_util.h>
 #include <thread>
 
-constexpr uint8_t MaxPeripheralConnections = 1;
-constexpr uint8_t MaxCentralConnections = 7;
+constexpr uint8_t MaxPeripheralConnections    = 1;
+constexpr uint8_t MaxCentralConnections       = 7;
 constexpr uint8_t MaxCentralSecureConnections = 1;
 
 namespace testutil {
@@ -42,6 +43,18 @@ AdapterWrapper::AdapterWrapper(const Role &role, const std::string &port, const 
     m_adapter = adapterInit(port.c_str(), baudRate, retransmissionInterval, responseTimeout);
 
     AdapterWrapper::adapters[m_adapter->internal] = this;
+
+#if NRF_SD_BLE_API > 5
+    //
+    // Create a fixed memory area to support SoftDevice API v6
+    // advertising data change during advertising
+    //
+    m_data_buffers.resize(DATA_ROTATING_BUFFER_COUNT);
+    for (auto &buffer : m_data_buffers)
+    {
+        buffer.reserve(ADV_DATA_BUFFER_SIZE);
+    }
+#endif
 
     // Setup scratchpad with default values
     setupScratchpad(mtu);
@@ -317,7 +330,7 @@ uint32_t AdapterWrapper::setupAdvertising(
         }
     }
 
-    auto err_code =
+    const auto err_code =
         sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
                                      &(scratchpad.adv_report_data), &(scratchpad.adv_params));
 #endif
@@ -359,6 +372,96 @@ uint32_t AdapterWrapper::startAdvertising()
     }
 
     return err_code;
+}
+
+#if NRF_SD_BLE_API > 5
+data_buffer &AdapterWrapper::nextDataBuffer()
+{
+    m_data_buffers_index++;
+    m_data_buffers_index = m_data_buffers_index % DATA_ROTATING_BUFFER_COUNT;
+    return m_data_buffers[m_data_buffers_index];
+}
+#endif
+
+uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &advertisingData,
+                                               const std::vector<uint8_t> &scanResponseData)
+{
+#if NRF_SD_BLE_API == 6
+    const auto advertisingDataSize = advertisingData.size();
+
+    if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
+    {
+        NRF_LOG(role() << " Advertising data is larger then the buffer set asize.");
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
+    ble_data_t adv_data;
+
+    if (advertisingDataSize == 0)
+    {
+        adv_data.p_data = nullptr;
+        adv_data.len    = 0;
+    }
+    else
+    {
+        auto &adv_data_buffer = nextDataBuffer();
+
+        adv_data_buffer.resize(advertisingDataSize);
+        std::copy(advertisingData.begin(), advertisingData.end(), adv_data_buffer.begin());
+
+        adv_data.p_data = adv_data_buffer.data();
+        adv_data.len    = static_cast<uint16_t>(advertisingDataSize);
+    }
+
+    const auto scanResponseDataSize = scanResponseData.size();
+
+    ble_data_t scan_rsp_data;
+
+    if (scanResponseDataSize == 0)
+    {
+        scan_rsp_data.p_data = nullptr;
+        scan_rsp_data.len    = 0;
+    }
+    else
+    {
+        auto &scan_rsp_data_buffer = nextDataBuffer();
+        scan_rsp_data_buffer.resize(scanResponseDataSize);
+        std::copy(scanResponseData.begin(), scanResponseData.end(), scan_rsp_data_buffer.begin());
+        scan_rsp_data.p_data = scan_rsp_data_buffer.data();
+        scan_rsp_data.len    = static_cast<uint16_t>(scanResponseDataSize);
+    }
+
+    // Tie together the advertisement setup
+    ble_gap_adv_data_t advertising_data;
+
+    advertising_data.adv_data      = adv_data;
+    advertising_data.scan_rsp_data = scan_rsp_data;
+
+    NRF_LOG(role() << " Changing advertisement data to instance with addresses"
+                   << " adv_data.p_data:" << static_cast<void *>(advertising_data.adv_data.p_data)
+                   << " adv_data.len:" << static_cast<uint32_t>(adv_data.len) << " scan_rsp.p_data:"
+                   << static_cast<void *>(advertising_data.scan_rsp_data.p_data)
+                   << " scan_rsp_data.len:" << static_cast<uint32_t>(scan_rsp_data.len));
+
+    // Support only undirected advertisement for now
+    const auto err_code = sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
+                                                       &advertising_data, nullptr);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG(role() << " Changing of advertisement data failed, "
+                       << testutil::errorToString(err_code));
+    }
+    else
+    {
+        m_changeCount++;
+        NRF_LOG(role() << " Changing advertisement data succeeded (#" << m_changeCount << ")");
+    }
+
+    return err_code;
+#else
+    return NRF_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 uint32_t AdapterWrapper::startServiceDiscovery(const uint8_t type, const uint16_t uuid)
@@ -884,10 +987,10 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     std::memset(&scratchpad.ble_enable_params, 0, sizeof(scratchpad.ble_enable_params));
     scratchpad.ble_enable_params.gatts_enable_params.attr_tab_size =
         BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-    scratchpad.ble_enable_params.gatts_enable_params.service_changed   = false;
-    scratchpad.ble_enable_params.gap_enable_params.periph_conn_count   = MaxPeripheralConnections;
-    scratchpad.ble_enable_params.gap_enable_params.central_conn_count  = MaxCentralConnections;
-    scratchpad.ble_enable_params.gap_enable_params.central_sec_count   = MaxCentralSecureConnections;
+    scratchpad.ble_enable_params.gatts_enable_params.service_changed  = false;
+    scratchpad.ble_enable_params.gap_enable_params.periph_conn_count  = MaxPeripheralConnections;
+    scratchpad.ble_enable_params.gap_enable_params.central_conn_count = MaxCentralConnections;
+    scratchpad.ble_enable_params.gap_enable_params.central_sec_count  = MaxCentralSecureConnections;
     scratchpad.ble_enable_params.common_enable_params.p_conn_bw_counts = nullptr;
     scratchpad.ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 
@@ -905,7 +1008,7 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.opt.common_opt                        = scratchpad.common_opt;
 #endif
 
-    scratchpad.mtu                                   = mtu == 0 ? DEFAULT_MTU_SIZE : mtu;
+    scratchpad.mtu = mtu == 0 ? DEFAULT_MTU_SIZE : mtu;
 
 #if NRF_SD_BLE_API == 3
     scratchpad.ble_enable_params.gatt_enable_params.att_mtu = scratchpad.mtu;

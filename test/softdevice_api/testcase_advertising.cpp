@@ -74,34 +74,28 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     SECTION("extended")
     {
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
-        const auto maxNumberOfAdvertisements = 20;
-        const auto advertisementNameLength   = 40;
-        const auto advertisementSetId        = 5;
+        const auto maxNumberOfAdvertisements = 100; // Random number of advertisements
+        const auto advertisementNameLength   = 40; // Random advertisement name length
+        const auto advertisementSetId        = 5;  // Random advertisement set id
 
         auto scanRequestCountOtherCentral = 0;
         auto scanRequestCountThisCentral  = 0;
 
-        std::vector<uint8_t> peripheralAdvNameBuffer(advertisementNameLength);
-        testutil::appendRandomAlphaNumeric(peripheralAdvNameBuffer, advertisementNameLength);
-        const std::string peripheralAdvName(peripheralAdvNameBuffer.begin(),
-                                            peripheralAdvNameBuffer.end());
+        std::string peripheralAdvName;
+        std::vector<uint8_t> randomData;
 
         // Create advertising data and scan response data
-        std::vector<uint8_t> advertising;
-        std::vector<uint8_t> scanResponse;
-
-        testutil::appendAdvertisingName(scanResponse, peripheralAdvName);
+        std::vector<uint8_t> advertisingData;
+        std::vector<uint8_t> scanResponseData;
 
         // Append max number of bytes in advertisement packet with manufacturer specific random data
         // after the peripheral name
-        const auto remainingSpace =
-            maxLengthOfAdvData - scanResponse.size() - 2 /* length and AD type */;
-        std::vector<uint8_t> randomData;
+        const auto remainingSpace = maxLengthOfAdvData -
+                                    (advertisementNameLength + 2) /* AD header size */ -
+                                    2 /* AD header size manufacturer specific data */;
 
-        testutil::appendRandomData(randomData, remainingSpace);
-
-        scanResponse.reserve(maxLengthOfAdvData);
-        testutil::appendManufacturerSpecificData(scanResponse, randomData, true);
+        testutil::createRandomAdvertisingData(scanResponseData, peripheralAdvName, randomData,
+                                              advertisementNameLength, remainingSpace);
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::make_shared<testutil::AdapterWrapper>(
@@ -110,8 +104,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
-            env.responseTimeout);
+            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -153,6 +147,25 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                     NRF_LOG(c->role()
                                             << " Configured advertisement on peripheral does not "
                                                "match event received on central");
+                                    error = true;
+                                    return true;
+                                }
+
+                                // Change advertising data in peripheral
+                                scanResponseData.clear();
+                                testutil::createRandomAdvertisingData(
+                                    scanResponseData, peripheralAdvName, randomData);
+                                NRF_LOG(c->role() << " Changing advertisement data in BLE_GAP_EVT_ADV_REPORT");
+
+                                const auto err_code = p->changeAdvertisingData(
+                                    std::vector<uint8_t>(), scanResponseData);
+
+                                if (err_code != NRF_SUCCESS)
+                                {
+                                    NRF_LOG(c->role() << " Error changing advertising data "
+                                                      << testutil::asText(
+                                                             gapEvent->params.adv_report.peer_addr)
+                                                      << ", " << testutil::errorToString(err_code));
                                     error = true;
                                     return true;
                                 }
@@ -252,12 +265,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     std::vector<uint8_t> manufacturerSpecificData;
                     const auto advReport = setTerminated.adv_data;
 
-                    std::vector<uint8_t> advData;
+                    std::vector<uint8_t> scan_rsp_data;
                     const auto data       = advReport.scan_rsp_data.p_data;
                     const auto dataLength = advReport.scan_rsp_data.len;
-                    advData.assign(data, data + dataLength);
+                    scan_rsp_data.assign(data, data + dataLength);
 
-                    if (scanResponse != advData)
+                    if (scanResponseData != scan_rsp_data)
                     {
                         NRF_LOG(p->role() << " BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
                                              "buffers set in sd_ble_gap_adv_set_configure does "
@@ -298,8 +311,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         REQUIRE(c->configure() == NRF_SUCCESS);
         REQUIRE(p->configure() == NRF_SUCCESS);
 
-        REQUIRE(p->setupAdvertising({},                       // advertising data
-                                    scanResponse,             // scan response data
+        REQUIRE(p->setupAdvertising(advertisingData,          // advertising data
+                                    scanResponseData,         // scan response data
                                     40,                       // interval
                                     0,                        // duration
                                     false,                    // connectable
