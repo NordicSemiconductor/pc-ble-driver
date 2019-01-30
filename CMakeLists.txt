@@ -179,7 +179,7 @@ foreach(SD_API_VER ${SD_API_VERS})
             VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
             SOVERSION "${PROJECT_VERSION_MAJOR}"
             PREFIX "lib"
-            RESOURCE "${${SD_API_VER}_HEX_FILES}}"
+            RESOURCE "${${SD_API_VER}_HEX_FILES}"
         )
 
         set_target_properties(
@@ -187,7 +187,7 @@ foreach(SD_API_VER ${SD_API_VERS})
             PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
             OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
             PREFIX "lib"
-            RESOURCE "${${SD_API_VER}_HEX_FILES}}"
+            RESOURCE "${${SD_API_VER}_HEX_FILES}"
         )
     endif()
 
