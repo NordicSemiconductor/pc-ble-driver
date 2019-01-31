@@ -344,7 +344,7 @@ uint32_t app_ble_gap_state_reset()
 }
 
 #if NRF_SD_BLE_API_VERSION >= 6
-static adv_set_data_t adv_set_data[] = {BLE_GAP_ADV_SET_HANDLE_NOT_SET, nullptr, nullptr};
+static adv_set_data_t adv_set_data[] = {{BLE_GAP_ADV_SET_HANDLE_NOT_SET, nullptr, nullptr}};
 
 uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 {
