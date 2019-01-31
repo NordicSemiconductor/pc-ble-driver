@@ -74,7 +74,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     SECTION("extended")
     {
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
-        const auto maxNumberOfAdvertisements = 100; // Random number of advertisements
+        const auto maxNumberOfAdvertisements = 200; // Random number of advertisements
         const auto advertisementNameLength   = 40; // Random advertisement name length
         const auto advertisementSetId        = 5;  // Random advertisement set id
 
