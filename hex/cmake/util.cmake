@@ -92,6 +92,12 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
             return()
         endif()
 
+        set(ARM_GCC_TOOLCHAIN_VERSION_MIN "7.3.1")
+
+        if(GCC_VERSION VERSION_LESS "${ARM_GCC_TOOLCHAIN_VERSION_MIN}")
+            message(FATAL_ERROR "armgcc toolchain version is too old. Needs to be ${ARM_GCC_TOOLCHAIN_VERSION_MIN} or newer.")
+        endif()
+
         set(TOOLCHAIN_PATH "${SDK_DIRECTORY}/components/toolchain/gcc")
         if(EXISTS "${TOOLCHAIN_PATH}")
             if(WIN32)
