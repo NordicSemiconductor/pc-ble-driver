@@ -74,7 +74,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     SECTION("extended")
     {
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
-        const auto maxNumberOfAdvertisements = 200; // Random number of advertisements
+        const auto maxNumberOfAdvertisements = 10; // Random number of advertisements
         const auto advertisementNameLength   = 40; // Random advertisement name length
         const auto advertisementSetId        = 5;  // Random advertisement set id
 
@@ -330,6 +330,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(3));
+
+        REQUIRE(sd_ble_gap_scan_stop(c->unwrap()) == NRF_SUCCESS);
+        REQUIRE(sd_ble_gap_adv_stop(p->unwrap(), p->scratchpad.adv_handle) == NRF_SUCCESS);
 
         CHECK(error == false);
         CHECK(testSuccess == true);
