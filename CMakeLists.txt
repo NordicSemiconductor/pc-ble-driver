@@ -275,7 +275,7 @@ endif()
 include(cmake/install-target.cmake)
 
 if(COMPILE_CONNECTIVITY)
-    add_subdirectory(hex)
+    add_subdirectory(hex EXCLUDE_FROM_ALL)
 endif()
 
 include (cmake/clang-dev-tools.cmake)
