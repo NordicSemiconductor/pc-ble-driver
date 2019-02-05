@@ -332,7 +332,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
         REQUIRE(sd_ble_gap_scan_stop(c->unwrap()) == NRF_SUCCESS);
-        REQUIRE(sd_ble_gap_adv_stop(p->unwrap(), p->scratchpad.adv_handle) == NRF_SUCCESS);
+
+        // Advertising shall already be stopped, check that actually is
+        REQUIRE(sd_ble_gap_adv_stop(p->unwrap(), p->scratchpad.adv_handle) == NRF_ERROR_INVALID_STATE);
 
         CHECK(error == false);
         CHECK(testSuccess == true);
