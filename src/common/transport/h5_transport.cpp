@@ -1151,7 +1151,7 @@ void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
 void H5Transport::logStateTransition(h5_state_t from, h5_state_t to) const
 {
     std::stringstream logLine;
-    logLine << "State change: " << stateToString(from) << " -> " << stateToString(to) << std::endl;
+    logLine << "State change: " << stateToString(from) << " -> " << stateToString(to);
 
     log(SD_RPC_LOG_DEBUG, logLine.str());
 }
