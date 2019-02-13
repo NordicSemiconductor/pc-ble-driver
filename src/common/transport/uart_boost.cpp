@@ -287,7 +287,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
     message << "Successfully opened " << uartSettingsBoost.getPortName() << ". "
             << "Baud rate: " << uartSettingsBoost.getBaudRate() << ". "
             << "Flow control: " << flow_control_string.str() << ". "
-            << "Parity: " << parity_string.str() << "." << std::endl;
+            << "Parity: " << parity_string.str() << ".";
 
     log(SD_RPC_LOG_INFO, message.str());
 
