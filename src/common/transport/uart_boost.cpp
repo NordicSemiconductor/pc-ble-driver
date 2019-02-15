@@ -142,6 +142,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         serialPort->set_option(parity);
         serialPort->set_option(characterSize);
 
+#ifdef SEGGER_HWFC_WORKAROUND
         // SEGGER J-LINK-OB VCOM has an issue when auto-detecting UART flow control
         // The VCOM implementation keeps the detected flow-control state if the baud rate
         // is the same as the previous open of UART (MDK-1005).
@@ -157,11 +158,16 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
 
             return NRF_ERROR_SD_RPC_SERIAL_PORT;
         }
+#endif // SEGGER_HWFC_WORKAROUND
 
 #if !defined(__APPLE__)
+#ifdef SEGGER_HWFC_WORKAROUND
         // Set dummy baud rate
         auto baudRate = asio::serial_port::baud_rate(DUMMY_BAUD_RATE);
         serialPort->set_option(baudRate);
+#else
+        asio::serial_port::baud_rate baudRate;
+#endif // SEGGER_HWFC_WORKAROUND
 
         // Set requested baud rate
         baudRate = uartSettingsBoost.getBoostBaudRate();
@@ -171,6 +177,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // get underlying boost serial port handle and apply baud rate directly
 
         // Set dummy baud rate
+#ifdef SEGGER_HWFC_WORKAROUND
         auto speed = (speed_t)DUMMY_BAUD_RATE;
         if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
         {
@@ -178,6 +185,9 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             throw std::system_error(error, "Failed to set dummy baud rate (" +
                                                std::to_string(speed) + ")");
         }
+#else
+        speed_t speed;
+#endif // SEGGER_HWFC_WORKAROUND
 
         // Set requested baud rate
         speed = (speed_t)uartSettingsBoost.getBaudRate();
