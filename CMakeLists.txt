@@ -95,6 +95,7 @@ set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FI
 
 # Add common compiler definitions
 add_definitions(
+    -DASIO_STANDALONE
     -DSD_RPC_EXPORTS
     -DHCI_LINK_CONTROL # Adds support for Link Control packets according to the HCI standard
 )
