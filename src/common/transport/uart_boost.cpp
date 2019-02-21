@@ -56,7 +56,7 @@
 #ifdef SEGGER_HWFC_WORKAROUND
 constexpr uint32_t DUMMY_BAUD_RATE = 9600;
 #endif // SEGGER_HWFC_WORKAROUND
-constexpr auto SLEEP_BETWEEN_UART_SETTING = std::chrono::milliseconds(100);
+constexpr auto SLEEP_BETWEEN_UART_SETTING = std::chrono::milliseconds(200);
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport()
