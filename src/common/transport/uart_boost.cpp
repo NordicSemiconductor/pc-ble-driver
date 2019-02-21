@@ -56,6 +56,7 @@
 #ifdef SEGGER_HWFC_WORKAROUND
 constexpr uint32_t DUMMY_BAUD_RATE = 9600;
 #endif // SEGGER_HWFC_WORKAROUND
+constexpr auto SLEEP_BETWEEN_UART_SETTING = std::chrono::milliseconds(200);
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport()
@@ -124,16 +125,20 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
     try
     {
         serialPort->open(portName);
-
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
         const auto flowControl   = uartSettingsBoost.getBoostFlowControl();
         const auto stopBits      = uartSettingsBoost.getBoostStopBits();
         const auto parity        = uartSettingsBoost.getBoostParity();
         const auto characterSize = uartSettingsBoost.getBoostCharacterSize();
 
         serialPort->set_option(flowControl);
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
         serialPort->set_option(stopBits);
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
         serialPort->set_option(parity);
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
         serialPort->set_option(characterSize);
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
 
 #ifdef SEGGER_HWFC_WORKAROUND
         // SEGGER J-LINK-OB VCOM has an issue when auto-detecting UART flow control
@@ -158,6 +163,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // Set dummy baud rate
         auto baudRate = asio::serial_port::baud_rate(DUMMY_BAUD_RATE);
         serialPort->set_option(baudRate);
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
 #else
         asio::serial_port::baud_rate baudRate;
 #endif // SEGGER_HWFC_WORKAROUND
@@ -165,7 +171,8 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // Set requested baud rate
         baudRate = uartSettingsBoost.getBoostBaudRate();
         serialPort->set_option(baudRate);
-#else
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
+#else // !defined(__APPLE__)
         // Workaround for setting non-standard baudrate on macOS
         // get underlying boost serial port handle and apply baud rate directly
 
@@ -178,6 +185,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             throw std::system_error(error, "Failed to set dummy baud rate (" +
                                                std::to_string(speed) + ")");
         }
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
 #else
         speed_t speed;
 #endif // SEGGER_HWFC_WORKAROUND
@@ -190,6 +198,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             const auto error = std::error_code(errno, std::system_category());
             throw std::system_error(error, "Failed to set baud rate to " + std::to_string(speed));
         }
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
 #endif
 
         // Wait a bit before making the device available since there are problems
@@ -199,7 +208,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
         // All of these devices use the SEGGER OB which at the time of testing has firmware version
         // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
     }
     catch (std::exception &ex)
     {
