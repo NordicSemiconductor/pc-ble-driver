@@ -53,7 +53,9 @@
 
 #include <asio.hpp>
 
+#ifdef SEGGER_HWFC_WORKAROUND
 constexpr uint32_t DUMMY_BAUD_RATE = 9600;
+#endif // SEGGER_HWFC_WORKAROUND
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport()
@@ -123,15 +125,6 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
     {
         serialPort->open(portName);
 
-        // Wait a bit before making the device available since there are problems
-        // if data is sent right after open.
-        //
-        // Not sure if this is an OS issue or if it is an issue with the device USB stack.
-        // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
-        // All of these devices use the SEGGER OB which at the time of testing has firmware version
-        // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
         const auto flowControl   = uartSettingsBoost.getBoostFlowControl();
         const auto stopBits      = uartSettingsBoost.getBoostStopBits();
         const auto parity        = uartSettingsBoost.getBoostParity();
@@ -198,6 +191,15 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             throw std::system_error(error, "Failed to set baud rate to " + std::to_string(speed));
         }
 #endif
+
+        // Wait a bit before making the device available since there are problems
+        // if data is sent right after open.
+        //
+        // Not sure if this is an OS issue or if it is an issue with the device USB stack.
+        // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
+        // All of these devices use the SEGGER OB which at the time of testing has firmware version
+        // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
     catch (std::exception &ex)
     {
