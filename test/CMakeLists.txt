@@ -6,7 +6,6 @@ endif()
 find_package(Catch2 CONFIG REQUIRED)
 
 include_directories (
-    ../3rdparty
     ../include/common/sdk_compat
     ../include/common
     ../include/common/internal/transport
@@ -102,15 +101,20 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
 
     add_custom_command(
         OUTPUT ${COMMAND_NAME}
+        COMMAND ${CMAKE_COMMAND} -E echo "Preparing to run test target ${target_name} with connectivity ${connfw}."
+    )
 
-        COMMAND ${NRFJPROG} --version
+    add_custom_command(
+        OUTPUT ${COMMAND_NAME}
+
+        APPEND COMMAND ${NRFJPROG} --version
         COMMAND ${CMAKE_COMMAND} -E echo "Erasing ${pca}/${DEVICE_A_SEGGER_SN}."
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --eraseall --log
         COMMAND ${CMAKE_COMMAND} -E echo "Programming ${pca}/${DEVICE_A_SEGGER_SN}."
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --program ${connfw} --log
         COMMAND ${CMAKE_COMMAND} -E echo "Resetting ${pca}/${DEVICE_A_SEGGER_SN}."
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --reset --log
-        COMMAND ${CMAKE_COMMAND} -E echo "Resetting of ${pca}/${DEVICE_B_SEGGER_SN} complete."
+        COMMAND ${CMAKE_COMMAND} -E echo "Resetting of ${pca}/${DEVICE_A_SEGGER_SN} complete."
 
         COMMAND ${CMAKE_COMMAND} -E echo "Erasing ${pca}/${DEVICE_B_SEGGER_SN}."
         COMMAND ${NRFJPROG} -s ${DEVICE_B_SEGGER_SN} --eraseall --log
@@ -137,7 +141,7 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
     foreach(integration_test IN LISTS tests)
         add_custom_command(
             OUTPUT ${COMMAND_NAME}
-            APPEND COMMAND ${CMAKE_COMMAND} -E echo "Running tests from $<TARGET_FILE:${integration_test}> with connectivity ${connfw}."
+            APPEND COMMAND ${CMAKE_COMMAND} -E echo "Running tests in $<TARGET_FILE:${integration_test}> with connectivity ${connfw}."
         )
 
         add_custom_command(
@@ -157,7 +161,7 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
             --hardware-info "hex:${connfw_filename},pca:${pca},segger_sn:${DEVICE_A_SEGGER_SN},${DEVICE_B_SEGGER_SN}"
             --reporter ${tests_reporter}
             --order lex
-            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml" || (exit 0)
+            --out "$<TARGET_FILE_DIR:${integration_test}>/test-reports/${target_name}-${integration_test}.xml" || ${CMAKE_COMMAND} -E echo "Target ${target_name} failed."
             DEPENDS ${integration_test}
         )
     endforeach()
