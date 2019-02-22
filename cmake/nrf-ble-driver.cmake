@@ -52,8 +52,7 @@ endif()
 
 # Add or remove SD API versions here
 if(NOT SD_API_VER_NUMS)
-	#set(SD_API_VER_NUMS 2 3 5 6)
-	set(SD_API_VER_NUMS 2 3 5)
+    set(SD_API_VER_NUMS 2 3 5 6)
 endif()
 
 list(LENGTH SD_API_VER_NUMS SD_API_VER_COUNT)
