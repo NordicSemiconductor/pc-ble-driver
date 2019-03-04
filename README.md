@@ -218,16 +218,16 @@ The following steps are needed only if you want to compile your own `connectivit
     $ choco install -y make
     ```
 
-2. Install `GNU Embedded Toolchain for Arm`
-    ```bash
-    $ choco install -y gcc-arm-embedded
-    ```
+2. Download and install `GNU Embedded Toolchain for Arm` version 7-2018q2
+    [Download](https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-win32-sha2.exe?revision=bc72768f-9927-454e-9141-918927fb74ff?product=GNU%20Arm%20Embedded%20Toolchain,32-bit,,Windows,7-2018-q2-update)
+
+    Follow the install instructions.
 
     Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
     By default:
 
     ```bash
-    $ SET GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
+    $ set GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
     ```
 
 3. Install `Python` and `pip`, and then install `nrfutil`
@@ -275,7 +275,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
 The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-1. Install `GNU Embedded Toolchain for Arm`.
+1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
@@ -315,7 +315,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
  The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-1. Install `GNU Embedded Toolchain for Arm`
+1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
