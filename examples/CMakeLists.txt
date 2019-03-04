@@ -24,7 +24,7 @@ function(setup_example example_directory)
             EXPORT ${PROJECT_NAME}-targets
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/examples
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             COMPONENT Examples
         )
     endforeach()
@@ -41,3 +41,5 @@ endif()
 
 setup_example(heart_rate_monitor)
 setup_example(heart_rate_collector)
+
+message(STATUS "Compiled examples are installed in directory \"${CMAKE_INSTALL_BINDIR}\"")

@@ -401,7 +401,7 @@ function(setup_test)
         EXPORT ${PROJECT_NAME}-targets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/tests
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT Tests
     )
 endfunction(setup_test)
@@ -436,4 +436,6 @@ if(TEST_SOFTDEVICE_API)
         setup_test_run()
         add_run_test_targets()
     endif()
+
+    message(STATUS "Compiled tests are installed in directory \"${CMAKE_INSTALL_BINDIR}\"")
 endif()
