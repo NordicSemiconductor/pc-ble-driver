@@ -53,10 +53,11 @@
 
 #include <asio.hpp>
 
-#ifdef SEGGER_HWFC_WORKAROUND
-constexpr uint32_t DUMMY_BAUD_RATE = 9600;
-#endif // SEGGER_HWFC_WORKAROUND
-constexpr auto SLEEP_BETWEEN_UART_SETTING = std::chrono::milliseconds(200);
+constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
+
+// On Windows, some users experience a permission denied error
+// if opening a UART port right after close.
+constexpr auto DELAY_BEFORE_OPEN = std::chrono::milliseconds(200);
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     : Transport()
@@ -64,9 +65,6 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
     , asyncWriteInProgress(false)
     , ioServiceThread(nullptr)
 {
-    ioService    = new asio::io_service();
-    serialPort   = new asio::serial_port(*ioService);
-    workNotifier = new asio::io_service::work(*ioService);
 }
 
 // The order of destructor invocation is important here. See:
@@ -75,28 +73,9 @@ UartBoost::~UartBoost() noexcept
 {
     try
     {
-        if (serialPort != nullptr)
+        if (isOpen)
         {
-            delete serialPort;
-        }
-
-        if (workNotifier != nullptr)
-        {
-            delete workNotifier;
-        }
-
-        if (ioServiceThread != nullptr)
-        {
-            if (ioServiceThread->joinable())
-            {
-                ioServiceThread->join();
-                delete ioServiceThread;
-            }
-        }
-
-        if (ioService != nullptr)
-        {
-            delete ioService;
+            close();
         }
     }
     catch (std::exception &e)
@@ -122,10 +101,16 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
 
     const auto portName = uartSettingsBoost.getPortName();
 
+    ioService    = std::make_unique<asio::io_service>();
+    serialPort   = std::make_unique<asio::serial_port>(*ioService);
+    workNotifier = std::make_unique<asio::executor_work_guard<asio::io_context::executor_type>>(
+        asio::make_work_guard(*ioService));
+
     try
     {
+        std::this_thread::sleep_for(DELAY_BEFORE_OPEN);
         serialPort->open(portName);
-        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
+        purge();
         const auto flowControl   = uartSettingsBoost.getBoostFlowControl();
         const auto stopBits      = uartSettingsBoost.getBoostStopBits();
         const auto parity        = uartSettingsBoost.getBoostParity();
@@ -136,55 +121,15 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         serialPort->set_option(parity);
         serialPort->set_option(characterSize);
 
-#ifdef SEGGER_HWFC_WORKAROUND
-        // SEGGER J-LINK-OB VCOM has an issue when auto-detecting UART flow control
-        // The VCOM implementation keeps the detected flow-control state if the baud rate
-        // is the same as the previous open of UART (MDK-1005).
-        if (uartSettingsBoost.getBoostBaudRate().value() == DUMMY_BAUD_RATE)
-        {
-            std::stringstream message;
-            message << "Error setting up serial port " << uartSettingsBoost.getPortName()
-                    << ". Baud rate requested (" << uartSettingsBoost.getBoostBaudRate().value()
-                    << ") is the dummy baud rate to circumvent a SEGGER J-LINK-OB issue. Please "
-                       "use a different baud rate.";
-
-            status(IO_RESOURCES_UNAVAILABLE, message.str());
-
-            return NRF_ERROR_SD_RPC_SERIAL_PORT;
-        }
-#endif // SEGGER_HWFC_WORKAROUND
-
 #if !defined(__APPLE__)
-#ifdef SEGGER_HWFC_WORKAROUND
-        // Set dummy baud rate
-        auto baudRate = asio::serial_port::baud_rate(DUMMY_BAUD_RATE);
-        serialPort->set_option(baudRate);
-#else
         asio::serial_port::baud_rate baudRate;
-#endif // SEGGER_HWFC_WORKAROUND
 
         // Set requested baud rate
         baudRate = uartSettingsBoost.getBoostBaudRate();
         serialPort->set_option(baudRate);
 #else // !defined(__APPLE__)
-        // Workaround for setting non-standard baudrate on macOS
-        // get underlying boost serial port handle and apply baud rate directly
-
-        // Set dummy baud rate
-#ifdef SEGGER_HWFC_WORKAROUND
-        auto speed = (speed_t)DUMMY_BAUD_RATE;
-        if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
-        {
-            const auto error = std::error_code(errno, std::system_category());
-            throw std::system_error(error, "Failed to set dummy baud rate (" +
-                                               std::to_string(speed) + ")");
-        }
-#else
-        speed_t speed;
-#endif // SEGGER_HWFC_WORKAROUND
-
         // Set requested baud rate
-        speed = (speed_t)uartSettingsBoost.getBaudRate();
+        const auto speed = (speed_t)uartSettingsBoost.getBaudRate();
 
         if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
         {
@@ -200,7 +145,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         // The 200ms wait time is based on testing with PCA10028, PCA10031 and PCA10040.
         // All of these devices use the SEGGER OB which at the time of testing has firmware version
         // "J-Link OB-SAM3U128-V2-NordicSemi compiled Jan 12 2018 16:05:20"
-        std::this_thread::sleep_for(SLEEP_BETWEEN_UART_SETTING);
+        std::this_thread::sleep_for(DELAY_BEFORE_READ_WRITE);
     }
     catch (std::exception &ex)
     {
@@ -220,13 +165,6 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
 
         callbackWriteHandle =
             std::bind(&UartBoost::writeHandler, this, std::placeholders::_1, std::placeholders::_2);
-
-        // run execution of io_service handlers in a separate thread
-        if (ioServiceThread != nullptr)
-        {
-            std::cerr << "ioServiceThread already exists.... aborting." << std::endl;
-            std::terminate();
-        }
 
         const auto asioWorker = [&]() {
             try
@@ -250,7 +188,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
             }
         };
 
-        ioServiceThread = new std::thread(asioWorker);
+        ioServiceThread = std::make_unique<std::thread>(asioWorker);
     }
     catch (std::exception &ex)
     {
@@ -320,8 +258,11 @@ uint32_t UartBoost::close()
 
     try
     {
+        serialPort->cancel();
+        purge();
         serialPort->close();
         ioService->stop();
+        workNotifier->reset();
 
         if (ioServiceThread != nullptr)
         {
@@ -329,10 +270,10 @@ uint32_t UartBoost::close()
             {
                 ioServiceThread->join();
             }
-
-            delete ioServiceThread;
-            ioServiceThread = nullptr;
         }
+
+        serialPort.reset();
+        ioService.reset();
 
         std::stringstream message;
         message << "serial port " << uartSettingsBoost.getPortName() << " closed.";
@@ -481,4 +422,33 @@ void UartBoost::asyncWrite()
 
     const auto buffer = asio::buffer(writeBufferVector, writeBufferVector.size());
     asio::async_write(*serialPort, buffer, callbackWriteHandle);
+}
+
+void UartBoost::purge()
+{
+#if _WIN32
+    const auto result = PurgeComm(serialPort->native_handle(),
+                                  PURGE_RXCLEAR | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_TXABORT);
+    if (result == 0)
+    {
+        const auto lastError = GetLastError();
+
+        if (lastError != ERROR_SUCCESS)
+        {
+            std::stringstream message;
+            message << "Error purging UART " << static_cast<uint32_t>(lastError);
+            log(SD_RPC_LOG_ERROR, message.str());
+        }
+    }
+#endif
+
+#ifdef __unix__
+    const auto result = tcflush(serialPort->native_handle(), TCIOFLUSH);
+
+    if (result == -1) {
+        std::stringstream message;
+        message << "Error purging UART " << static_cast<uint32_t>(result);
+        log(SD_RPC_LOG_ERROR, message.str());
+    }
+#endif
 }
