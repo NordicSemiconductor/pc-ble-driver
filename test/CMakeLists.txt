@@ -1,3 +1,5 @@
+include(GNUInstallDirs)
+
 if(MSVC)
     add_definitions(-DPC_BLE_DRIVER_STATIC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)

@@ -1,3 +1,5 @@
+include(GNUInstallDirs)
+
 function(setup_example example_directory)
     set(EXAMPLE_NAME_BASE "${example_directory}")
     file(GLOB EXAMPLE_SOURCE_FILES "${example_directory}/*.c")
