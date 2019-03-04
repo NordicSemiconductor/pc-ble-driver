@@ -532,6 +532,22 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             }
         });
 
+    c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
+        if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
+            code == PKT_UNEXPECTED)
+        {
+            centralError = true;
+        }
+    });
+
+    p->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
+        if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
+            code == PKT_UNEXPECTED)
+        {
+            peripheralError = true;
+        }
+    });
+
     // Open the adapters
     REQUIRE(c->open() == NRF_SUCCESS);
     REQUIRE(p->open() == NRF_SUCCESS);
