@@ -218,16 +218,16 @@ The following steps are needed only if you want to compile your own `connectivit
     $ choco install -y make
     ```
 
-2. Install `GNU Embedded Toolchain for Arm`
-    ```bash
-    $ choco install -y gcc-arm-embedded
-    ```
+2. Download and install `GNU Embedded Toolchain for Arm` version 7-2018q2
+    Download from [this](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) location.
+
+    Follow the install instructions.
 
     Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
-    By default:
+    For example:
 
     ```bash
-    $ SET GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
+    $ set GCCARMEMB_TOOLCHAIN_PATH=c:\gccarmemb
     ```
 
 3. Install `Python` and `pip`, and then install `nrfutil`
@@ -275,7 +275,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
 The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-1. Install `GNU Embedded Toolchain for Arm`.
+1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
@@ -315,7 +315,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
  The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-1. Install `GNU Embedded Toolchain for Arm`
+1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
     * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
@@ -350,13 +350,13 @@ The following steps are needed only if you want to compile your own `connectivit
 
     To build 32-bit version with Visual Studio 2015:
     ```bash
-    $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ..
+    $ cmake -G "Visual Studio 14" ..
     ```
 
     To build 64-bit version with Visual Studio 2015:
 
     ```bash
-    $ cmake -G "Visual Studio 14 Win64" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ..
+    $ cmake -G "Visual Studio 14 Win64" ..
     ```
 
     Change `-G "Visual Studio 14"` to `-G "Visual Studio 15"` if you are using Visual Studio 2017.
@@ -364,13 +364,13 @@ The following steps are needed only if you want to compile your own `connectivit
 3. MSBuild
 
     ```bash
-    $ msbuild ALL_BUILD.vcxproj
+    $ cmake --build .
     ```
 
-    Optionally select the build configuration with the `/p:Configuration=` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available. For example:
+    Optionally select the build configuration with the `--config` option. Typically `Debug`, `Release`, `MinSizeRel` and `RelWithDebInfo` are available. For example:
 
     ```bash
-    $ msbuild ALL_BUILD.vcxproj /p:Configuration=Debug
+    $ cmake --build . --config Debug
     ```
 
 #### Compiling pc-ble-driver on Ubuntu Linux or macOS
@@ -391,7 +391,6 @@ The following steps are needed only if you want to compile your own `connectivit
     ```bash
     $ cmake \
         -G "Unix Makefiles" \
-        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
         ..
     ```
 
@@ -403,7 +402,6 @@ The following steps are needed only if you want to compile your own `connectivit
     ```bash
     $ cmake \
         -G "Unix Makefiles" \
-        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
         -DCMAKE_BUILD_TYPE=Debug \
         -DARCH=x86_32,x86_64 \
         ..
@@ -411,7 +409,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
 3. Make
     ```bash
-    $ make
+    $ cmake --build .
     ```
 
 ---
@@ -445,11 +443,10 @@ Follow the steps to install dependencies on a specific platform:
 
 2. CMake
     ```bash
-    $ cd hex
     $ mkdir build && cd build
 
     # Modify -DCONNECTIVITY_VERSION=a.b.c
-    $ cmake -G "Visual Studio 14" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+    $ cmake -G "Visual Studio 14" -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
     ```
 
     `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
@@ -460,7 +457,7 @@ Follow the steps to install dependencies on a specific platform:
 
 3. MSBuild
     ```bash
-    $ msbuild compile_connectivity.vcxproj
+    $ cmake --build hex --target compile_connectivity
     ```
 
     The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
@@ -484,7 +481,6 @@ Follow the steps to install dependencies on a specific platform:
     # Modify -DCONNECTIVITY_VERSION=a.b.c
     $ cmake \
         -G "Unix Makefiles" \
-        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
         -DCOMPILE_CONNECTIVITY=1 \
         -DCONNECTIVITY_VERSION=1.0.0 \
         ..
@@ -498,7 +494,7 @@ Follow the steps to install dependencies on a specific platform:
 
 3. Make
     ```bash
-    $ make compile_connectivity
+    $ cmake --build hex --target compile_connectivity
     ```
 
     The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
