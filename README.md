@@ -219,6 +219,7 @@ The following steps are needed only if you want to compile your own `connectivit
     ```
 
 2. Download and install `GNU Embedded Toolchain for Arm` version 7-2018q2
+
     Download from [this](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) location.
 
     Follow the install instructions.
