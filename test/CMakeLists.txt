@@ -116,7 +116,6 @@ function(add_softdevice_test target_name pca device_a device_b connfw tests_repo
 
     add_custom_command(
         OUTPUT ${COMMAND_NAME}
-
         APPEND COMMAND ${NRFJPROG} --version
         COMMAND ${CMAKE_COMMAND} -E echo "Erasing ${pca}/${DEVICE_A_SEGGER_SN}."
         COMMAND ${NRFJPROG} -s ${DEVICE_A_SEGGER_SN} --eraseall --log

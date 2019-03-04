@@ -119,13 +119,16 @@ class UartBoost : public Transport
 
     UartSettingsBoost uartSettingsBoost;
     bool asyncWriteInProgress;
-    std::thread *ioServiceThread;
+    std::unique_ptr<std::thread> ioServiceThread;
 
-    asio::io_service *ioService;
-    asio::serial_port *serialPort;
+    std::unique_ptr<asio::io_service> ioService;
+    std::unique_ptr<asio::serial_port> serialPort;
+    std::unique_ptr<asio::executor_work_guard<asio::io_context::executor_type>> workNotifier;
 
-    asio::io_service::work *workNotifier;
-
+    /**
+     * @brief      Purge RX and TX data in serial buffers. On WIN32, in addition, abort any overlapped operations
+     */
+    void purge();
 };
 
 #endif // UART_BOOST_H
