@@ -219,15 +219,15 @@ The following steps are needed only if you want to compile your own `connectivit
     ```
 
 2. Download and install `GNU Embedded Toolchain for Arm` version 7-2018q2
-    [Download](https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-win32-sha2.exe?revision=bc72768f-9927-454e-9141-918927fb74ff?product=GNU%20Arm%20Embedded%20Toolchain,32-bit,,Windows,7-2018-q2-update)
+    Download from [this](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) location.
 
     Follow the install instructions.
 
     Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
-    By default:
+    For example:
 
     ```bash
-    $ set GCCARMEMB_TOOLCHAIN_PATH=C:\ProgramData\chocolatey\lib\gcc-arm-embedded\tools
+    $ set GCCARMEMB_TOOLCHAIN_PATH=c:\gccarmemb
     ```
 
 3. Install `Python` and `pip`, and then install `nrfutil`
