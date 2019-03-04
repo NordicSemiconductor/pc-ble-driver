@@ -92,10 +92,10 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
             return()
         endif()
 
-        set(ARM_GCC_TOOLCHAIN_VERSION_MIN "7.3.1")
+        set(ARM_GCC_TOOLCHAIN_VERSION "7.3.1")
 
-        if(GCC_VERSION VERSION_LESS "${ARM_GCC_TOOLCHAIN_VERSION_MIN}")
-            message(FATAL_ERROR "armgcc toolchain version is too old. Needs to be ${ARM_GCC_TOOLCHAIN_VERSION_MIN} or newer.")
+        if(NOT GCC_VERSION VERSION_EQUAL "${ARM_GCC_TOOLCHAIN_VERSION}")
+            message(FATAL_ERROR "Required armgcc toolchain version not provided. Needs to be ${ARM_GCC_TOOLCHAIN_VERSION}.")
         endif()
 
         set(TOOLCHAIN_PATH "${SDK_DIRECTORY}/components/toolchain/gcc")
@@ -118,7 +118,7 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
                     file(WRITE "${MAKEFILE_COMMON}.pristine" "${MAKEFILE_CONTENT}")
 
                     string(
-                        REPLACE "RM := rm -rf" "RM := \"${CMAKE_COMMAND}\" -E remove_directory" 
+                        REPLACE "RM := rm -rf" "RM := \"${CMAKE_COMMAND}\" -E remove_directory"
                         MAKEFILE_CONTENT_NEW "${MAKEFILE_CONTENT}"
                     )
 
