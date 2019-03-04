@@ -490,7 +490,7 @@ index 84d5ff8..9a72955 100644
  /**@brief     Function for registering for System (SOC) events.
   *
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/main.c nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/main.c
-index 83241ef..85d6acb 100644
+index 83241ef..addb80a 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/main.c
 +++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/main.c
 @@ -28,9 +28,47 @@
@@ -528,9 +528,9 @@ index 83241ef..85d6acb 100644
 +    .struct_version     = 2,
 +    .rfu0               = 0xFFFFFF,
 +    .revision_hash      = 0,
-+    .version_major      = 0xf1,
-+    .version_minor      = 0xf2,
-+    .version_patch      = 0xf3,
++    .version_major      = APP_VERSION_MAJOR,
++    .version_minor      = APP_VERSION_MINOR,
++    .version_patch      = APP_VERSION_PATCH,
 +    .rfu1               = 0xFF,
 +    .sd_ble_api_version = 2,
 +    .transport_type     = 1,
@@ -571,7 +571,7 @@ index 0265b80..13d400b 100644
                <Undefine></Undefine>
                <IncludePath>..\..\..\config\ble_connectivity_s130_hci_pca10028;..\..\..\config;..\..\..\..\..\..\components\ble\ble_dtm;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\config;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\components\libraries\mailbox;..\..\..\..\..\..\components\libraries\scheduler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\serialization\common;..\..\..\..\..\..\components\serialization\common\struct_ser\s130;..\..\..\..\..\..\components\serialization\common\transport;..\..\..\..\..\..\components\serialization\common\transport\ser_phy;..\..\..\..\..\..\components\serialization\common\transport\ser_phy\config;..\..\..\..\..\..\components\serialization\connectivity;..\..\..\..\..\..\components\serialization\connectivity\codecs\common;..\..\..\..\..\..\components\serialization\connectivity\codecs\s130\middleware;..\..\..\..\..\..\components\serialization\connectivity\codecs\s130\serializers;..\..\..\..\..\..\components\serialization\connectivity\hal;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\softdevice\s130\headers;..\..\..\..\..\..\components\softdevice\s130\headers\nrf51;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\bsp</IncludePath>
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
-index f02d9d2..cc9dd3f 100644
+index f02d9d2..9fc735c 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
 +++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
@@ -583,6 +583,15 @@ index f02d9d2..cc9dd3f 100644
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
+@@ -240,7 +240,7 @@ OUTPUT_BINARY_DIRECTORY = $(OBJECT_DIRECTORY)
+ BUILD_DIRECTORIES := $(sort $(OBJECT_DIRECTORY) $(OUTPUT_BINARY_DIRECTORY) $(LISTING_DIRECTORY) )
+ 
+ #flags common to all targets
+-CFLAGS  = -D__HEAP_SIZE=1024
++CFLAGS += -D__HEAP_SIZE=1024
+ CFLAGS += -DBOARD_PCA10028
+ CFLAGS += -D__STACK_SIZE=2048
+ CFLAGS += -DNRF51
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld
 index 52c6617..4654217 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10028/ser_s130_hci/armgcc/ble_connectivity_gcc_nrf51.ld
@@ -648,7 +657,7 @@ index 77f246a..1e6f8eb 100644
  #echo suspend
  ifeq ("$(VERBOSE)","1")
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
-index 989b76f..ca395e5 100644
+index 989b76f..f0f1df0 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
 +++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_hci/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
@@ -660,6 +669,15 @@ index 989b76f..ca395e5 100644
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
+@@ -240,7 +240,7 @@ OUTPUT_BINARY_DIRECTORY = $(OBJECT_DIRECTORY)
+ BUILD_DIRECTORIES := $(sort $(OBJECT_DIRECTORY) $(OUTPUT_BINARY_DIRECTORY) $(LISTING_DIRECTORY) )
+ 
+ #flags common to all targets
+-CFLAGS  = -DNRF52_PAN_16
++CFLAGS += -DNRF52_PAN_16
+ CFLAGS += -DNRF52_PAN_23
+ CFLAGS += -D__STACK_SIZE=2048
+ CFLAGS += -DSER_CONNECTIVITY
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
 index 2459d52..e79a308 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10036/ser_s132_spi/armgcc/Makefile
@@ -700,7 +718,7 @@ index fb5210d..9d004e8 100644
  #echo suspend
  ifeq ("$(VERBOSE)","1")
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
-index f4b3fc1..ab9016d 100644
+index f4b3fc1..c14fae0 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
 +++ nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/Makefile
 @@ -13,7 +13,7 @@ include $(TEMPLATE_PATH)/Makefile.posix
@@ -712,6 +730,15 @@ index f4b3fc1..ab9016d 100644
  
  #echo suspend
  ifeq ("$(VERBOSE)","1")
+@@ -240,7 +240,7 @@ OUTPUT_BINARY_DIRECTORY = $(OBJECT_DIRECTORY)
+ BUILD_DIRECTORIES := $(sort $(OBJECT_DIRECTORY) $(OUTPUT_BINARY_DIRECTORY) $(LISTING_DIRECTORY) )
+ 
+ #flags common to all targets
+-CFLAGS  = -D__STACK_SIZE=2048
++CFLAGS += -D__STACK_SIZE=2048
+ CFLAGS += -DNRF52
+ CFLAGS += -DSOFTDEVICE_PRESENT
+ CFLAGS += -DSER_CONNECTIVITY
 diff --git nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld nRF5_SDK_11.0.0_XXXXXXX/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
 index 3c6e5b1..996be3c 100644
 --- nRF5_SDK_11.0.0_89a8197/examples/ble_central_and_peripheral/ble_connectivity/pca10040/ser_s132_hci/armgcc/ble_connectivity_gcc_nrf52.ld
