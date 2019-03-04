@@ -164,7 +164,6 @@ function(nrf_create_connectivity_compile_targets)
                 endif()
 
                 if(TRANSPORT STREQUAL "uart")
-                    list(APPEND TRANSPORTS "115k2")
                     list(APPEND TRANSPORTS "1m")
                 endif()
 
