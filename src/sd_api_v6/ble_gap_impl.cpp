@@ -336,9 +336,7 @@ uint32_t sd_ble_gap_privacy_get(adapter_t *adapter, ble_gap_privacy_params_t *p_
     return gap_encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gap_adv_stop(adapter_t *adapter, uint8_t adv_handle
-
-)
+uint32_t sd_ble_gap_adv_stop(adapter_t *adapter, uint8_t adv_handle)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gap_adv_stop_req_enc(adv_handle, buffer, length);
