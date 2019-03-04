@@ -18,6 +18,15 @@ function(setup_example example_directory)
             # Assume Linux
             target_link_libraries(${EXAMPLE_NAME} PRIVATE nrf_ble_driver_sd_api_v${SD_API_VER}_static "pthread")
         endif()
+
+        install(
+            TARGETS ${EXAMPLE_NAME}
+            EXPORT ${PROJECT_NAME}-targets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/examples
+            COMPONENT Examples
+        )
     endforeach()
 endfunction(setup_example)
 
