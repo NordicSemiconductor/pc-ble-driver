@@ -1,0 +1,242 @@
+trigger:
+- master
+- test-azure
+
+variables:
+  NRF_BLE_DRIVER_VERSION: 4.1.0-alpha
+  NRF_BLE_DRIVER_ARTIFACT_PREFIX: nrf-ble-driver-$(NRF_BLE_DRIVER_VERSION)
+  NRF_BLE_DRIVER_INSTALL_PREFIX: artifacts/$(NRF_BLE_DRIVER_ARTIFACT_PREFIX)
+  GITHUB_CONNECTION: 'chfa_github'
+  GITHUB_REPO: 'chunfantasy/pc-ble-driver'
+  GITHUB_TAG: v$(NRF_BLE_DRIVER_VERSION)
+
+jobs:
+- job: Ubuntu_16_04
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  steps:
+  - script: |
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+      sudo apt-get update -y
+      sudo apt-get install libudev-dev -y
+      sudo vcpkg install catch2
+      sudo vcpkg install asio
+    displayName: Setup vcpkg
+  - script: |
+      echo VCPKG_ROOT $VCPKG_ROOT
+      mkdir build
+      cd build
+      cmake -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX=$(NRF_BLE_DRIVER_INSTALL_PREFIX) ..
+    displayName: Create project files
+  - script: |
+      cd build
+      cmake --build . --target install
+      tar czf $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-linux-x64.tar.gz artifacts
+      cp -R $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-linux-x64.tar.gz "$BUILD_ARTIFACTSTAGINGDIRECTORY"
+    displayName: 'Compile'
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTION)
+      repositoryName: $(GITHUB_REPO)
+      tag: '$(GITHUB_TAG)'
+      action: 'edit'
+      tagSource: 'Git tag'
+      assetUploadMode: 'replace'
+      isDraft: 'true'
+      addChangeLog: 'false'
+    displayName: 'Publish'
+
+- job: macOS
+  pool:
+    vmImage: 'xcode9-macos10.13'
+  steps:
+  - script: |
+      brew install gcc6
+      pushd .
+      cd ..
+      git clone https://github.com/Microsoft/vcpkg.git
+      cd vcpkg
+      ./bootstrap-vcpkg.sh
+      ./vcpkg install catch2
+      ./vcpkg install asio
+      popd
+    displayName: Setup vcpkg
+  - script: |
+      mkdir build
+      cd build
+      cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(NRF_BLE_DRIVER_INSTALL_PREFIX) ..
+    displayName: Create project files
+  - script: |
+      cd build
+      echo "Starting compilation"
+      echo "ArtifactsStagingDirectory: $BUILD_ARTIFACTSTAGINGDIRECTORY"
+      cmake --build . --target install
+      tar czf $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-darwin-x64.tar.gz artifacts
+      cp -R $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-darwin-x64.tar.gz "$BUILD_ARTIFACTSTAGINGDIRECTORY"
+    displayName: 'Compile'
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTION)
+      repositoryName: $(GITHUB_REPO)
+      tag: '$(GITHUB_TAG)'
+      action: 'edit'
+      tagSource: 'Git tag'
+      assetUploadMode: 'replace'
+      isDraft: 'true'
+      addChangeLog: 'false'
+    displayName: 'Publish'
+
+- job: Windows_vs2017_x86
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: NuGetCommand@2
+    inputs:
+      command: custom
+      arguments: install vcpkg.nuget
+  - script: |
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install asio
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install catch2
+    displayName: Setup vcpkg
+  - script: |
+      mkdir build
+      cd build
+      cmake -G "Visual Studio 15 2017" -DCMAKE_TOOLCHAIN_FILE=..\Vcpkg.Nuget.1.5.0\vcpkg_bin\scripts\buildsystems\vcpkg.cmake -DCMAKE_INSTALL_PREFIX=$(NRF_BLE_DRIVER_INSTALL_PREFIX) ..
+      cmake --build . --target install
+      tar czf $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2017-win32-ia32.tar.gz artifacts
+      cp -R $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2017-win32-ia32.tar.gz "$(Build.ArtifactStagingDirectory)"
+    displayName: Compile
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTION)
+      repositoryName: $(GITHUB_REPO)
+      tag: '$(GITHUB_TAG)'
+      action: 'edit'
+      tagSource: 'Git tag'
+      assetUploadMode: 'replace'
+      isDraft: 'true'
+      addChangeLog: 'false'
+    displayName: 'Publish'
+
+- job: Windows_vs2017_x64
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: NuGetCommand@2
+    inputs:
+      command: custom
+      arguments: install vcpkg.nuget
+  - script: |
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install asio:x64-windows
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install catch2:x64-windows
+    displayName: Setup vcpkg
+  - script: |
+      mkdir build
+      cd build
+      cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=..\Vcpkg.Nuget.1.5.0\vcpkg_bin\scripts\buildsystems\vcpkg.cmake -DCMAKE_INSTALL_PREFIX=$(NRF_BLE_DRIVER_INSTALL_PREFIX) ..
+      cmake --build . --target install
+      tar czf $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2017-win32-x64.tar.gz artifacts
+      cp -R $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2017-win32-x64.tar.gz "$(Build.ArtifactStagingDirectory)"
+    displayName: Compile
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTION)
+      repositoryName: $(GITHUB_REPO)
+      tag: '$(GITHUB_TAG)'
+      action: 'edit'
+      tagSource: 'Git tag'
+      assetUploadMode: 'replace'
+      isDraft: 'true'
+      addChangeLog: 'false'
+    displayName: 'Publish'
+
+- job: Windows_vs2015_x86
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: NuGetCommand@2
+    inputs:
+      command: custom
+      arguments: install vcpkg.nuget
+  - script: |
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install asio
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install catch2
+    displayName: Setup vcpkg
+  - script: |
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\tools\vsdevcmd.bat" -vcvars_ver=14.0  -arch=x64
+      mkdir build
+      cd build
+      cmake -G "Visual Studio 14 2015" -DCMAKE_TOOLCHAIN_FILE=..\Vcpkg.Nuget.1.5.0\vcpkg_bin\scripts\buildsystems\vcpkg.cmake -DCMAKE_INSTALL_PREFIX=$(NRF_BLE_DRIVER_INSTALL_PREFIX) ..
+      cmake --build . --target install
+      tar czf $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2015-win32-ia32.tar.gz artifacts
+      cp -R $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2015-win32-ia32.tar.gz "$(Build.ArtifactStagingDirectory)"
+    displayName: Compile
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTION)
+      repositoryName: $(GITHUB_REPO)
+      tag: '$(GITHUB_TAG)'
+      action: 'edit'
+      tagSource: 'Git tag'
+      assetUploadMode: 'replace'
+      isDraft: 'true'
+      addChangeLog: 'false'
+    displayName: 'Publish'
+
+- job: Windows_vs2015_x64
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: NuGetCommand@2
+    inputs:
+      command: custom
+      arguments: install vcpkg.nuget
+  - script: |
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install asio:x64-windows
+      Vcpkg.Nuget.1.5.0\vcpkg_bin\vcpkg install catch2:x64-windows
+    displayName: Setup vcpkg
+  - script: |
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\tools\vsdevcmd.bat" -vcvars_ver=14.0  -arch=x64
+      mkdir build
+      cd build
+      cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_TOOLCHAIN_FILE=..\Vcpkg.Nuget.1.5.0\vcpkg_bin\scripts\buildsystems\vcpkg.cmake -DCMAKE_INSTALL_PREFIX=$(NRF_BLE_DRIVER_INSTALL_PREFIX) ..
+      cmake --build . --target install
+      tar czf $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2015-win32-x64.tar.gz artifacts
+      cp -R $(NRF_BLE_DRIVER_ARTIFACT_PREFIX)-vs2015-win32-x64.tar.gz "$(Build.ArtifactStagingDirectory)"
+    displayName: Compile
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTION)
+      repositoryName: $(GITHUB_REPO)
+      tag: '$(GITHUB_TAG)'
+      action: 'edit'
+      tagSource: 'Git tag'
+      assetUploadMode: 'replace'
+      isDraft: 'true'
+      addChangeLog: 'false'
+    displayName: 'Publish'
+
+- job: Jenkins_test
+  dependsOn: [
+    Ubuntu_16_04,
+    macOS,
+    Windows_vs2015_x86,
+    Windows_vs2015_x64,
+    Windows_vs2017_x86,
+    Windows_vs2017_x64,
+  ]
+  pool: server
+  steps:
+  - task: InvokeRESTAPI@1
+    inputs:
+      connectionType: 'connectedServiceName' # Options: connectedServiceName, connectedServiceNameARM
+      serviceConnection: 'chfa' # Required when connectionType == ConnectedServiceName
+      # azureServiceConnection: # Required when connectionType == ConnectedServiceNameARM
+      method: 'POST' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
+      # method: 'GET' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
+      # headers: '{Content-Type: application/application/json}'
+      # body: 'BAR=lalala' # Required when method != GET && Method != HEAD
+      urlSuffix: '?BRANCH=master&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
+      waitForCompletion: 'true' # Options: true, false
+      #successCriteria: # Optional
+
