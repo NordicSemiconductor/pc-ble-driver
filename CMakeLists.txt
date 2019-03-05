@@ -1,7 +1,39 @@
 cmake_minimum_required(VERSION 3.11)
-project(pc-ble-driver)
 
-include (cmake/pc-ble-driver.cmake)
+set(NRF_BLE_DRIVER_DEFAULT_VERSION "0.0.0")
+
+if(NOT DEFINED NRF_BLE_DRIVER_VERSION)
+    message(STATUS "NRF_BLE_DRIVER_VERSION not specified, setting it to ${NRF_BLE_DRIVER_DEFAULT_VERSION}")
+    set(NRF_BLE_DRIVER_VERSION "${NRF_BLE_DRIVER_DEFAULT_VERSION}")
+endif()
+
+set(NRF_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION "0.0.0")
+
+# Add connectivity firmware building
+if(NOT DEFINED CONNECTIVITY_VERSION)
+    message(STATUS "CONNECTIVITY_VERSION not specified, setting it to ${NRF_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION}")
+    set(CONNECTIVITY_VERSION "${NRF_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION}" CACHE STRING "" FORCE)
+else()
+    set(CONNECTIVITY_VERSION "${CONNECTIVITY_VERSION}" CACHE STRING "" FORCE)
+endif()
+
+if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      CACHE STRING "")
+endif()
+
+project(
+    nrf-ble-driver
+    VERSION ${NRF_BLE_DRIVER_VERSION}
+)
+
+include(cmake/nrf-ble-driver.cmake)
+
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+    message(FATAL_ERROR "Protocol implementation does not support big endian platforms.")
+endif()
 
 # Common source files
 file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")
@@ -23,10 +55,14 @@ else()
 endif()
 
 # SDK source files, different per API version
+
+# Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
+file(GLOB_RECURSE LIB_NEWER_SDK_API_COMMON_C_SRC_FILES "src/sd_api_common/sdk/*.c")
+
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_C_SRC_FILES "src/${SD_API_VER_L}/sdk/*.c")
-    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_CPP_SRC_FILES "src/${SD_API_VER_L}/sdk/*.cpp")
+    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_CPP_SRC_FILES "src/${SD_API_VER_L}/*.cpp")
 endforeach(SD_API_VER)
 
 # Set C, CPP and platform source file groups and properties
@@ -35,6 +71,10 @@ foreach(SD_API_VER ${SD_API_VERS})
                         ${LIB_SDK_${SD_API_VER}_C_SRC_FILES}
                         ${LIB_TRANSPORT_C_SRC_FILES}
     )
+
+    if(SD_API_VER STRGREATER "SD_API_V2")
+        list(APPEND LIB_${SD_API_VER}_C_SRC_FILES ${LIB_NEWER_SDK_API_COMMON_C_SRC_FILES})
+    endif()
 
     set(LIB_${SD_API_VER}_CPP_SRC_FILES ${LIB_BASE_CPP_SRC_FILES}
                           ${LIB_SDK_${SD_API_VER}_CPP_SRC_FILES}
@@ -53,92 +93,195 @@ endforeach(SD_API_VER)
 
 set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
 
-if(WIN32)
-    # Disable CRT Warnings with Visual Studio
-    set_source_files_properties(
-        ${LIB_PLATFORM_C_SRC_FILES}
-        PROPERTIES
-        COMPILE_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
-    )
-    set_source_files_properties(
-        ${LIB_PLATFORM_CPP_SRC_FILES}
-        PROPERTIES
-        COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS"
-    )
-endif()
 # Add common compiler definitions
 add_definitions(
+    -DASIO_STANDALONE
     -DSD_RPC_EXPORTS
     -DHCI_LINK_CONTROL # Adds support for Link Control packets according to the HCI standard
 )
 
+if(WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
     # Object library, from which both shared and static will be built
-    add_library(${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} OBJECT ${LIB_${SD_API_VER}_C_SRC_FILES} ${LIB_${SD_API_VER}_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
+    add_library(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} OBJECT ${LIB_${SD_API_VER}_C_SRC_FILES} ${LIB_${SD_API_VER}_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
     # shared libraries need PIC
-    set_property(TARGET ${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
+    set_property(TARGET ${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)
 
     # actual shared and static libraries built from the same object files
-    add_library(${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} SHARED $<TARGET_OBJECTS:${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
-    add_library(${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} STATIC $<TARGET_OBJECTS:${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
+    add_library(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} SHARED $<TARGET_OBJECTS:${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
+    add_library(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} STATIC $<TARGET_OBJECTS:${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB}>)
+
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+
+    target_include_directories(
+        ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} INTERFACE
+        $<INSTALL_INTERFACE:include/${SD_API_VER_L}>
+    )
+
+    target_include_directories(
+        ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} INTERFACE
+        $<INSTALL_INTERFACE:include/${SD_API_VER_L}>
+    )
+
+    set(${SD_API_VER}_PUBLIC_HEADERS
+        include/common/sd_rpc.h
+        include/common/sd_rpc_types.h
+        include/common/adapter.h
+        include/common/sdk_compat/nrf.h
+        include/common/sdk_compat/compiler_abstraction.h
+        include/common/sdk_compat/nrf_svc.h
+        include/common/config/platform.h
+        include/${SD_API_VER_L}/ble.h
+        include/${SD_API_VER_L}/ble_err.h
+        include/${SD_API_VER_L}/ble_gap.h
+        include/${SD_API_VER_L}/ble_gatt.h
+        include/${SD_API_VER_L}/ble_gattc.h
+        include/${SD_API_VER_L}/ble_gatts.h
+        include/${SD_API_VER_L}/ble_hci.h
+        include/${SD_API_VER_L}/ble_l2cap.h
+        include/${SD_API_VER_L}/ble_ranges.h
+        include/${SD_API_VER_L}/ble_types.h
+        include/${SD_API_VER_L}/nrf_error.h
+    )
+
+    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
+    set(HEX_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}/connectivity_${CONNECTIVITY_VERSION}*.hex")
+    file(GLOB_RECURSE ${SD_API_VER}_HEX_FILES ${HEX_FILE_DIRECTORY})
+
+    if(WIN32)
+        set_target_properties(
+            ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTIES
+            PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+            OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+            RELEASE_POSTFIX "${MSVC_TOOLSET}-mt-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            RELWITHDEBINFO_POSTFIX "${MSVC_TOOLSET}-mt-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            MINSIZEREL_POSTFIX "${MSVC_TOOLSET}-mt-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-gd-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            RESOURCE "${${SD_API_VER}_HEX_FILES}"
+        )
+
+        set_target_properties(
+            ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PROPERTIES
+            PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+            OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+            RELEASE_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            RELWITHDEBINFO_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            MINSIZEREL_POSTFIX "${MSVC_TOOLSET}-mt-static-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-static-gd-${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}_${PROJECT_VERSION_PATCH}"
+            RESOURCE "${${SD_API_VER}_HEX_FILES}"
+        )
+    else()
+        set_target_properties(
+            ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTIES
+            COMPILE_DEFINITIONS "DLL_EXPORT"
+            PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+            OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+            VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+            SOVERSION "${PROJECT_VERSION_MAJOR}"
+            PREFIX "lib"
+            RESOURCE "${${SD_API_VER}_HEX_FILES}"
+        )
+
+        set_target_properties(
+            ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PROPERTIES
+            PUBLIC_HEADER "${${SD_API_VER}_PUBLIC_HEADERS}"
+            OUTPUT_NAME "nrf-ble-driver-${SD_API_VER_L}"
+            PREFIX "lib"
+            RESOURCE "${${SD_API_VER}_HEX_FILES}"
+        )
+    endif()
+
 endforeach(SD_API_VER)
 
 # Set common include directories
+find_path(ASIO_INCLUDE_DIR asio.hpp)
+
 include_directories(
         include/common
+        include/common/config
         include/common/sdk_compat
         include/common/internal
         include/common/internal/transport
-        # Include boost as a system include so that the compiler doesn't nag about issues in boost header files
-        SYSTEM ${Boost_INCLUDE_DIRS}
+        SYSTEM ${ASIO_INCLUDE_DIR}
 )
 
 # Set per-SD API version include directories and compiler definitions
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    target_include_directories (${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE
-        src/${SD_API_VER_L}/sdk/components/libraries/util
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
-        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
-        src/${SD_API_VER_L}/sdk/components/serialization/common
-        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
-        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s132
-        src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/ble
-        src/${SD_API_VER_L}/sdk/components/softdevice/s132/headers
-    )
+
+    # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
+    if(SD_API_VER STRGREATER "SD_API_V2")
+        target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+            src/sd_api_common/sdk/components/libraries/util
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
+            src/sd_api_common/sdk/components/serialization/common
+            src/sd_api_common/sdk/components/serialization/common/struct_ser/ble
+            include/${SD_API_VER_L}
+        )
+    else()
+        target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+            src/${SD_API_VER_L}/sdk/components/libraries/util
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
+            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
+            src/${SD_API_VER_L}/sdk/components/serialization/common
+            src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
+            include/${SD_API_VER_L}
+        )
+    endif()
+
     # Provide the NRF_SD_BLE_API_VERSION macro to each variant
     string(REGEX MATCH "[0-9]+$" _SD_API_VER_NUM "${SD_API_VER}")
     set(SD_API_VER_COMPILER_DEF_NUM "-D${SD_API_VER_COMPILER_DEF}=${_SD_API_VER_NUM}")
     #MESSAGE( STATUS "compiler def: " "${SD_API_VER_COMPILER_DEF_NUM}" )
-    target_compile_definitions(${PC_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE "${SD_API_VER_COMPILER_DEF_NUM}")
+    target_compile_definitions(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PRIVATE "${SD_API_VER_COMPILER_DEF_NUM}")
 endforeach(SD_API_VER)
 
 # Additional special linkage libraries
 foreach(SD_API_VER ${SD_API_VERS})
     if(WIN32)
     elseif(APPLE)
-        target_link_libraries(${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
-        target_link_libraries(${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
-        set_property(TARGET ${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PROPERTY MACOSX_RPATH ON)
-        set_property(TARGET ${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTY MACOSX_RPATH ON)
+        target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
+        target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "-framework CoreFoundation" "-framework IOKit")
+        set_property(TARGET ${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PROPERTY MACOSX_RPATH ON)
+        set_property(TARGET ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTY MACOSX_RPATH ON)
     else()
         # Assume Linux
-        target_link_libraries(${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "udev" "pthread")
-        target_link_libraries(${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "udev" "pthread")
+        target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "udev" "pthread")
+        target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "udev" "pthread")
     endif()
 
     # Specify libraries to link serialization library with
-    target_link_libraries (${PC_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
-    target_link_libraries (${PC_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
+    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
+    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
 endforeach(SD_API_VER)
 
 # Add tests
-add_subdirectory(test)
+if(NOT DEFINED DISABLE_TESTS)
+    add_subdirectory(test)
+else()
+    message(STATUS "Disabling tests")
+endif()
 
+# Add examples
+if(NOT DEFINED DISABLE_EXAMPLES)
+    add_subdirectory(examples)
+else()
+    message(STATUS "Disabling examples")
+endif()
+
+# Add install target
+include(cmake/install-target.cmake)
+
+if(COMPILE_CONNECTIVITY)
+    add_subdirectory(hex EXCLUDE_FROM_ALL)
+endif()
 
 include (cmake/clang-dev-tools.cmake)
-

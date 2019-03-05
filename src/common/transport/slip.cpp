@@ -37,19 +37,20 @@
 
 #include "slip.h"
 #include "nrf_error.h"
+#include "sd_rpc_types.h"
+#include <cstddef>
 #include <vector>
-#include <algorithm>
 
-#define SLIP_END 0xC0
-#define SLIP_ESC 0xDB
-#define SLIP_ESC_END 0xDC
-#define SLIP_ESC_ESC 0xDD
+constexpr uint8_t SLIP_END     = 0xC0;
+constexpr uint8_t SLIP_ESC     = 0xDB;
+constexpr uint8_t SLIP_ESC_END = 0xDC;
+constexpr uint8_t SLIP_ESC_ESC = 0xDD;
 
 void slip_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet)
 {
     out_packet.push_back(SLIP_END);
 
-    for (unsigned char i : in_packet)
+    for (auto i : in_packet)
     {
         if (i == SLIP_END)
         {
@@ -72,13 +73,14 @@ void slip_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &ou
 
 uint32_t slip_decode(const std::vector<uint8_t> &packet, std::vector<uint8_t> &out_packet)
 {
-    for (size_t i = 0; i < packet.size(); i++)
+    for (std::size_t i = 0; i < packet.size(); i++)
     {
         if (packet[i] == SLIP_END)
         {
             continue;
         }
-        else if (packet[i] == SLIP_ESC) {
+        else if (packet[i] == SLIP_ESC)
+        {
             i++;
             if (packet[i] == SLIP_ESC_END)
             {
@@ -90,7 +92,7 @@ uint32_t slip_decode(const std::vector<uint8_t> &packet, std::vector<uint8_t> &o
             }
             else
             {
-                return NRF_ERROR_INVALID_DATA;
+                return NRF_ERROR_SD_RPC_H5_TRANSPORT_SLIP_DECODING;
             }
         }
         else

@@ -43,7 +43,7 @@
 #ifndef SD_RPC_H__
 #define SD_RPC_H__
 
-#include "config/platform.h"
+#include "platform.h"
 #include "sd_rpc_types.h"
 #include "adapter.h"
 
@@ -148,11 +148,12 @@ SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, s
 /**@brief Reset the connectivity chip.
  *
  * @param[in]  adapter  The transport adapter.
+ * @param[in]  reset_mode   The reset mode to perform in connectivity firmware.
  *
  * @retval NRF_SUCCESS  The connectivity chip was reset successfully.
  * @retval NRF_ERROR    There was an error reset the connectivity chip.
  */
-SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *adapter);
+SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode);
 
 #ifdef __cplusplus
 }

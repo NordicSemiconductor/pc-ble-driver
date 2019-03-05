@@ -39,8 +39,6 @@
 
 #include <iostream>
 
-using namespace boost;
-
 UartSettingsBoost::UartSettingsBoost()
     : UartSettings()
 {

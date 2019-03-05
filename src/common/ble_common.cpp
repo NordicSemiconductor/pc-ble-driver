@@ -35,72 +35,96 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- #include "ble_common.h"
+#include "ble_common.h"
 
 #include <memory>
 #include <sstream>
 
 #include "adapter_internal.h"
+#include "app_ble_gap.h"
 #include "nrf_error.h"
 #include "ser_config.h"
 
-uint32_t encode_decode(adapter_t *adapter, encode_function_t encode_function, decode_function_t decode_function)
+// AdapterRequestReplyCodecContext
+
+RequestReplyCodecContext::RequestReplyCodecContext(void *adapterId)
 {
-    uint32_t tx_buffer_length = SER_HAL_TRANSPORT_MAX_PKT_SIZE;
-    uint32_t rx_buffer_length = 0;
+    app_ble_gap_set_current_adapter_id(adapterId, REQUEST_REPLY_CODEC_CONTEXT);
+}
 
-    std::unique_ptr<uint8_t> tx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
-    std::unique_ptr<uint8_t> rx_buffer(static_cast<uint8_t*>(std::malloc(SER_HAL_TRANSPORT_MAX_PKT_SIZE)));
+RequestReplyCodecContext::~RequestReplyCodecContext()
+{
+    app_ble_gap_unset_current_adapter_id(REQUEST_REPLY_CODEC_CONTEXT);
+}
 
+EventCodecContext::EventCodecContext(void *adapterId)
+{
+    app_ble_gap_set_current_adapter_id(adapterId, EVENT_CODEC_CONTEXT);
+}
+
+EventCodecContext::~EventCodecContext()
+{
+    app_ble_gap_unset_current_adapter_id(EVENT_CODEC_CONTEXT);
+}
+
+uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
+                       const decode_function_t &decode_function)
+{
     std::stringstream error_message;
+    auto _adapter = static_cast<AdapterInternal *>(adapter->internal);
 
-    auto _adapter = static_cast<AdapterInternal*>(adapter->internal);
-
-    uint32_t err_code = encode_function(tx_buffer.get(), &tx_buffer_length);
-
-    if (_adapter->isInternalError(err_code))
+    // Create rx_buffer
+    std::shared_ptr<std::vector<uint8_t>> rx_buffer;
+    
+    if (decode_function)
     {
-        error_message << "Not able to encode packet. Code #" << err_code;
-        _adapter->statusHandler(PKT_ENCODE_ERROR, error_message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        rx_buffer = std::make_shared<std::vector<uint8_t>>(SER_HAL_TRANSPORT_MAX_PKT_SIZE);
     }
 
-    if (decode_function != nullptr)
+    // Create tx_buffer
+    uint32_t tx_buffer_length = SER_HAL_TRANSPORT_MAX_PKT_SIZE;
+    std::vector<uint8_t> tx_buffer(tx_buffer_length);
+    auto err_code = encode_function(tx_buffer.data(), &tx_buffer_length);
+    tx_buffer.resize(tx_buffer_length);
+
+    if (AdapterInternal::isInternalError(err_code))
     {
-        err_code = _adapter->transport->send(
-            tx_buffer.get(),
-            tx_buffer_length,
-            rx_buffer.get(),
-            &rx_buffer_length);
-    }
-    else
-    {
-        err_code = _adapter->transport->send(
-            tx_buffer.get(),
-            tx_buffer_length,
-            nullptr,
-            &rx_buffer_length);
+        error_message << "Not able to encode packet. Code: 0x" << std::hex << err_code;
+        _adapter->statusHandler(PKT_ENCODE_ERROR, error_message.str());
+        return NRF_ERROR_SD_RPC_ENCODE;
     }
 
-    if (_adapter->isInternalError(err_code))
+    err_code = _adapter->transport->send(tx_buffer, rx_buffer);
+
+    if (AdapterInternal::isInternalError(err_code))
     {
-        error_message << "Error sending packet to target. Code #" << err_code;
-        _adapter->statusHandler(PKT_SEND_ERROR, error_message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        error_message << "Error sending packet to target. Code: 0x" << std::hex << err_code;
+        _adapter->statusHandler(PKT_SEND_ERROR, error_message.str());
+
+        switch (err_code)
+        {
+            case NRF_ERROR_SD_RPC_H5_TRANSPORT_NO_RESPONSE:
+                return NRF_ERROR_SD_RPC_NO_RESPONSE;
+            case NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE:
+                return NRF_ERROR_SD_RPC_INVALID_STATE;
+            default:
+                return NRF_ERROR_SD_RPC_SEND;
+        }
     }
 
     uint32_t result_code = NRF_SUCCESS;
 
-    if (decode_function != nullptr)
+    if (decode_function)
     {
-        err_code = decode_function(rx_buffer.get(), rx_buffer_length, &result_code);
+        err_code = decode_function(rx_buffer->data(), static_cast<uint32_t>(rx_buffer->size()),
+                                   &result_code);
     }
 
-    if (_adapter->isInternalError(err_code))
+    if (AdapterInternal::isInternalError(err_code))
     {
-        error_message << "Not able to decode packet. Code #" << err_code;
-        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str().c_str());
-        return NRF_ERROR_INTERNAL;
+        error_message << "Not able to decode packet. Code 0x" << std::hex << err_code;
+        _adapter->statusHandler(PKT_DECODE_ERROR, error_message.str());
+        return NRF_ERROR_SD_RPC_DECODE;
     }
 
     return result_code;

@@ -69,7 +69,7 @@
 
 #include <list>
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 
 struct SerialPortDesc {
 public:
@@ -82,6 +82,6 @@ public:
     std::string productId;
 };
 
-uint32_t EnumSerialPorts(std::list<SerialPortDesc*>& descs);
+std::list<SerialPortDesc> EnumSerialPorts();
 
 #endif // SERIAL_PORT_ENUM_H
