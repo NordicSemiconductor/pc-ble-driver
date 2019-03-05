@@ -215,28 +215,3 @@ jobs:
       isDraft: 'true'
       addChangeLog: 'false'
     displayName: 'Publish'
-
-- job: Jenkins_test
-  dependsOn: [
-    Ubuntu_16_04,
-    macOS,
-    Windows_vs2015_x86,
-    Windows_vs2015_x64,
-    Windows_vs2017_x86,
-    Windows_vs2017_x64,
-  ]
-  pool: server
-  steps:
-  - task: InvokeRESTAPI@1
-    inputs:
-      connectionType: 'connectedServiceName' # Options: connectedServiceName, connectedServiceNameARM
-      serviceConnection: 'chfa' # Required when connectionType == ConnectedServiceName
-      # azureServiceConnection: # Required when connectionType == ConnectedServiceNameARM
-      method: 'POST' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
-      # method: 'GET' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
-      # headers: '{Content-Type: application/application/json}'
-      # body: 'BAR=lalala' # Required when method != GET && Method != HEAD
-      urlSuffix: '?BRANCH=master&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
-      waitForCompletion: 'true' # Options: true, false
-      #successCriteria: # Optional
-
