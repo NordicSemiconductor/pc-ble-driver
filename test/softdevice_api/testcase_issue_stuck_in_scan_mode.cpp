@@ -93,6 +93,16 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
         env.responseTimeout);
 
+    p->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
+        if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
+            code == PKT_UNEXPECTED)
+        {
+            error = true;
+            NRF_LOG(p->role() << " error in status callback " << static_cast<uint32_t>(code) << ": "
+                              << message);
+        }
+    });
+
     REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
     REQUIRE(p->open() == NRF_SUCCESS);
     REQUIRE(p->configure() == NRF_SUCCESS);
@@ -112,6 +122,16 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         auto c = std::make_shared<testutil::AdapterWrapper>(
             testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
             env.responseTimeout);
+
+        c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
+            if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
+                code == PKT_UNEXPECTED)
+            {
+                error = true;
+                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
+                                  << ": " << message);
+            }
+        });
 
         NRF_LOG(c->role() << " Starting scan iteration #" << std::dec << static_cast<uint32_t>(i)
                           << " of " << static_cast<uint32_t>(scanIterations));
@@ -160,6 +180,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             }
         });
 
+        REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->configure() == NRF_SUCCESS);
         REQUIRE(c->startScan() == NRF_SUCCESS);

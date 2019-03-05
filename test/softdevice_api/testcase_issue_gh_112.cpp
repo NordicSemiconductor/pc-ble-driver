@@ -537,6 +537,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             code == PKT_UNEXPECTED)
         {
             centralError = true;
+            NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code) << ": "
+                              << message);
         }
     });
 
@@ -545,6 +547,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             code == PKT_UNEXPECTED)
         {
             peripheralError = true;
+            NRF_LOG(p->role() << " error in status callback " << static_cast<uint32_t>(code) << ": "
+                              << message);
         }
     });
 
