@@ -164,7 +164,6 @@ function(nrf_create_connectivity_compile_targets)
                 endif()
 
                 if(TRANSPORT STREQUAL "uart")
-                    list(APPEND TRANSPORTS "115k2")
                     list(APPEND TRANSPORTS "1m")
                 endif()
 
@@ -193,31 +192,19 @@ function(nrf_create_connectivity_compile_targets)
                     else()
                         set(COMMAND_NAME "${TARGET_NAME}_cmd")
 
-                        set(SER_CONFIG_PATH)
                         set(MAIN_PATH)
-                        nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_ROOT} SER_CONFIG_PATH MAIN_PATH)
-
-                        set(SER_CONFIG_IN_PATH "${SER_CONFIG_PATH}.in")
-                        if(NOT EXISTS ${SER_CONFIG_IN_PATH})
-                            message(FATAL_ERROR "ser_config.h.in not found. The SDK needs to be prepared. Please delete the build folder and try again  (${SDK_ROOT}).")
-                        endif()
+                        nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_ROOT} MAIN_PATH)
 
                         set(MAIN_IN_PATH "${MAIN_PATH}.in")
                         if(NOT EXISTS ${MAIN_IN_PATH})
                             message(FATAL_ERROR "main.c.in not found. The SDK needs to be prepared. Please delete the build folder and try again (${SDK_ROOT}).")
                         endif()
 
-                        # Setup ser_config.h
-                        add_custom_command(
-                            OUTPUT "${COMMAND_NAME}"
-                            COMMAND ${CMAKE_COMMAND} -DSDK_VERSION=${SDK_VERSION} -DSER_CONFIG_IN_PATH=${SER_CONFIG_IN_PATH} -DBAUD_RATE=${TRANSPORT} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_ser_config.cmake
-                            WORKING_DIRECTORY ${ARMGCC_PROJECT_DIRECTORY}
-                        )
-
                         # Setup main.c
                         add_custom_command(
                             OUTPUT "${COMMAND_NAME}"
-                            APPEND COMMAND ${CMAKE_COMMAND} -DMAIN_IN_PATH=${MAIN_IN_PATH} -DCONNECTIVITY_VERSION=${VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_main.cmake
+                            COMMAND ${CMAKE_COMMAND} -DMAIN_IN_PATH=${MAIN_IN_PATH} -DCONNECTIVITY_VERSION=${VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_main.cmake
+                            WORKING_DIRECTORY ${ARMGCC_PROJECT_DIRECTORY}
                         )
 
                         message(STATUS "Running make:${MAKE} in ARMGCC_PROJECT_DIRECTORY:${ARMGCC_PROJECT_DIRECTORY}")

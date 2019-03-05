@@ -64,17 +64,16 @@
 
 
 /** Definitions */
+#define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
+
 #ifdef _WIN32
 #define DEFAULT_UART_PORT_NAME "COM1"
-#define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 #endif
 #ifdef __APPLE__
 #define DEFAULT_UART_PORT_NAME "/dev/tty.usbmodem00000"
-#define DEFAULT_BAUD_RATE 115200 /* 1M baud rate is not supported on MacOS */
 #endif
 #ifdef __linux__
 #define DEFAULT_UART_PORT_NAME "/dev/ttyACM0"
-#define DEFAULT_BAUD_RATE 1000000
 #endif
 
 enum
@@ -999,7 +998,7 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 /**@brief Function for application main entry.
  *
  * @param[in] argc Number of arguments (program expects 0 or 1 arguments).
- * @param[in] argv The serial port and baud rate of the target nRF5 device (Optional).
+ * @param[in] argv The serial port of the target nRF5 device (Optional).
  */
 int main(int argc, char * argv[])
 {
@@ -1007,23 +1006,6 @@ int main(int argc, char * argv[])
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  cccd_value = 0;
-
-    if (argc > 2)
-    {
-        if (strcmp(argv[2], "1000000") == 0)
-        {
-            baud_rate = 1000000;
-        }
-        else if (strcmp(argv[2], "115200") == 0)
-        {
-            baud_rate = 115200;
-        }
-        else
-        {
-            printf("Supported baud rate values are: 115200, 1000000\n");
-            fflush(stdout);
-        }
-    }
 
     if (argc > 1)
     {

@@ -21,7 +21,7 @@ Where `heart_rate_monitor_v2` and `heart_rate_monitor_v3` etc are the executable
 
 Plug your nRF5 DK into your PC and [Program the connectivity firmware](/README.md#Programming-connectivity-HEX-files).
 
-Note: the examples communicate with a baud rate of 115200 [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you program your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_115k2_with_s<v>_<a>.<b>.<c>.hex` where `115k2` corresponds to the baud rate of 115200.
+Note: the examples communicate with a baud rate of 1M [by default](https://github.com/NordicSemiconductor/pc-ble-driver/blob/master/examples/heart_rate_monitor/main.c#L420), so make sure you program your nRF5 device with `hex/sd_api_v<x>/connectivity_<ver>_1m_with_s<v>_<a>.<b>.<c>.hex` where `1m` corresponds to the baud rate of 1M.
 
 If you are on macOS or a recent version of Linux there is a known [J-Link issue](https://github.com/NordicSemiconductor/pc-ble-driver#macos-os-x) that you need to do a workaround for.
 
@@ -39,7 +39,7 @@ And run the example:
 When running the `heart_rate_monitor` example you should see:
 
     > Serial port used: /dev/tty.usbmodem<xxxx>
-    > Warning: Successfully opened /dev/tty.usbmodem<xxxx>. Baud rate: 115200. Flow control: none. Parity: none.
+    > Warning: Successfully opened /dev/tty.usbmodem<xxxx>. Baud rate: 1M. Flow control: none. Parity: none.
 
     > Status: 6, message: Target Reset performed
     > Status: 7, message: Connection active

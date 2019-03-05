@@ -62,11 +62,11 @@ To use pc-ble-driver, your Development Kit needs to have the correct firmware. T
 
 The generated libraries are compatible with the following SoftDevice API versions and nRF5x ICs:
 
-* SoftDevice s130 API version 2: `connectivity_<version>_<115k2|1m>_with_s130_2.x.x` (nRF51 and nRF52 series ICs)
-* SoftDevice s132 API version 3: `connectivity_<version>_<115k2|1m|*usb>_with_s132_3.x.x` (only for nRF52 series ICs)
-* SoftDevice s132 API version 5: `connectivity_<version>_<115k2|1m|*usb>_with_s132_5.x.x` (only for nRF52 series ICs)
-* SoftDevice s132 API version 6: `connectivity_<version>_<115k2|1m|*usb>_with_s132_6.x.x` (only for nRF52 series ICs)
-* SoftDevice s140 API version 6: `connectivity_<version>_<115k2|1m|*usb>_with_s140_6.x.x` (only for nRF52 series ICs)
+* SoftDevice s130 API version 2: `connectivity_<version>_1m_with_s130_2.x.x` (nRF51 and nRF52 series ICs)
+* SoftDevice s132 API version 3: `connectivity_<version>_<1m|*usb>_with_s132_3.x.x` (only for nRF52 series ICs)
+* SoftDevice s132 API version 5: `connectivity_<version>_<1m|*usb>_with_s132_5.x.x` (only for nRF52 series ICs)
+* SoftDevice s132 API version 6: `connectivity_<version>_<1m|*usb>_with_s132_6.x.x` (only for nRF52 series ICs)
+* SoftDevice s140 API version 6: `connectivity_<version>_<1m|*usb>_with_s140_6.x.x` (only for nRF52 series ICs)
 
 *usb) only for nRF52 series ICs with USBD peripheral
 
