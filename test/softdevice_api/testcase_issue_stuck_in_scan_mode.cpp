@@ -180,7 +180,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             }
         });
 
-        REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
+        REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
         REQUIRE(c->open() == NRF_SUCCESS);
         REQUIRE(c->configure() == NRF_SUCCESS);
         REQUIRE(c->startScan() == NRF_SUCCESS);
