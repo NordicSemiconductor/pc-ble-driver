@@ -201,10 +201,6 @@ function(add_run_test_targets)
     set(TEST_REPORTER "junit")
 
     set(RUN_TEST_TARGETS )
-    set(RUN_TEST_TARGETS_PCA10028 )
-    set(RUN_TEST_TARGETS_PCA10031 )
-    set(RUN_TEST_TARGETS_PCA10040 )
-    set(RUN_TEST_TARGETS_PCA10056 )
 
     if(BLE_DRIVER_TEST_PCA10028_A AND BLE_DRIVER_TEST_PCA10028_B)
         # SDv2
@@ -219,7 +215,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V2}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv2_s130_pca10028)
-            list(APPEND RUN_TEST_TARGETS_PCA10028 run_test_sdv2_s130_pca10028)
         endif()
     endif()
 
@@ -236,7 +231,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V2}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv2_s130_pca10031)
-            list(APPEND RUN_TEST_TARGETS_PCA10031 run_test_sdv2_s130_pca10031)
         endif()
     endif()
 
@@ -253,7 +247,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V3}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv3_s132_pca10040)
-            list(APPEND RUN_TEST_TARGETS_PCA10040 run_test_sdv3_s132_pca10040)
         endif()
 
         # SDv5
@@ -268,7 +261,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V5}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv5_s132_pca10040)
-            list(APPEND RUN_TEST_TARGETS_PCA10040 run_test_sdv5_s132_pca10040)
         endif()
 
         # SDv6
@@ -283,7 +275,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V6}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv6_s132_pca10040)
-            list(APPEND RUN_TEST_TARGETS_PCA10040 run_test_sdv6_s132_pca10040)
         endif()
     endif()
 
@@ -300,7 +291,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V3}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv3_s132_pca10056_usb)
-            list(APPEND RUN_TEST_TARGETS_PCA10056 run_test_sdv3_s132_pca10056_usb)
         endif()
 
         # SDv6
@@ -315,7 +305,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V6}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv6_s140_pca10056_usb)
-            list(APPEND RUN_TEST_TARGETS_PCA10056 run_test_sdv6_s140_pca10056_usb)
         endif()
     endif()
 
@@ -332,7 +321,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V3}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv3_s132_pca10056)
-            list(APPEND RUN_TEST_TARGETS_PCA10056 run_test_sdv3_s132_pca10056)
         endif()
 
         # SDv5
@@ -347,7 +335,6 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V5}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv5_s132_pca10056)
-            list(APPEND RUN_TEST_TARGETS_PCA10056 run_test_sdv5_s132_pca10056)
         endif()
 
         # SDv6
@@ -362,44 +349,10 @@ function(add_run_test_targets)
                 "${TESTS_SOFTDEVICE_V6}"
             )
             list(APPEND RUN_TEST_TARGETS run_test_sdv6_s140_pca10056)
-            list(APPEND RUN_TEST_TARGETS_PCA10056 run_test_sdv6_s140_pca10056)
         endif()
     endif()
 
     add_custom_target(run_tests DEPENDS ${RUN_TEST_TARGETS})
-    set(PARALLEL_TARGETS )
-
-    list(LENGTH RUN_TEST_TARGETS_PCA10028 TLEN)
-    if(TLEN GREATER 0)
-        add_custom_target(run_tests_pca10028 DEPENDS ${RUN_TEST_TARGETS_PCA10028})
-        list(APPEND PARALLEL_TARGETS run_tests_pca10028)
-    endif()
-
-    list(LENGTH RUN_TEST_TARGETS_PCA10031 TLEN)
-    if(TLEN GREATER 0)
-        add_custom_target(run_tests_pca10031 DEPENDS ${RUN_TEST_TARGETS_PCA10031})
-        list(APPEND PARALLEL_TARGETS run_tests_pca10031)
-    endif()
-
-    list(LENGTH RUN_TEST_TARGETS_PCA10040 TLEN)
-    if(TLEN GREATER 0)
-        add_custom_target(run_tests_pca10040 DEPENDS ${RUN_TEST_TARGETS_PCA10040})
-        list(APPEND PARALLEL_TARGETS run_tests_pca10040)
-    endif()
-
-    list(LENGTH RUN_TEST_TARGETS_PCA10056 TLEN)
-    if(TLEN GREATER 0)
-        add_custom_target(run_tests_pca10056 DEPENDS ${RUN_TEST_TARGETS_PCA10056})
-        list(APPEND PARALLEL_TARGETS run_tests_pca10056)
-    endif()
-
-    list(LENGTH PARALLEL_TARGETS TLEN)
-    if(TLEN GREATER 0)
-        add_custom_command(
-            OUTPUT run_tests_parallell DEPENDS ${PARALLEL_TARGETS}
-            COMMAND ${CMAKE_COMMAND} -E echo "The following tests ran in parallel: ${PARALLEL_TARGETS}"
-        )
-    endif()
 endfunction(add_run_test_targets)
 
 function(setup_test)
