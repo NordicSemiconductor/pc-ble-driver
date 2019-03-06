@@ -191,22 +191,6 @@ function(nrf_create_connectivity_compile_targets)
                         message(STATUS "Target ${TARGET_NAME} already exists.")
                     else()
                         set(COMMAND_NAME "${TARGET_NAME}_cmd")
-
-                        set(MAIN_PATH)
-                        nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_ROOT} MAIN_PATH)
-
-                        set(MAIN_IN_PATH "${MAIN_PATH}.in")
-                        if(NOT EXISTS ${MAIN_IN_PATH})
-                            message(FATAL_ERROR "main.c.in not found. The SDK needs to be prepared. Please delete the build folder and try again (${SDK_ROOT}).")
-                        endif()
-
-                        # Setup main.c
-                        add_custom_command(
-                            OUTPUT "${COMMAND_NAME}"
-                            COMMAND ${CMAKE_COMMAND} -DMAIN_IN_PATH=${MAIN_IN_PATH} -DCONNECTIVITY_VERSION=${VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_cmd_main.cmake
-                            WORKING_DIRECTORY ${ARMGCC_PROJECT_DIRECTORY}
-                        )
-
                         message(STATUS "Running make:${MAKE} in ARMGCC_PROJECT_DIRECTORY:${ARMGCC_PROJECT_DIRECTORY}")
 
                         # Add CFLAGS that specify application version, used by SDFU
@@ -219,7 +203,8 @@ function(nrf_create_connectivity_compile_targets)
                         # Compile project
                         add_custom_command(
                             OUTPUT "${COMMAND_NAME}"
-                            APPEND COMMAND ${CMAKE_COMMAND} -E env CFLAGS=${VERSION_CFLAGS} ${MAKE}
+                            COMMAND ${CMAKE_COMMAND} -E env CFLAGS=${VERSION_CFLAGS} ${MAKE}
+                            WORKING_DIRECTORY ${ARMGCC_PROJECT_DIRECTORY}
                         )
 
                         set(HEX_MERGED "${TARGET_NAME}.hex")
@@ -275,15 +260,7 @@ function(nrf_create_connectivity_compile_targets)
                             endif()
                         endif()
 
-                        # Make the last target added to list of targets a dependency to this target
-                        # We need to make sure that the targets are compiled in sequence
-                        # since the source code changes in every target (configuration of .in files)
-                        list(LENGTH CONNECTIVITY_BUILD_TARGETS CONNECTIVITY_BUILD_TARGETS_LENGTH)
-                        if(CONNECTIVITY_BUILD_TARGETS_LENGTH GREATER_EQUAL 1)
-                            list(GET CONNECTIVITY_BUILD_TARGETS -1 PREVIOUS_TARGET)
-                        endif()
-
-                        add_custom_target("compile_${TARGET_NAME}" DEPENDS ${COMMAND_NAME} ${PREVIOUS_TARGET})
+                        add_custom_target("compile_${TARGET_NAME}" DEPENDS ${COMMAND_NAME})
                         list(APPEND CONNECTIVITY_BUILD_TARGETS "compile_${TARGET_NAME}")
                     endif()
                 endforeach()
@@ -327,11 +304,4 @@ nrf_create_connectivity_compile_targets(
     VERSION "${CONNECTIVITY_VERSION}"
 )
 
-# Add a connectivity compilation target that depends on the last target added to CONNECTIVITY_BUILD_TARGETS
-# This target makes it easier for the developer to know which target to invoke to compile
-# all versions of connectivity firmware
-list(LENGTH CONNECTIVITY_BUILD_TARGETS CONNECTIVITY_BUILD_TARGETS_LENGTH)
-if(CONNECTIVITY_BUILD_TARGETS_LENGTH GREATER_EQUAL 1)
-    list(GET CONNECTIVITY_BUILD_TARGETS -1 PREVIOUS_TARGET)
-    add_custom_target("compile_connectivity" DEPENDS ${PREVIOUS_TARGET})
-endif()
+add_custom_target("compile_connectivity" DEPENDS ${CONNECTIVITY_BUILD_TARGETS})

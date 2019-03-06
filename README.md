@@ -165,8 +165,8 @@ To compile `pc-ble-driver` you will need the following tools:
 ##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source)
 
 To compile `connectivity` HEX files you will need additional tools:
-* [Chocolatey](https://chocolatey.org/) (for installing GNU Make on Windows)
-* [GNU Make](https://www.gnu.org/software/make/)
+* [Chocolatey](https://chocolatey.org/)
+* [Ninja](https://ninja-build.org/)
 * [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm)
 * [Python](https://www.python.org/)
 * [pip](https://pypi.org/project/pip/)
@@ -197,7 +197,7 @@ Follow the steps to install dependencies on a specific platform:
     $ choco install -y git
     ```
 
-3. Install `Cmake`.
+3. Install `CMake`.
     ```bash
     $ choco install -y cmake
     ```
@@ -213,9 +213,9 @@ Follow the steps to install dependencies on a specific platform:
 
 The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
-1. Install `make`.
+1. Install `ninja`.
     ```bash
-    $ choco install -y make
+    $ choco install -y ninja
     ```
 
 2. Download and install `GNU Embedded Toolchain for Arm` version 7-2018q2
@@ -258,12 +258,12 @@ The following steps are needed only if you want to compile your own `connectivit
     $ sudo apt install git
     ```
 
-3. Install `Cmake`.
+3. Install `CMake`.
     ```bash
     $ sudo apt-get -y install cmake
     ```
 
-    Install `Cmake` from source if the version is lower than required.
+    Install `CMake` from source if the version is lower than required.
 
 4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
@@ -348,21 +348,13 @@ The following steps are needed only if you want to compile your own `connectivit
     ```
 
 2. CMake
-
-    To build 32-bit version with Visual Studio 2015:
-    ```bash
-    $ cmake -G "Visual Studio 14" ..
-    ```
-
-    To build 64-bit version with Visual Studio 2015:
+    Select the Visual Studio compiler to use according to this article: [Build C/C++ code on the command line](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2015)
 
     ```bash
-    $ cmake -G "Visual Studio 14 Win64" ..
+    $ cmake -G Ninja ..
     ```
 
-    Change `-G "Visual Studio 14"` to `-G "Visual Studio 15"` if you are using Visual Studio 2017.
-
-3. MSBuild
+3. Compile
 
     ```bash
     $ cmake --build .
@@ -391,7 +383,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
     ```bash
     $ cmake \
-        -G "Unix Makefiles" \
+        -G Ninja \
         ..
     ```
 
@@ -402,13 +394,13 @@ The following steps are needed only if you want to compile your own `connectivit
 
     ```bash
     $ cmake \
-        -G "Unix Makefiles" \
+        -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
         -DARCH=x86_32,x86_64 \
         ..
     ```
 
-3. Make
+3. Compile
     ```bash
     $ cmake --build .
     ```
@@ -456,9 +448,9 @@ Follow the steps to install dependencies on a specific platform:
 
     Check more options at [compiling pc-ble-driver on Windows](#Compiling-pc-ble-driver-on-Windows)
 
-3. MSBuild
+3. Compile
     ```bash
-    $ cmake --build hex --target compile_connectivity
+    $ cmake --build . --target compile_connectivity
     ```
 
     The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.
@@ -481,7 +473,7 @@ Follow the steps to install dependencies on a specific platform:
 
     # Modify -DCONNECTIVITY_VERSION=a.b.c
     $ cmake \
-        -G "Unix Makefiles" \
+        -G Ninja \
         -DCOMPILE_CONNECTIVITY=1 \
         -DCONNECTIVITY_VERSION=1.0.0 \
         ..
@@ -493,9 +485,9 @@ Follow the steps to install dependencies on a specific platform:
 
     Check more options at [compiling pc-ble-driver on Ubuntu Linux or macOS](#Compiling-pc-ble-driver-on-Ubuntu-Linux-or-macOS)
 
-3. Make
+3. Compile
     ```bash
-    $ cmake --build hex --target compile_connectivity
+    $ cmake --build . --target compile_connectivity
     ```
 
     The HEX files are available in the `hex/sd_api_v<x>` folder after compilation. They include the SoftDevice and the connectivity application.

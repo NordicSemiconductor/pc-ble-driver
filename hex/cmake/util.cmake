@@ -1,14 +1,3 @@
-function(nrf_configure_sdk_affected_files SDK_VERSION SDK_DIRECTORY MAIN_PATH)
-    if(SDK_VERSION EQUAL 11)
-        set(MAIN_PATH "${SDK_DIRECTORY}/examples/ble_central_and_peripheral/ble_connectivity/main.c" PARENT_SCOPE)
-    elseif(SDK_VERSION EQUAL 15)
-        set(MAIN_PATH "${SDK_DIRECTORY}/examples/connectivity/ble_connectivity/main.c" PARENT_SCOPE)
-    else()
-        message(FATAL_ERROR "Not able to prepare SDK with configuration values because SDK v${SDK_VERSION} is unknown.")
-        return()
-    endif()
-endfunction()
-
 function(nrf_extract_version_number VERSION_NUMBER MAJOR MINOR PATCH)
     string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" MATCHES ${VERSION_NUMBER})
 
@@ -22,21 +11,6 @@ function(nrf_extract_version_number VERSION_NUMBER MAJOR MINOR PATCH)
 endfunction()
 
 function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
-    set(MAIN_PATH)
-
-    nrf_configure_sdk_affected_files(${SDK_VERSION} ${SDK_DIRECTORY} MAIN_PATH)
-    if(NOT EXISTS ${MAIN_PATH})
-        message(FATAL_ERROR "Not able to find main.c in path ${SER_CONFIG_PATH}")
-    endif()
-
-    file(READ ${MAIN_PATH} MAIN)
-
-    # Version number is defined the same way in supported SDKS
-    string(REGEX REPLACE "(\\.version_major[ ]+\\=[ ]+)0xf1(,\n)" "\\1@VERSION_MAJOR@\\2" MAIN_IN "${MAIN}")
-    string(REGEX REPLACE "(\\.version_minor[ ]+\\=[ ]+)0xf2(,\n)" "\\1@VERSION_MINOR@\\2" MAIN_IN "${MAIN_IN}")
-    string(REGEX REPLACE "(\\.version_patch[ ]+\\=[ ]+)0xf3(,\n)" "\\1@VERSION_PATCH@\\2" MAIN_IN "${MAIN_IN}")
-    file(WRITE "${MAIN_PATH}.in" "${MAIN_IN}")
-
      # Configure armgcc related files (if armgcc is available)
     find_program(GCC "arm-none-eabi-gcc")
 
