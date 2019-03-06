@@ -197,7 +197,7 @@ Follow the steps to install dependencies on a specific platform:
     $ choco install -y git
     ```
 
-3. Install `Cmake`.
+3. Install `CMake`.
     ```bash
     $ choco install -y cmake
     ```
@@ -258,12 +258,12 @@ The following steps are needed only if you want to compile your own `connectivit
     $ sudo apt install git
     ```
 
-3. Install `Cmake`.
+3. Install `CMake`.
     ```bash
     $ sudo apt-get -y install cmake
     ```
 
-    Install `Cmake` from source if the version is lower than required.
+    Install `CMake` from source if the version is lower than required.
 
 4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
     ```bash
@@ -448,7 +448,7 @@ Follow the steps to install dependencies on a specific platform:
 
     Check more options at [compiling pc-ble-driver on Windows](#Compiling-pc-ble-driver-on-Windows)
 
-3. MSBuild
+3. Compile
     ```bash
     $ cmake --build . --target compile_connectivity
     ```
