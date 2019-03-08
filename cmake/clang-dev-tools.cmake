@@ -18,7 +18,7 @@ if(WIN32)
     endif()
 endif()
 
-find_program(CLANG_TIDY NAMES run-clang-tidy.py run-clang-tidy-6.0.py)
+find_program(CLANG_TIDY NAMES run-clang-tidy-7.py run-clang-tidy.py)
 
 if(NOT CLANG_TIDY)
     message(STATUS "Did not find clang-tidy, target tidy is disabled.")
