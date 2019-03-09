@@ -40,15 +40,14 @@
 #include <iostream>
 
 UartSettingsBoost::UartSettingsBoost()
-    : 
 {
-    //Empty
+    // Empty
 }
 
 UartSettingsBoost::UartSettingsBoost(const UartCommunicationParameters &communicationParameters)
     : UartSettings(communicationParameters)
 {
-    //Empty
+    // Empty
 }
 
 asio::serial_port::baud_rate UartSettingsBoost::getBoostBaudRate() const
@@ -67,7 +66,8 @@ asio::serial_port::flow_control UartSettingsBoost::getBoostFlowControl() const
         case UartFlowControlHardware:
             return asio::serial_port::flow_control(asio::serial_port::flow_control::hardware);
         default:
-            std::cerr << "Invalid flowcontrol setting " << flowControl <<", defaulting to flow_control::none!";
+            std::cerr << "Invalid flowcontrol setting " << flowControl
+                      << ", defaulting to flow_control::none!";
             return asio::serial_port::flow_control(asio::serial_port::flow_control::none);
     }
 }
@@ -83,7 +83,7 @@ asio::serial_port::parity UartSettingsBoost::getBoostParity() const
         case UartParityEven:
             return asio::serial_port::parity(asio::serial_port::parity::even);
         default:
-            std::cerr << "Invalid parity setting " << parity <<", defaulting to parity::none!";
+            std::cerr << "Invalid parity setting " << parity << ", defaulting to parity::none!";
             return asio::serial_port::parity(asio::serial_port::parity::none);
     }
 }
@@ -99,7 +99,8 @@ asio::serial_port::stop_bits UartSettingsBoost::getBoostStopBits() const
         case UartStopBitsTwo:
             return asio::serial_port::stop_bits(asio::serial_port::stop_bits::two);
         default:
-            std::cerr << "Invalid stopbits setting " << stopBits <<", defaulting to stop_bits::one!";
+            std::cerr << "Invalid stopbits setting " << stopBits
+                      << ", defaulting to stop_bits::one!";
             return asio::serial_port::stop_bits(asio::serial_port::stop_bits::one);
     }
 }

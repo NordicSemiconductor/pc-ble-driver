@@ -60,12 +60,12 @@ constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
 constexpr auto DELAY_BEFORE_OPEN = std::chrono::milliseconds(200);
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
-    : 
-    , readBuffer(), isOpen(false), uartSettingsBoost(communicationParameters)
+    : readBuffer()
+    , isOpen(false)
+    , uartSettingsBoost(communicationParameters)
     , asyncWriteInProgress(false)
     , ioServiceThread(nullptr)
-{
-}
+{}
 
 // The order of destructor invocation is important here. See:
 // https://svn.boost.org/trac10/ticket/10447
@@ -128,7 +128,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
         baudRate = uartSettingsBoost.getBoostBaudRate();
         serialPort->set_option(baudRate);
 #else // !defined(__APPLE__)
-        // Set requested baud rate
+      // Set requested baud rate
         const auto speed = (speed_t)uartSettingsBoost.getBaudRate();
 
         if (ioctl(serialPort->native_handle(), IOSSIOSPEED, &speed) < 0)
@@ -445,7 +445,8 @@ void UartBoost::purge()
 #ifdef __unix__
     const auto result = tcflush(serialPort->native_handle(), TCIOFLUSH);
 
-    if (result == -1) {
+    if (result == -1)
+    {
         std::stringstream message;
         message << "Error purging UART " << static_cast<uint32_t>(result);
         log(SD_RPC_LOG_ERROR, message.str());
