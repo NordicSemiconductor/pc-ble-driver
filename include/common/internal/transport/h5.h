@@ -43,45 +43,34 @@
 
 const uint32_t H5_HEADER_LENGTH = 4;
 
-typedef enum
-{
-    ACK_PACKET = 0,
-    HCI_COMMAND_PACKET = 1,
-    ACL_DATA_PACKET = 2,
-    SYNC_DATA_PACKET = 3,
-    HCI_EVENT_PACKET = 4,
-    RESET_PACKET = 5,
+typedef enum {
+    ACK_PACKET             = 0,
+    HCI_COMMAND_PACKET     = 1,
+    ACL_DATA_PACKET        = 2,
+    SYNC_DATA_PACKET       = 3,
+    HCI_EVENT_PACKET       = 4,
+    RESET_PACKET           = 5,
     VENDOR_SPECIFIC_PACKET = 14,
-    LINK_CONTROL_PACKET = 15
+    LINK_CONTROL_PACKET    = 15
 } h5_pkt_type_t;
 
-typedef enum
-{
-    CONTROL_PKT_RESET = 0,
-    CONTROL_PKT_ACK = 1,
-    CONTROL_PKT_SYNC = 2,
-    CONTROL_PKT_SYNC_RESPONSE = 3,
-    CONTROL_PKT_SYNC_CONFIG = 4,
+typedef enum {
+    CONTROL_PKT_RESET                = 0,
+    CONTROL_PKT_ACK                  = 1,
+    CONTROL_PKT_SYNC                 = 2,
+    CONTROL_PKT_SYNC_RESPONSE        = 3,
+    CONTROL_PKT_SYNC_CONFIG          = 4,
     CONTROL_PKT_SYNC_CONFIG_RESPONSE = 5,
-    CONTROL_PKT_LAST = 10
+    CONTROL_PKT_LAST                 = 10
 } control_pkt_type;
 
-void h5_encode(const std::vector<uint8_t> &in_packet,
-               std::vector<uint8_t> &out_packet,
-               uint8_t seq_num,
-               uint8_t ack_num,
-               bool crc_present,
-               bool reliable_packet,
+void h5_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet,
+               uint8_t seq_num, uint8_t ack_num, bool crc_present, bool reliable_packet,
                h5_pkt_type_t packet_type);
 
-uint32_t h5_decode(const std::vector<uint8_t> &slip_dec_packet,
-	std::vector<uint8_t> &h5_dec_packet,
-	uint8_t *seq_num,
-	uint8_t *ack_num,
-    bool *_data_integrity,
-    uint16_t *_payload_length,
-    uint8_t *_header_checksum,
-	bool *reliable_packet,
-	h5_pkt_type_t *packet_type);
+uint32_t h5_decode(const std::vector<uint8_t> &slipPayload, std::vector<uint8_t> &h5Payload,
+                   uint8_t *seq_num, uint8_t *ack_num, bool *_data_integrity,
+                   uint16_t *_payload_length, uint8_t *_header_checksum, bool *reliable_packet,
+                   h5_pkt_type_t *packet_type);
 
-#endif //H5_H
+#endif // H5_H

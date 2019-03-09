@@ -202,7 +202,7 @@ uint32_t ble_gatts_characteristic_add_req_enc
  *                                   expected operation code.
  */
 uint32_t ble_gatts_characteristic_add_rsp_dec(uint8_t const * const p_buf,
-                                              uint32_t              packet_len,
+                                              uint32_t              buf_len,
                                               uint16_t * * const    pp_handles,
                                               uint32_t * const      p_result_code);
 

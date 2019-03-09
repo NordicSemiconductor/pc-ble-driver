@@ -133,7 +133,7 @@ uint32_t ble_gatts_evt_rw_authorize_request_t_enc(void const * const p_void_auth
 uint32_t ble_gatts_evt_rw_authorize_request_t_dec(uint8_t const * const p_buf,
                                                   uint32_t              buf_len,
                                                   uint32_t * const      p_index,
-                                                  uint32_t * const      p_struct_size,
+                                                  uint32_t * const      p_struct_len,
                                                   void * const          p_void_authorize_request);
 
 uint32_t ble_gatts_authorize_params_t_enc(void const * const p_void_struct,

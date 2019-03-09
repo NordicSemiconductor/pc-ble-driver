@@ -279,7 +279,7 @@ uint32_t ble_gap_appearance_set_rsp_dec(uint8_t const * const p_buf,
  * @retval NRF_ERROR_INVALID_LENGTH   Encoding failure. Incorrect buffer length.
  */
 uint32_t ble_gap_device_name_get_req_enc(uint8_t const * const  p_dev_name,
-                                         uint16_t const * const p_dev_name_len,
+                                         uint16_t const * const p_len,
                                          uint8_t * const        p_buf,
                                          uint32_t * const       p_buf_len);
 

@@ -202,8 +202,8 @@ uint32_t ble_uuid_decode_req_enc(uint8_t               uuid_le_len,
  *                                   operation code.
  */
 uint32_t ble_uuid_decode_rsp_dec(uint8_t const * const p_buf,
-                                 uint32_t              packet_len,
-                                 ble_uuid_t * * const  p_uuid,
+                                 uint32_t              buf_len,
+                                 ble_uuid_t * * const  pp_uuid,
                                  uint32_t * const      p_result_code);
 
 /**@brief Encodes @ref sd_ble_uuid_vs_add command request.

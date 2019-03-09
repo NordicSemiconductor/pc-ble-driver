@@ -80,7 +80,7 @@ class H5Transport : public Transport
 {
   public:
     H5Transport() = delete;
-    H5Transport(Transport *nextTransportLayer, uint32_t retransmission_interval);
+    H5Transport(Transport *_nextTransportLayer, uint32_t retransmission_interval);
     ~H5Transport() noexcept;
 
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
@@ -95,15 +95,14 @@ class H5Transport : public Transport
     static bool isSyncConfigPacket(const payload_t &packet, uint8_t offset = 0);
     static bool isSyncConfigResponsePacket(const payload_t &packet, uint8_t offset = 0);
     static bool isResetPacket(const payload_t &packet, uint8_t offset = 0);
-    static bool checkPattern(const payload_t &packet, uint8_t offset,
-                             const payload_t &pattern);
+    static bool checkPattern(const payload_t &packet, uint8_t offset, const payload_t &pattern);
     static payload_t getPktPattern(control_pkt_type);
     static std::string stateToString(h5_state_t state);
     static std::string pktTypeToString(h5_pkt_type_t pktType);
 
   private:
     void dataHandler(const uint8_t *data, size_t length);
-    void statusHandler(sd_rpc_app_status_t code, const std::string &error);
+    void statusHandler(sd_rpc_app_status_t code, const std::string &message);
     void processPacket(const payload_t &packet);
 
     void sendControlPacket(control_pkt_type type);

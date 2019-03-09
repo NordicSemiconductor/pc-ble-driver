@@ -69,7 +69,7 @@ uint32_t cond_field_enc(void const * const      p_field,
                         uint8_t * const         p_buf,
                         uint32_t                buf_len,
                         uint32_t * const        p_index,
-                        field_encoder_handler_t field_parser);
+                        field_encoder_handler_t fp_field_encoder);
 
 /**@brief Function for safe decoding conditional field.
  *
@@ -90,7 +90,7 @@ uint32_t cond_field_dec(uint8_t const * const   p_buf,
                         uint32_t                buf_len,
                         uint32_t * const        p_index,
                         void * * const          pp_field,
-                        field_decoder_handler_t field_parser);
+                        field_decoder_handler_t fp_field_parser);
 
 #ifdef __cplusplus
 }

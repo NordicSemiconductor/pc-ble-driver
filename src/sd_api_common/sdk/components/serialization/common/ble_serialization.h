@@ -702,7 +702,7 @@ uint32_t uint16_t_dec(uint8_t const * const p_buf,
  * @param[out]     value            Decoded uint16 value.
  */
 void uint16_dec(uint8_t const * const p_buf,
-                uint32_t              packet_len,
+                uint32_t              buf_len,
                 uint32_t * const      index,
                 uint16_t * const      value);
 
@@ -753,7 +753,7 @@ uint32_t uint8_t_dec(uint8_t const * const p_buf,
  * @param[out]     value            Decoded uint8 value.
  */
 void uint8_dec(uint8_t const * const p_buf,
-               uint32_t              packet_len,
+               uint32_t              buf_len,
                uint32_t * const      index,
                uint8_t * const       value);
 
@@ -768,7 +768,7 @@ void uint8_dec(uint8_t const * const p_buf,
  * @param[out]     value            Decoded uint8 value.
  */
 void int8_dec(uint8_t const * const p_buf,
-              uint32_t              packet_len,
+              uint32_t              buf_len,
               uint32_t * const      index,
               int8_t * const        value);
 

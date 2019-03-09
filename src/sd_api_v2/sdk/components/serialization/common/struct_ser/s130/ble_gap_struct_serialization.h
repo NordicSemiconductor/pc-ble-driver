@@ -89,7 +89,7 @@ uint32_t ble_gap_enc_info_enc(void const * const p_data,
 uint32_t ble_gap_enc_info_dec(uint8_t const * const p_buf,
                               uint32_t              buf_len,
                               uint32_t * const      p_index,
-                              void * const          p_enc_info);
+                              void * const          p_enc_infox);
 
 uint32_t ble_gap_sign_info_enc(void const * const p_sign_info,
                                uint8_t * const    p_buf,

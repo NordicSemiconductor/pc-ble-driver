@@ -80,7 +80,7 @@ uint32_t ble_l2cap_evt_rx_t_enc(void const * const p_void_evt_rx,
 uint32_t ble_l2cap_evt_rx_t_dec(uint8_t const * const p_buf,
                                 uint32_t              buf_len,
                                 uint32_t * const      p_index,
-                                uint32_t * const      p_event_len,
+                                uint32_t * const      p_struct_len,
                                 void * const          p_void_evt_rx);
                                 
 uint32_t ble_enable_params_t_enc(void const * const p_void_enable_params,
@@ -123,7 +123,7 @@ uint32_t ble_conn_bw_count_t_dec(uint8_t const * const p_buf,
                                  uint32_t * const      p_index,
                                  void * const          p_void_conn_bw_count);
 
-uint32_t ble_conn_bw_counts_t_enc(void const * const p_void_conn_bw_count,
+uint32_t ble_conn_bw_counts_t_enc(void const * const p_void_conn_bw_counts,
                                   uint8_t * const    p_buf,
                                   uint32_t           buf_len,
                                   uint32_t * const   p_index);
@@ -131,7 +131,7 @@ uint32_t ble_conn_bw_counts_t_enc(void const * const p_void_conn_bw_count,
 uint32_t ble_conn_bw_counts_t_dec(uint8_t const * const p_buf,
                                   uint32_t              buf_len,
                                   uint32_t * const      p_index,
-                                  void * const          p_void_conn_bw_count);
+                                  void * const          p_void_conn_bw_counts);
 
 uint32_t ble_common_enable_params_t_enc(void const * const p_void_common_enable_params,
                                         uint8_t * const    p_buf,

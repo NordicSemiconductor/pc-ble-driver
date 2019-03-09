@@ -94,7 +94,7 @@ typedef enum {
  * @param[in] key Key that represents the adapter, used by other functions to select GAP state for a
  * adapter
  */
-uint32_t app_ble_gap_state_create(void *key);
+uint32_t app_ble_gap_state_create(void *adapter_id);
 
 /**
  * @brief Delete GAP states for a given adapter
@@ -103,7 +103,7 @@ uint32_t app_ble_gap_state_create(void *key);
  *
  * @param[in] key Key that represents the adapter
  */
-uint32_t app_ble_gap_state_delete(void *key);
+uint32_t app_ble_gap_state_delete(void *adapter_id);
 
 /**@brief Set the current GAP adapter to be used by codecs
  *
@@ -111,18 +111,17 @@ uint32_t app_ble_gap_state_delete(void *key);
  * @param[in]     codec_context Codec context
  */
 void app_ble_gap_set_current_adapter_id(void *adapter_id,
-                                        app_ble_gap_adapter_codec_context_t codec_context);
+                                        app_ble_gap_adapter_codec_context_t key_type);
 
 /**@brief Unset the current GAP adapter used by codecs
  * @param[in]     codec_context Unset the given codec context
  */
-void app_ble_gap_unset_current_adapter_id(app_ble_gap_adapter_codec_context_t codec_context);
+void app_ble_gap_unset_current_adapter_id(app_ble_gap_adapter_codec_context_t key_type);
 
 /**@brief Check if current adapter is set
  * @param[in] codec_context       Check if adapter GAP state is set for codec context
  */
-uint32_t
-app_ble_gap_check_current_adapter_set(app_ble_gap_adapter_codec_context_t codec_context);
+uint32_t app_ble_gap_check_current_adapter_set(app_ble_gap_adapter_codec_context_t codec_context);
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *

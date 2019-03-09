@@ -244,7 +244,7 @@ uint32_t ble_gap_scan_params_t_enc(void const * const p_void_struct,
 uint32_t ble_gap_scan_params_t_dec(uint8_t const * const  p_buf,
                                  uint32_t           buf_len,
                                  uint32_t * const   p_index,
-                                 void * const p_data);
+                                 void * const p_void_struct);
 
 uint32_t ble_gap_master_id_t_enc(void const * const p_void_struct,
                                  uint8_t * const    p_buf,
