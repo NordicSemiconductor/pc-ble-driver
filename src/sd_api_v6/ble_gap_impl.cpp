@@ -89,8 +89,9 @@ uint32_t sd_ble_gap_adv_set_configure(adapter_t *adapter, uint8_t *p_adv_handle,
         uint32_t err = ble_gap_adv_set_configure_rsp_dec(buffer, length, p_adv_handle, result);
         if (err == 0)
         {
-            app_ble_gap_set_adv_data_set(*p_adv_handle, (uint8_t *)mp_out_params[0],
-                                         (uint8_t *)mp_out_params[1]);
+            app_ble_gap_set_adv_data_set(*p_adv_handle,
+                                         reinterpret_cast<uint8_t *>(mp_out_params[0]),
+                                         reinterpret_cast<uint8_t *>(mp_out_params[1]));
         }
         return err;
     };
@@ -390,7 +391,7 @@ uint32_t sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle,
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
                                             uint32_t *result) -> uint32_t {
         return ble_gap_conn_sec_get_rsp_dec(buffer, length,
-                                            (ble_gap_conn_sec_t * *const) & p_conn_sec, result);
+                                            const_cast<ble_gap_conn_sec_t **>(&p_conn_sec), result);
     };
 
     return gap_encode_decode(adapter, encode_function, decode_function);
