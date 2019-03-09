@@ -72,7 +72,7 @@ public:
     bool isOpened;
 
     StartExitCriterias() noexcept
-        : ExitCriterias(),
+        : ,
         isOpened(false) {}
     StartExitCriterias(const StartExitCriterias&) = delete;
 
@@ -105,7 +105,7 @@ public:
     bool resetWait;
 
     ResetExitCriterias() noexcept
-        : ExitCriterias(), resetSent(false), resetWait(false) {}
+        : , resetSent(false), resetWait(false) {}
     ResetExitCriterias(const ResetExitCriterias&) = delete;
 
     bool isFullfilled() const override
@@ -139,7 +139,7 @@ public:
     bool syncRspReceived;
 
     UninitializedExitCriterias() noexcept
-        : ExitCriterias(),
+        : ,
         syncSent(false),
         syncRspReceived(false) {}
     UninitializedExitCriterias(const UninitializedExitCriterias&) = delete;
@@ -174,7 +174,7 @@ public:
     bool syncConfigRspReceived;
 
     InitializedExitCriterias() noexcept
-        : ExitCriterias(),
+        : ,
         syncConfigSent(false),
         syncConfigRspReceived(false) {}
     InitializedExitCriterias(const InitializedExitCriterias&) = delete;
@@ -209,7 +209,7 @@ public:
     bool syncReceived;
 
     ActiveExitCriterias() noexcept
-        : ExitCriterias(), irrecoverableSyncError(false),
+        : , irrecoverableSyncError(false),
         syncReceived(false) {}
     ActiveExitCriterias(const ActiveExitCriterias&) = delete;
 

@@ -60,7 +60,7 @@ constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
 constexpr auto DELAY_BEFORE_OPEN = std::chrono::milliseconds(200);
 
 UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
-    : Transport()
+    : 
     , readBuffer(), isOpen(false), uartSettingsBoost(communicationParameters)
     , asyncWriteInProgress(false)
     , ioServiceThread(nullptr)

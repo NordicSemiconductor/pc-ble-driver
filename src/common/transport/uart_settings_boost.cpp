@@ -40,7 +40,7 @@
 #include <iostream>
 
 UartSettingsBoost::UartSettingsBoost()
-    : UartSettings()
+    : 
 {
     //Empty
 }
