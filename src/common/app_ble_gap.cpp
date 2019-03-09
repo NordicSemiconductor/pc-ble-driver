@@ -41,10 +41,10 @@
 #include "nrf_error.h"
 
 #include <cstring>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <iostream>
 
 #include <sd_rpc_types.h>
 
@@ -571,35 +571,35 @@ void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *bu
         return;
     }
 
-    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
+    for (auto &i : adv_set_data)
     {
-        if (adv_set_data[i].adv_handle == adv_handle)
+        if (i.adv_handle == adv_handle)
         {
             /* If adv_set is already configured replace old buffers with new one. */
-            if (adv_set_data[i].buf1 != buf1)
+            if (i.buf1 != buf1)
             {
-                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf1);
+                app_ble_gap_adv_buf_addr_unregister(i.buf1);
             }
 
-            if (adv_set_data[i].buf2 != buf2)
+            if (i.buf2 != buf2)
             {
-                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf2);
+                app_ble_gap_adv_buf_addr_unregister(i.buf2);
             }
 
-            adv_set_data[i].buf1 = buf1;
-            adv_set_data[i].buf2 = buf2;
+            i.buf1 = buf1;
+            i.buf2 = buf2;
 
             return;
         }
     }
 
-    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
+    for (auto &i : adv_set_data)
     {
-        if (adv_set_data[i].adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
+        if (i.adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
         {
-            adv_set_data[i].adv_handle = adv_handle;
-            adv_set_data[i].buf1       = buf1;
-            adv_set_data[i].buf2       = buf2;
+            i.adv_handle = adv_handle;
+            i.buf1       = buf1;
+            i.buf2       = buf2;
             return;
         }
     }
