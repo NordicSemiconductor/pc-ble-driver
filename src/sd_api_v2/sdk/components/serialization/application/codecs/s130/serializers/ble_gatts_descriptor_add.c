@@ -48,7 +48,7 @@
 
 uint32_t ble_gatts_descriptor_add_req_enc(uint16_t                       char_handle,
                                           ble_gatts_attr_t const * const p_attr,
-                                          uint16_t * const               p_handle,
+                                          const uint16_t * const               p_handle,
                                           uint8_t * const                p_buf,
                                           uint32_t * const               p_buf_len)
 {

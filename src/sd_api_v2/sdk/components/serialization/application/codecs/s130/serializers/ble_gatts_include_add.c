@@ -43,7 +43,7 @@
 
 uint32_t ble_gatts_include_add_req_enc(uint16_t         service_handle,
                                        uint16_t         inc_srvc_handle,
-                                       uint16_t * const p_include_handle,
+                                       const uint16_t * const p_include_handle,
                                        uint8_t * const  p_buf,
                                        uint32_t * const p_buf_len)
 {

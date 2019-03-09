@@ -421,7 +421,7 @@ uint32_t ble_gatts_sys_attr_get_rsp_dec(uint8_t const * const p_buf,
  */
 uint32_t ble_gatts_descriptor_add_req_enc(uint16_t                       char_handle,
                                           ble_gatts_attr_t const * const p_attr,
-                                          uint16_t * const               p_handle,
+                                          const uint16_t * const               p_handle,
                                           uint8_t * const                p_buf,
                                           uint32_t * const               p_buf_len);
 
@@ -465,7 +465,7 @@ uint32_t ble_gatts_descriptor_add_rsp_dec(uint8_t const * const p_buf,
  */
 uint32_t ble_gatts_include_add_req_enc(uint16_t         service_handle,
                                        uint16_t         inc_srvc_handle,
-                                       uint16_t * const p_include_handle,
+                                       const uint16_t * const p_include_handle,
                                        uint8_t * const  p_buf,
                                        uint32_t * const p_buf_len);
 
