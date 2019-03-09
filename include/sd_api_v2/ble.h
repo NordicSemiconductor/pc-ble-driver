@@ -399,7 +399,7 @@ typedef struct
  * @retval ::NRF_ERROR_CONN_COUNT     The requested number of connections exceeds the maximum supported by the SoftDevice.
  *                                    Please refer to the SoftDevice Specification for more information on role configuration.
  */
-SD_RPC_API uint32_t sd_ble_enable(adapter_t *adapter, ble_enable_params_t * p_ble_enable_params, uint32_t * p_app_ram_base);
+SD_RPC_API uint32_t sd_ble_enable(adapter_t *adapter, ble_enable_params_t * p_ble_enable_params, const uint32_t *const p_app_ram_base);
 
 /**@brief Get an event from the pending events queue.
  *

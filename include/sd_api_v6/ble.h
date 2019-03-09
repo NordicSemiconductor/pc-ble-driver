@@ -414,7 +414,7 @@ typedef union
  *                                      is currently not supported.
  * @retval ::NRF_ERROR_RESOURCES      The total number of L2CAP Channels configured using @ref sd_ble_cfg_set is too large.
  */
-SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t *adapter, uint32_t * p_app_ram_base));
+SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t *adapter, const uint32_t *const p_app_ram_base));
 
 /**@brief Add configurations for the BLE stack
  *
