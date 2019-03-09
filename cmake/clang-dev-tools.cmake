@@ -34,7 +34,7 @@ else()
 
     # Configuration of rules are picked up from .clang-tidy
     message(STATUS "Picking up clang-tidy rules from ${CMAKE_SOURCE_DIR}/.clang-tidy")
-    set(CLANG_TIDY_ARGS "-header-filter=.*")
+    set(CLANG_TIDY_ARGS "")
 
     if (WIN32)
         add_custom_target(tidy
