@@ -256,7 +256,7 @@ uint32_t sd_ble_gap_addr_get(adapter_t *adapter, ble_gap_addr_t *const p_addr)
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
                                             uint32_t *result) -> uint32_t {
-        return ble_gap_addr_get_rsp_dec(buffer, length, (ble_gap_addr_t *)p_addr, result);
+        return ble_gap_addr_get_rsp_dec(buffer, length, p_addr, result);
     };
 
     return gap_encode_decode(adapter, encode_function, decode_function);
@@ -543,8 +543,7 @@ uint32_t sd_ble_gap_rssi_get(adapter_t *adapter, uint16_t conn_handle, int8_t *p
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
                                             uint32_t *result) -> uint32_t {
-        return ble_gap_rssi_get_rsp_dec(buffer, length, (int8_t *)p_rssi, (uint8_t *)p_ch_index,
-                                        result);
+        return ble_gap_rssi_get_rsp_dec(buffer, length, p_rssi, p_ch_index, result);
     };
 
     return gap_encode_decode(adapter, encode_function, decode_function);

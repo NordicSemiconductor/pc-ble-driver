@@ -113,7 +113,7 @@ uint32_t ble_gattc_evt_char_val_by_uuid_read_rsp_t_dec(uint8_t const * const p_b
 
         for (i = 0; i < count; i++)
         {
-            p_handle_value          = (ble_gattc_handle_value_t *)&p_read->handle_value[i];
+            p_handle_value          = &p_read->handle_value[i];
             p_handle_value->p_value = p_value;
 
             SER_ASSERT_LENGTH_LEQ(2, buf_len - *p_index);

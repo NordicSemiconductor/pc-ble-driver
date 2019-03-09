@@ -1507,11 +1507,11 @@ uint32_t ble_gap_lesc_oob_data_t_dec(uint8_t const * const p_buf,
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
     uint8_t * p = p_oob_data->r;
-    err_code = buf_dec(p_buf, buf_len, p_index, (uint8_t **)&p, BLE_GAP_SEC_KEY_LEN, BLE_GAP_SEC_KEY_LEN);
+    err_code = buf_dec(p_buf, buf_len, p_index, &p, BLE_GAP_SEC_KEY_LEN, BLE_GAP_SEC_KEY_LEN);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
     p = p_oob_data->c;
-    err_code = buf_dec(p_buf, buf_len, p_index, (uint8_t **)&p, BLE_GAP_SEC_KEY_LEN,  BLE_GAP_SEC_KEY_LEN);
+    err_code = buf_dec(p_buf, buf_len, p_index, &p, BLE_GAP_SEC_KEY_LEN,  BLE_GAP_SEC_KEY_LEN);
     SER_ASSERT(err_code == NRF_SUCCESS, err_code);
 
     return NRF_SUCCESS;
