@@ -35,13 +35,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
+#include <cstdint>
 
 // C++ code
 #include "adapter.h"
 #include "adapter_internal.h"
 #include "transport.h"
-
 
 // C code
 #include "ble_gattc.h"
@@ -49,104 +48,127 @@
 
 #include "ble_common.h"
 
-uint32_t sd_ble_gattc_primary_services_discover(adapter_t *adapter, uint16_t conn_handle, uint16_t start_handle, ble_uuid_t const *p_srvc_uuid)
+uint32_t sd_ble_gattc_primary_services_discover(adapter_t *adapter, uint16_t conn_handle,
+                                                uint16_t start_handle,
+                                                ble_uuid_t const *p_srvc_uuid)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gattc_primary_services_discover_req_enc(conn_handle, start_handle, p_srvc_uuid, buffer, length);
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_primary_services_discover_req_enc(conn_handle, start_handle, p_srvc_uuid,
+                                                           buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_primary_services_discover_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_relationships_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range)
+uint32_t sd_ble_gattc_relationships_discover(adapter_t *adapter, uint16_t conn_handle,
+                                             ble_gattc_handle_range_t const *p_handle_range)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gattc_relationships_discover_req_enc(conn_handle, p_handle_range, buffer, length);
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_relationships_discover_req_enc(conn_handle, p_handle_range, buffer,
+                                                        length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_relationships_discover_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_characteristics_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range)
+uint32_t sd_ble_gattc_characteristics_discover(adapter_t *adapter, uint16_t conn_handle,
+                                               ble_gattc_handle_range_t const *p_handle_range)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gattc_characteristics_discover_req_enc(conn_handle, p_handle_range, buffer, length);
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_characteristics_discover_req_enc(conn_handle, p_handle_range, buffer,
+                                                          length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_characteristics_discover_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_descriptors_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const *p_handle_range)
+uint32_t sd_ble_gattc_descriptors_discover(adapter_t *adapter, uint16_t conn_handle,
+                                           ble_gattc_handle_range_t const *p_handle_range)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gattc_descriptors_discover_req_enc(conn_handle, p_handle_range, buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_descriptors_discover_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_char_value_by_uuid_read(adapter_t *adapter, uint16_t conn_handle, ble_uuid_t const *p_uuid, ble_gattc_handle_range_t const *p_handle_range)
+uint32_t sd_ble_gattc_char_value_by_uuid_read(adapter_t *adapter, uint16_t conn_handle,
+                                              ble_uuid_t const *p_uuid,
+                                              ble_gattc_handle_range_t const *p_handle_range)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gattc_char_value_by_uuid_read_req_enc(conn_handle, p_uuid, p_handle_range, buffer, length);
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_char_value_by_uuid_read_req_enc(conn_handle, p_uuid, p_handle_range,
+                                                         buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_char_value_by_uuid_read_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_read(adapter_t *adapter, uint16_t conn_handle, uint16_t handle, uint16_t offset)
+uint32_t sd_ble_gattc_read(adapter_t *adapter, uint16_t conn_handle, uint16_t handle,
+                           uint16_t offset)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gattc_read_req_enc(conn_handle, handle, offset, buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_read_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_char_values_read(adapter_t *adapter, uint16_t conn_handle, uint16_t const *p_handles, uint16_t handle_count)
+uint32_t sd_ble_gattc_char_values_read(adapter_t *adapter, uint16_t conn_handle,
+                                       uint16_t const *p_handles, uint16_t handle_count)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_gattc_char_values_read_req_enc(conn_handle, p_handles, handle_count, buffer, length);
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
+        return ble_gattc_char_values_read_req_enc(conn_handle, p_handles, handle_count, buffer,
+                                                  length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_char_values_read_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_write(adapter_t *adapter, uint16_t conn_handle, ble_gattc_write_params_t const *p_write_params)
+uint32_t sd_ble_gattc_write(adapter_t *adapter, uint16_t conn_handle,
+                            ble_gattc_write_params_t const *p_write_params)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gattc_write_req_enc(conn_handle, p_write_params, buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_write_rsp_dec(buffer, length, result);
     };
 
@@ -155,37 +177,42 @@ uint32_t sd_ble_gattc_write(adapter_t *adapter, uint16_t conn_handle, ble_gattc_
 
 uint32_t sd_ble_gattc_hv_confirm(adapter_t *adapter, uint16_t conn_handle, uint16_t handle)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gattc_hv_confirm_req_enc(conn_handle, handle, buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_hv_confirm_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_attr_info_discover(adapter_t *adapter, uint16_t conn_handle, ble_gattc_handle_range_t const * p_handle_range)
+uint32_t sd_ble_gattc_attr_info_discover(adapter_t *adapter, uint16_t conn_handle,
+                                         ble_gattc_handle_range_t const *p_handle_range)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gattc_attr_info_discover_req_enc(conn_handle, p_handle_range, buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_attr_info_discover_rsp_dec(buffer, length, result);
     };
 
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_gattc_exchange_mtu_request(adapter_t *adapter, uint16_t conn_handle, uint16_t client_rx_mtu)
+uint32_t sd_ble_gattc_exchange_mtu_request(adapter_t *adapter, uint16_t conn_handle,
+                                           uint16_t client_rx_mtu)
 {
-    const encode_function_t encode_function = [&] (uint8_t *buffer, uint32_t *length) -> uint32_t {
+    const encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_gattc_exchange_mtu_request_req_enc(conn_handle, client_rx_mtu, buffer, length);
     };
 
-    const decode_function_t decode_function = [&] (uint8_t *buffer, const uint32_t length, uint32_t *result) -> uint32_t {
+    const decode_function_t decode_function = [&](uint8_t *buffer, const uint32_t length,
+                                                  uint32_t *result) -> uint32_t {
         return ble_gattc_exchange_mtu_request_rsp_dec(buffer, length, result);
     };
 

@@ -39,8 +39,8 @@
 
 #include "nrf_error.h"
 
+#include <cstdint>
 #include <iostream>
-#include <stdint.h>
 
 using namespace std;
 

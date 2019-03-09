@@ -61,11 +61,11 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <stdint.h>
 #include <thread>
 
 const uint8_t PACKET_RETRANSMISSIONS =
@@ -91,8 +91,7 @@ H5Transport::H5Transport(Transport *_nextTransportLayer, const uint32_t retransm
     , currentState(STATE_START)
     , stateMachineReady(false)
     , isOpen(false)
-{
-}
+{}
 
 H5Transport::~H5Transport() noexcept
 {
@@ -121,7 +120,8 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
     if (!(currentState == STATE_START || currentState == STATE_CLOSED))
     {
         std::stringstream ss;
-        ss << "Not able to open, current state is not valid (" << stateToString(currentState) << ")";
+        ss << "Not able to open, current state is not valid (" << stateToString(currentState)
+           << ")";
         log(SD_RPC_LOG_FATAL, ss.str());
         return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
     }
