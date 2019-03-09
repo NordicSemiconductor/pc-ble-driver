@@ -61,8 +61,8 @@ class Transport
 
     virtual uint32_t send(const std::vector<uint8_t> &data) = 0;
 
-    void log(const sd_rpc_log_severity_t severity, const std::string &message) const;
-    void status(const sd_rpc_app_status_t code, const std::string &message) const;
+    void log(sd_rpc_log_severity_t severity, const std::string &message) const;
+    void status(sd_rpc_app_status_t code, const std::string &message) const;
 
   protected:
     Transport();

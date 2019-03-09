@@ -111,18 +111,18 @@ uint32_t app_ble_gap_state_delete(void *key);
  * @param[in]     codec_context Codec context
  */
 void app_ble_gap_set_current_adapter_id(void *adapter_id,
-                                        const app_ble_gap_adapter_codec_context_t codec_context);
+                                        app_ble_gap_adapter_codec_context_t codec_context);
 
 /**@brief Unset the current GAP adapter used by codecs
  * @param[in]     codec_context Unset the given codec context
  */
-void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_context_t codec_context);
+void app_ble_gap_unset_current_adapter_id(app_ble_gap_adapter_codec_context_t codec_context);
 
 /**@brief Check if current adapter is set
  * @param[in] codec_context       Check if adapter GAP state is set for codec context
  */
 uint32_t
-app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context);
+app_ble_gap_check_current_adapter_set(app_ble_gap_adapter_codec_context_t codec_context);
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
@@ -141,7 +141,7 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
  * @retval NRF_SUCCESS                Context released.
  * @retval NRF_ERROR_NOT_FOUND        Instance with conn_handle not found.
  */
-uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle);
+uint32_t app_ble_gap_sec_keys_storage_destroy(uint16_t conn_handle);
 
 /**@brief Finds index of instance identified by a connection handle.
  *
@@ -153,21 +153,21 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle);
  * @retval NRF_SUCCESS                Context found.
  * @retval NRF_ERROR_NOT_FOUND        Instance with conn_handle not found.
  */
-uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index);
+uint32_t app_ble_gap_sec_keys_find(uint16_t conn_handle, uint32_t *p_index);
 
 /**@brief Gets key for given adapter and connection.
  *
  * @param[in] index key index
  * @param[out] Double pointer to keyset for given key index
  */
-uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **keyset);
+uint32_t app_ble_gap_sec_keys_get(uint32_t index, ble_gap_sec_keyset_t **keyset);
 
 /**@brief Updates key in given index. This function is used in REQUEST_REPLY_CODEC_CONTEXT.
  *
  * @param[in] index key index
  * @param[out] Pointer to keyset for given key index
  */
-uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset);
+uint32_t app_ble_gap_sec_keys_update(uint32_t index, const ble_gap_sec_keyset_t *keyset);
 
 /**
  * @brief Reset internal values in app_ble_gap
@@ -255,7 +255,7 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf);
  * @return Buffer pointer from advertisement buffer table, except nullptr if id == 0 or if the
  * context for the current adapter is not set
  */
-void *app_ble_gap_adv_buf_unregister(const int id, bool event_context);
+void *app_ble_gap_adv_buf_unregister(int id, bool event_context);
 
 void app_ble_gap_scan_data_unset(bool free);
 

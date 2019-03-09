@@ -103,22 +103,22 @@ public:
     virtual ~UartSettings();
 
     /*@brief Sets the name of the serial port. */
-    void setPortName(const std::string value);
+    void setPortName(std::string value);
 
     /*@brief Sets the baud rate. */
-    void setBaudRate(const uint32_t value);
+    void setBaudRate(uint32_t value);
 
     /*@brief Sets the flow control parameter. */
-    void setFlowControl(const UartFlowControl value);
+    void setFlowControl(UartFlowControl value);
 
     /*@brief Sets the Parity parameter. */
-    void setParity(const UartParity value);
+    void setParity(UartParity value);
 
     /*@brief Sets the Stop Bits parameter. */
-    void setStopBits(const UartStopBits value);
+    void setStopBits(UartStopBits value);
 
     /*@brief Sets the Data Bits parameter. */
-    void setDataBits(const UartDataBits value);
+    void setDataBits(UartDataBits value);
 
     /*@brief Returns the currently configured serial port name. */
     std::string getPortName();

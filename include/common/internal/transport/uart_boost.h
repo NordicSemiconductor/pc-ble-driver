@@ -85,12 +85,12 @@ class UartBoost : public Transport
     /**
      *@brief Called when background thread receives bytes from uart.
      */
-    void readHandler(const asio::error_code &errorCode, const size_t bytesTransferred);
+    void readHandler(const asio::error_code &errorCode, size_t bytesTransferred);
 
     /**
      *@brief Called when write is finished doing asynchronous write.
      */
-    void writeHandler(const asio::error_code &errorCode, const size_t);
+    void writeHandler(const asio::error_code &errorCode, size_t);
 
     /**
      *@brief Starts asynchronous read on a background thread.

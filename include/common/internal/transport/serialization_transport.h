@@ -89,7 +89,7 @@ class SerializationTransport
                   serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
 
   private:
-    void readHandler(const uint8_t *data, const size_t length);
+    void readHandler(const uint8_t *data, size_t length);
     void eventHandlingRunner();
 
     status_cb_t statusCallback;
