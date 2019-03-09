@@ -221,7 +221,7 @@ uint32_t ble_gap_conn_sec_get_req_enc(uint16_t                         conn_hand
 
 uint32_t ble_gap_conn_sec_get_rsp_dec(uint8_t const * const        p_buf,
                                       uint32_t                     packet_len,
-                                      ble_gap_conn_sec_t * * const pp_conn_sec,
+                                      ble_gap_conn_sec_t * const * const pp_conn_sec,
                                       uint32_t * const             p_result_code)
 {
     SER_RSP_DEC_BEGIN(SD_BLE_GAP_CONN_SEC_GET);

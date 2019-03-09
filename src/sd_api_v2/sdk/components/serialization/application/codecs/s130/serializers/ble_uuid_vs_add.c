@@ -73,7 +73,7 @@ uint32_t ble_uuid_vs_add_req_enc(ble_uuid128_t const * const p_vs_uuid,
 
 uint32_t ble_uuid_vs_add_rsp_dec(uint8_t const * const p_buf,
                                  uint32_t              buf_len,
-                                 uint8_t * * const     pp_uuid_type,
+                                 uint8_t * const * const pp_uuid_type,
                                  uint32_t * const      p_result_code)
 {
     SER_ASSERT_NOT_NULL(p_buf);

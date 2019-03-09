@@ -203,7 +203,7 @@ uint32_t ble_uuid_decode_req_enc(uint8_t               uuid_le_len,
  */
 uint32_t ble_uuid_decode_rsp_dec(uint8_t const * const p_buf,
                                  uint32_t              buf_len,
-                                 ble_uuid_t * * const  pp_uuid,
+                                 ble_uuid_t * const * const  pp_uuid,
                                  uint32_t * const      p_result_code);
 
 /**@brief Encodes @ref sd_ble_uuid_vs_add command request.
@@ -247,7 +247,7 @@ uint32_t ble_uuid_vs_add_req_enc(ble_uuid128_t const * const p_vs_uuid,
  */
 uint32_t ble_uuid_vs_add_rsp_dec(uint8_t const * const p_buf,
                                  uint32_t              buf_len,
-                                 uint8_t * * const     pp_uuid_type,
+                                 uint8_t *const * const     pp_uuid_type,
                                  uint32_t * const      p_result_code);
 
 /**@brief Encodes @ref sd_ble_version_get command request.

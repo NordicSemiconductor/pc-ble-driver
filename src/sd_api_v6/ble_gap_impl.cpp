@@ -390,8 +390,7 @@ uint32_t sd_ble_gap_conn_sec_get(adapter_t *adapter, uint16_t conn_handle,
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,
                                             uint32_t *result) -> uint32_t {
-        return ble_gap_conn_sec_get_rsp_dec(buffer, length,
-                                            const_cast<ble_gap_conn_sec_t **>(&p_conn_sec), result);
+        return ble_gap_conn_sec_get_rsp_dec(buffer, length, &p_conn_sec, result);
     };
 
     return gap_encode_decode(adapter, encode_function, decode_function);

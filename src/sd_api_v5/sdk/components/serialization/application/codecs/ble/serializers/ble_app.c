@@ -333,10 +333,10 @@ uint32_t ble_uuid_decode_req_enc(uint8_t               uuid_le_len,
 }
 
 
-uint32_t ble_uuid_decode_rsp_dec(uint8_t const * const p_buf,
-                                 uint32_t              packet_len,
-                                 ble_uuid_t * * const  pp_uuid,
-                                 uint32_t * const      p_result_code)
+uint32_t ble_uuid_decode_rsp_dec(uint8_t const * const     p_buf,
+                                 uint32_t                  packet_len,
+                                 ble_uuid_t *const * const pp_uuid,
+                                 uint32_t * const          p_result_code)
 {
     SER_RSP_DEC_BEGIN(SD_BLE_UUID_DECODE);
     SER_PULL_COND(pp_uuid, ble_uuid_t_dec);
@@ -396,10 +396,10 @@ uint32_t ble_uuid_vs_add_req_enc(ble_uuid128_t const * const p_vs_uuid,
 }
 
 
-uint32_t ble_uuid_vs_add_rsp_dec(uint8_t const * const p_buf,
-                                 uint32_t              packet_len,
-                                 uint8_t * * const     pp_uuid_type,
-                                 uint32_t * const      p_result_code)
+uint32_t ble_uuid_vs_add_rsp_dec(uint8_t const * const  p_buf,
+                                 uint32_t               packet_len,
+                                 uint8_t *const * const pp_uuid_type,
+                                 uint32_t * const       p_result_code)
 {
     SER_RSP_DEC_BEGIN(SD_BLE_UUID_VS_ADD);
 
