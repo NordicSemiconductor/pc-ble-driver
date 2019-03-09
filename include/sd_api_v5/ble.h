@@ -390,7 +390,7 @@ typedef union
  *                                    large enough to fit this configuration's memory requirement. Check *p_app_ram_base
  *                                    and set the start address of the application RAM region accordingly.
  */
-SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t *adapter, uint32_t * p_app_ram_base));
+SVCALL(SD_BLE_ENABLE, uint32_t, sd_ble_enable(adapter_t *adapter, const uint32_t *const p_app_ram_base));
 
 /**@brief Add configurations for the BLE stack
  *

@@ -199,7 +199,7 @@ uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_t const *p_
 uint32_t sd_ble_enable(
     adapter_t *adapter,
     ble_enable_params_t * p_params,
-    uint32_t *p_app_ram_base)
+    const uint32_t *const p_app_ram_base)
 {
     (void)p_app_ram_base;
 
