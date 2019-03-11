@@ -677,7 +677,7 @@ h5_state_t H5Transport::stateActionUninitialized()
         std::stringstream status;
         status << "No response from device. Tried to send packet "
                << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
-        statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+        statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str());
         return STATE_NO_RESPONSE;
     }
 
@@ -723,7 +723,7 @@ h5_state_t H5Transport::stateActionInitialized()
         std::stringstream status;
         status << "No response from device. Tried to send packet "
                << std::to_string(PACKET_RETRANSMISSIONS) << " times.";
-        statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str().c_str());
+        statusHandler(PKT_SEND_MAX_RETRIES_REACHED, status.str());
         return STATE_NO_RESPONSE;
     }
 
