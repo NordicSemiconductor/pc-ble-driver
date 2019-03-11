@@ -42,8 +42,6 @@
 #include <cstdint>
 #include <iostream>
 
-using namespace std;
-
 Transport::Transport()  = default;
 Transport::~Transport() = default;
 
