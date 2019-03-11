@@ -357,7 +357,7 @@ void UartBoost::readHandler(const asio::error_code &errorCode, const size_t byte
     }
 }
 
-void UartBoost::writeHandler(const asio::error_code &errorCode, const size_t bytesTransferred)
+void UartBoost::writeHandler(const asio::error_code &errorCode, const size_t  /*bytesTransferred*/)
 {
     if (!errorCode)
     {

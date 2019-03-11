@@ -133,7 +133,7 @@ uint32_t sd_ble_opt_set(adapter_t *adapter, uint32_t opt_id, ble_opt_t const *p_
 }
 
 uint32_t sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const *p_cfg,
-                        uint32_t app_ram_base)
+                        uint32_t  /*app_ram_base*/)
 {
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
         return ble_cfg_set_req_enc(cfg_id, p_cfg, buffer, length);
