@@ -44,7 +44,7 @@
 #include <string>
 #include <vector>
 
-#include <stdint.h>
+#include <cstdint>
 
 typedef std::function<void(const sd_rpc_app_status_t code, const std::string &message)> status_cb_t;
 typedef std::function<void(const uint8_t *data, const size_t length)> data_cb_t;

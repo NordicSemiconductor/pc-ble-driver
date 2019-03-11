@@ -38,7 +38,7 @@
 #ifndef H5_H
 #define H5_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 const uint32_t H5_HEADER_LENGTH = 4;

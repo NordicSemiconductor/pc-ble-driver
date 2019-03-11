@@ -39,7 +39,7 @@
 
 #include "adapter.h"
 #include <functional>
-#include <stdint.h>
+#include <cstdint>
 
 typedef std::function<uint32_t(uint8_t *, uint32_t *)> encode_function_t;
 typedef std::function<uint32_t(uint8_t *, uint32_t, uint32_t *)> decode_function_t;

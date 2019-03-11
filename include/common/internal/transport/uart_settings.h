@@ -38,7 +38,7 @@
 #ifndef UART_SETTINGS_H
 #define UART_SETTINGS_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 /*@brief Flow control modes. */

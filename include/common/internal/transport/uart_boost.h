@@ -49,7 +49,7 @@
 #include <mutex>
 #include <thread>
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * @brief The UartBoost class opens, reads and writes a serial port using the boost asio library
@@ -126,7 +126,8 @@ class UartBoost : public Transport
     std::unique_ptr<asio::executor_work_guard<asio::io_context::executor_type>> workNotifier;
 
     /**
-     * @brief      Purge RX and TX data in serial buffers. On WIN32, in addition, abort any overlapped operations
+     * @brief      Purge RX and TX data in serial buffers. On WIN32, in addition, abort any
+     * overlapped operations
      */
     void purge();
 };
