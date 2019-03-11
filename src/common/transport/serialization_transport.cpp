@@ -138,7 +138,7 @@ uint32_t SerializationTransport::close()
 }
 
 uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
-                                      std::shared_ptr<std::vector<uint8_t>> rspBuffer,
+                                      const std::shared_ptr<std::vector<uint8_t>>& rspBuffer,
                                       serialization_pkt_type_t pktType)
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);

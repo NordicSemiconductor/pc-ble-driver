@@ -85,7 +85,7 @@ class SerializationTransport
                   const log_cb_t &log_callback);
     uint32_t close();
     uint32_t send(const std::vector<uint8_t> &cmdBuffer,
-                  std::shared_ptr<std::vector<uint8_t>> rspBuffer,
+                  const std::shared_ptr<std::vector<uint8_t>>& rspBuffer,
                   serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
 
   private:

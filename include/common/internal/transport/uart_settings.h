@@ -103,7 +103,7 @@ public:
     virtual ~UartSettings();
 
     /*@brief Sets the name of the serial port. */
-    void setPortName(std::string value);
+    void setPortName(const std::string& value);
 
     /*@brief Sets the baud rate. */
     void setBaudRate(uint32_t value);

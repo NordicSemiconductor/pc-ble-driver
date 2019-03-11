@@ -60,7 +60,7 @@ UartSettings::UartSettings(const UartCommunicationParameters &communicationParam
 UartSettings::~UartSettings()
 = default;
 
-void UartSettings::setPortName(const std::string value)
+void UartSettings::setPortName(const std::string& value)
 {
     portName = value;
 }
