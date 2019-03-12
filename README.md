@@ -439,7 +439,7 @@ Follow the steps to install dependencies on a specific platform:
     $ mkdir build && cd build
 
     # Modify -DCONNECTIVITY_VERSION=a.b.c
-    $ cmake -G "Visual Studio 14" -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
+    $ cmake -G Ninja -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=1.0.0 ..
     ```
 
     `COMPILE_CONNECTIVITY` is set to 1 to enable compiling connectivity firmware.
