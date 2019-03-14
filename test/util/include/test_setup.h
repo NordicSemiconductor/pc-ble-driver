@@ -40,7 +40,6 @@
 #include "h5_transport.h"
 #include "transport.h"
 
-#include "log.h"
 #include "test_util.h"
 
 #include "virtual_uart.h"

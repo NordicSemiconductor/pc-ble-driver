@@ -4,8 +4,10 @@
 #include <mutex>
 #include <test_setup.h>
 
-std::ostream &nrfLogStream(std::cout);
-std::mutex nrfLogMutex;
+#include <logger.h>
+#include <spdlog/logger.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #define CATCH_CONFIG_RUNNER
 #include "catch2/catch.hpp"
@@ -20,6 +22,15 @@ int main(int argc, char *argv[])
     auto baudRate    = defaultBaudRate;
 
     using namespace Catch::clara;
+
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+    sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("driver-logfile.txt", true));
+
+    setup_logger(sinks);
+    spdlog::set_level(spdlog::level::level_enum::debug);
+
+    spdlog::set_pattern("[%H:%M:%S.%f] [t:%t] [%^%l%$] %v");
 
     const auto cli =
         session.cli() |
@@ -77,5 +88,9 @@ int main(int argc, char *argv[])
         test::ConfiguredEnvironment.hardwareInfo = "No hardware info provided.";
     }
 
-    return session.run();
+    auto ret = session.run();
+
+    spdlog::shutdown();
+
+    return ret;
 }

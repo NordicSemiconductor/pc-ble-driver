@@ -1,6 +1,5 @@
 #pragma once
 
-#include "internal/log.h"
 #include "transport.h"
 #include "h5_transport.h"
 

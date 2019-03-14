@@ -36,8 +36,7 @@
  */
 
 // Logging support
-#define NRF_LOG_SETUP
-#include "internal/log.h"
+#include <logger.h>
 
 // Test framework
 #define CATCH_CONFIG_MAIN
@@ -137,18 +136,17 @@ TEST_CASE("open_close")
 
     const auto status_callback = [&error](const sd_rpc_app_status_t code,
                                           const std::string &message) -> void {
-        NRF_LOG("code: " << code << " message: " << message);
+        get_logger()->debug("code: {} message: {}", code, message);
         if (code != NRF_SUCCESS)
         {
             error = true;
-            NRF_LOG("ERROR: code is " << std::to_string(code) << " must be "
-                                      << std::to_string(NRF_SUCCESS));
+            get_logger()->debug("ERROR: code is {} must be {}", std::to_string(code), std::to_string(NRF_SUCCESS));
         }
     };
 
     auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity,
                                                  std::string message) -> void {
-        NRF_LOG("severity: " << severity << " message: " << message);
+        get_logger()->debug("severty: {} message: {}", severity, message);
 
         if (severity == 1)
         {
@@ -158,12 +156,12 @@ TEST_CASE("open_close")
 
             for (auto match : matches)
             {
-                NRF_LOG(match.str());
+                get_logger()->debug("{}", match.str());
             }
 
             if (matches.size() != 2)
             {
-                NRF_LOG("ERROR: match size must be 2");
+                get_logger()->debug("ERROR: match size must be 2");
                 error = true;
                 return;
             }
@@ -171,7 +169,7 @@ TEST_CASE("open_close")
             const auto port_ = matches[1].str();
             if (!(port_ == portA || port_ == portB))
             {
-                NRF_LOG("ERROR: ports must match either " << portA << " or " << portB);
+                get_logger()->debug("ERROR: ports must match either {} or {}", portA, portB);
                 error = true;
             }
         }

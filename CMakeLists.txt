@@ -201,6 +201,7 @@ endforeach(SD_API_VER)
 
 # Set common include directories
 find_path(ASIO_INCLUDE_DIR asio.hpp)
+find_package(spdlog CONFIG REQUIRED)
 
 include_directories(
         include/common
@@ -259,8 +260,8 @@ foreach(SD_API_VER ${SD_API_VERS})
     endif()
 
     # Specify libraries to link serialization library with
-    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
-    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
+    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE spdlog::spdlog)
+    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE spdlog::spdlog)
 endforeach(SD_API_VER)
 
 # Add tests

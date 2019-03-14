@@ -1,6 +1,5 @@
 // Logging support
-#define NRF_LOG_SETUP
-#include <internal/log.h>
+#include <logger.h>
 
 #include <test_setup.h>
 #include <test_util.h>
@@ -39,7 +38,7 @@ TEST_CASE("virtual_uart")
             return [name, &payloadReceived](const uint8_t *data, const size_t length) -> void
             {
                 payloadReceived.assign(data, data + length);
-                NRF_LOG("[" << name << "][data]<- " << testutil::asHex(payloadReceived) << " length: " << length);
+                get_logger()->debug("[{}][data]<- {} length: {}", name, testutil::asHex(payloadReceived), length);
             };
         };
 
@@ -48,12 +47,12 @@ TEST_CASE("virtual_uart")
         uartA->open(
             [&uartAName](const sd_rpc_app_status_t code, const std::string &message) -> void
             {
-                NRF_LOG("[" << uartAName << "][status] code: " << code << " message: " << message);
+                get_logger()->debug("[{}][status] code: {} message: {}", uartAName, code, message);
             },
             dataCallback(uartAName, payloadFromB),
             [&uartAName](const sd_rpc_log_severity_t severity, const std::string &message) -> void
             {
-                NRF_LOG("[" << uartAName << "][log] severity: " << severity << " message: " << message);
+                get_logger()->debug("[{}][log] severity: {} message: {}", uartAName, severity, message);
             }
         );
 
@@ -62,12 +61,12 @@ TEST_CASE("virtual_uart")
         uartB->open(
             [&uartBName](const sd_rpc_app_status_t code, const std::string &message) -> void
             {
-                NRF_LOG("[" << uartBName << "][status] code: " << code << " message: " << message);
+                get_logger()->debug("[{}][status] code: {} message: {}", uartBName, code, message);
             },
             dataCallback(uartBName, payloadFromA),
             [&uartBName](const sd_rpc_log_severity_t severity, const std::string &message) -> void
             {
-                NRF_LOG("[" << uartBName << "][log] severity: " << severity << " message: " << message);
+                get_logger()->debug("[{}][log] severity: {} message: {}", uartBName, severity, message);
             }
         );
 
