@@ -40,8 +40,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#define NRF_LOG_SETUP
-#include <internal/log.h>
+#include <logger.h>
 
 #include <sd_rpc.h>
 #include <nrf_error.h>
@@ -66,6 +65,6 @@ TEST_CASE("SerialPortEnumeration")
         auto size = static_cast<uint32_t>(devices.capacity());
         REQUIRE(sd_rpc_serial_port_enum(devices.data(), &size) == NRF_SUCCESS);
         REQUIRE(size > 0);
-        NRF_LOG("Found " << size << " devices.");
+        get_logger()->debug("Found {} devices.", size);
     }
 }

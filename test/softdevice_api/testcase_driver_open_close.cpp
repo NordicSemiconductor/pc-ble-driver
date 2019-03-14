@@ -39,7 +39,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include <internal/log.h>
+#include <logger.h>
 
 #include <test_setup.h>
 #include <test_util.h>
@@ -89,8 +89,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                get_logger()->debug("{} error in status callback {}: {}", c->role(), static_cast<uint32_t>(code), message);
             }
         });
 
@@ -107,8 +106,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     {
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            NRF_LOG("Starting iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
-                                           << numberOfIterations);
+            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1), numberOfIterations);
 
             auto c = std::make_shared<testutil::AdapterWrapper>(
                 testutil::Central, serialPort.port, env.baudRate, env.mtu,
@@ -121,8 +119,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
                 if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                     code == PKT_UNEXPECTED)
                 {
-                    NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                      << ": " << message);
+                    get_logger()->debug("{} error in status callback: {}: {}",c->role(), static_cast<uint32_t>(code), message);
                 }
             });
 
@@ -139,7 +136,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
                             if (err_code != NRF_SUCCESS)
                             {
-                                NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
+                                get_logger()->debug("{} Scan start error, err_code: {}", c->role(), err_code);
                                 error = true;
                             }
                         }
@@ -160,8 +157,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             CHECK(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
 
-            NRF_LOG("Iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
-                                  << numberOfIterations << " complete.");
+            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1), numberOfIterations);
         }
     }
 
@@ -179,22 +175,19 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
                 if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                     code == PKT_UNEXPECTED)
                 {
-                    NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                      << ": " << message);
+                    get_logger()->debug("{} error in status callback {}: {}", c->role(), static_cast<uint32_t>(code), message);
                 }
             });
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            NRF_LOG("Starting iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
-                                           << numberOfIterations);
+            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1), numberOfIterations);
 
             REQUIRE(c->open() == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
             CHECK(c->close() == NRF_SUCCESS);
 
-            NRF_LOG("Iteration #" << std::dec << static_cast<uint32_t>(i + 1) << " of "
-                                  << numberOfIterations << " complete.");
+            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1), numberOfIterations);
         }
 
         sd_rpc_adapter_delete(c->unwrap());

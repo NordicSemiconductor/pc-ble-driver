@@ -39,7 +39,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include <internal/log.h>
+#include <logger.h>
 
 #include <test_setup.h>
 #include <test_util.h>
@@ -98,8 +98,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             code == PKT_UNEXPECTED)
         {
             error = true;
-            NRF_LOG(p->role() << " error in status callback " << static_cast<uint32_t>(code) << ": "
-                              << message);
+            get_logger()->debug("{}  error in status callback {}: {}", p->role(), static_cast<uint32_t>(code), message);
         }
     });
 
@@ -128,13 +127,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                get_logger()->debug("{}  error in status callback {}: {}", c->role(), static_cast<uint32_t>(code), message);
             }
         });
 
-        NRF_LOG(c->role() << " Starting scan iteration #" << std::dec << static_cast<uint32_t>(i)
-                          << " of " << static_cast<uint32_t>(scanIterations));
+        get_logger()->debug("{} Starting scan iteration #{} of {}", c->role(),
+                            static_cast<uint32_t>(i), static_cast<uint32_t>(scanIterations));
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
@@ -147,15 +145,15 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             {
                 case BLE_GAP_EVT_ADV_REPORT:
                     adv_report_count++;
-                    NRF_LOG("adv_report_count: " << adv_report_count);
+                    get_logger()->debug("adv_report_count: {}", adv_report_count);
 #if NRF_SD_BLE_API == 6
                     {
                         const auto err_code = c->startScan(true);
                         if (err_code != NRF_SUCCESS)
                         {
-                            NRF_LOG(c->role()
-                                    << " startScan in BLE_GAP_EVT_ADV_REPORT failed, err_code "
-                                    << err_code);
+                            get_logger()->debug(
+                                "{} startScan in BLE_GAP_EVT_ADV_REPORT failed, err_code {}",
+                                c->role(), err_code);
                             error = true;
                         }
                     }
@@ -170,7 +168,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
+                            get_logger()->debug("{}  Scan start error, err_code {}", c->role(), err_code);
                             error = true;
                         }
                     }
@@ -200,7 +198,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        NRF_LOG(c->role() << " Scan iteration #" << std::dec << static_cast<uint32_t>(i) << " of "
-                          << static_cast<uint32_t>(scanIterations) << " completed");
+        get_logger()->debug("{}  Scan iteration #{} of {} completed", c->role(), static_cast<uint32_t>(i), static_cast<uint32_t>(scanIterations));
     }
 }

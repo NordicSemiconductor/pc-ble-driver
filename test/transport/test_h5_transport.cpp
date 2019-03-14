@@ -40,9 +40,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#define NRF_LOG_SETUP
-#include <internal/log.h>
-
+#include <logger.h>
 #include <transport.h>
 #include <h5_transport.h>
 #include <h5.h>
@@ -73,18 +71,18 @@ public:
 
     void statusCallback(const sd_rpc_app_status_t code, const std::string &message) const
     {
-        NRF_LOG("[" << name << "][status] code: " << code << " message: " << message);
+        get_logger()->debug("[{}][status] code: {} message: {}", name, code, message);
     }
 
     void dataCallback(const uint8_t *data, const size_t length)
     {
         incoming.assign(data, data + length);
-        NRF_LOG("[" << name << "][data]<- " << testutil::asHex(incoming) << " length: " << length);
+        get_logger()->debug("[{}][data]<- {} length: {}", name, testutil::asHex(incoming), length);
     }
 
     void logCallback(const sd_rpc_log_severity_t severity, const std::string &message) const
     {
-        NRF_LOG("[" << name << "][log] severity: " << severity << " message: " << message);
+        get_logger()->debug("[{}][log] severity: {} message: {}", name, severity, message);
     }
 
     void setup()
@@ -136,7 +134,7 @@ TEST_CASE("H5TransportWrapper")
     {
         for (auto i = 0; i < NUMBER_OF_ITERATIONS; i++)
         {
-            NRF_LOG("Starting iteration #" << std::to_string(i) << " of " << NUMBER_OF_ITERATIONS);
+            get_logger()->debug("Starting iteration #{} of {}", std::to_string(i), NUMBER_OF_ITERATIONS);
             auto transportA = new VirtualUart("uartA");
             auto transportB = new VirtualUart("uartB");
 
@@ -175,7 +173,7 @@ TEST_CASE("H5Transport")
 
         REQUIRE(transportUnderTest.wait() == NRF_ERROR_TIMEOUT);
         REQUIRE(transportUnderTest.state() == STATE_NO_RESPONSE);
-        NRF_LOG("Transport closed.");
+        get_logger()->debug("Transport closed.");
     }
 
     SECTION("packet_recognition")

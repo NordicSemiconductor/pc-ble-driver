@@ -40,6 +40,8 @@
 #include "adapter_internal.h"
 #include "ble_common.h"
 
+#include <logger.h>
+
 // C code
 #include "ble_gap.h"
 #include "ble_gap_app.h" // Encoder/decoder functions
@@ -53,6 +55,8 @@ static void *mp_out_params[3];
 static uint32_t gap_encode_decode(adapter_t *adapter, const encode_function_t &encode_function,
                                   const decode_function_t &decode_function)
 {
+    get_logger()->debug("gap_encode_decode");
+
     const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
     if (adapterLayer == nullptr)

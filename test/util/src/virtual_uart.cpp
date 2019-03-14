@@ -1,8 +1,8 @@
 #include "virtual_uart.h"
 
-#include "internal/log.h"
 #include "sd_rpc_types.h"
 #include "transport.h"
+#include "logger.h"
 
 #include <algorithm>
 #include <mutex>
@@ -30,7 +30,7 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
 
     if (peer == nullptr)
     {
-        NRF_LOG("Peer port must be specified before calling open.");
+        get_logger()->debug("Peer port must be specified before calling open.");
         return NRF_ERROR_INTERNAL;
     }
 
@@ -48,9 +48,9 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
                     // rules
                     if (H5Transport::isResetPacket(data, 2))
                     {
-                        NRF_LOG("[" << name << "]"
-                                    << " Requested to send RESET, ignoring since a reset does not "
-                                       "make sense in this case.");
+                        get_logger()->debug("[{}] Requested to send RESET, ignoring since a reset "
+                                            "does not make sense in this case.",
+                                            name);
                     }
                     else
                     {
@@ -67,8 +67,7 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
                         }
                         catch (std::exception &e)
                         {
-                            NRF_LOG("[" << name << "] "
-                                        << "error sending " << e.what());
+                            get_logger()->debug("[{}] error sending {}", name, e.what());
                         }
                     }
                 });
@@ -89,38 +88,38 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
             if (inData.size() > 0)
             {
                 std::for_each(inData.begin(), inData.end(), [&](std::vector<uint8_t> data) {
-                    // TODO: do a proper SLIP decoding later on in case 
+                    // TODO: do a proper SLIP decoding later on in case
                     // TODO: header hits SLIP encoding rules
 
                     if (H5Transport::isResetPacket(data, 2))
                     {
-                        NRF_LOG("[" << name << "] Received RESET, ignoring");
+                        get_logger()->debug("[{}] Received RESET, ignoring", name);
                     }
                     else if (H5Transport::isSyncPacket(data, 5) &&
                              stopAtPktType <= CONTROL_PKT_SYNC)
                     {
-                        NRF_LOG("[" << name << "] Received SYNC ignored.");
+                        get_logger()->debug("[{}] Received SYNC ignored.", name);
                         stoppedProcessing = true;
                         outDataAvailable.notify_all();
                     }
                     else if (H5Transport::isSyncResponsePacket(data, 5) &&
                              stopAtPktType <= CONTROL_PKT_SYNC_RESPONSE)
                     {
-                        NRF_LOG("[" << name << "] Received SYNC RESPONSE ignored.");
+                        get_logger()->debug("[{}] Received SYNC RESPONSE ignored.", name);
                         stoppedProcessing = true;
                         outDataAvailable.notify_all();
                     }
                     else if (H5Transport::isSyncConfigPacket(data, 5) &&
                              stopAtPktType <= CONTROL_PKT_SYNC_CONFIG)
                     {
-                        NRF_LOG("[" << name << "] Received SYNC CONFIG ignored.");
+                        get_logger()->debug("[{}}] Received SYNC CONFIG ignored.", name);
                         stoppedProcessing = true;
                         outDataAvailable.notify_all();
                     }
                     else if (H5Transport::isSyncConfigResponsePacket(data, 5) &&
                              stopAtPktType <= CONTROL_PKT_SYNC_CONFIG_RESPONSE)
                     {
-                        NRF_LOG("[" << name << "] Received SYNC CONFIG RESPONSE ignored.");
+                        get_logger()->debug("[{}] Received SYNC CONFIG RESPONSE ignored.", name);
                         stoppedProcessing = true;
                         outDataAvailable.notify_all();
                     }
@@ -135,8 +134,8 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
                         }
                         catch (std::exception &e)
                         {
-                            NRF_LOG("[" << name << "]" << name
-                                        << "] error calling data callback: " << e.what());
+                            get_logger()->debug("[{} error calling data callback: {}", name,
+                                                e.what());
                         }
                     }
                 });

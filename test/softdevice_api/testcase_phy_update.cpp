@@ -41,7 +41,7 @@
 #if NRF_SD_BLE_API >= 6
 
 // Logging support
-#include <internal/log.h>
+#include <logger.h>
 
 // Test support
 #include <test_setup.h>
@@ -109,10 +109,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        NRF_LOG(c->role()
-                                << "BLE_GAP_EVT_CONNECTED: error calling sd_ble_gap_phy_update"
-                                << ", " << testutil::errorToString(err_code));
-
+                        get_logger()->debug("{} BLE_GAP_EVT_CONNECTED: error calling sd_ble_gap_phy_update, {}", c->role(), testutil::errorToString(err_code));
                         error = true;
                     }
                 }
@@ -129,10 +126,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                             if (err_code != NRF_SUCCESS)
                             {
-                                NRF_LOG(c->role()
-                                        << " Error connecting to "
-                                        << testutil::asText(gapEvent->params.adv_report.peer_addr)
-                                        << ", " << testutil::errorToString(err_code));
+                                get_logger()->debug(
+                                    "{}  Error connecting to {}, {}", c->role(),
+                                    testutil::asText(gapEvent->params.adv_report.peer_addr),
+                                    testutil::errorToString(err_code));
                                 error = true;
                             }
                         }
@@ -149,7 +146,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
+                            get_logger()->debug("{} Scan start error, err_code {}", c->role(), err_code);
                             error = true;
                         }
                     }
@@ -162,7 +159,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        NRF_LOG(c->role() << " Conn params update failed, err_code " << err_code);
+                        get_logger()->debug("{} Conn params update failed, err_code {}", c->role(), err_code);
                         error = true;
                     }
                 }
@@ -172,9 +169,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
-                        NRF_LOG(
-                            c->role()
-                            << "BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request");
+                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request", c->role());
                         error = true;
                     }
                     else
@@ -182,9 +177,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                         const auto status = gapEvent->params.phy_update.status;
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            NRF_LOG(c->role() << "BLE_GAP_EVT_PHY_UPDATE: status is " << status
-                                              << ", should be BLE_HCI_STATUS_CODE_SUCCESS( "
-                                              << BLE_HCI_STATUS_CODE_SUCCESS << ")");
+                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {}, should be BLE_HCI_STATUS_CODE_SUCCESS({})",
+                                                c->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;
                         }
                     }
@@ -204,7 +198,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                 case BLE_GAP_EVT_DISCONNECTED:
                 {
                     // Use scratchpad defaults when advertising
-                    NRF_LOG(p->role() << " Starting advertising.");
+                    get_logger()->debug("{} Starting advertising.", p->role());
                     const auto err_code = p->startAdvertising();
                     if (err_code != NRF_SUCCESS)
                     {
@@ -218,8 +212,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                 {
                     if (gapEvent->params.phy_update_request.peer_preferred_phys != requestedPhys)
                     {
-                        NRF_LOG(p->role() << "BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: update "
-                                             "request is not equal to the one sent from central");
+                        get_logger()->debug("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: update request is not equal to the one sent from central", p->role());
                         error = true;
                     }
                     else
@@ -230,10 +223,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            NRF_LOG(p->role()
-                                    << "BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: error calling "
-                                       "sd_ble_gap_phy_update"
-                                    << ", " << testutil::errorToString(err_code));
+                            get_logger()->debug("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: error "
+                                              "calling sd_ble_gap_phy_update, {}",
+                                              p->role(), testutil::errorToString(err_code));
 
                             error = true;
                         }
@@ -245,9 +237,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
-                        NRF_LOG(
-                            p->role()
-                            << "BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request");
+                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request", p->role());
                         error = true;
                     }
                     else
@@ -256,9 +246,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            NRF_LOG(p->role() << "BLE_GAP_EVT_PHY_UPDATE: status is " << status
-                                              << ", should be BLE_HCI_STATUS_CODE_SUCCESS( "
-                                              << BLE_HCI_STATUS_CODE_SUCCESS << ")");
+                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {} , should "
+                                                "be BLE_HCI_STATUS_CODE_SUCCESS({})",
+                                                p->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;
                         }
                         else

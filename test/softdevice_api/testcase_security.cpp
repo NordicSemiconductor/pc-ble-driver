@@ -39,7 +39,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include <internal/log.h>
+#include <logger.h>
 
 // Test support
 #include <test_setup.h>
@@ -79,8 +79,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
         auto err_code = p->setupAdvertising(advertisingData);
         if (err_code != NRF_SUCCESS)
         {
-            NRF_LOG(p->role() << " Error setting advertising data, "
-                              << ", " << testutil::errorToString(err_code));
+            get_logger()->debug("{} Error setting advertising data, {}", p->role(),
+                                testutil::errorToString(err_code));
             return err_code;
         }
 
@@ -131,10 +131,11 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                             if (err_code != NRF_SUCCESS)
                             {
-                                NRF_LOG(c->role()
-                                        << " Error connecting to "
-                                        << testutil::asText(gapEvent->params.adv_report.peer_addr)
-                                        << ", " << testutil::errorToString(err_code));
+                                get_logger()->debug(
+                                    "{} Error connecting to {}, {}", c->role(),
+                                    testutil::asText(gapEvent->params.adv_report.peer_addr),
+                                    testutil::errorToString(err_code));
+
                                 error = true;
                             }
                         }
@@ -153,7 +154,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
+                            get_logger()->debug("{} Scan start error, err_code {}", c->role(),
+                                                err_code);
                             error = true;
                         }
                     }
@@ -166,7 +168,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        NRF_LOG(c->role() << " Conn params update failed, err_code " << err_code);
+                        get_logger()->debug("{} Conn params update failed, err_code  {}", c->role(),
+                                            err_code);
                         error = true;
                     }
                 }
@@ -245,7 +248,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 case BLE_GAP_EVT_DISCONNECTED:
                 {
                     // Use scratchpad defaults when advertising
-                    NRF_LOG(p->role() << " Starting advertising.");
+                    get_logger()->debug("{} Starting advertising.", p->role());
                     const auto err_code = p->startAdvertising();
                     if (err_code != NRF_SUCCESS)
                     {
@@ -291,8 +294,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                get_logger()->debug("{} error in status callback {}: {}", c->role(),
+                                    static_cast<uint32_t>(code), message);
             }
         });
 
@@ -301,8 +304,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                NRF_LOG(p->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                get_logger()->debug("{} error in status callback {}: {}", p->role(),
+                                    static_cast<uint32_t>(code), message);
             }
         });
 

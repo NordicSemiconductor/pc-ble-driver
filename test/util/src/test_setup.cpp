@@ -1,4 +1,5 @@
 #include "test_setup.h"
+#include <logger.h>
 #include <algorithm>
 #include <utility>
 
@@ -170,7 +171,7 @@ uint32_t VirtualTransportSendSync::close()
 
 uint32_t VirtualTransportSendSync::send(const std::vector<uint8_t> &data)
 {
-    NRF_LOG("->" << testutil::asHex(data) << " length: " << data.size());
+    get_logger()->debug("->{} length: {}", testutil::asHex(data), data.size());
     return NRF_SUCCESS;
 }
 
