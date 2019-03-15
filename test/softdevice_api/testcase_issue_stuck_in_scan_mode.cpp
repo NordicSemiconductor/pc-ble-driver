@@ -98,7 +98,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             code == PKT_UNEXPECTED)
         {
             error = true;
-            get_logger()->debug("{}  error in status callback {}: {}", p->role(), static_cast<uint32_t>(code), message);
+            get_logger()->debug("{}  error in status callback {}:{}", p->role(), static_cast<uint32_t>(code), message);
         }
     });
 
@@ -127,7 +127,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                get_logger()->debug("{}  error in status callback {}: {}", c->role(), static_cast<uint32_t>(code), message);
+                get_logger()->debug("{}  error in status callback {}:{}", c->role(), static_cast<uint32_t>(code), message);
             }
         });
 
