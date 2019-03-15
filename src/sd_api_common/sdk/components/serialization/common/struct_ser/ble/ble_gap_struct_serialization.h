@@ -594,6 +594,16 @@ uint32_t ble_gap_adv_data_t_dec(uint8_t const * const p_buf,
                                 uint32_t * const      p_index,
                                 void * const          p_void_struct);
 
+uint32_t ble_gap_adv_data_t_empty_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index);
+
+uint32_t ble_gap_adv_data_t_empty_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                void * const          p_void_struct);
+
 uint32_t ble_gap_evt_adv_set_terminated_t_enc(void const * const p_void_struct,
                                 uint8_t * const    p_buf,
                                 uint32_t           buf_len,

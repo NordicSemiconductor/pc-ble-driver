@@ -499,18 +499,65 @@ uint32_t ble_data_t_dec(uint8_t const * const p_buf,
 
     uint32_t buf_id;
     SER_PULL_uint32(&buf_id);
-    p_struct->len = SER_MAX_ADV_DATA;
+	p_struct->len = SER_MAX_ADV_DATA;
 #if NRF_SD_BLE_API_VERSION > 5
 #if defined(SER_CONNECTIVITY)
     if (buf_id && (p_struct->p_data == NULL))
-     {
-         p_struct->p_data = conn_ble_gap_ble_data_buf_alloc(buf_id);
-     }
+    {
+        p_struct->p_data = conn_ble_gap_ble_data_buf_alloc(buf_id);
+    }
 #else
     p_struct->p_data = app_ble_gap_adv_buf_unregister(buf_id, true);
 #endif
 #endif
     SER_PULL_len16data(&p_struct->p_data, &p_struct->len);
+
+    SER_STRUCT_DEC_END;
+}
+
+uint32_t ble_data_t_empty_enc(void const * const p_void_struct,
+                        uint8_t * const    p_buf,
+                        uint32_t           buf_len,
+                        uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_data_t);
+
+    uint32_t buf_id = 0;
+#if NRF_SD_BLE_API_VERSION > 5
+#if defined(SER_CONNECTIVITY)
+    buf_id = conn_ble_gap_ble_data_buf_free(p_struct->p_data);
+#else
+    buf_id = app_ble_gap_adv_buf_register(p_struct->p_data);
+    SER_ASSERT(buf_id >= 0, NRF_ERROR_NO_MEM);
+#endif
+#endif
+    SER_PUSH_uint32(&buf_id);
+    SER_PUSH_uint16(&p_struct->len);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_data_t_empty_dec(uint8_t const * const p_buf,
+                        uint32_t              buf_len,
+                        uint32_t * const      p_index,
+                        void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_data_t);
+
+    uint32_t buf_id;
+    SER_PULL_uint32(&buf_id);
+    p_struct->len = SER_MAX_ADV_DATA;
+#if NRF_SD_BLE_API_VERSION > 5
+#if defined(SER_CONNECTIVITY)
+    if (buf_id && (p_struct->p_data == NULL))
+    {
+        p_struct->p_data = conn_ble_gap_ble_data_buf_alloc(buf_id);
+    }
+#else
+    p_struct->p_data = app_ble_gap_adv_buf_unregister(buf_id, true);
+#endif
+#endif
+    SER_PULL_uint16(&p_struct->len);
 
     SER_STRUCT_DEC_END;
 }
