@@ -720,11 +720,14 @@ std::string asText(const ble_data_t &data)
     std::stringstream retval;
 
     std::vector<uint8_t> wrappedData;
-    wrappedData.assign(data.p_data, data.p_data + data.len);
 
-    retval << "data:" << asHex(wrappedData);
-    retval << " len:" << static_cast<uint32_t>(data.len);
-
+    if (data.p_data != nullptr)
+    {
+        wrappedData.assign(data.p_data, data.p_data + data.len);
+        retval << "data:" << asHex(wrappedData);
+        retval << " len:" << static_cast<uint32_t>(data.len);
+    }
+    
     return retval.str();
 }
 
