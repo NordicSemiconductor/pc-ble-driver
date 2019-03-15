@@ -169,7 +169,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request", c->role());
+                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: phy is not updated according to request", c->role());
                         error = true;
                     }
                     else
@@ -237,7 +237,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE:: phy is not updated according to request", p->role());
+                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: phy is not updated according to request", p->role());
                         error = true;
                     }
                     else
@@ -246,7 +246,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {} , should "
+                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {}, should "
                                                 "be BLE_HCI_STATUS_CODE_SUCCESS({})",
                                                 p->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;

@@ -532,7 +532,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             code == PKT_UNEXPECTED)
         {
             centralError = true;
-            get_logger()->debug("{}  error in status callback {}: {}", c->role(), static_cast<uint32_t>(code), message);
+            get_logger()->debug("{}  error in status callback {}:{}", c->role(), static_cast<uint32_t>(code), message);
         }
     });
 

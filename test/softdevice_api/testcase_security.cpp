@@ -294,7 +294,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                get_logger()->debug("{} error in status callback {}: {}", c->role(),
+                get_logger()->debug("{} error in status callback {}:{}", c->role(),
                                     static_cast<uint32_t>(code), message);
             }
         });
@@ -304,7 +304,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                get_logger()->debug("{} error in status callback {}: {}", p->role(),
+                get_logger()->debug("{} error in status callback {}:{}", p->role(),
                                     static_cast<uint32_t>(code), message);
             }
         });

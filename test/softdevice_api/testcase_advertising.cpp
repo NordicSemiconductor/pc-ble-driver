@@ -133,7 +133,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                             // Check that the received data is according to setupAdvertisement
                             if (manufacturerSpecificData != randomData)
                             {
-                                get_logger()->debug("{} {}", c->role(), " Data configured in peripheral does not match data received on central");
+                                get_logger()->debug("{} Data configured in peripheral does not match data received on central", c->role());
                                 error = true;
                                 return true;
                             }
@@ -147,8 +147,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                       advReport.type.connectable == 0 &&
                                       advReport.set_id == advertisementSetId))
                                 {
-                                    get_logger()->debug("{} {}", c->role(), " Configured advertisement on peripheral does not "
-                                               "match event received on central");
+                                    get_logger()->debug(
+                                        "{} Configured advertisement on peripheral does not "
+                                        "match event received on central",
+                                        c->role());
                                     error = true;
                                     return true;
                                 }
@@ -157,7 +159,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 scanResponseData.clear();
                                 testutil::createRandomAdvertisingData(
                                     scanResponseData, peripheralAdvName, randomData);
-                                get_logger()->debug("{} {}", c->role(), "Changing advertisement data in BLE_GAP_EVT_ADV_REPORT");
+                                get_logger()->debug("{} Changing advertisement data in BLE_GAP_EVT_ADV_REPORT", c->role());
 
                                 const auto err_code = p->changeAdvertisingData(
                                     std::vector<uint8_t>(), scanResponseData);
