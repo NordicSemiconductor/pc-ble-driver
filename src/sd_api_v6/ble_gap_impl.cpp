@@ -456,10 +456,6 @@ uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
     if (err_code == NRF_SUCCESS)
     {
         app_ble_gap_scan_data_unset(true);
-        get_logger()->warn("scan stopped");
-    }
-    else {
-      get_logger()->error("scan stop returned %d", err_code);
     }
     #endif
 
