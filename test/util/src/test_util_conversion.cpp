@@ -727,7 +727,12 @@ std::string asText(const ble_data_t &data)
         retval << "data:" << asHex(wrappedData);
         retval << " len:" << static_cast<uint32_t>(data.len);
     }
-    
+    else
+    {
+        retval << "data:null";
+        retval << " len:" << static_cast<uint32_t>(data.len);
+    }
+
     return retval.str();
 }
 
@@ -759,11 +764,16 @@ std::string asText(const ble_gap_evt_adv_report_t &advReport)
     std::stringstream retval;
 
     retval << "peer_addr:[" << asText(advReport.peer_addr) << "]";
+    std::vector<uint8_t> data;
+
 #if NRF_SD_BLE_API == 6
-    std::vector<uint8_t> data(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
-    retval << " type:[" << asText(advReport.type) << "]";
+    if (advReport.data.p_data != nullptr)
+    {
+        data = std::vector<uint8_t>(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
+        retval << " type:[" << asText(advReport.type) << "]";
+    }
 #else
-    std::vector<uint8_t> data(advReport.data, advReport.data + advReport.dlen);
+    data = std::vector<uint8_t>(advReport.data, advReport.data + advReport.dlen);
     retval << " type:" << asHex(advReport.type);
 #endif
 
