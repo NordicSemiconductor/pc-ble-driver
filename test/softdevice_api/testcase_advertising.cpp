@@ -73,6 +73,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
     SECTION("extended")
     {
+        while(true) {
+        auto error       = false;
+        auto testSuccess = false;
+
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
         const auto maxNumberOfAdvertisements = 10; // Random number of advertisements
         const auto advertisementNameLength   = 40; // Random advertisement name length
@@ -360,6 +364,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
         CHECK(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
+        }
     }
 #endif // NRF_SD_BLE_API == 6
 }
