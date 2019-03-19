@@ -641,7 +641,7 @@ uint32_t ble_gap_scan_start_req_enc(ble_gap_scan_params_t const *  p_scan_params
     SER_REQ_ENC_BEGIN(SD_BLE_GAP_SCAN_START);
     SER_PUSH_COND(p_scan_params, ble_gap_scan_params_t_enc);
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
-    SER_PUSH_COND(p_adv_report_buffer, ble_data_t_enc);
+    SER_PUSH_COND(p_adv_report_buffer, ble_data_t_empty_enc);
 #endif
     SER_REQ_ENC_END;
 }

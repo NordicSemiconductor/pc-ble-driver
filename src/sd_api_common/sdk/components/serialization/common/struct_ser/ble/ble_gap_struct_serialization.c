@@ -460,7 +460,7 @@ uint32_t ble_gap_evt_connected_t_enc(void const * const p_void_struct,
     SER_PUSH_FIELD(&p_struct->conn_params, ble_gap_conn_params_t_enc);
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
     SER_PUSH_uint8(&p_struct->adv_handle);
-    SER_PUSH_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_enc);
+    SER_PUSH_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_empty_enc);
 #endif
 
     SER_STRUCT_ENC_END;
@@ -478,7 +478,7 @@ uint32_t ble_gap_evt_connected_t_dec(uint8_t const * const p_buf,
     SER_PULL_FIELD(&p_struct->conn_params, ble_gap_conn_params_t_dec);
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
     SER_PULL_uint8(&p_struct->adv_handle);
-    SER_PULL_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_dec);
+    SER_PULL_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_empty_dec);
 #endif
 
     SER_STRUCT_DEC_END;
@@ -1715,6 +1715,32 @@ uint32_t ble_gap_adv_data_t_dec(uint8_t const * const p_buf,
     SER_STRUCT_DEC_END;
 }
 
+uint32_t ble_gap_adv_data_t_empty_enc(void const * const p_void_struct,
+                                uint8_t * const    p_buf,
+                                uint32_t           buf_len,
+                                uint32_t * const   p_index)
+{
+    SER_STRUCT_ENC_BEGIN(ble_gap_adv_data_t);
+
+    SER_PUSH_FIELD(&p_struct->adv_data, ble_data_t_empty_enc);
+    SER_PUSH_FIELD(&p_struct->scan_rsp_data, ble_data_t_empty_enc);
+
+    SER_STRUCT_ENC_END;
+}
+
+uint32_t ble_gap_adv_data_t_empty_dec(uint8_t const * const p_buf,
+                                uint32_t              buf_len,
+                                uint32_t * const      p_index,
+                                void * const          p_void_struct)
+{
+    SER_STRUCT_DEC_BEGIN(ble_gap_adv_data_t);
+
+    SER_PULL_FIELD(&p_struct->adv_data, ble_data_t_empty_dec);
+    SER_PULL_FIELD(&p_struct->scan_rsp_data, ble_data_t_empty_dec);
+
+    SER_STRUCT_DEC_END;
+}
+
 uint32_t ble_gap_evt_adv_set_terminated_t_enc(void const * const p_void_struct,
                                 uint8_t * const    p_buf,
                                 uint32_t           buf_len,
@@ -1725,7 +1751,8 @@ uint32_t ble_gap_evt_adv_set_terminated_t_enc(void const * const p_void_struct,
     SER_PUSH_uint8(&p_struct->reason);
     SER_PUSH_uint8(&p_struct->adv_handle);
     SER_PUSH_uint8(&p_struct->num_completed_adv_events);
-    SER_PUSH_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_enc);
+
+    SER_PUSH_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_empty_enc);
 
     SER_STRUCT_ENC_END;
 }
@@ -1740,7 +1767,8 @@ uint32_t ble_gap_evt_adv_set_terminated_t_dec(uint8_t const * const p_buf,
     SER_PULL_uint8(&p_struct->reason);
     SER_PULL_uint8(&p_struct->adv_handle);
     SER_PULL_uint8(&p_struct->num_completed_adv_events);
-    SER_PULL_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_dec);
+
+    SER_PULL_FIELD(&p_struct->adv_data, ble_gap_adv_data_t_empty_dec);
 
     SER_STRUCT_DEC_END;
 }
