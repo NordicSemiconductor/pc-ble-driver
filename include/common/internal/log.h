@@ -48,7 +48,7 @@
 
 // You should not use stdout/stderr on Windows since this will have a huge impact on
 // the application since this logger is not offloading the displaying of data
-// to a separate thread. 
+// to a separate thread.
 //
 // This stack overflow thread contains more info in regards to cmd.exe output:
 //   https://stackoverflow.com/questions/7404551/why-is-console-output-so-slow
@@ -70,12 +70,12 @@ extern std::mutex nrfLogMutex;
 
 #ifndef NRF_LOG
 #define NRF_LOG(message) do { \
-    auto timestamp = std::chrono::high_resolution_clock::now(); \
+    auto timestamp = std::chrono::system_clock::now(); \
     auto threadID = std::this_thread::get_id(); \
     std::unique_lock<std::mutex> lock(nrfLogMutex); \
     std::stringstream stream; \
     stream << message; \
-    nrfLogStream << "@" << std::right << std::setfill('0') << std::setw(10) << std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count() \
+    nrfLogStream << "@" << std::right << std::setfill('0') << std::setw(10) << std::dec << std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count() \
     << " [" << std::setw(5) << threadID << "] " \
     << "| " << message << std::endl << std::flush; \
 } while(0);
