@@ -537,7 +537,19 @@ To quickly get the examples up and running, see [examples/README.md](./examples/
 
 If you meet problems during installation of pc-ble-driver, please see [Issues.md](./Issues.md).
 
----
+## Contributions
+
+Feel free to propose changes by creating a pull request.
+
+If you plan to make any non-trivial changes, please start out small and ask seek an agreement before putting too much work in it. 
+A pull request can be declined if it does not fit well within the current product roadmap.
+
+In order to accept your pull request, we need you to sign our Contributor License Agreement (CLA). You will see instructions for doing this after having submitted your first pull request.
+
+## Feedback
+
+If you find any bugs, or have questions or other feedback in general, please submit a post on the [Nordic DevZone](http://devzone.nordicsemi.no) portal.
+Note that bug reports should describe in sufficient detail how to reproduce the bug.
 
 ## License
 
