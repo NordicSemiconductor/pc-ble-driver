@@ -559,6 +559,11 @@ uint32_t ble_data_t_empty_dec(uint8_t const * const p_buf,
 #endif
     SER_PULL_uint16(&p_struct->len);
 
+    if (p_struct->p_data == NULL)
+    {
+        p_struct->len = 0;
+    }
+
     SER_STRUCT_DEC_END;
 }
 #endif
