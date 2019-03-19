@@ -1,5 +1,13 @@
 # Known Issues
 
+## SoftDevice API Issues
+
+#### Errors related to advertisement (SDv6)
+
+In SoftDevice API v6 advertisement data can be changed during advertisement.
+If the user change the advertisement data (`sd_ble_gap_adv_set_configure`) while there is a pending `BLE_GAP_EVT_ADV_SET_TERMINATED` event it will cause issues. In this scenario the data in the `BLE_GAP_EVT_ADV_SET_TERMINATED` event will be NULL. This is a deviation from the SoftDevice API v6 documentation.
+
+
 ## Windows Issues
 
 #### /dev/null git apply issue
