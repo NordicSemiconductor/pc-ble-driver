@@ -6,7 +6,7 @@ function(setup_example example_directory)
 
     # Build executable
     foreach(SD_API_VER ${SD_API_VER_NUMS})
-        set(EXAMPLE_NAME "${EXAMPLE_NAME_BASE}_v${SD_API_VER}")
+        set(EXAMPLE_NAME "${EXAMPLE_NAME_BASE}_sd_api_v${SD_API_VER}")
         add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCE_FILES})
 
         target_compile_definitions(${EXAMPLE_NAME} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER})

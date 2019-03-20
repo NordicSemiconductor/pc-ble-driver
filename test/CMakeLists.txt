@@ -374,7 +374,7 @@ function(setup_test)
     #message(STATUS "softdevice_api_ver:${softdevice_api_ver} source_file:${source_file} source_testcases:${source_testcases} test_list:${test_list}")
 
     get_filename_component(test_name ${source_file} NAME_WE)
-    set(test_name "${test_name}_v${softdevice_api_ver}")
+    set(test_name "${test_name}_sd_api_v${softdevice_api_ver}")
 
     # Build executable
     add_executable(${test_name} ${source_file} ${source_testcases} ${test_util_src})
@@ -425,7 +425,7 @@ if(TEST_TRANSPORT)
 endif()
 
 if(TEST_SOFTDEVICE_API)
-    file(GLOB tests_src "softdevice_api/test_*.cpp")
+    file(GLOB tests_src "softdevice_api/test.cpp")
     file(GLOB testcases_src "softdevice_api/testcase_*.cpp")
 
     foreach(SD_API_VER ${SD_API_VER_NUMS})
