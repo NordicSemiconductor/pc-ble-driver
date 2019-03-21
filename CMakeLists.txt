@@ -297,3 +297,32 @@ if(COMPILE_CONNECTIVITY)
 endif()
 
 include (cmake/clang-dev-tools.cmake)
+
+# Create package
+set(ARCH_SUFFIX "unknown")
+
+if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+    set(ARCH_SUFFIX "x86_64")
+else()
+    set(ARCH_SUFFIX "x86_32")
+endif()
+
+
+if(APPLE)
+    set(OS_SUFFIX "macos")
+elseif(WIN32)
+    set(OS_SUFFIX "win")
+else()
+    #Assume Linux
+    set(OS_SUFFIX "linux")
+endif()
+
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP")
+else()
+    set(CPACK_GENERATOR "TGZ")
+endif()
+
+set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${NRF_BLE_DRIVER_VERSION}-${OS_SUFFIX}_${ARCH_SUFFIX}")
+
+include(CPack)
