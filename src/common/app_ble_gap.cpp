@@ -397,69 +397,6 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
     }
 }
 
-uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
-                                      uint8_t *p_scan_rsp_data)
-{
-    if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
-    {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
-    }
-
-    try
-    {
-        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
-
-        for (auto &m_adv_set : gap_state->adv_sets)
-        {
-            if (!m_adv_set.active)
-            {
-                m_adv_set.active          = true;
-                m_adv_set.adv_handle      = adv_handle;
-                m_adv_set.p_adv_data      = p_adv_data;
-                m_adv_set.p_scan_rsp_data = p_scan_rsp_data;
-                return NRF_SUCCESS;
-            }
-        }
-
-        return NRF_ERROR_NOT_FOUND;
-    }
-    catch (const std::out_of_range &)
-    {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
-    }
-}
-
-uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
-                                        uint8_t **pp_scan_rsp_data)
-{
-    if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
-    {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
-    }
-
-    try
-    {
-        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
-
-        for (auto &m_adv_set : gap_state->adv_sets)
-        {
-            if (m_adv_set.active && (m_adv_set.adv_handle == adv_handle))
-            {
-                m_adv_set.active  = false;
-                *pp_adv_data      = m_adv_set.p_adv_data;
-                *pp_scan_rsp_data = m_adv_set.p_scan_rsp_data;
-                return NRF_SUCCESS;
-            }
-        }
-
-        return NRF_ERROR_NOT_FOUND;
-    }
-    catch (const std::out_of_range &)
-    {
-        return NRF_ERROR_SD_RPC_INVALID_STATE;
-    }
-}
-
 int app_ble_gap_adv_buf_register(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))

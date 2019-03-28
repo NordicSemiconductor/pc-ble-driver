@@ -209,32 +209,6 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data);
 uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data);
 
 /**
- * @brief Function for registering data pointers related with given adv_handle.
- *
- * @param adv_handle      Handle.
- * @param p_adv_data      Adv_data buffer.
- * @param p_scan_rsp_data Scan_rsp_data buffer.
- *
- * @return NRF_SUCCESS or error.
- *
- */
-uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t *p_adv_data,
-                                      uint8_t *p_scan_rsp_data);
-
-/**
- * @brief Function for unregistering given .
- *
- * @param[in]  adv_handle       Handle.
- * @param[out] pp_adv_data      Pointer to adv_data buffer associated with given adv_handle.
- * @param[out] pp_scan_rsp_data Pointer to adv_data buffer associated with given adv_handle.
- *
- * @return NRF_SUCCESS or error.
- *
- */
-uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t **pp_adv_data,
-                                        uint8_t **pp_scan_rsp_data);
-
-/**
  * @brief Register an advertisement buffer pointer
  *
  * @param[in] p_buf Advertisement buffer to create a pointer ID from
