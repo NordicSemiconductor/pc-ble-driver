@@ -45,7 +45,7 @@
 #include <memory>
 #include <mutex>
 #include <iostream>
-
+#include <logger.h>
 #include <sd_rpc_types.h>
 
 typedef struct
@@ -56,6 +56,18 @@ typedef struct
     uint8_t *p_scan_rsp_data;
 } adv_set_t;
 
+typedef enum {
+    BLE_DATA_BUF_FREE,
+    BLE_DATA_BUF_IN_USE,
+    BLE_DATA_BUF_LAST_DIRTY,
+} ble_data_buf_state_t;
+
+typedef struct
+{
+    ble_data_buf_state_t state;
+    uint32_t id;
+    void *buf;
+} ble_data_item_t;
 /**
  * @brief This structure keeps GAP states for one adapter
  */
@@ -69,7 +81,7 @@ typedef struct
     // Buffer for scan data received
     ble_data_t scan_data = {nullptr, 0};
     int scan_data_id{0};
-    void *ble_gap_adv_buf_addr[APP_BLE_GAP_ADV_BUF_COUNT]{};
+    ble_data_item_t m_ble_data_pool[APP_BLE_GAP_ADV_BUF_COUNT]{};
 #endif // NRF_SD_BLE_API_VERSION >= 6
 } adapter_ble_gap_state_t;
 
@@ -420,11 +432,14 @@ int app_ble_gap_adv_buf_register(void *p_buf)
 
         // Find available location in ble_gap_adv_buf_addr for
         // store this new buffer pointer.
-        for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+        for (auto &item : gap_state->m_ble_data_pool)
         {
-            if ((addr == nullptr) || (addr == p_buf))
+            if (item.state == BLE_DATA_BUF_FREE)
             {
-                addr = p_buf;
+              get_logger()->debug("adv_buf_register {}", id);
+                item.buf = p_buf;
+                item.id = id;
+                item.state = BLE_DATA_BUF_IN_USE;
                 return id;
             }
             id++;
@@ -447,7 +462,7 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
                   << std::endl;
         std::terminate();
     }
-
+    get_logger()->debug("adv_buf_unregister (adv_set_configure error) enter");
     if (p_buf == nullptr)
     {
         return 0;
@@ -461,13 +476,18 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 
         // Find available location in ble_gap_adv_buf_addr for
         // store this new buffer pointer.
-        for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+        for (auto &item : gap_state->m_ble_data_pool)
         {
-            if (addr == p_buf)
+            if ((item.buf == p_buf) &&
+            ((item.state == BLE_DATA_BUF_IN_USE) || (item.state == BLE_DATA_BUF_LAST_DIRTY)))
             {
-                addr = nullptr;
+                item.buf = nullptr;
+                item.state = BLE_DATA_BUF_FREE;
+                item.id = 0;
+                get_logger()->debug("adv_buf_unregister (adv_set_configure error) {}", id);
                 return id;
             }
+            id++;
         }
 
         return -1;
@@ -480,6 +500,7 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 
 void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
 {
+    get_logger()->debug("adv_buf_unregister enter");
     if (!app_ble_gap_check_current_adapter_set(event_context ? EVENT_CODEC_CONTEXT
                                                              : REQUEST_REPLY_CODEC_CONTEXT))
     {
@@ -491,55 +512,64 @@ void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
         return nullptr;
     }
 
+    get_logger()->debug("adv_buf_unregister {}", id);
     const auto gap_state =
         adapters_gap_state.at(event_context ? current_event_context.adapter_id
                                             : current_request_reply_context.adapter_id);
 
-    auto ret                                = gap_state->ble_gap_adv_buf_addr[id - 1];
-    gap_state->ble_gap_adv_buf_addr[id - 1] = nullptr;
+    auto ret = gap_state->m_ble_data_pool[id - 1].buf;
+
+    gap_state->m_ble_data_pool[id - 1].buf = nullptr;
+    gap_state->m_ble_data_pool[id - 1].id = 0;
+    gap_state->m_ble_data_pool[id - 1].state = BLE_DATA_BUF_FREE;
 
     return ret;
+}
+
+static void app_ble_gap_ble_data_mark_dirty(uint8_t * p_buf)
+{
+    const auto gap_state =
+        adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+    for (auto &item : gap_state->m_ble_data_pool)
+    {
+        if ((item.buf == p_buf) && (item.state == BLE_DATA_BUF_IN_USE))
+        {
+            item.state = BLE_DATA_BUF_LAST_DIRTY;
+            get_logger()->error("buffer marked dirty {}", item.id);
+        }
+    }
+}
+
+static void app_ble_gap_ble_adv_data_mark_dirty(uint8_t * p_buf1, uint8_t *p_buf2)
+{
+    const auto gap_state =
+        adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+    for (auto &item : gap_state->m_ble_data_pool)
+    {
+        if (item.state == BLE_DATA_BUF_LAST_DIRTY)
+        {
+            app_ble_gap_adv_buf_addr_unregister(item.buf);
+        }
+    }
+
+    app_ble_gap_ble_data_mark_dirty(p_buf1);
+    app_ble_gap_ble_data_mark_dirty(p_buf2);
 }
 
 void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *buf2)
 {
     if (adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
     {
-        return;
+        adv_handle = BLE_GAP_ADV_SET_COUNT_MAX - 1;
     }
+    app_ble_gap_ble_adv_data_mark_dirty(adv_set_data[adv_handle].buf1, adv_set_data[adv_handle].buf2);
 
-    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
-    {
-        if (adv_set_data[i].adv_handle == adv_handle)
-        {
-            /* If adv_set is already configured replace old buffers with new one. */
-            if (adv_set_data[i].buf1 != buf1)
-            {
-                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf1);
-            }
-
-            if (adv_set_data[i].buf2 != buf2)
-            {
-                app_ble_gap_adv_buf_addr_unregister(adv_set_data[i].buf2);
-            }
-
-            adv_set_data[i].buf1 = buf1;
-            adv_set_data[i].buf2 = buf2;
-
-            return;
-        }
-    }
-
-    for (int i = 0; i < BLE_GAP_ADV_SET_COUNT_MAX; i++)
-    {
-        if (adv_set_data[i].adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
-        {
-            adv_set_data[i].adv_handle = adv_handle;
-            adv_set_data[i].buf1       = buf1;
-            adv_set_data[i].buf2       = buf2;
-            return;
-        }
-    }
+    get_logger()->debug("new adv_set. Freeing buffers {} {}", adv_set_data[adv_handle].buf1, adv_set_data[adv_handle].buf2);
+    get_logger()->debug("new adv_set. New buffers {} {}", buf1, buf2);
+    adv_set_data[adv_handle].buf1 = buf1;
+    adv_set_data[adv_handle].buf2 = buf2;
 }
 
 // Update the adapter gap state scan_data_id variable based on pointer received???
@@ -556,10 +586,11 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
     auto id = 0;
 
     // Check if ptr to scan data is already registered???
-    for (auto &addr : gap_state->ble_gap_adv_buf_addr)
+    for (auto &item : gap_state->m_ble_data_pool)
     {
-        if (addr == p_scan_data)
+        if (item.buf == p_scan_data)
         {
+          get_logger()->debug("scan data set {}", id + 1);
             gap_state->scan_data_id = id + 1;
             return;
         }
@@ -578,6 +609,7 @@ void app_ble_gap_scan_data_unset(bool free)
 
     const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
 
+    get_logger()->debug("scan data unset {} {}", gap_state->scan_data_id, free);
     if (gap_state->scan_data_id)
     {
         if (free)
