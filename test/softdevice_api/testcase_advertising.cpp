@@ -73,7 +73,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
     SECTION("extended")
     {
-        while(true) {
         auto error       = false;
         auto testSuccess = false;
 
@@ -92,8 +91,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         std::vector<uint8_t> advertisingData;
         std::vector<uint8_t> scanResponseData;
 
-        // Append max number of bytes in advertisement packet with manufacturer specific random data
-        // after the peripheral name
+        // Append max number of bytes in advertisement packet with manufacturer specific random
+        // data after the peripheral name
         const auto remainingSpace = maxLengthOfAdvData -
                                     (advertisementNameLength + 2) /* AD header size */ -
                                     2 /* AD header size manufacturer specific data */;
@@ -133,7 +132,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                             // Check that the received data is according to setupAdvertisement
                             if (manufacturerSpecificData != randomData)
                             {
-                                get_logger()->debug("{} Data configured in peripheral does not match data received on central", c->role());
+                                get_logger()->debug("{} Data configured in peripheral does not "
+                                                    "match data received on central",
+                                                    c->role());
                                 error = true;
                                 return true;
                             }
@@ -159,7 +160,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 scanResponseData.clear();
                                 testutil::createRandomAdvertisingData(
                                     scanResponseData, peripheralAdvName, randomData);
-                                get_logger()->debug("{} Changing advertisement data in BLE_GAP_EVT_ADV_REPORT", c->role());
+                                get_logger()->debug(
+                                    "{} Changing advertisement data in BLE_GAP_EVT_ADV_REPORT",
+                                    c->role());
 
                                 const auto err_code = p->changeAdvertisingData(
                                     std::vector<uint8_t>(), scanResponseData);
@@ -190,7 +193,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {}", c->role(), err_code);
+                            get_logger()->debug("{} Scan start error, err_code {}", c->role(),
+                                                err_code);
                             error = true;
                         }
                     }
@@ -211,8 +215,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     if (scanRequestReport.adv_handle != p->scratchpad.adv_handle)
                     {
                         get_logger()->debug("{} BLE_GAP_EVT_SCAN_REQ_REPORT:  Received "
-                                             "advertisement handle does not match the "
-                                             "one setup with sd_ble_gap_adv_set_configure.", p->role());
+                                            "advertisement handle does not match the "
+                                            "one setup with sd_ble_gap_adv_set_configure.",
+                                            p->role());
                         error = true;
                         return true;
                     }
@@ -228,8 +233,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                         }
 
                         get_logger()->debug("{} SCAN_REQ_REPORT count, this: {}, other: {}",
-                                            p->role(),
-                                            scanRequestCountThisCentral,
+                                            p->role(), scanRequestCountThisCentral,
                                             scanRequestCountOtherCentral);
                     }
                 }
@@ -241,24 +245,29 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     if (setTerminated.adv_handle != p->scratchpad.adv_handle)
                     {
                         get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Received "
-                                             "advertisement handle does not match the "
-                                             "one setup with sd_ble_gap_adv_set_configure.", p->role());
+                                            "advertisement handle does not match the "
+                                            "one setup with sd_ble_gap_adv_set_configure.",
+                                            p->role());
                         error = true;
                         return true;
                     }
 
                     if (setTerminated.reason != BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason was not LIMIT_REACHED which it should be.", p->role());
+                        get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason "
+                                            "was not LIMIT_REACHED which it should be.",
+                                            p->role());
                         error = true;
                         return true;
                     }
 
                     if (setTerminated.num_completed_adv_events != maxNumberOfAdvertisements)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
-                                   "advertisement events does not match max_adv_evts set in "
-                                   "sd_ble_gap_adv_set_configure.", p->role());
+                        get_logger()->debug(
+                            "{} BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
+                            "advertisement events does not match max_adv_evts set in "
+                            "sd_ble_gap_adv_set_configure.",
+                            p->role());
                         error = true;
                         return true;
                     }
@@ -268,13 +277,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                     if (advReport.scan_rsp_data.p_data == nullptr)
                     {
-                        NRF_LOG(
-                            p->role()
-                            << " BLE_GAP_EVT_ADV_SET_TERMINATED: WARNING: scan_rsp_data.p_data is "
-                               "nullptr even though it should point to the set advertisement "
-                               "data. This is a known issue with connectivity and "
-                               "SoftDevice API v6 that we are looking into. We let the test "
-                               "for this pass for now.");
+                        get_logger()->warn(
+                            "{} BLE_GAP_EVT_ADV_SET_TERMINATED: WARNING: scan_rsp_data.p_data "
+                            "is "
+                            "nullptr even though it should point to the set advertisement "
+                            "data. This is a known issue with connectivity and "
+                            "SoftDevice API v6 that we are looking into. We let the test "
+                            "for this pass for now.",
+                            p->role());
                         testSuccess = true;
                         return true;
                     }
@@ -287,8 +297,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     if (scanResponseData != scan_rsp_data)
                     {
                         get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
-                                             "buffers set in sd_ble_gap_adv_set_configure does "
-                                             "not match with advertisement received.", p->role());
+                                            "buffers set in sd_ble_gap_adv_set_configure does "
+                                            "not match with advertisement received.",
+                                            p->role());
                         error = true;
                         return true;
                     }
@@ -359,7 +370,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
         CHECK(p->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(p->unwrap());
-        }
     }
 #endif // NRF_SD_BLE_API == 6
 }

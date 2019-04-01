@@ -733,7 +733,6 @@ std::string asText(const ble_data_t &data)
         retval << " len:" << static_cast<uint32_t>(data.len);
     }
 
-<<<<<<< HEAD
     if (data.p_data != nullptr)
     {
         wrappedData.assign(data.p_data, data.p_data + data.len);
@@ -741,8 +740,6 @@ std::string asText(const ble_data_t &data)
         retval << " len:" << static_cast<uint32_t>(data.len);
     }
 
-=======
->>>>>>> Log p_data null when ptr is null add check for nullptr
     return retval.str();
 }
 
