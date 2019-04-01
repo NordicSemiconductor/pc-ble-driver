@@ -112,7 +112,7 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
                     else if (H5Transport::isSyncConfigPacket(data, 5) &&
                              stopAtPktType <= CONTROL_PKT_SYNC_CONFIG)
                     {
-                        get_logger()->debug("[{}}] Received SYNC CONFIG ignored.", name);
+                        get_logger()->debug("[{}] Received SYNC CONFIG ignored.", name);
                         stoppedProcessing = true;
                         outDataAvailable.notify_all();
                     }

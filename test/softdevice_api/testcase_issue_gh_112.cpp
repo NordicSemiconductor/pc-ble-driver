@@ -154,12 +154,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
     // Instantiate an adapter to use as BLE Central in the test
     auto c = std::make_shared<testutil::AdapterWrapper>(
-        testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        testutil::Role::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
         env.responseTimeout);
 
     // Instantiated an adapter to use as BLE Peripheral in the test
     auto p = std::make_shared<testutil::AdapterWrapper>(
-        testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        testutil::Role::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
         env.responseTimeout);
 
     // Use Heart rate service and characteristics as target for testing but

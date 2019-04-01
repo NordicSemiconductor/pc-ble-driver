@@ -90,7 +90,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
 
     // Instantiated an adapter to use as BLE Peripheral in the test
     auto p = std::make_shared<testutil::AdapterWrapper>(
-        testutil::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
+        testutil::Role::Peripheral, peripheral.port, env.baudRate, env.mtu, env.retransmissionInterval,
         env.responseTimeout);
 
     p->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
@@ -119,7 +119,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         auto adv_report_count = 0;
 
         auto c = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            testutil::Role::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
             env.responseTimeout);
 
         c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {

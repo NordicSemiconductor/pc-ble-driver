@@ -68,7 +68,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     SECTION("open_already_opened_adapter")
     {
         auto c = std::make_unique<testutil::AdapterWrapper>(
-            testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            testutil::Role::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
             env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
@@ -82,14 +82,15 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     SECTION("close_already_closed_adapter")
     {
         auto c = std::make_unique<testutil::AdapterWrapper>(
-            testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            testutil::Role::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
             env.responseTimeout);
 
         c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} error in status callback {}:{}", c->role(), static_cast<uint32_t>(code), message);
+                get_logger()->debug("{} error in status callback {}:{}", c->role(),
+                                    static_cast<uint32_t>(code), message);
             }
         });
 
@@ -106,10 +107,11 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     {
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1), numberOfIterations);
+            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1),
+                                numberOfIterations);
 
             auto c = std::make_shared<testutil::AdapterWrapper>(
-                testutil::Central, serialPort.port, env.baudRate, env.mtu,
+                testutil::Role::Central, serialPort.port, env.baudRate, env.mtu,
                 env.retransmissionInterval, env.responseTimeout);
 
             REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
@@ -119,32 +121,34 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
                 if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                     code == PKT_UNEXPECTED)
                 {
-                    get_logger()->debug("{} error in status callback: {}:{}",c->role(), static_cast<uint32_t>(code), message);
+                    get_logger()->debug("{} error in status callback: {}:{}", c->role(),
+                                        static_cast<uint32_t>(code), message);
                 }
             });
 
-            c->setGapEventCallback([&](const uint16_t eventId,
-                                       const ble_gap_evt_t *gapEvent) -> bool {
-                switch (eventId)
-                {
-                    case BLE_GAP_EVT_ADV_REPORT:
-                        return true;
-                    case BLE_GAP_EVT_TIMEOUT:
-                        if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
-                        {
-                            const auto err_code = c->startScan();
-
-                            if (err_code != NRF_SUCCESS)
+            c->setGapEventCallback(
+                [&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
+                    switch (eventId)
+                    {
+                        case BLE_GAP_EVT_ADV_REPORT:
+                            return true;
+                        case BLE_GAP_EVT_TIMEOUT:
+                            if (gapEvent->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
                             {
-                                get_logger()->debug("{} Scan start error, err_code: {}", c->role(), err_code);
-                                error = true;
+                                const auto err_code = c->startScan();
+
+                                if (err_code != NRF_SUCCESS)
+                                {
+                                    get_logger()->debug("{} Scan start error, err_code: {}",
+                                                        c->role(), err_code);
+                                    error = true;
+                                }
                             }
-                        }
-                        return true;
-                    default:
-                        return false;
-                }
-            });
+                            return true;
+                        default:
+                            return false;
+                    }
+                });
 
             REQUIRE(c->open() == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
@@ -157,37 +161,40 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             CHECK(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
 
-            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1), numberOfIterations);
+            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1),
+                                numberOfIterations);
         }
     }
 
     SECTION("open_close_open_iterations")
     {
         auto c = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Central, serialPort.port, env.baudRate, env.mtu,
-            env.retransmissionInterval, env.responseTimeout);
+            testutil::Role::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        c->setStatusCallback(
-            [&](const sd_rpc_app_status_t code, const std::string &message) {
-                if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
-                    code == PKT_UNEXPECTED)
-                {
-                    get_logger()->debug("{} error in status callback {}:{}", c->role(), static_cast<uint32_t>(code), message);
-                }
-            });
+        c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
+            if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
+                code == PKT_UNEXPECTED)
+            {
+                get_logger()->debug("{} error in status callback {}:{}", c->role(),
+                                    static_cast<uint32_t>(code), message);
+            }
+        });
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1), numberOfIterations);
+            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1),
+                                numberOfIterations);
 
             REQUIRE(c->open() == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
             CHECK(c->close() == NRF_SUCCESS);
 
-            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1), numberOfIterations);
+            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1),
+                                numberOfIterations);
         }
 
         sd_rpc_adapter_delete(c->unwrap());

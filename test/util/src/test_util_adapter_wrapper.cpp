@@ -355,7 +355,7 @@ uint32_t AdapterWrapper::setupAdvertising(
 
 uint32_t AdapterWrapper::startAdvertising()
 {
-    if (role() != Peripheral)
+    if (role() != Role::Peripheral)
     {
         get_logger()->debug("{} Wrong role, must be peripheral to advertise.", role());
         return NRF_ERROR_INVALID_STATE;
@@ -397,7 +397,7 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
 
     if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
     {
-        get_logger()->debug("{}  Advertising data is larger then the buffer set asize.", role());
+        get_logger()->debug("{} Advertising data is larger then the buffer set aside.", role());
         return NRF_ERROR_INVALID_PARAM;
     }
 
@@ -444,8 +444,8 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     advertising_data.scan_rsp_data = scan_rsp_data;
 
     get_logger()->debug(
-        "{}  Changing advertisement data to instance with addresses adv_data.p_data: {}  "
-        "adv_data.len: {}  scan_rsp.p_data: {} scan_rsp_data.len:{}",
+        "{} Changing advertisement data to instance with addresses adv_data.p_data: {} "
+        "adv_data.len: {} scan_rsp.p_data: {} scan_rsp_data.len:{}",
         role(), static_cast<void *>(advertising_data.adv_data.p_data),
         static_cast<uint32_t>(adv_data.len),
         static_cast<void *>(advertising_data.scan_rsp_data.p_data),
@@ -463,7 +463,7 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     else
     {
         m_changeCount++;
-        get_logger()->debug("{}  Changing advertisement data succeeded (#{})", role(),
+        get_logger()->debug("{} Changing advertisement data succeeded (#{})", role(),
                             m_changeCount);
     }
 
@@ -488,7 +488,7 @@ uint32_t AdapterWrapper::startServiceDiscovery(const uint8_t type, const uint16_
 
     if (err_code != NRF_SUCCESS)
     {
-        get_logger()->debug("{}  Failed to initiate or continue a GATT Primary Service Discovery "
+        get_logger()->debug("{} Failed to initiate or continue a GATT Primary Service Discovery "
                             "procedure, sd_ble_gattc_primary_services_discover {}",
                             role(), testutil::errorToString(err_code));
     }
@@ -517,7 +517,7 @@ uint32_t AdapterWrapper::startAuthentication(const bool bond, const bool mitm, c
 
     if (err_code != NRF_SUCCESS)
     {
-        get_logger()->debug("{} Error calling sd_ble_gap_authenticate:  {}", role(),
+        get_logger()->debug("{} Error calling sd_ble_gap_authenticate: {}", role(),
                             testutil::errorToString(err_code));
     }
 
@@ -638,7 +638,7 @@ uint32_t AdapterWrapper::writeCCCDValue(const uint16_t cccdHandle, const uint8_t
     write_params.write_op = BLE_GATT_OP_WRITE_REQ;
     write_params.offset   = 0;
 
-    get_logger()->debug("{}  Writing to connection {}  CCCD handle: {} value: {}", role(),
+    get_logger()->debug("{} Writing to connection {} CCCD handle: {} value: {}", role(),
                         testutil::asText(scratchpad.connection_handle),
                         testutil::asText(cccdHandle), value);
 
@@ -664,7 +664,7 @@ uint32_t AdapterWrapper::writeCharacteristicValue(const uint16_t characteristicH
     write_params.offset   = 0;
 
     get_logger()->debug(
-        "{} Writing to connection_handle: {}  characteristic_handle: {}  length: {}, value: 0x{}",
+        "{} Writing to connection_handle: {} characteristic_handle: {} length: {}, value: {:x}",
         role(), testutil::asText(scratchpad.connection_handle),
         testutil::asText(characteristicHandle), data.size(), asHex(data));
 
@@ -710,12 +710,12 @@ void AdapterWrapper::logEvent(const uint16_t eventId, const ble_gap_evt_t &gapEv
     switch (eventId)
     {
         case BLE_GAP_EVT_CONNECTED:
-            get_logger()->debug("{}  BLE_GAP_EVT_CONNECTED [conn_handle:{} connected:[{}]]", role(),
+            get_logger()->debug("{} BLE_GAP_EVT_CONNECTED [conn_handle:{} connected:[{}]]", role(),
                                 testutil::asText(gapEvent.conn_handle),
                                 testutil::asText(gapEvent.params.connected));
             break;
         case BLE_GAP_EVT_DISCONNECTED:
-            get_logger()->debug("{}  BLE_GAP_EVT_DISCONNECTED [conn_handle: {} disconnected:[{}]]",
+            get_logger()->debug("{} BLE_GAP_EVT_DISCONNECTED [conn_handle: {} disconnected:[{}]]",
                                 role(), testutil::asText(gapEvent.conn_handle),
                                 testutil::asText(gapEvent.params.disconnected));
             break;
@@ -837,7 +837,7 @@ void AdapterWrapper::logEvent(const uint16_t eventId, const ble_gap_evt_t &gapEv
 
 #endif // NRF_SD_BLE_API == 6
         default:
-            get_logger()->debug("{}  UNKNOWN EVENT WITH ID [0x{}]", role(), eventId);
+            get_logger()->debug("{} UNKNOWN EVENT WITH ID [{:x}]", role(), eventId);
             break;
     }
 }
@@ -847,7 +847,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
     auto eventId = p_ble_evt->header.evt_id;
 
     const auto logGenericUnprocessed = [this, &eventId]() {
-        get_logger()->debug("{}  Unprocessed event: 0x{}", role(), (uint32_t)eventId);
+        get_logger()->debug("{} Unprocessed event: {:x}", role(), (uint32_t)eventId);
     };
 
     if (eventId >= BLE_GAP_EVT_BASE && eventId <= BLE_GAP_EVT_LAST)
@@ -948,7 +948,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
 
 void AdapterWrapper::processStatus(const sd_rpc_app_status_t code, const std::string &message)
 {
-    get_logger()->debug("{} [status] code: 7} message: {}", role(), testutil::asText(code),
+    get_logger()->debug("{}[status] code: {} message: {}", role(), testutil::asText(code),
                         message);
 
     if (m_statusCallback)
@@ -1001,7 +1001,7 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.ble_enable_params.common_enable_params.p_conn_bw_counts = nullptr;
     scratchpad.ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 
-    if (m_role == Central)
+    if (m_role == Role::Central)
     {
         scratchpad.common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
     }
