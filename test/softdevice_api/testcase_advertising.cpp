@@ -317,6 +317,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                get_logger()->debug("{} status callback gave error {}:{}", c->role(), code, message);
                 error = true;
             }
         });
@@ -325,6 +326,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                get_logger()->debug("{} status callback gave error {}:{}", p->role(), code, message);
                 error = true;
             }
         });
