@@ -98,7 +98,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             code == PKT_UNEXPECTED)
         {
             error = true;
-            get_logger()->debug("{}  error in status callback {}:{}", p->role(), static_cast<uint32_t>(code), message);
+            get_logger()->debug("{}  error in status callback {:x}:{}", p->role(), static_cast<uint32_t>(code), message);
         }
     });
 
@@ -127,7 +127,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                get_logger()->debug("{}  error in status callback {}:{}", c->role(), static_cast<uint32_t>(code), message);
+                get_logger()->debug("{}  error in status callback {:x}:{}", c->role(), static_cast<uint32_t>(code), message);
             }
         });
 
@@ -168,7 +168,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{}  Scan start error, err_code {}", c->role(), err_code);
+                            get_logger()->debug("{}  Scan start error, err_code {:x}", c->role(), err_code);
                             error = true;
                         }
                     }

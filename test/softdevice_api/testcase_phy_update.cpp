@@ -146,7 +146,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {}", c->role(), err_code);
+                            get_logger()->debug("{} Scan start error, err_code {:x}", c->role(), err_code);
                             error = true;
                         }
                     }
@@ -159,7 +159,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        get_logger()->debug("{} Conn params update failed, err_code {}", c->role(), err_code);
+                        get_logger()->debug("{} Conn params update failed, err_code {:x}", c->role(), err_code);
                         error = true;
                     }
                 }
@@ -177,7 +177,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                         const auto status = gapEvent->params.phy_update.status;
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {}, should be BLE_HCI_STATUS_CODE_SUCCESS({})",
+                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {:x}, should be BLE_HCI_STATUS_CODE_SUCCESS({})",
                                                 c->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;
                         }
@@ -246,7 +246,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {}, should "
+                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {:x}, should "
                                                 "be BLE_HCI_STATUS_CODE_SUCCESS({})",
                                                 p->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;

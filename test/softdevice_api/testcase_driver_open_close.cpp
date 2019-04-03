@@ -89,7 +89,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} error in status callback {}:{}", c->role(),
+                get_logger()->debug("{} error in status callback {:x}:{}", c->role(),
                                     static_cast<uint32_t>(code), message);
             }
         });
@@ -121,7 +121,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
                 if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                     code == PKT_UNEXPECTED)
                 {
-                    get_logger()->debug("{} error in status callback: {}:{}", c->role(),
+                    get_logger()->debug("{} error in status callback: {:x}:{}", c->role(),
                                         static_cast<uint32_t>(code), message);
                 }
             });
@@ -139,7 +139,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
                                 if (err_code != NRF_SUCCESS)
                                 {
-                                    get_logger()->debug("{} Scan start error, err_code: {}",
+                                    get_logger()->debug("{} Scan start error, err_code: {:x}",
                                                         c->role(), err_code);
                                     error = true;
                                 }
@@ -179,7 +179,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} error in status callback {}:{}", c->role(),
+                get_logger()->debug("{} error in status callback {:x}:{}", c->role(),
                                     static_cast<uint32_t>(code), message);
             }
         });

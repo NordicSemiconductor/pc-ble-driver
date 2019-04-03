@@ -71,7 +71,7 @@ public:
 
     void statusCallback(const sd_rpc_app_status_t code, const std::string &message) const
     {
-        get_logger()->debug("[{}][status] code: {} message: {}", name, code, message);
+        get_logger()->debug("[{}][status] code: {:x} message: {}", name, code, message);
     }
 
     void dataCallback(const uint8_t *data, const size_t length)

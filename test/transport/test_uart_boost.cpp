@@ -136,7 +136,7 @@ TEST_CASE("open_close")
 
     const auto status_callback = [&error](const sd_rpc_app_status_t code,
                                           const std::string &message) -> void {
-        get_logger()->debug("code: {} message: {}", code, message);
+        get_logger()->debug("code: {:x} message: {}", code, message);
         if (code != NRF_SUCCESS)
         {
             error = true;
@@ -146,7 +146,7 @@ TEST_CASE("open_close")
 
     auto log_callback = [&portA, &portB, &error](sd_rpc_log_severity_t severity,
                                                  std::string message) -> void {
-        get_logger()->debug("severty: {} message: {}", severity, message);
+        get_logger()->debug("severty: {:x} message: {}", severity, message);
 
         if (severity == 1)
         {

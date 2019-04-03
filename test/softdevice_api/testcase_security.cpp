@@ -154,7 +154,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {}", c->role(),
+                            get_logger()->debug("{} Scan start error, err_code {:x}", c->role(),
                                                 err_code);
                             error = true;
                         }
@@ -168,7 +168,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        get_logger()->debug("{} Conn params update failed, err_code  {}", c->role(),
+                        get_logger()->debug("{} Conn params update failed, err_code  {:x}", c->role(),
                                             err_code);
                         error = true;
                     }
@@ -294,7 +294,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                get_logger()->debug("{} error in status callback {}:{}", c->role(),
+                get_logger()->debug("{} error in status callback {:x}:{}", c->role(),
                                     static_cast<uint32_t>(code), message);
             }
         });
@@ -304,7 +304,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 code == PKT_UNEXPECTED)
             {
                 error = true;
-                get_logger()->debug("{} error in status callback {}:{}", p->role(),
+                get_logger()->debug("{} error in status callback {:x}:{}", p->role(),
                                     static_cast<uint32_t>(code), message);
             }
         });

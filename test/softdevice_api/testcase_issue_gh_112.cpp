@@ -229,7 +229,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        get_logger()->debug("{} Scan start error, err_code: {}", c->role(), err_code);
+                        get_logger()->debug("{} Scan start error, err_code: {:x}", c->role(), err_code);
                         centralError = true;
                     }
                 }
@@ -241,7 +241,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                     &(gapEvent->params.conn_param_update_request.conn_params));
                 if (err_code != NRF_SUCCESS)
                 {
-                    get_logger()->debug("{} Conn params update failed, err_code {}", c->role(), err_code);
+                    get_logger()->debug("{} Conn params update failed, err_code {:x}", c->role(), err_code);
                     centralError = true;
                 }
             }
@@ -423,7 +423,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    get_logger()->debug("{} Error writing data to characteristic. err_code: {}",
+                    get_logger()->debug("{} Error writing data to characteristic. err_code: {:x}",
                                         c->role(), err_code);
                     centralError = true;
                 }
@@ -532,7 +532,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             code == PKT_UNEXPECTED)
         {
             centralError = true;
-            get_logger()->debug("{}  error in status callback {}:{}", c->role(), static_cast<uint32_t>(code), message);
+            get_logger()->debug("{}  error in status callback {:x}:{}", c->role(), static_cast<uint32_t>(code), message);
         }
     });
 
@@ -541,7 +541,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             code == PKT_UNEXPECTED)
         {
             peripheralError = true;
-            get_logger()->debug("{} error in status callback {}:{}", p->role(), static_cast<uint32_t>(code), message);
+            get_logger()->debug("{} error in status callback {:x}:{}", p->role(), static_cast<uint32_t>(code), message);
         }
     });
 

@@ -193,7 +193,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {}", c->role(),
+                            get_logger()->debug("{} Scan start error, err_code {:x}", c->role(),
                                                 err_code);
                             error = true;
                         }
@@ -317,7 +317,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} status callback gave error {}:{}", c->role(), code, message);
+                get_logger()->debug("{} status callback gave error {:x}:{}", c->role(),
+                                    static_cast<uint32_t>(code), message);
                 error = true;
             }
         });
@@ -326,7 +327,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} status callback gave error {}:{}", p->role(), code, message);
+                get_logger()->debug("{} status callback gave error {:x}:{}", p->role(),
+                                    static_cast<uint32_t>(code), message);
                 error = true;
             }
         });
