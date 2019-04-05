@@ -51,6 +51,9 @@ int main(int argc, char *argv[])
                         test::ConfiguredEnvironment.driverLogLevel =
                             testutil::parseLogSeverity(value);
                         test::ConfiguredEnvironment.driverLogLevelSet = true;
+
+                        auto logLevel = testutil::parseSpdLogLevel(value);
+                        spdlog::set_level(logLevel);
                     }
                     catch (std::invalid_argument &)
                     {

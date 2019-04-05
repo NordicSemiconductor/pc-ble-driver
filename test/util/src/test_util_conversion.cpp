@@ -7,6 +7,7 @@
 #include <cctype>
 #include <iomanip>
 #include <map>
+#include <spdlog/logger.h>
 #include <sstream>
 #include <vector>
 
@@ -776,7 +777,8 @@ std::string asText(const ble_gap_evt_adv_report_t &advReport)
 #if NRF_SD_BLE_API == 6
     if (advReport.data.p_data != nullptr)
     {
-        data = std::vector<uint8_t>(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
+        data =
+            std::vector<uint8_t>(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
         retval << " type:[" << asText(advReport.type) << "]";
     }
 #else
@@ -1109,4 +1111,37 @@ sd_rpc_log_severity_t parseLogSeverity(const std::string &level)
     ss << "Not able to parse '" << level << "' to be sd_rpc_log_severity_t.";
     throw std::invalid_argument(ss.str());
 }
+
+spdlog::level::level_enum parseSpdLogLevel(const std::string &level)
+{
+    if (level == "trace")
+    {
+        return spdlog::level::level_enum::trace;
+    }
+    else if (level == "debug")
+    {
+        return spdlog::level::level_enum::debug;
+    }
+    else if (level == "info")
+    {
+        return spdlog::level::level_enum::info;
+    }
+    else if (level == "warning")
+    {
+        return spdlog::level::level_enum::warn;
+    }
+    else if (level == "error")
+    {
+        return spdlog::level::level_enum::err;
+    }
+    else if (level == "fatal")
+    {
+        return spdlog::level::level_enum::critical;
+    }
+
+    std::stringstream ss;
+    ss << "Not able to parse '" << level << "' to be spdlog::level::level_enum.";
+    throw std::invalid_argument(ss.str());
+}
+
 } // namespace testutil
