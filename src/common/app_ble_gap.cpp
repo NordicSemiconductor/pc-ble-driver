@@ -547,7 +547,7 @@ void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
     }
 
     get_logger()->debug("adv_buf_unregister {}", id);
-    auto ret = nullptr;
+    void *ret = nullptr;
 
     try
     {
@@ -591,8 +591,7 @@ static void app_ble_gap_ble_data_mark_dirty(uint8_t *p_buf)
     {
         get_logger()->error(
             "Not able to find current_request_reply_context.adapter_id, value is {}",
-            event_context ? current_event_context.adapter_id
-                          : current_request_reply_context.adapter_id);
+            current_request_reply_context.adapter_id);
     }
 }
 
