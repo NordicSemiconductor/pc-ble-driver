@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 project(connectivity)
 
 #[[
-    This CMake file uses directory structure conventions in the SDKs 
+    This CMake file uses directory structure conventions in the SDKs
     supported (v11 and v15) to supply information to targets and create them.
 ]]
 
@@ -291,10 +291,10 @@ nrf_create_connectivity_compile_targets(
 
 nrf_prepare_sdk(
     SDK_VERSION 15
-    URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.2.0_9412b96.zip"
-    FILENAME "nRF5_SDK_15.2.0_9412b96.zip"
-    SHA512 6ed3cbcbb798775557affc9a323f2665629e17359aaf8ae2e2f70c99645862185ae5d0f8fa46b17ade2af7e6dd7a62e6292b01f4e883107265c3c39c3eb22b46
-    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK_15.2.0_connectivity.patch"
+    URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.3.0_59ac345.zip"
+    FILENAME "nRF5_SDK_15.3.0_59ac345.zip"
+    SHA512 7cdf1652e828b7c5266c21e1a12e16c90f51213130268e7138950c070c2271d357410a103427e0f67dc56816a8cf6f69df93a6462e2b5e18d6be0a9bb465484f
+    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK_15.3.0_connectivity.patch"
 )
 
 nrf_create_connectivity_compile_targets(
