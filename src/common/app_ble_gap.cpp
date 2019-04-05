@@ -41,11 +41,11 @@
 #include "nrf_error.h"
 
 #include <cstring>
+#include <iostream>
+#include <logger.h>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <iostream>
-#include <logger.h>
 #include <sd_rpc_types.h>
 
 typedef struct
@@ -220,6 +220,10 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
@@ -250,6 +254,9 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error("Not able to find current_event_context.adapter_id, value is {}",
+                            current_event_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -279,6 +286,9 @@ uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error("Not able to find current_event_context.adapter_id, value is {}",
+                            current_event_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -298,6 +308,9 @@ uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **k
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error("Not able to find current_event_context.adapter_id, value is {}",
+                            current_event_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -318,6 +331,10 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -349,6 +366,10 @@ uint32_t app_ble_gap_state_reset()
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
@@ -379,6 +400,10 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -405,6 +430,9 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error("Not able to find current_event_context.adapter_id, value is {}",
+                            current_event_context.adapter_id);
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -436,9 +464,9 @@ int app_ble_gap_adv_buf_register(void *p_buf)
         {
             if (item.state == BLE_DATA_BUF_FREE)
             {
-              get_logger()->debug("adv_buf_register {}", id);
-                item.buf = p_buf;
-                item.id = id;
+                get_logger()->debug("adv_buf_register {}", id);
+                item.buf   = p_buf;
+                item.id    = id;
                 item.state = BLE_DATA_BUF_IN_USE;
                 return id;
             }
@@ -449,6 +477,9 @@ int app_ble_gap_adv_buf_register(void *p_buf)
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
         return -1;
     }
 }
@@ -479,11 +510,11 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
         for (auto &item : gap_state->m_ble_data_pool)
         {
             if ((item.buf == p_buf) &&
-            ((item.state == BLE_DATA_BUF_IN_USE) || (item.state == BLE_DATA_BUF_LAST_DIRTY)))
+                ((item.state == BLE_DATA_BUF_IN_USE) || (item.state == BLE_DATA_BUF_LAST_DIRTY)))
             {
-                item.buf = nullptr;
+                item.buf   = nullptr;
                 item.state = BLE_DATA_BUF_FREE;
-                item.id = 0;
+                item.id    = 0;
                 get_logger()->debug("adv_buf_unregister (adv_set_configure error) {}", id);
                 return id;
             }
@@ -494,6 +525,9 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
     }
     catch (const std::out_of_range &)
     {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
         return -1;
     }
 }
@@ -513,49 +547,78 @@ void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
     }
 
     get_logger()->debug("adv_buf_unregister {}", id);
-    const auto gap_state =
-        adapters_gap_state.at(event_context ? current_event_context.adapter_id
-                                            : current_request_reply_context.adapter_id);
+    auto ret = nullptr;
 
-    auto ret = gap_state->m_ble_data_pool[id - 1].buf;
+    try
+    {
+        auto adapter_id = event_context ? current_event_context.adapter_id
+                                        : current_request_reply_context.adapter_id;
 
-    gap_state->m_ble_data_pool[id - 1].buf = nullptr;
-    gap_state->m_ble_data_pool[id - 1].id = 0;
-    gap_state->m_ble_data_pool[id - 1].state = BLE_DATA_BUF_FREE;
+        const auto gap_state = adapters_gap_state.at(adapter_id);
+
+        ret = gap_state->m_ble_data_pool[id - 1].buf;
+
+        gap_state->m_ble_data_pool[id - 1].buf   = nullptr;
+        gap_state->m_ble_data_pool[id - 1].id    = 0;
+        gap_state->m_ble_data_pool[id - 1].state = BLE_DATA_BUF_FREE;
+    }
+    catch (const std::out_of_range &)
+    {
+        get_logger()->error("Not able to find context with adapter_id, value is {}",
+                            event_context ? current_event_context.adapter_id
+                                          : current_request_reply_context.adapter_id);
+    }
 
     return ret;
 }
 
-static void app_ble_gap_ble_data_mark_dirty(uint8_t * p_buf)
+static void app_ble_gap_ble_data_mark_dirty(uint8_t *p_buf)
 {
-    const auto gap_state =
-        adapters_gap_state.at(current_request_reply_context.adapter_id);
-
-    for (auto &item : gap_state->m_ble_data_pool)
+    try
     {
-        if ((item.buf == p_buf) && (item.state == BLE_DATA_BUF_IN_USE))
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+        for (auto &item : gap_state->m_ble_data_pool)
         {
-            item.state = BLE_DATA_BUF_LAST_DIRTY;
-            get_logger()->error("buffer marked dirty {}", item.id);
+            if ((item.buf == p_buf) && (item.state == BLE_DATA_BUF_IN_USE))
+            {
+                item.state = BLE_DATA_BUF_LAST_DIRTY;
+                get_logger()->error("buffer marked dirty {}", item.id);
+            }
         }
+    }
+    catch (const std::out_of_range &)
+    {
+        get_logger()->error(
+            "Not able to find current_request_reply_context.adapter_id, value is {}",
+            event_context ? current_event_context.adapter_id
+                          : current_request_reply_context.adapter_id);
     }
 }
 
-static void app_ble_gap_ble_adv_data_mark_dirty(uint8_t * p_buf1, uint8_t *p_buf2)
+static void app_ble_gap_ble_adv_data_mark_dirty(uint8_t *p_buf1, uint8_t *p_buf2)
 {
-    const auto gap_state =
-        adapters_gap_state.at(current_request_reply_context.adapter_id);
-
-    for (auto &item : gap_state->m_ble_data_pool)
+    try
     {
-        if (item.state == BLE_DATA_BUF_LAST_DIRTY)
-        {
-            app_ble_gap_adv_buf_addr_unregister(item.buf);
-        }
-    }
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
 
-    app_ble_gap_ble_data_mark_dirty(p_buf1);
-    app_ble_gap_ble_data_mark_dirty(p_buf2);
+        for (auto &item : gap_state->m_ble_data_pool)
+        {
+            if (item.state == BLE_DATA_BUF_LAST_DIRTY)
+            {
+                app_ble_gap_adv_buf_addr_unregister(item.buf);
+            }
+        }
+
+        app_ble_gap_ble_data_mark_dirty(p_buf1);
+        app_ble_gap_ble_data_mark_dirty(p_buf2);
+    }
+    catch (const std::out_of_range &)
+    {
+        get_logger()->error(
+            "Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
+    }
 }
 
 void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *buf2)
@@ -564,9 +627,11 @@ void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *bu
     {
         adv_handle = BLE_GAP_ADV_SET_COUNT_MAX - 1;
     }
-    app_ble_gap_ble_adv_data_mark_dirty(adv_set_data[adv_handle].buf1, adv_set_data[adv_handle].buf2);
+    app_ble_gap_ble_adv_data_mark_dirty(adv_set_data[adv_handle].buf1,
+                                        adv_set_data[adv_handle].buf2);
 
-    get_logger()->debug("new adv_set. Freeing buffers {} {}", adv_set_data[adv_handle].buf1, adv_set_data[adv_handle].buf2);
+    get_logger()->debug("new adv_set. Freeing buffers {} {}", adv_set_data[adv_handle].buf1,
+                        adv_set_data[adv_handle].buf2);
     get_logger()->debug("new adv_set. New buffers {} {}", buf1, buf2);
     adv_set_data[adv_handle].buf1 = buf1;
     adv_set_data[adv_handle].buf2 = buf2;
@@ -581,23 +646,32 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
     }
 
     // Find location for scan_data
-    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
-
-    auto id = 0;
-
-    // Check if ptr to scan data is already registered???
-    for (auto &item : gap_state->m_ble_data_pool)
+    try
     {
-        if (item.buf == p_scan_data)
-        {
-          get_logger()->debug("scan data set {}", id + 1);
-            gap_state->scan_data_id = id + 1;
-            return;
-        }
-        id++;
-    }
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
 
-    gap_state->scan_data_id = 0;
+        auto id = 0;
+
+        // Check if ptr to scan data is already registered???
+        for (auto &item : gap_state->m_ble_data_pool)
+        {
+            if (item.buf == p_scan_data)
+            {
+                get_logger()->debug("scan data set {}", id + 1);
+                gap_state->scan_data_id = id + 1;
+                return;
+            }
+            id++;
+        }
+
+        gap_state->scan_data_id = 0;
+    }
+    catch (const std::out_of_range &)
+    {
+        get_logger()->error(
+            "Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
+    }
 }
 
 void app_ble_gap_scan_data_unset(bool free)
@@ -607,16 +681,25 @@ void app_ble_gap_scan_data_unset(bool free)
         return;
     }
 
-    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
-
-    get_logger()->debug("scan data unset {} {}", gap_state->scan_data_id, free);
-    if (gap_state->scan_data_id)
+    try
     {
-        if (free)
+        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+
+        get_logger()->debug("scan data unset {} {}", gap_state->scan_data_id, free);
+        if (gap_state->scan_data_id)
         {
-            app_ble_gap_adv_buf_unregister(gap_state->scan_data_id, false);
+            if (free)
+            {
+                app_ble_gap_adv_buf_unregister(gap_state->scan_data_id, false);
+            }
+            gap_state->scan_data_id = 0;
         }
-        gap_state->scan_data_id = 0;
+    }
+    catch (const std::out_of_range &)
+    {
+        get_logger()->error(
+            "Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            current_request_reply_context.adapter_id);
     }
 }
 
