@@ -86,8 +86,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Role::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
-            env.responseTimeout);
+            testutil::Role::Central, central.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(
@@ -109,7 +109,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_CONNECTED: error calling sd_ble_gap_phy_update, {}", c->role(), testutil::errorToString(err_code));
+                        get_logger()->error(
+                            "{} BLE_GAP_EVT_CONNECTED: error calling sd_ble_gap_phy_update, {}",
+                            c->role(), testutil::errorToString(err_code));
                         error = true;
                     }
                 }
@@ -126,7 +128,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                             if (err_code != NRF_SUCCESS)
                             {
-                                get_logger()->debug(
+                                get_logger()->error(
                                     "{}  Error connecting to {}, {}", c->role(),
                                     testutil::asText(gapEvent->params.adv_report.peer_addr),
                                     testutil::errorToString(err_code));
@@ -146,7 +148,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {:x}", c->role(), err_code);
+                            get_logger()->error("{} Scan start error, err_code {:x}", c->role(),
+                                                err_code);
                             error = true;
                         }
                     }
@@ -159,7 +162,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        get_logger()->debug("{} Conn params update failed, err_code {:x}", c->role(), err_code);
+                        get_logger()->error("{} Conn params update failed, err_code {:x}",
+                                            c->role(), err_code);
                         error = true;
                     }
                 }
@@ -169,7 +173,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: phy is not updated according to request", c->role());
+                        get_logger()->error(
+                            "{} BLE_GAP_EVT_PHY_UPDATE: phy is not updated according to request",
+                            c->role());
                         error = true;
                     }
                     else
@@ -177,7 +183,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                         const auto status = gapEvent->params.phy_update.status;
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {:x}, should be BLE_HCI_STATUS_CODE_SUCCESS({})",
+                            get_logger()->error("{} BLE_GAP_EVT_PHY_UPDATE: status is {:x}, should "
+                                                "be BLE_HCI_STATUS_CODE_SUCCESS({})",
                                                 c->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;
                         }
@@ -202,6 +209,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     const auto err_code = p->startAdvertising();
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} start advertising failed, error is {:x}", c->role(),
+                                            err_code);
+
                         error = true;
                     }
                 }
@@ -212,7 +222,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                 {
                     if (gapEvent->params.phy_update_request.peer_preferred_phys != requestedPhys)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: update request is not equal to the one sent from central", p->role());
+                        get_logger()->error("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: update "
+                                            "request is not equal to the one sent from central",
+                                            p->role());
                         error = true;
                     }
                     else
@@ -223,9 +235,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: error "
-                                              "calling sd_ble_gap_phy_update, {}",
-                                              p->role(), testutil::errorToString(err_code));
+                            get_logger()->error("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: error "
+                                                "calling sd_ble_gap_phy_update, {}",
+                                                p->role(), testutil::errorToString(err_code));
 
                             error = true;
                         }
@@ -237,7 +249,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: phy is not updated according to request", p->role());
+                        get_logger()->error(
+                            "{} BLE_GAP_EVT_PHY_UPDATE: phy is not updated according to request",
+                            p->role());
                         error = true;
                     }
                     else
@@ -246,7 +260,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
 
                         if (status != BLE_HCI_STATUS_CODE_SUCCESS)
                         {
-                            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE: status is {:x}, should "
+                            get_logger()->error("{} BLE_GAP_EVT_PHY_UPDATE: status is {:x}, should "
                                                 "be BLE_HCI_STATUS_CODE_SUCCESS({})",
                                                 p->role(), status, BLE_HCI_STATUS_CODE_SUCCESS);
                             error = true;
@@ -269,6 +283,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                get_logger()->error("{} error in status callback {:x}:{}", c->role(),
+                                    static_cast<uint32_t>(code), message);
+
                 error = true;
             }
         });
@@ -277,6 +294,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                get_logger()->error("{} error in status callback {:x}:{}", p->role(),
+                                    static_cast<uint32_t>(code), message);
+
                 error = true;
             }
         });

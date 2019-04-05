@@ -132,7 +132,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                             // Check that the received data is according to setupAdvertisement
                             if (manufacturerSpecificData != randomData)
                             {
-                                get_logger()->debug("{} Data configured in peripheral does not "
+                                get_logger()->error("{} Data configured in peripheral does not "
                                                     "match data received on central",
                                                     c->role());
                                 error = true;
@@ -148,7 +148,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                       advReport.type.connectable == 0 &&
                                       advReport.set_id == advertisementSetId))
                                 {
-                                    get_logger()->debug(
+                                    get_logger()->error(
                                         "{} Configured advertisement on peripheral does not "
                                         "match event received on central",
                                         c->role());
@@ -169,7 +169,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                                 if (err_code != NRF_SUCCESS)
                                 {
-                                    get_logger()->debug(
+                                    get_logger()->error(
                                         "{} {} error changing advertising data: {}", c->role(),
                                         testutil::asText(gapEvent->params.adv_report.peer_addr),
                                         testutil::errorToString(err_code));
@@ -193,7 +193,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {:x}", c->role(),
+                            get_logger()->error("{} Scan start error, err_code {:x}", c->role(),
                                                 err_code);
                             error = true;
                         }
@@ -214,7 +214,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     const auto scanRequestReport = gapEvent->params.scan_req_report;
                     if (scanRequestReport.adv_handle != p->scratchpad.adv_handle)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_SCAN_REQ_REPORT:  Received "
+                        get_logger()->error("{} BLE_GAP_EVT_SCAN_REQ_REPORT:  Received "
                                             "advertisement handle does not match the "
                                             "one setup with sd_ble_gap_adv_set_configure.",
                                             p->role());
@@ -244,7 +244,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                     if (setTerminated.adv_handle != p->scratchpad.adv_handle)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Received "
+                        get_logger()->error("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Received "
                                             "advertisement handle does not match the "
                                             "one setup with sd_ble_gap_adv_set_configure.",
                                             p->role());
@@ -254,7 +254,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                     if (setTerminated.reason != BLE_GAP_EVT_ADV_SET_TERMINATED_REASON_LIMIT_REACHED)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason "
+                        get_logger()->error("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Limit reason "
                                             "was not LIMIT_REACHED which it should be.",
                                             p->role());
                         error = true;
@@ -263,7 +263,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                     if (setTerminated.num_completed_adv_events != maxNumberOfAdvertisements)
                     {
-                        get_logger()->debug(
+                        get_logger()->error(
                             "{} BLE_GAP_EVT_ADV_SET_TERMINATED: Number of completed "
                             "advertisement events does not match max_adv_evts set in "
                             "sd_ble_gap_adv_set_configure.",
@@ -296,7 +296,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                     if (scanResponseData != scan_rsp_data)
                     {
-                        get_logger()->debug("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
+                        get_logger()->error("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
                                             "buffers set in sd_ble_gap_adv_set_configure does "
                                             "not match with advertisement received.",
                                             p->role());
@@ -317,7 +317,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} status callback gave error {:x}:{}", c->role(),
+                get_logger()->error("{} status callback gave error {:x}:{}", c->role(),
                                     static_cast<uint32_t>(code), message);
                 error = true;
             }
@@ -327,7 +327,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                get_logger()->debug("{} status callback gave error {:x}:{}", p->role(),
+                get_logger()->error("{} status callback gave error {:x}:{}", p->role(),
                                     static_cast<uint32_t>(code), message);
                 error = true;
             }

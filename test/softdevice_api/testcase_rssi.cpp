@@ -348,6 +348,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
         if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
             code == PKT_UNEXPECTED)
         {
+            get_logger()->error("{} error in status callback {:x}:{}", c->role(),
+                                static_cast<uint32_t>(code), message);
+
             centralError = true;
         }
     });
@@ -356,6 +359,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
         if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
             code == PKT_UNEXPECTED)
         {
+            get_logger()->error("{} error in status callback {:x}:{}", p->role(),
+                                static_cast<uint32_t>(code), message);
+
             peripheralError = true;
         }
     });

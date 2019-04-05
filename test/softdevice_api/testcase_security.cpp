@@ -115,6 +115,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} Not able to start authentication, error {:x}, {}",
+                                            c->role(), static_cast<uint32_t>(err_code),
+                                            testutil::errorToString(err_code));
                         error = true;
                     }
                 }
@@ -131,7 +134,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                             if (err_code != NRF_SUCCESS)
                             {
-                                get_logger()->debug(
+                                get_logger()->error(
                                     "{} Error connecting to {}, {}", c->role(),
                                     testutil::asText(gapEvent->params.adv_report.peer_addr),
                                     testutil::errorToString(err_code));
@@ -154,8 +157,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            get_logger()->debug("{} Scan start error, err_code {:x}", c->role(),
-                                                err_code);
+                            get_logger()->error("{} Scan start error, err_code {:x}", c->role(),
+                                                static_cast<uint32_t>(err_code));
                             error = true;
                         }
                     }
@@ -168,8 +171,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        get_logger()->debug("{} Conn params update failed, err_code  {:x}", c->role(),
-                                            err_code);
+                        get_logger()->error("{} Conn params update failed, err_code  {:x}", c->role(),
+                                            static_cast<uint32_t>(err_code));
                         error = true;
                     }
                 }
@@ -191,6 +194,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} security params reply failed, err_code  {:x}", c->role(),
+                                            static_cast<uint32_t>(err_code));
                         error = true;
                     }
                 }
@@ -222,6 +227,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} auth key reply failed, err_code {:x}", p->role(),
+                                            static_cast<uint32_t>(err_code));
+
                         error = true;
                     }
                 }
@@ -233,6 +241,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                     else
                     {
+                        get_logger()->error("{} BLE_GAP_EVT_AUTH_STATUS replied with status {:x}", p->role(),
+                                            static_cast<uint32_t>(gapEvent->params.auth_status.auth_status));
+
                         error = true;
                     }
 
@@ -252,6 +263,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     const auto err_code = p->startAdvertising();
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} start advertising failed, error {:x}", p->role(),
+                                            static_cast<uint32_t>(err_code));
+
                         error = true;
                     }
                 }
@@ -268,6 +282,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} security params reply failed, error {:x}", p->role(),
+                                            static_cast<uint32_t>(err_code));
                         error = true;
                     }
                 }
@@ -280,6 +296,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                     else
                     {
+                        get_logger()->error("{} auth failed with status  {:x}", p->role(),
+                                            static_cast<uint32_t>(gapEvent->params.auth_status.auth_status));
+
                         error = true;
                     }
 
@@ -293,9 +312,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                error = true;
-                get_logger()->debug("{} error in status callback {:x}:{}", c->role(),
+                get_logger()->error("{} error in status callback {:x}:{}", c->role(),
                                     static_cast<uint32_t>(code), message);
+                error = true;
             }
         });
 
@@ -303,9 +322,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                error = true;
-                get_logger()->debug("{} error in status callback {:x}:{}", p->role(),
+                get_logger()->error("{} error in status callback {:x}:{}", p->role(),
                                     static_cast<uint32_t>(code), message);
+                error = true;
             }
         });
 
