@@ -583,7 +583,7 @@ static void app_ble_gap_ble_data_mark_dirty(uint8_t *p_buf)
             if ((item.buf == p_buf) && (item.state == BLE_DATA_BUF_IN_USE))
             {
                 item.state = BLE_DATA_BUF_LAST_DIRTY;
-                get_logger()->error("buffer marked dirty {}", item.id);
+                get_logger()->debug("buffer marked dirty {}", item.id);
             }
         }
     }
