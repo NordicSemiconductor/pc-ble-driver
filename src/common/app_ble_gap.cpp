@@ -198,9 +198,11 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_request_reply_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
         // Assumption: conn_handle is always starting from 0 and up to SER_MAX_CONNECTIONS (not
         // including)
@@ -219,6 +221,10 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
@@ -232,9 +238,11 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_event_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
         for (auto &keys : gap_state->app_keys_table)
         {
@@ -249,6 +257,10 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -260,9 +272,11 @@ uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_event_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
         for (auto i = 0; i < SER_MAX_CONNECTIONS; i++)
         {
@@ -278,6 +292,10 @@ uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -289,14 +307,20 @@ uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **k
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_event_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
         *keyset              = &(gap_state->app_keys_table[index].keyset);
         return NRF_SUCCESS;
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -308,15 +332,21 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_request_reply_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
         std::memcpy(&(gap_state->app_keys_table[index].keyset), keyset,
                     sizeof(ble_gap_sec_keyset_t));
         return NRF_SUCCESS;
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -328,9 +358,11 @@ uint32_t app_ble_gap_state_reset()
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_request_reply_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
         for (auto &keyset : gap_state->app_keys_table)
         {
@@ -348,6 +380,10 @@ uint32_t app_ble_gap_state_reset()
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
@@ -364,6 +400,8 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_request_reply_context.adapter_id;
+
     try
     {
         const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
@@ -378,6 +416,10 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -389,9 +431,11 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
+    auto adapter_id = current_event_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_event_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
         std::memcpy(p_data, &(gap_state->scan_data), sizeof(ble_data_t));
 
         if (gap_state->scan_data.p_data != nullptr)
@@ -404,6 +448,10 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 }
@@ -423,9 +471,11 @@ int app_ble_gap_adv_buf_register(void *p_buf)
         return 0;
     }
 
+    auto adapter_id = current_request_reply_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
         auto id = 1;
 
@@ -447,6 +497,10 @@ int app_ble_gap_adv_buf_register(void *p_buf)
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return -1;
     }
 }
@@ -466,9 +520,11 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
         return 0;
     }
 
+    auto adapter_id = current_request_reply_context.adapter_id;
+
     try
     {
-        const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
         auto id = 1;
 
@@ -492,6 +548,10 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
     }
     catch (const std::out_of_range &)
     {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+
         return -1;
     }
 }
@@ -509,46 +569,79 @@ void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
         return nullptr;
     }
 
-    const auto gap_state =
-        adapters_gap_state.at(event_context ? current_event_context.adapter_id
-                                            : current_request_reply_context.adapter_id);
+    void *ret = nullptr;
+    auto adapter_id =
+        event_context ? current_event_context.adapter_id : current_request_reply_context.adapter_id;
 
-    auto ret = gap_state->m_ble_data_pool[id - 1].buf;
+    try
+    {
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
-    gap_state->m_ble_data_pool[id - 1].buf   = nullptr;
-    gap_state->m_ble_data_pool[id - 1].id    = 0;
-    gap_state->m_ble_data_pool[id - 1].state = BLE_DATA_BUF_FREE;
+        ret = gap_state->m_ble_data_pool[id - 1].buf;
+
+        gap_state->m_ble_data_pool[id - 1].buf   = nullptr;
+        gap_state->m_ble_data_pool[id - 1].id    = 0;
+        gap_state->m_ble_data_pool[id - 1].state = BLE_DATA_BUF_FREE;
+    }
+    catch (const std::out_of_range &)
+    {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+    }
 
     return ret;
 }
 
 static void app_ble_gap_ble_data_mark_dirty(uint8_t *p_buf)
 {
-    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+    auto adapter_id = current_request_reply_context.adapter_id;
 
-    for (auto &item : gap_state->m_ble_data_pool)
+    try
     {
-        if ((item.buf == p_buf) && (item.state == BLE_DATA_BUF_IN_USE))
+        const auto gap_state = adapters_gap_state.at(adapter_id);
+
+        for (auto &item : gap_state->m_ble_data_pool)
         {
-            item.state = BLE_DATA_BUF_LAST_DIRTY;
+            if ((item.buf == p_buf) && (item.state == BLE_DATA_BUF_IN_USE))
+            {
+                item.state = BLE_DATA_BUF_LAST_DIRTY;
+            }
         }
+    }
+    catch (const std::out_of_range &)
+    {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
     }
 }
 
 static void app_ble_gap_ble_adv_data_mark_dirty(uint8_t *p_buf1, uint8_t *p_buf2)
 {
-    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+    auto adapter_id = current_request_reply_context.adapter_id;
 
-    for (auto &item : gap_state->m_ble_data_pool)
+    try
     {
-        if (item.state == BLE_DATA_BUF_LAST_DIRTY)
-        {
-            app_ble_gap_adv_buf_addr_unregister(item.buf);
-        }
-    }
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
-    app_ble_gap_ble_data_mark_dirty(p_buf1);
-    app_ble_gap_ble_data_mark_dirty(p_buf2);
+        for (auto &item : gap_state->m_ble_data_pool)
+        {
+            if (item.state == BLE_DATA_BUF_LAST_DIRTY)
+            {
+                app_ble_gap_adv_buf_addr_unregister(item.buf);
+            }
+        }
+
+        app_ble_gap_ble_data_mark_dirty(p_buf1);
+        app_ble_gap_ble_data_mark_dirty(p_buf2);
+    }
+    catch (const std::out_of_range &)
+    {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+    }
 }
 
 void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *buf2)
@@ -574,22 +667,33 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
     }
 
     // Find location for scan_data
-    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+    auto adapter_id = current_request_reply_context.adapter_id;
 
-    auto id = 0;
-
-    // Check if ptr to scan data is already registered???
-    for (auto &item : gap_state->m_ble_data_pool)
+    try
     {
-        if (item.buf == p_scan_data)
-        {
-            gap_state->scan_data_id = id + 1;
-            return;
-        }
-        id++;
-    }
+        const auto gap_state = adapters_gap_state.at(adapter_id);
 
-    gap_state->scan_data_id = 0;
+        auto id = 0;
+
+        // Check if ptr to scan data is already registered???
+        for (auto &item : gap_state->m_ble_data_pool)
+        {
+            if (item.buf == p_scan_data)
+            {
+                gap_state->scan_data_id = id + 1;
+                return;
+            }
+            id++;
+        }
+
+        gap_state->scan_data_id = 0;
+    }
+    catch (const std::out_of_range &)
+    {
+        std::cerr << __FUNCTION__ << " adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
+    }
 }
 
 void app_ble_gap_scan_data_unset(bool free)
@@ -599,15 +703,26 @@ void app_ble_gap_scan_data_unset(bool free)
         return;
     }
 
-    const auto gap_state = adapters_gap_state.at(current_request_reply_context.adapter_id);
+    auto adapter_id = current_request_reply_context.adapter_id;
 
-    if (gap_state->scan_data_id)
+    try
     {
-        if (free)
+        const auto gap_state = adapters_gap_state.at(adapter_id);
+
+        if (gap_state->scan_data_id)
         {
-            app_ble_gap_adv_buf_unregister(gap_state->scan_data_id, false);
+            if (free)
+            {
+                app_ble_gap_adv_buf_unregister(gap_state->scan_data_id, false);
+            }
+            gap_state->scan_data_id = 0;
         }
-        gap_state->scan_data_id = 0;
+    }
+    catch (const std::out_of_range &)
+    {
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
+                  << " not found in adapters_gap_state."
+                  << "\n";
     }
 }
 
