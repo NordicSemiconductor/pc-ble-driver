@@ -147,7 +147,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        NRF_LOG(c->role() << " Scan start error, " << testutil::errorToString(err_code));
+                        NRF_LOG(c->role()
+                                << " Scan start error, " << testutil::errorToString(err_code));
                         centralError = true;
                     }
                 }
@@ -160,7 +161,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG(c->role() << " Conn params update failed, " << testutil::errorToString(err_code));
+                    NRF_LOG(c->role()
+                            << " Conn params update failed, " << testutil::errorToString(err_code));
                     centralError = true;
                 }
             }
@@ -344,6 +346,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
         if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
             code == PKT_UNEXPECTED)
         {
+            NRF_LOG(c->role() << " error in status callback " << std::hex
+                              << static_cast<uint32_t>(code) << ": " << message);
+
             centralError = true;
         }
     });
@@ -352,6 +357,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
         if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
             code == PKT_UNEXPECTED)
         {
+            NRF_LOG(p->role() << " error in status callback " << std::hex
+                              << static_cast<uint32_t>(code) << ": " << message);
+
             peripheralError = true;
         }
     });
