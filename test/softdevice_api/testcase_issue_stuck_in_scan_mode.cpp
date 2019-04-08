@@ -131,7 +131,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
             }
         });
 
-        get_logger()->debug("{} Starting scan iteration #{} of {}", c->role(),
+        get_logger()->info("{} Starting scan iteration #{} of {}", c->role(),
                             static_cast<uint32_t>(i), static_cast<uint32_t>(scanIterations));
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
@@ -198,6 +198,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         CHECK(c->close() == NRF_SUCCESS);
         sd_rpc_adapter_delete(c->unwrap());
 
-        get_logger()->debug("{}  Scan iteration #{} of {} completed", c->role(), static_cast<uint32_t>(i), static_cast<uint32_t>(scanIterations));
+        get_logger()->info("{}  Scan iteration #{} of {} completed", c->role(), static_cast<uint32_t>(i), static_cast<uint32_t>(scanIterations));
     }
 }

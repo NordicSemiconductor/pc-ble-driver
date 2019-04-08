@@ -108,7 +108,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     {
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1),
+            get_logger()->info("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1),
                                 numberOfIterations);
 
             auto c = std::make_shared<testutil::AdapterWrapper>(
@@ -162,7 +162,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             CHECK(c->close() == NRF_SUCCESS);
             sd_rpc_adapter_delete(c->unwrap());
 
-            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1),
+            get_logger()->info("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1),
                                 numberOfIterations);
         }
     }
@@ -187,14 +187,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {
-            get_logger()->debug("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1),
+            get_logger()->info("Starting iteration #{} of {}", static_cast<uint32_t>(i + 1),
                                 numberOfIterations);
 
             REQUIRE(c->open() == NRF_SUCCESS);
             REQUIRE(c->configure() == NRF_SUCCESS);
             CHECK(c->close() == NRF_SUCCESS);
 
-            get_logger()->debug("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1),
+            get_logger()->info("Iteration #{} of {} complete.", static_cast<uint32_t>(i + 1),
                                 numberOfIterations);
         }
 
