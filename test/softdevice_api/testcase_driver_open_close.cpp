@@ -89,7 +89,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
+                NRF_LOG(c->role() << " error in status callback " << std::hex << static_cast<uint32_t>(code)
                                   << ": " << message);
             }
         });
