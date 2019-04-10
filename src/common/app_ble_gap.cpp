@@ -615,7 +615,8 @@ static void app_ble_gap_ble_adv_data_mark_dirty(uint8_t *p_buf1, uint8_t *p_buf2
     catch (const std::out_of_range &)
     {
         get_logger()->error(
-            "Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            "{} Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            __FUNCTION__,
             current_request_reply_context.adapter_id);
     }
 }
@@ -668,7 +669,8 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
     catch (const std::out_of_range &)
     {
         get_logger()->error(
-            "Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            "{} Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            __FUNCTION__,
             current_request_reply_context.adapter_id);
     }
 }
@@ -697,7 +699,8 @@ void app_ble_gap_scan_data_unset(bool free)
     catch (const std::out_of_range &)
     {
         get_logger()->error(
-            "Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            "{} Not able to find adapter_id in current_request_reply_context.adapter_id, value is {}",
+            __FUNCTION__,
             current_request_reply_context.adapter_id);
     }
 }
