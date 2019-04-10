@@ -136,6 +136,7 @@ uint32_t app_ble_gap_state_create(void *adapter_id)
 
 uint32_t app_ble_gap_state_delete(void *adapter_id)
 {
+  get_logger()->warn("{} - adapter_id: {}", __FUNCTION__, adapter_id);
     if (adapters_gap_state.erase(adapter_id) != 1)
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -151,6 +152,7 @@ uint32_t app_ble_gap_state_delete(void *adapter_id)
 void app_ble_gap_set_current_adapter_id(void *adapter_id,
                                         const app_ble_gap_adapter_codec_context_t key_type)
 {
+    get_logger()->warn("{} - key type: {} {}", __FUNCTION__, key_type, adapter_id);
     if (key_type == EVENT_CODEC_CONTEXT)
     {
         current_event_context.codec_mutex.lock();
@@ -539,7 +541,7 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 
 void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
 {
-    get_logger()->debug("adv_buf_unregister enter");
+    get_logger()->debug("adv_buf_unregister enter {}", event_context);
     if (!app_ble_gap_check_current_adapter_set(event_context ? EVENT_CODEC_CONTEXT
                                                              : REQUEST_REPLY_CODEC_CONTEXT))
     {

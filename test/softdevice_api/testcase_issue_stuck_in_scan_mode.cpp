@@ -199,5 +199,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_stuck_in_scan_mode,
         sd_rpc_adapter_delete(c->unwrap());
 
         get_logger()->info("{}  Scan iteration #{} of {} completed", c->role(), static_cast<uint32_t>(i), static_cast<uint32_t>(scanIterations));
+        if (error == true) return;
     }
 }
