@@ -165,6 +165,8 @@ void app_ble_gap_set_current_adapter_id(void *adapter_id,
 
 void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_context_t key_type)
 {
+    get_logger()->warn("{} - key type: {}", __FUNCTION__, key_type);
+
     if (key_type == EVENT_CODEC_CONTEXT)
     {
         current_event_context.codec_mutex.unlock();
