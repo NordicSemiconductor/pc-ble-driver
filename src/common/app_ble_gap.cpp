@@ -460,7 +460,7 @@ int app_ble_gap_adv_buf_register(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context "
+        std::cerr << __FUNCTION__ << ": app_ble_gap_adv_buf_register not called from context "
                      "REQUEST_REPLY_CODEC_CONTEXT, terminating"
                   << std::endl;
         std::terminate();
@@ -509,7 +509,7 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << "PROGRAM LOGIC ERROR: app_ble_gap_adv_buf_register not called from context "
+        std::cerr << __FUNCTION__ << ": app_ble_gap_adv_buf_register not called from context "
                      "REQUEST_REPLY_CODEC_CONTEXT, terminating"
                   << std::endl;
         std::terminate();
@@ -690,7 +690,7 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
     }
     catch (const std::out_of_range &)
     {
-        std::cerr << __FUNCTION__ << " adapter_id " << static_cast<void *>(adapter_id)
+        std::cerr << __FUNCTION__ << ": adapter_id " << static_cast<void *>(adapter_id)
                   << " not found in adapters_gap_state."
                   << "\n";
     }
