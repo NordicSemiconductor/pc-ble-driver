@@ -65,14 +65,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
     const auto peripheral = env.serialPorts.at(1);
 
 #if NRF_SD_BLE_API == 6
-    // Indicates if an error has occurred in a callback.
-    // The test framework is not thread safe so this variable is used to communicate that an issues
-    // has occurred in a callback.
-    auto error       = false;
-    auto testSuccess = false;
-
     SECTION("extended")
     {
+        // Indicates if an error has occurred in a callback.
+        // The test framework is not thread safe so this variable is used to communicate that an
+        // issues has occurred in a callback.
+        auto error       = false;
+        auto testSuccess = false;
+
         const auto maxLengthOfAdvData        = testutil::ADV_DATA_BUFFER_SIZE;
         const auto maxNumberOfAdvertisements = 10; // Random number of advertisements
         const auto advertisementNameLength   = 40; // Random advertisement name length
@@ -307,6 +307,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                NRF_LOG(c->role() << " error in status callback " << std::hex
+                                  << static_cast<uint32_t>(code) << ": " << message);
+
                 error = true;
             }
         });
@@ -315,6 +318,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                NRF_LOG(p->role() << " error in status callback " << std::hex
+                                  << static_cast<uint32_t>(code) << ": " << message);
                 error = true;
             }
         });
