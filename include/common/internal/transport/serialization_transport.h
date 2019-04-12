@@ -114,7 +114,9 @@ class SerializationTransport
     std::thread eventThread;
     std::queue<std::vector<uint8_t>> eventQueue;
 
+    std::mutex isOpenMutex;
     std::atomic<bool> isOpen; // Variable is shared between threads
+
     std::mutex publicMethodMutex;
 };
 

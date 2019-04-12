@@ -43,6 +43,7 @@
 
 #include "ble_common.h"
 
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -65,12 +66,16 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
 
-    if (isOpen)
     {
-        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_OPEN;
-    }
+        std::lock_guard<std::mutex> openLck(isOpenMutex);
 
-    isOpen = true;
+        if (isOpen)
+        {
+            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_OPEN;
+        }
+
+        isOpen = true;
+    }
 
     statusCallback = status_callback;
     eventCallback  = event_callback;
@@ -89,14 +94,14 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
     // Thread should not be running from before when calling this
     if (!eventThread.joinable())
     {
-        // If ::close is called when this method (::open) returns 
-        // and eventThread is executing somewhere between while (isOpen) 
+        // If ::close is called when this method (::open) returns
+        // and eventThread is executing somewhere between while (isOpen)
         // and eventWaitCondition notification we could get a deadlock.
         //
         // To prevent this, lock eventMutex in this thread, let eventThread
         // wait until eventMutex is unlocked (.wait in this thread).
-        // When eventThread is started and outside critical region, 
-        // let eventThread notify eventWaitCondition, making .wait 
+        // When eventThread is started and outside critical region,
+        // let eventThread notify eventWaitCondition, making .wait
         // return
         std::unique_lock<std::mutex> eventLock(eventMutex);
         eventThread = std::thread([this] { eventHandlingRunner(); });
@@ -114,12 +119,17 @@ uint32_t SerializationTransport::close()
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
 
-    if (!isOpen)
     {
-        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
+        std::lock_guard<std::mutex> openLck(isOpenMutex);
+
+        if (!isOpen)
+        {
+            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
+        }
+
+        isOpen = false;
     }
 
-    isOpen = false;
     eventWaitCondition.notify_all();
 
     if (eventThread.joinable())
@@ -142,6 +152,7 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
                                       serialization_pkt_type_t pktType)
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
+    std::lock_guard<std::mutex> openLck(isOpenMutex);
 
     if (!isOpen)
     {
@@ -197,6 +208,8 @@ void SerializationTransport::eventHandlingRunner()
         // ::readHandler (thread in H5Transport)
         eventWaitCondition.notify_all();
         eventWaitCondition.wait(eventLock);
+
+        std::lock_guard<std::mutex> openLck(isOpenMutex);
 
         while (!eventQueue.empty() && isOpen)
         {
