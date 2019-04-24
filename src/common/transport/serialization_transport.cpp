@@ -67,7 +67,7 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
     std::lock_guard<std::mutex> lck(publicMethodMutex);
 
     {
-        std::lock_guard<std::mutex> openLck(isOpenMutex);
+        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
         if (isOpen)
         {
@@ -120,7 +120,7 @@ uint32_t SerializationTransport::close()
     std::lock_guard<std::mutex> lck(publicMethodMutex);
 
     {
-        std::lock_guard<std::mutex> openLck(isOpenMutex);
+        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
         if (!isOpen)
         {
@@ -152,7 +152,7 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
                                       serialization_pkt_type_t pktType)
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
-    std::lock_guard<std::mutex> openLck(isOpenMutex);
+    std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
     if (!isOpen)
     {
@@ -209,7 +209,10 @@ void SerializationTransport::eventHandlingRunner()
         eventWaitCondition.notify_all();
         eventWaitCondition.wait(eventLock);
 
-        std::lock_guard<std::mutex> openLck(isOpenMutex);
+        // Prevent changing open state of adapter while processing queued events from connectivity.
+        // Incoming events will invoke callbacks into application code.
+        // Application code may call pc-ble-driver functions that end up calling ::send
+        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
         while (!eventQueue.empty() && isOpen)
         {

@@ -114,8 +114,11 @@ class SerializationTransport
     std::thread eventThread;
     std::queue<std::vector<uint8_t>> eventQueue;
 
-    std::mutex isOpenMutex;
-    std::atomic<bool> isOpen; // Variable is shared between threads
+    // Use recursive mutex since the mutex may be acquired recursively in the same thread
+    // in the case of ::eventHandlingRunner thread calling a application callback that
+    // again invoke a function that call ::send
+    std::recursive_mutex isOpenMutex;
+    bool isOpen;
 
     std::mutex publicMethodMutex;
 };
