@@ -106,7 +106,7 @@ uint32_t H5Transport::open(const status_cb_t &status_callback, const data_cb_t &
 
     if (isOpen)
     {
-        return NRF_ERROR_SD_RPC_H5_TRANSPORT_STATE;
+        return NRF_ERROR_SD_RPC_H5_TRANSPORT_ALREADY_OPEN;
     }
 
     isOpen = true;
