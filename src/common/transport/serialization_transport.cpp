@@ -65,16 +65,11 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
                                       const evt_cb_t &event_callback, const log_cb_t &log_callback)
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
+    std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
+    if (isOpen)
     {
-        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
-
-        if (isOpen)
-        {
-            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_OPEN;
-        }
-
-        isOpen = true;
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_OPEN;
     }
 
     statusCallback = status_callback;
@@ -90,6 +85,8 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
     {
         return errorCode;
     }
+
+    isOpen = true;
 
     // Thread should not be running from before when calling this
     if (!eventThread.joinable())
@@ -118,17 +115,14 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
 uint32_t SerializationTransport::close()
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
+    std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
+    if (!isOpen)
     {
-        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
-
-        if (!isOpen)
-        {
-            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
-        }
-
-        isOpen = false;
+        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
     }
+
+    isOpen = false;
 
     eventWaitCondition.notify_all();
 
@@ -200,6 +194,12 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
 void SerializationTransport::eventHandlingRunner()
 {
     std::unique_lock<std::mutex> eventLock(eventMutex);
+
+    // Drain the queue for any old events
+    while(!eventQueue.empty()) 
+    {
+        eventQueue.pop();
+    }
 
     while (isOpen)
     {
