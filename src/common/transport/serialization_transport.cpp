@@ -48,7 +48,7 @@
 #include <memory>
 #include <sstream>
 
-SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout)
+SerializationTransport::SerializationTransport(H5Transport *dataLinkLayer, uint32_t response_timeout)
     : statusCallback(nullptr)
     , eventCallback(nullptr)
     , logCallback(nullptr)
@@ -57,7 +57,7 @@ SerializationTransport::SerializationTransport(Transport *dataLinkLayer, uint32_
     , isOpen(false)
 {
     // SerializationTransport takes ownership of dataLinkLayer provided object
-    nextTransportLayer = std::shared_ptr<Transport>(dataLinkLayer);
+    nextTransportLayer = std::shared_ptr<H5Transport>(dataLinkLayer);
     responseTimeout    = response_timeout;
 }
 
@@ -157,6 +157,10 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
 
     if (!isOpen)
     {
+        std::stringstream s2;
+        s2 << "t:" << std::this_thread::get_id() << " about to release isOpenMutex" << std::endl;
+        logCallback(SD_RPC_LOG_TRACE, s2.str());
+
         return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_INVALID_STATE;
     }
 
@@ -190,6 +194,9 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
 
     if (!responseReceived)
     {
+        std::stringstream s2;
+        s2 << "t:" << std::this_thread::get_id() << " about to release isOpenMutex" << std::endl;
+        logCallback(SD_RPC_LOG_TRACE, s2.str());
         logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
         return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_NO_RESPONSE;
     }

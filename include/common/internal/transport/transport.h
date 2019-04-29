@@ -54,7 +54,7 @@ typedef std::function<void(const sd_rpc_log_severity_t severity, const std::stri
 class Transport
 {
   public:
-    virtual ~Transport();
+    virtual ~Transport() noexcept;
     virtual uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
                           const log_cb_t &log_callback);
     virtual uint32_t close() = 0;

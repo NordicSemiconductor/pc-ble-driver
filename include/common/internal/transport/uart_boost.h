@@ -63,7 +63,7 @@ class UartBoost : public Transport
      */
     UartBoost(const UartCommunicationParameters &communicationParameters);
 
-    ~UartBoost() noexcept;
+    ~UartBoost() noexcept override;
 
     /**
      *@brief Setup of serial port service with parameter data.

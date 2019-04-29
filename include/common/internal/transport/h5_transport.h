@@ -39,6 +39,7 @@
 #define H5_TRANSPORT_H
 
 #include "transport.h"
+#include "uart_boost.h"
 
 #include <condition_variable>
 #include <mutex>
@@ -80,8 +81,8 @@ class H5Transport : public Transport
 {
   public:
     H5Transport() = delete;
-    H5Transport(Transport *nextTransportLayer, const uint32_t retransmission_interval);
-    ~H5Transport() noexcept;
+    H5Transport(UartBoost *nextTransportLayer, const uint32_t retransmission_interval);
+    ~H5Transport() noexcept override;
 
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
                   const log_cb_t &log_callback) override;

@@ -75,7 +75,7 @@ UartBoost::~UartBoost() noexcept
     {
         if (isOpen)
         {
-            close();
+            UartBoost::close();
         }
     }
     catch (std::exception &e)

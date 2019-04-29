@@ -120,7 +120,7 @@ data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t 
                                                                uint32_t retransmission_interval)
 {
     const auto dataLinkLayer = static_cast<data_link_layer_t *>(malloc(sizeof(data_link_layer_t)));
-    const auto physicalLayer = static_cast<Transport *>(physical_layer->internal);
+    const auto physicalLayer = static_cast<UartBoost *>(physical_layer->internal);
     const auto h5            = new H5Transport(physicalLayer, retransmission_interval);
     dataLinkLayer->internal  = static_cast<void *>(h5);
     return dataLinkLayer;
@@ -130,7 +130,7 @@ transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_la
                                                  uint32_t response_timeout)
 {
     const auto transportLayer = static_cast<transport_layer_t *>(malloc(sizeof(transport_layer_t)));
-    const auto dataLinkLayer  = static_cast<Transport *>(data_link_layer->internal);
+    const auto dataLinkLayer  = static_cast<H5Transport *>(data_link_layer->internal);
     const auto serialization  = new SerializationTransport(dataLinkLayer, response_timeout);
     transportLayer->internal  = serialization;
     return transportLayer;
