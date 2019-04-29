@@ -115,14 +115,17 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
 uint32_t SerializationTransport::close()
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
-    std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
-
-    if (!isOpen)
+    
     {
-        return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
-    }
+        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
-    isOpen = false;
+        if (!isOpen)
+        {
+            return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_ALREADY_CLOSED;
+        }
+
+        isOpen = false;
+    }
 
     eventWaitCondition.notify_all();
 
