@@ -149,6 +149,10 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
                                       serialization_pkt_type_t pktType)
 {
     std::lock_guard<std::mutex> lck(publicMethodMutex);
+
+    std::stringstream s1;
+    s1 << "t:" << std::this_thread::get_id() << " about to lock isOpenMutex" << std::endl;
+    logCallback(SD_RPC_LOG_TRACE, s1.str());
     std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
     if (!isOpen)
@@ -189,6 +193,10 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
         logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
         return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_NO_RESPONSE;
     }
+
+    std::stringstream s2;
+    s2 << "t:" << std::this_thread::get_id() << " about to release isOpenMutex" << std::endl;
+    logCallback(SD_RPC_LOG_TRACE, s2.str());
 
     return NRF_SUCCESS;
 }
