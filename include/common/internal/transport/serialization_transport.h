@@ -80,7 +80,7 @@ class SerializationTransport
     SerializationTransport &operator=(SerializationTransport &&) = delete;
 
     SerializationTransport(H5Transport *dataLinkLayer, uint32_t response_timeout);
-    ~SerializationTransport() = default;
+    ~SerializationTransport();
 
     uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback,
                   const log_cb_t &log_callback);

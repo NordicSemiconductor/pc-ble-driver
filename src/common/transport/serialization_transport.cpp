@@ -61,6 +61,14 @@ SerializationTransport::SerializationTransport(H5Transport *dataLinkLayer, uint3
     responseTimeout    = response_timeout;
 }
 
+SerializationTransport::~SerializationTransport()
+{
+    if(eventThread.joinable())
+    {
+        eventThread.join();
+    }
+}
+
 uint32_t SerializationTransport::open(const status_cb_t &status_callback,
                                       const evt_cb_t &event_callback, const log_cb_t &log_callback)
 {
