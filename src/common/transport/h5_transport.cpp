@@ -97,6 +97,7 @@ H5Transport::H5Transport(UartBoost*_nextTransportLayer, const uint32_t retransmi
 
 H5Transport::~H5Transport() noexcept
 {
+    stopStateMachine();
     delete nextTransportLayer;
 }
 
