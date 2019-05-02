@@ -177,7 +177,7 @@ uint32_t VirtualTransportSendSync::send(const std::vector<uint8_t> &data) noexce
 // Since the H5Transport.open is a blocking call
 // we need to run open in separate threads to
 // make the two H5Transports communicate
-H5TransportWrapper::H5TransportWrapper(UartBoost *nextTransportLayer,
+H5TransportWrapper::H5TransportWrapper(UartTransport *nextTransportLayer,
                                        uint32_t retransmission_interval) noexcept
     : H5Transport(nextTransportLayer, retransmission_interval)
     , isOpenDone(false)

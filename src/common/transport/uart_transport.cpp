@@ -35,8 +35,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "uart_boost.h"
 #include "nrf_error.h"
+#include "uart_transport.h"
 #include "uart_settings_boost.h"
 
 #include <functional>
@@ -59,7 +59,7 @@ constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
 // if opening a UART port right after close.
 constexpr auto DELAY_BEFORE_OPEN = std::chrono::milliseconds(200);
 
-UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
+UartTransport::UartTransport(const UartCommunicationParameters &communicationParameters)
     : readBuffer()
     , isOpen(false)
     , uartSettingsBoost(communicationParameters)
@@ -69,23 +69,23 @@ UartBoost::UartBoost(const UartCommunicationParameters &communicationParameters)
 
 // The order of destructor invocation is important here. See:
 // https://svn.boost.org/trac10/ticket/10447
-UartBoost::~UartBoost() noexcept
+UartTransport::~UartTransport() noexcept
 {
     try
     {
         if (isOpen)
         {
-            UartBoost::close();
+            UartTransport::close();
         }
     }
     catch (std::exception &e)
     {
-        std::cerr << "Error in ~UartBoost" << e.what() << std::endl;
+        std::cerr << "Error in ~UartTransport" << e.what() << std::endl;
         std::terminate();
     }
 }
 
-uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+uint32_t UartTransport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
                          const log_cb_t &log_callback) noexcept
 {
     std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
@@ -167,10 +167,10 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
     try
     {
         callbackReadHandle =
-            std::bind(&UartBoost::readHandler, this, std::placeholders::_1, std::placeholders::_2);
+            std::bind(&UartTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
 
         callbackWriteHandle =
-            std::bind(&UartBoost::writeHandler, this, std::placeholders::_1, std::placeholders::_2);
+            std::bind(&UartTransport::writeHandler, this, std::placeholders::_1, std::placeholders::_2);
 
         const auto asioWorker = [&]() {
             try
@@ -265,7 +265,7 @@ uint32_t UartBoost::open(const status_cb_t &status_callback, const data_cb_t &da
     return NRF_SUCCESS;
 }
 
-uint32_t UartBoost::close() noexcept
+uint32_t UartTransport::close() noexcept
 {
     std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
@@ -310,7 +310,7 @@ uint32_t UartBoost::close() noexcept
     return NRF_SUCCESS;
 }
 
-uint32_t UartBoost::send(const std::vector<uint8_t> &data) noexcept
+uint32_t UartTransport::send(const std::vector<uint8_t> &data) noexcept
 {
     std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
@@ -353,7 +353,7 @@ uint32_t UartBoost::send(const std::vector<uint8_t> &data) noexcept
     return NRF_SUCCESS;
 }
 
-void UartBoost::readHandler(const asio::error_code &errorCode, const size_t bytesTransferred)
+void UartTransport::readHandler(const asio::error_code &errorCode, const size_t bytesTransferred)
 {
     if (!isOpen && !errorCode)
     {
@@ -391,7 +391,7 @@ void UartBoost::readHandler(const asio::error_code &errorCode, const size_t byte
     }
 }
 
-void UartBoost::writeHandler(const asio::error_code &errorCode, const size_t bytesTransferred)
+void UartTransport::writeHandler(const asio::error_code &errorCode, const size_t bytesTransferred)
 {
     if (!errorCode)
     {
@@ -422,18 +422,18 @@ void UartBoost::writeHandler(const asio::error_code &errorCode, const size_t byt
     }
 }
 
-void UartBoost::startRead()
+void UartTransport::startRead()
 {
     asyncRead();
 }
 
-void UartBoost::asyncRead()
+void UartTransport::asyncRead()
 {
     const auto mutableReadBuffer = asio::buffer(readBuffer, BUFFER_SIZE);
     serialPort->async_read_some(mutableReadBuffer, callbackReadHandle);
 }
 
-void UartBoost::asyncWrite()
+void UartTransport::asyncWrite()
 {
     { // lock_guard scope
         std::lock_guard<std::mutex> guard(queueMutex);
@@ -458,7 +458,7 @@ void UartBoost::asyncWrite()
     asio::async_write(*serialPort, buffer, callbackWriteHandle);
 }
 
-void UartBoost::purge() const
+void UartTransport::purge() const
 {
 #if _WIN32
     const auto result = PurgeComm(serialPort->native_handle(),

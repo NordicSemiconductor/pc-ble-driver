@@ -67,7 +67,7 @@
 #include <map>
 #include <sstream>
 #include <thread>
-#include <uart_boost.h>
+#include <uart_transport.h>
 
 const uint8_t PACKET_RETRANSMISSIONS =
     6; // Number of times to send reliable packets before giving in
@@ -80,7 +80,7 @@ const auto OPEN_WAIT_TIMEOUT = std::chrono::milliseconds(3000);
 const auto RESET_WAIT_DURATION = std::chrono::milliseconds(300);
 
 #pragma region Public methods
-H5Transport::H5Transport(UartBoost *_nextTransportLayer, const uint32_t retransmission_interval)
+H5Transport::H5Transport(UartTransport *_nextTransportLayer, const uint32_t retransmission_interval)
     : nextTransportLayer(_nextTransportLayer)
     , seqNum(0)
     , ackNum(0)

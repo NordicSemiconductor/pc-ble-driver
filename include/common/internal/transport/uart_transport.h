@@ -35,8 +35,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UART_BOOST_H
-#define UART_BOOST_H
+#ifndef UART_TRANSPORT_H
+#define UART_TRANSPORT_H
 
 #include "transport.h"
 #include "uart_defines.h"
@@ -52,18 +52,18 @@
 #include <stdint.h>
 
 /**
- * @brief The UartBoost class opens, reads and writes a serial port using the boost asio library
+ * @brief The UartTransport class opens, reads and writes a serial port using the boost asio library
  */
-class UartBoost : public Transport
+class UartTransport : public Transport
 {
   public:
     /**
      *@brief Is called by app_uart_init() stores function pointers and sets up necessary boost
      * variables.
      */
-    UartBoost(const UartCommunicationParameters &communicationParameters);
+    UartTransport(const UartCommunicationParameters &communicationParameters);
 
-    ~UartBoost() noexcept override;
+    ~UartTransport() noexcept override;
 
     /**
      *@brief Setup of serial port service with parameter data.
@@ -133,4 +133,4 @@ class UartBoost : public Transport
     void purge() const;
 };
 
-#endif // UART_BOOST_H
+#endif // UART_TRANSPORT_H

@@ -109,7 +109,7 @@ TEST_CASE("open_close")
     ap.parity      = UartParityNone;
     ap.portName    = portA;
     ap.stopBits    = UartStopBitsOne;
-    auto a         = new UartBoost(ap);
+    auto a         = new UartTransport(ap);
 
     auto envPortB = env.serialPorts.at(1);
     auto portB    = envPortB.port.c_str();
@@ -121,7 +121,7 @@ TEST_CASE("open_close")
     bp.parity      = UartParityNone;
     bp.portName    = portB;
     bp.stopBits    = UartStopBitsOne;
-    auto b         = new UartBoost(bp);
+    auto b         = new UartTransport(bp);
 
     bool error = false;
 
