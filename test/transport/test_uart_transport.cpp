@@ -44,7 +44,7 @@
 #include "catch2/catch.hpp"
 
 #include <test_setup.h>
-#include <uart_boost.h>
+#include <uart_transport.h>
 
 #include <chrono>
 #include <cstdlib>
