@@ -188,10 +188,12 @@ uint32_t sd_rpc_close(adapter_t *adapter)
         return NRF_ERROR_INVALID_PARAM;
     }
 
+    const auto err_code = adapterLayer->close();
+
     // Delete BLE GAP state object
     app_ble_gap_state_delete(adapterLayer->transport);
 
-    return adapterLayer->close();
+    return err_code;
 }
 
 uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,

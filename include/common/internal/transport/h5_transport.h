@@ -85,9 +85,9 @@ class H5Transport : public Transport
     ~H5Transport() noexcept override;
 
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                  const log_cb_t &log_callback) override;
-    uint32_t close() override;
-    uint32_t send(const std::vector<uint8_t> &data) override;
+                  const log_cb_t &log_callback) noexcept override;
+    uint32_t close() noexcept override;
+    uint32_t send(const std::vector<uint8_t> &data) noexcept override;
 
     h5_state_t state() const;
 
@@ -160,15 +160,15 @@ class H5Transport : public Transport
 
     std::map<h5_state_t, std::shared_ptr<ExitCriterias>> exitCriterias;
 
-    void stateMachineWorker();
+    void stateMachineWorker() noexcept;
 
     // Mutex that allows threads to wait for a given state in the state machine
     std::mutex stateMutex;
     bool waitForState(h5_state_t state, std::chrono::milliseconds timeout);
     std::condition_variable stateWaitCondition;
 
+    std::recursive_mutex isOpenMutex;
     bool isOpen;
-    std::mutex publicMethodMutex;
 
     // Actions associated with each state
     h5_state_t stateActionStart();
