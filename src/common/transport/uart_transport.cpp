@@ -40,7 +40,6 @@
 #include "uart_settings_boost.h"
 
 #include <functional>
-#include <iostream>
 #include <mutex>
 #include <sstream>
 #include <system_error>
@@ -71,18 +70,7 @@ UartTransport::UartTransport(const UartCommunicationParameters &communicationPar
 // https://svn.boost.org/trac10/ticket/10447
 UartTransport::~UartTransport() noexcept
 {
-    try
-    {
-        if (isOpen)
-        {
-            UartTransport::close();
-        }
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << "Error in ~UartTransport" << e.what() << std::endl;
-        std::terminate();
-    }
+    UartTransport::close();
 }
 
 uint32_t UartTransport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
@@ -312,15 +300,17 @@ uint32_t UartTransport::close() noexcept
 
 uint32_t UartTransport::send(const std::vector<uint8_t> &data) noexcept
 {
-    std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
-
-    if (!isOpen)
     {
-        log(SD_RPC_LOG_ERROR,
-            "Trying to send packets to device when serial device is closed is not "
-            "supported");
+        std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
-        return NRF_ERROR_SD_RPC_SERIAL_PORT_STATE;
+        if (!isOpen)
+        {
+            log(SD_RPC_LOG_ERROR,
+                "Trying to send packets to device when serial device is closed is not "
+                "supported");
+
+            return NRF_ERROR_SD_RPC_SERIAL_PORT_STATE;
+        }
     }
 
     {
@@ -355,15 +345,7 @@ uint32_t UartTransport::send(const std::vector<uint8_t> &data) noexcept
 
 void UartTransport::readHandler(const asio::error_code &errorCode, const size_t bytesTransferred)
 {
-    if (!isOpen && !errorCode)
-    {
-        std::stringstream message;
-        message << "serial port closed, but " << bytesTransferred
-                << " bytes received. Data will not be sent to transport layer above.";
-        log(SD_RPC_LOG_DEBUG, message.str());
-    }
-
-    if (!errorCode && isOpen)
+    if (!errorCode)
     {
         const auto readBufferData = readBuffer.data();
 

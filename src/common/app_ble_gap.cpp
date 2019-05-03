@@ -109,6 +109,12 @@ typedef struct
      * progress
      */
     std::mutex codec_mutex;
+
+    /**
+     * @brief Mutex that protectes the adapter_id
+     *
+     */
+    std::mutex adapter_id_mutex;
 } adapter_codec_context_t;
 
 /**
@@ -153,11 +159,13 @@ void app_ble_gap_set_current_adapter_id(void *adapter_id,
     if (key_type == EVENT_CODEC_CONTEXT)
     {
         current_event_context.codec_mutex.lock();
+        std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
         current_event_context.adapter_id = adapter_id;
     }
     else if (key_type == REQUEST_REPLY_CODEC_CONTEXT)
     {
         current_request_reply_context.codec_mutex.lock();
+        std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
         current_request_reply_context.adapter_id = adapter_id;
     }
 }
@@ -167,11 +175,13 @@ void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_contex
     if (key_type == EVENT_CODEC_CONTEXT)
     {
         current_event_context.codec_mutex.unlock();
+        std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
         current_event_context.adapter_id = nullptr;
     }
     else if (key_type == REQUEST_REPLY_CODEC_CONTEXT)
     {
         current_request_reply_context.codec_mutex.unlock();
+        std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
         current_request_reply_context.adapter_id = nullptr;
     }
 }
@@ -198,7 +208,7 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_request_reply_context.adapter_id;
+    const auto adapter_id = current_request_reply_context.adapter_id;
 
     try
     {
@@ -238,7 +248,7 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_event_context.adapter_id;
+    const auto adapter_id = current_event_context.adapter_id;
 
     try
     {
@@ -272,7 +282,7 @@ uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_event_context.adapter_id;
+    const auto adapter_id = current_event_context.adapter_id;
 
     try
     {
@@ -307,7 +317,7 @@ uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **k
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_event_context.adapter_id;
+    const auto adapter_id = current_event_context.adapter_id;
 
     try
     {
@@ -332,7 +342,7 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_request_reply_context.adapter_id;
+    const auto adapter_id = current_request_reply_context.adapter_id;
 
     try
     {
@@ -358,7 +368,7 @@ uint32_t app_ble_gap_state_reset()
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_request_reply_context.adapter_id;
+    const auto adapter_id = current_request_reply_context.adapter_id;
 
     try
     {
@@ -460,7 +470,8 @@ int app_ble_gap_adv_buf_register(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << __FUNCTION__ << ": app_ble_gap_adv_buf_register not called from context "
+        std::cerr << __FUNCTION__
+                  << ": app_ble_gap_adv_buf_register not called from context "
                      "REQUEST_REPLY_CODEC_CONTEXT, terminating"
                   << std::endl;
         std::terminate();
@@ -509,7 +520,8 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << __FUNCTION__ << ": app_ble_gap_adv_buf_register not called from context "
+        std::cerr << __FUNCTION__
+                  << ": app_ble_gap_adv_buf_register not called from context "
                      "REQUEST_REPLY_CODEC_CONTEXT, terminating"
                   << std::endl;
         std::terminate();
