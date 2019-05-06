@@ -268,7 +268,6 @@ void SerializationTransport::eventHandlingRunner() noexcept
                                << static_cast<uint32_t>(MaxPossibleEventLength) << ")";
                     logCallback(SD_RPC_LOG_ERROR, logMessage.str());
                     statusCallback(PKT_DECODE_ERROR, logMessage.str());
-                    continue;
                 }
                 else
                 {
