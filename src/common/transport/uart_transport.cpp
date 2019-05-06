@@ -35,8 +35,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "nrf_error.h"
 #include "uart_transport.h"
+#include "nrf_error.h"
 #include "uart_settings_boost.h"
 
 #include <functional>
@@ -74,7 +74,7 @@ UartTransport::~UartTransport() noexcept
 }
 
 uint32_t UartTransport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                         const log_cb_t &log_callback) noexcept
+                             const log_cb_t &log_callback) noexcept
 {
     std::lock_guard<std::recursive_mutex> openLck(isOpenMutex);
 
@@ -154,11 +154,11 @@ uint32_t UartTransport::open(const status_cb_t &status_callback, const data_cb_t
 
     try
     {
-        callbackReadHandle =
-            std::bind(&UartTransport::readHandler, this, std::placeholders::_1, std::placeholders::_2);
+        callbackReadHandle = std::bind(&UartTransport::readHandler, this, std::placeholders::_1,
+                                       std::placeholders::_2);
 
-        callbackWriteHandle =
-            std::bind(&UartTransport::writeHandler, this, std::placeholders::_1, std::placeholders::_2);
+        callbackWriteHandle = std::bind(&UartTransport::writeHandler, this, std::placeholders::_1,
+                                        std::placeholders::_2);
 
         const auto asioWorker = [&]() {
             try
@@ -411,7 +411,7 @@ void UartTransport::startRead()
 
 void UartTransport::asyncRead()
 {
-    const auto mutableReadBuffer = asio::buffer(readBuffer, BUFFER_SIZE);
+    const auto mutableReadBuffer = asio::buffer(readBuffer, UartTransportBufferSize);
     serialPort->async_read_some(mutableReadBuffer, callbackReadHandle);
 }
 
