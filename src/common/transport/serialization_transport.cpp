@@ -263,9 +263,8 @@ void SerializationTransport::eventHandlingRunner() noexcept
                 if (MaxPossibleEventLength < eventDataSize)
                 {
                     std::stringstream logMessage;
-                    logMessage << "Failed to decode event, event data is bigger ("
-                               << static_cast<uint32_t>(eventDataSize) << ") than decoding buffer("
-                               << static_cast<uint32_t>(MaxPossibleEventLength) << ")";
+                    logMessage << "Failed to decode event, event data is bigger (" << eventDataSize
+                               << ") than decoding buffer(" << MaxPossibleEventLength << ")";
                     logCallback(SD_RPC_LOG_ERROR, logMessage.str());
                     statusCallback(PKT_DECODE_ERROR, logMessage.str());
                 }
@@ -277,7 +276,8 @@ void SerializationTransport::eventHandlingRunner() noexcept
                     // Allocate memory to store decoded event including an unknown quantity of
                     // padding
                     auto possibleEventLength = MaxPossibleEventLength;
-                    std::vector<uint8_t> eventDecodeBuffer(MaxPossibleEventLength);
+                    std::vector<uint8_t> eventDecodeBuffer;
+                    eventDecodeBuffer.reserve(MaxPossibleEventLength);
                     const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
 
                     // Decode event
@@ -349,7 +349,8 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
     }
     else if (eventType == SERIALIZATION_EVENT)
     {
-        std::vector<uint8_t> event(MaxPossibleEventLength);
+        std::vector<uint8_t> event;
+        event.reserve(dataLength);
         std::copy(startOfData, startOfData + dataLength, std::back_inserter(event));
         std::lock_guard<std::mutex> eventLock(eventMutex);
         eventQueue.push(std::move(event));
