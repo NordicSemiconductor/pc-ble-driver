@@ -38,6 +38,7 @@
 #ifndef SERIALIZATION_TRANSPORT_H
 #define SERIALIZATION_TRANSPORT_H
 
+#include "h5_transport.h"
 #include "transport.h"
 
 #include "ble.h"
@@ -78,19 +79,19 @@ class SerializationTransport
     SerializationTransport(SerializationTransport &&)                 = delete;
     SerializationTransport &operator=(SerializationTransport &&) = delete;
 
-    SerializationTransport(Transport *dataLinkLayer, uint32_t response_timeout);
-    ~SerializationTransport() = default;
+    SerializationTransport(H5Transport *dataLinkLayer, uint32_t response_timeout);
+    ~SerializationTransport();
 
     uint32_t open(const status_cb_t &status_callback, const evt_cb_t &event_callback,
-                  const log_cb_t &log_callback);
-    uint32_t close();
+                  const log_cb_t &log_callback) noexcept;
+    uint32_t close() noexcept;
     uint32_t send(const std::vector<uint8_t> &cmdBuffer,
                   std::shared_ptr<std::vector<uint8_t>> rspBuffer,
-                  serialization_pkt_type_t pktType = SERIALIZATION_COMMAND);
+                  serialization_pkt_type_t pktType = SERIALIZATION_COMMAND) noexcept;
 
   private:
     void readHandler(const uint8_t *data, const size_t length);
-    void eventHandlingRunner();
+    void eventHandlingRunner() noexcept;
 
     status_cb_t statusCallback;
     evt_cb_t eventCallback;
@@ -98,7 +99,7 @@ class SerializationTransport
 
     data_cb_t dataCallback;
 
-    std::shared_ptr<Transport> nextTransportLayer;
+    std::shared_ptr<H5Transport> nextTransportLayer;
     uint32_t responseTimeout;
 
     bool responseReceived;
@@ -113,9 +114,14 @@ class SerializationTransport
     std::condition_variable eventWaitCondition;
     std::thread eventThread;
     std::queue<std::vector<uint8_t>> eventQueue;
+    void drainEventQueue();
+    bool processEvents;
 
-    std::atomic<bool> isOpen; // Variable is shared between threads
-    std::mutex publicMethodMutex;
+    // Use recursive mutex since the mutex may be acquired recursively in the same thread
+    // in the case of ::eventHandlingRunner thread calling a application callback that
+    // again invoke a function that call ::send
+    std::recursive_mutex isOpenMutex;
+    bool isOpen;
 };
 
 #endif // SERIALIZATION_TRANSPORT_H

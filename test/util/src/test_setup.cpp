@@ -119,12 +119,12 @@ Environment getEnvironment()
         }
     }
 
-    env.driverLogLevelSet = true;
-    env.baudRate          = baudRate;
-    env.hardwareInfo      = ConfiguredEnvironment.hardwareInfo;
-    env.retransmissionInterval  = ConfiguredEnvironment.retransmissionInterval;
-    env.responseTimeout = ConfiguredEnvironment.responseTimeout;
-    env.mtu = ConfiguredEnvironment.mtu;
+    env.driverLogLevelSet      = true;
+    env.baudRate               = baudRate;
+    env.hardwareInfo           = ConfiguredEnvironment.hardwareInfo;
+    env.retransmissionInterval = ConfiguredEnvironment.retransmissionInterval;
+    env.responseTimeout        = ConfiguredEnvironment.responseTimeout;
+    env.mtu                    = ConfiguredEnvironment.mtu;
 
     return env;
 };
@@ -136,7 +136,7 @@ VirtualTransportSendSync::VirtualTransportSendSync() noexcept
 
 uint32_t VirtualTransportSendSync::open(const status_cb_t &status_callback,
                                         const data_cb_t &data_callback,
-                                        const log_cb_t &log_callback)
+                                        const log_cb_t &log_callback) noexcept
 {
     Transport::open(status_callback, data_callback, log_callback);
     pushData = true;
@@ -156,7 +156,7 @@ uint32_t VirtualTransportSendSync::open(const status_cb_t &status_callback,
     return NRF_SUCCESS;
 }
 
-uint32_t VirtualTransportSendSync::close()
+uint32_t VirtualTransportSendSync::close() noexcept
 {
     pushData = false;
 
@@ -168,7 +168,7 @@ uint32_t VirtualTransportSendSync::close()
     return NRF_SUCCESS;
 }
 
-uint32_t VirtualTransportSendSync::send(const std::vector<uint8_t> &data)
+uint32_t VirtualTransportSendSync::send(const std::vector<uint8_t> &data) noexcept
 {
     NRF_LOG("->" << testutil::asHex(data) << " length: " << data.size());
     return NRF_SUCCESS;
@@ -177,7 +177,7 @@ uint32_t VirtualTransportSendSync::send(const std::vector<uint8_t> &data)
 // Since the H5Transport.open is a blocking call
 // we need to run open in separate threads to
 // make the two H5Transports communicate
-H5TransportWrapper::H5TransportWrapper(Transport *nextTransportLayer,
+H5TransportWrapper::H5TransportWrapper(UartTransport *nextTransportLayer,
                                        uint32_t retransmission_interval) noexcept
     : H5Transport(nextTransportLayer, retransmission_interval)
     , isOpenDone(false)

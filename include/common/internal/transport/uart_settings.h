@@ -87,7 +87,7 @@ typedef struct
 
 /**
  * @brief The UartSettings class parses a uart_comm_params_t struct and gives out corresponding
- * boost enum values for use in the UartBoost class.
+ * boost enum values for use in the UartTransport class.
  */
 class UartSettings
 {

@@ -39,6 +39,7 @@
 #define H5_TRANSPORT_H
 
 #include "transport.h"
+#include "uart_transport.h"
 
 #include <condition_variable>
 #include <mutex>
@@ -80,13 +81,13 @@ class H5Transport : public Transport
 {
   public:
     H5Transport() = delete;
-    H5Transport(Transport *nextTransportLayer, const uint32_t retransmission_interval);
-    ~H5Transport() noexcept;
+    H5Transport(UartTransport *nextTransportLayer, const uint32_t retransmission_interval);
+    ~H5Transport() noexcept override;
 
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                  const log_cb_t &log_callback) override;
-    uint32_t close() override;
-    uint32_t send(const std::vector<uint8_t> &data) override;
+                  const log_cb_t &log_callback) noexcept override;
+    uint32_t close() noexcept override;
+    uint32_t send(const std::vector<uint8_t> &data) noexcept override;
 
     h5_state_t state() const;
 
@@ -98,15 +99,15 @@ class H5Transport : public Transport
     static bool checkPattern(const payload_t &packet, const uint8_t offset,
                              const payload_t &pattern);
     static payload_t getPktPattern(const control_pkt_type);
-    static std::string stateToString(const h5_state_t state);
+    static std::string stateToString(const h5_state_t state) noexcept;
     static std::string pktTypeToString(const h5_pkt_type_t pktType);
 
   private:
-    void dataHandler(const uint8_t *data, const size_t length);
-    void statusHandler(const sd_rpc_app_status_t code, const std::string &error);
+    void dataHandler(const uint8_t *data, const size_t length) noexcept;
+    void statusHandler(const sd_rpc_app_status_t code, const std::string &error) noexcept;
     void processPacket(const payload_t &packet);
 
-    void sendControlPacket(control_pkt_type type);
+    void sendControlPacket(control_pkt_type type, const uint8_t ackNum = 0xff);
 
     void incrementSeqNum();
     void incrementAckNum();
@@ -120,25 +121,31 @@ class H5Transport : public Transport
     data_cb_t dataCallback;
 
     // Variables used for reliable packets
+    std::recursive_mutex seqNumMutex;
     uint8_t seqNum;
+
+    std::recursive_mutex ackNumMutex;
     uint8_t ackNum;
 
     bool c0Found;
     std::vector<uint8_t> unprocessedData;
 
-    std::mutex stateMachineMutex; // Mutex controlling access to state machine variables
-    std::condition_variable
-        stateMachineChange; // Condition variable to communicate changes to state machine
+    // Mutex controlling access to state machine variables in
+    // the different state machine states
+    std::mutex stateMachineMutex;
+
+    // Condition variable to communicate changes to state machine
+    std::condition_variable stateMachineChange;
 
     // Variables used in state ACTIVE
     std::chrono::milliseconds retransmissionInterval;
     std::mutex ackMutex;
-    std::condition_variable ackWaitCondition;
+    std::condition_variable ackReceived;
 
     // Debugging related
-    uint32_t incomingPacketCount;
-    uint32_t outgoingPacketCount;
-    uint32_t errorPacketCount;
+    std::atomic<uint32_t> incomingPacketCount;
+    std::atomic<uint32_t> outgoingPacketCount;
+    std::atomic<uint32_t> errorPacketCount;
 
     void logPacket(const bool outgoing, const payload_t &packet);
     void logStateTransition(const h5_state_t from, const h5_state_t to) const;
@@ -159,15 +166,15 @@ class H5Transport : public Transport
 
     std::map<h5_state_t, std::shared_ptr<ExitCriterias>> exitCriterias;
 
-    void stateMachineWorker();
+    void stateMachineWorker() noexcept;
 
     // Mutex that allows threads to wait for a given state in the state machine
-    std::mutex stateMutex;
+    std::mutex currentStateMutex;
     bool waitForState(h5_state_t state, std::chrono::milliseconds timeout);
-    std::condition_variable stateWaitCondition;
+    std::condition_variable currentStateChange;
 
+    std::recursive_mutex isOpenMutex;
     bool isOpen;
-    std::mutex publicMethodMutex;
 
     // Actions associated with each state
     h5_state_t stateActionStart();
