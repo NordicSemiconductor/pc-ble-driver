@@ -39,7 +39,7 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include <internal/log.h>
+#include <logging.h>
 
 // Test support
 #include <test_setup.h>
@@ -79,8 +79,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
         auto err_code = p->setupAdvertising(advertisingData);
         if (err_code != NRF_SUCCESS)
         {
-            NRF_LOG(p->role() << " Error setting advertising data, "
-                              << ", " << testutil::errorToString(err_code));
+            get_logger()->debug("{} Error setting advertising data, {}", p->role(),
+                                testutil::errorToString(err_code));
             return err_code;
         }
 
@@ -93,12 +93,12 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
         // Instantiate an adapter to use as BLE Central in the test
         auto c = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Central, central.port, env.baudRate, env.mtu, env.retransmissionInterval,
-            env.responseTimeout);
+            testutil::Role::Central, central.port, env.baudRate, env.mtu,
+            env.retransmissionInterval, env.responseTimeout);
 
         // Instantiated an adapter to use as BLE Peripheral in the test
         auto p = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Peripheral, peripheral.port, env.baudRate, env.mtu,
+            testutil::Role::Peripheral, peripheral.port, env.baudRate, env.mtu,
             env.retransmissionInterval, env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
@@ -115,6 +115,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} Not able to start authentication, error {:x}, {}",
+                                            c->role(), static_cast<uint32_t>(err_code),
+                                            testutil::errorToString(err_code));
                         error = true;
                     }
                 }
@@ -131,10 +134,11 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                             if (err_code != NRF_SUCCESS)
                             {
-                                NRF_LOG(c->role()
-                                        << " Error connecting to "
-                                        << testutil::asText(gapEvent->params.adv_report.peer_addr)
-                                        << ", " << testutil::errorToString(err_code));
+                                get_logger()->error(
+                                    "{} Error connecting to {}, {}", c->role(),
+                                    testutil::asText(gapEvent->params.adv_report.peer_addr),
+                                    testutil::errorToString(err_code));
+
                                 error = true;
                             }
                         }
@@ -153,7 +157,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            NRF_LOG(c->role() << " Scan start error, err_code " << err_code);
+                            get_logger()->error("{} Scan start error, err_code {:x}", c->role(),
+                                                static_cast<uint32_t>(err_code));
                             error = true;
                         }
                     }
@@ -166,7 +171,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        NRF_LOG(c->role() << " Conn params update failed, err_code " << err_code);
+                        get_logger()->error("{} Conn params update failed, err_code  {:x}",
+                                            c->role(), static_cast<uint32_t>(err_code));
                         error = true;
                     }
                 }
@@ -188,6 +194,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} security params reply failed, err_code  {:x}",
+                                            c->role(), static_cast<uint32_t>(err_code));
                         error = true;
                     }
                 }
@@ -219,6 +227,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} auth key reply failed, err_code {:x}", p->role(),
+                                            static_cast<uint32_t>(err_code));
+
                         error = true;
                     }
                 }
@@ -230,6 +241,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                     else
                     {
+                        get_logger()->error(
+                            "{} BLE_GAP_EVT_AUTH_STATUS replied with status {:x}", p->role(),
+                            static_cast<uint32_t>(gapEvent->params.auth_status.auth_status));
+
                         error = true;
                     }
 
@@ -245,10 +260,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                 case BLE_GAP_EVT_DISCONNECTED:
                 {
                     // Use scratchpad defaults when advertising
-                    NRF_LOG(p->role() << " Starting advertising.");
+                    get_logger()->debug("{} Starting advertising.", p->role());
                     const auto err_code = p->startAdvertising();
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} start advertising failed, error {:x}", p->role(),
+                                            static_cast<uint32_t>(err_code));
+
                         error = true;
                     }
                 }
@@ -265,6 +283,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
 
                     if (err_code != NRF_SUCCESS)
                     {
+                        get_logger()->error("{} security params reply failed, error {:x}",
+                                            p->role(), static_cast<uint32_t>(err_code));
                         error = true;
                     }
                 }
@@ -277,6 +297,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                     else
                     {
+                        get_logger()->error(
+                            "{} auth failed with status  {:x}", p->role(),
+                            static_cast<uint32_t>(gapEvent->params.auth_status.auth_status));
+
                         error = true;
                     }
 
@@ -290,8 +314,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                get_logger()->error("{} error in status callback {:x}:{}", c->role(),
+                                    static_cast<uint32_t>(code), message);
                 error = true;
             }
         });
@@ -300,8 +324,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                NRF_LOG(p->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                get_logger()->error("{} error in status callback {:x}:{}", p->role(),
+                                    static_cast<uint32_t>(code), message);
                 error = true;
             }
         });

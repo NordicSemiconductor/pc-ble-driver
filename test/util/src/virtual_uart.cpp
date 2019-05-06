@@ -1,8 +1,10 @@
 #include "virtual_uart.h"
 
+#include "h5_transport.h"
 #include "internal/log.h"
 #include "sd_rpc_types.h"
 #include "transport.h"
+
 
 #include <algorithm>
 #include <mutex>

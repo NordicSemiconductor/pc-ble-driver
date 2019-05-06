@@ -6,6 +6,7 @@ if(MSVC)
 endif()
 
 find_package(Catch2 CONFIG REQUIRED)
+find_path(SPDLOG_INCLUDE_DIR spdlog)
 
 include_directories (
     ../include/common/sdk_compat
@@ -395,9 +396,10 @@ function(setup_test)
     # Build executable
     add_executable(${test_name} ${source_file} ${source_testcases} ${test_util_src})
 
-    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver})
+    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver} FMT_HEADER_ONLY SPDLOG_FMT_EXTERNAL)
     target_include_directories(${test_name} SYSTEM PRIVATE ../include/sd_api_v${softdevice_api_ver})
     target_include_directories(${test_name} SYSTEM PRIVATE util/include)
+    target_include_directories(${test_name} SYSTEM PRIVATE ${SPDLOG_INCLUDE_DIR})
 
     if(WIN32)
         target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static Catch2::Catch2)
