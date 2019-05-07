@@ -275,18 +275,18 @@ void SerializationTransport::eventHandlingRunner() noexcept
 
                     // Allocate memory to store decoded event including an unknown quantity of
                     // padding
-                    auto possibleEventLength = MaxPossibleEventLength;
-                    std::vector<uint8_t> eventDecodeBuffer;
-                    eventDecodeBuffer.reserve(MaxPossibleEventLength);
+                    auto possibleEventLength = static_cast<uint32_t>(MaxPossibleEventLength);
+                    std::vector<uint8_t> eventDecodeBuffer(MaxPossibleEventLength);
                     const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
 
                     // Decode event
                     const auto errCode =
                         ble_event_dec(eventData.data(), static_cast<uint32_t>(eventDataSize), event,
-                                      reinterpret_cast<uint32_t *>(&possibleEventLength));
+                                      &possibleEventLength);
 
                     if (eventCallback && errCode == NRF_SUCCESS)
                     {
+                        eventDecodeBuffer.resize(possibleEventLength);
                         eventCallback(event);
                     }
 
