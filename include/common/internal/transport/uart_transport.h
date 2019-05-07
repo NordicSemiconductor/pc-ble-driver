@@ -35,11 +35,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UART_BOOST_H
-#define UART_BOOST_H
+#ifndef UART_TRANSPORT_H
+#define UART_TRANSPORT_H
 
 #include "transport.h"
-#include "uart_defines.h"
 #include "uart_settings_boost.h"
 
 #include <asio.hpp>
@@ -52,34 +51,39 @@
 #include <stdint.h>
 
 /**
- * @brief The UartBoost class opens, reads and writes a serial port using the boost asio library
+ * @brief Controls the buffer sizes for read buffers
  */
-class UartBoost : public Transport
+constexpr size_t UartTransportBufferSize = 1024;
+
+/**
+ * @brief The UartTransport class opens, reads and writes a serial port using the boost asio library
+ */
+class UartTransport : public Transport
 {
   public:
     /**
      *@brief Is called by app_uart_init() stores function pointers and sets up necessary boost
      * variables.
      */
-    UartBoost(const UartCommunicationParameters &communicationParameters);
+    UartTransport(const UartCommunicationParameters &communicationParameters);
 
-    ~UartBoost() noexcept;
+    ~UartTransport() noexcept override;
 
     /**
      *@brief Setup of serial port service with parameter data.
      */
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                  const log_cb_t &log_callback) override;
+                  const log_cb_t &log_callback) noexcept override;
 
     /**
      *@brief Closes the serial port service.
      */
-    uint32_t close() override;
+    uint32_t close() noexcept override;
 
     /**
      *@brief sends data to serial port to write.
      */
-    uint32_t send(const std::vector<uint8_t> &data) override;
+    uint32_t send(const std::vector<uint8_t> &data) noexcept override;
 
   private:
     /**
@@ -107,12 +111,13 @@ class UartBoost : public Transport
      */
     void asyncWrite();
 
-    std::array<uint8_t, BUFFER_SIZE> readBuffer;
+    std::array<uint8_t, UartTransportBufferSize> readBuffer;
     std::vector<uint8_t> writeBufferVector;
     std::deque<uint8_t> writeQueue;
     std::mutex queueMutex;
-    std::mutex publicMethodMutex;
+
     bool isOpen;
+    std::recursive_mutex isOpenMutex;
 
     std::function<void(const asio::error_code, const size_t)> callbackReadHandle;
     std::function<void(const asio::error_code, const size_t)> callbackWriteHandle;
@@ -126,9 +131,10 @@ class UartBoost : public Transport
     std::unique_ptr<asio::executor_work_guard<asio::io_context::executor_type>> workNotifier;
 
     /**
-     * @brief      Purge RX and TX data in serial buffers. On WIN32, in addition, abort any overlapped operations
+     * @brief      Purge RX and TX data in serial buffers. On WIN32, in addition, abort any
+     * overlapped operations
      */
-    void purge();
+    void purge() const;
 };
 
-#endif // UART_BOOST_H
+#endif // UART_TRANSPORT_H

@@ -60,7 +60,8 @@ constexpr uint32_t defaultRetransmissionInterval()
 #endif
 }
 
-constexpr uint32_t defaultBaudRate = 1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
+constexpr uint32_t defaultBaudRate =
+    1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #define STR(s) #s
 #define EXPAND(s) STR(s)
@@ -99,9 +100,9 @@ class VirtualTransportSendSync : public Transport
     explicit VirtualTransportSendSync() noexcept;
 
     uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                  const log_cb_t &log_callback);
-    uint32_t close();
-    uint32_t send(const std::vector<uint8_t> &data);
+                  const log_cb_t &log_callback) noexcept override;
+    uint32_t close() noexcept override;
+    uint32_t send(const std::vector<uint8_t> &data) noexcept override;
 
   private:
     std::thread dataPusher;
@@ -114,7 +115,7 @@ class VirtualTransportSendSync : public Transport
 class H5TransportWrapper : public H5Transport
 {
   public:
-    H5TransportWrapper(Transport *nextTransportLayer, uint32_t retransmission_interval) noexcept;
+    H5TransportWrapper(UartTransport *nextTransportLayer, uint32_t retransmission_interval) noexcept;
     ~H5TransportWrapper();
 
     void openThread(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);

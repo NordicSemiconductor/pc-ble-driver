@@ -71,7 +71,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an
     // issue has occurred in a callback.
-    auto centralError = false;
+    auto centralError    = false;
     auto peripheralError = false;
 
     // Set to true when the test is complete
@@ -393,7 +393,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG(c->role() << " MTU exchange request failed, " << testutil::errorToString(err_code));
+                    NRF_LOG(c->role() << " MTU exchange request failed, "
+                                      << testutil::errorToString(err_code));
                     centralError = true;
                 }
             }
@@ -451,8 +452,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                     if (err_code != NRF_SUCCESS)
                     {
-                        NRF_LOG(c->role()
-                                << " MTU exchange request reply failed, " << testutil::errorToString(err_code));
+                        NRF_LOG(c->role() << " MTU exchange request reply failed, "
+                                          << testutil::errorToString(err_code));
                         centralError = true;
                     }
                 }
@@ -473,7 +474,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 const auto err_code = p->startAdvertising();
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG(p->role() << " Error starting advertising after disconnect, " << testutil::errorToString(err_code));
+                    NRF_LOG(p->role() << " Error starting advertising after disconnect, "
+                                      << testutil::errorToString(err_code));
                     peripheralError = true;
                 }
             }
@@ -537,8 +539,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
             code == PKT_UNEXPECTED)
         {
             centralError = true;
-            NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code) << ": "
-                              << message);
+            NRF_LOG(c->role() << " error in status callback " << std::hex
+                              << static_cast<uint32_t>(code) << ": " << message);
         }
     });
 

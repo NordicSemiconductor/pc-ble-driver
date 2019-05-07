@@ -68,7 +68,14 @@ AdapterWrapper::~AdapterWrapper()
         NRF_LOG(role() << " sd_rpc_close, " << testutil::errorToString(err_code));
 
         // Remove adapter from map of adapters used in callbacks
-        AdapterWrapper::adapters.erase(m_adapter->internal);
+        try
+        {
+            AdapterWrapper::adapters.erase(m_adapter->internal);
+        }
+        catch (const std::exception &e)
+        {
+            NRF_LOG(role() << " not possible to erase adapter in map of adapters, " << e.what());
+        }
 
         sd_rpc_adapter_delete(m_adapter);
         NRF_LOG(role() << " sd_rpc_adapter_delete called and returned.");
@@ -1208,9 +1215,9 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
         const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
         wrappedAdapter->processEvent(p_ble_evt);
     }
-    catch (std::out_of_range &)
+    catch (std::out_of_range &e)
     {
-        NRF_LOG("In eventHandler, not able to find adapter to invoke event handler on.");
+        NRF_LOG("In eventHandler, not able to find adapter to invoke event handler on, " << e.what());
     }
     catch (std::system_error &e)
     {
@@ -1226,13 +1233,13 @@ void AdapterWrapper::logHandler(adapter_t *adapter, sd_rpc_log_severity_t severi
         const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
         wrappedAdapter->processLog(severity, log_message);
     }
-    catch (std::out_of_range &)
+    catch (std::out_of_range &e)
     {
-        NRF_LOG("In logHandler, not able to find adapter to invoke log handler on.");
+        NRF_LOG("In logHandler, not able to find adapter to invoke log handler on, " << e.what());
     }
     catch (std::system_error &e)
     {
-        NRF_LOG("std::system_error in logHandler: " << e.what());
+        NRF_LOG("std::system_error in logHandler, " << e.what());
     }
 }
 

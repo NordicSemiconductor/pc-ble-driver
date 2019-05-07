@@ -196,8 +196,8 @@ static adapter_t * adapter_init(char * serial_port, uint32_t baud_rate)
                                             baud_rate,
                                             SD_RPC_FLOW_CONTROL_NONE,
                                             SD_RPC_PARITY_NONE);
-    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 100);
-    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 100);
+    data_link_layer = sd_rpc_data_link_layer_create_bt_three_wire(phy, 250);
+    transport_layer = sd_rpc_transport_layer_create(data_link_layer, 1500);
     return sd_rpc_adapter_create(transport_layer);
 }
 

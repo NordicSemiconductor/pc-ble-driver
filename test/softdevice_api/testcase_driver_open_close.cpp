@@ -89,8 +89,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
-                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                  << ": " << message);
+                NRF_LOG(c->role() << " error in status callback " << std::hex
+                                  << static_cast<uint32_t>(code) << ": " << message);
             }
         });
 
@@ -168,21 +168,20 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(driver_open_close,
     SECTION("open_close_open_iterations")
     {
         auto c = std::make_shared<testutil::AdapterWrapper>(
-            testutil::Central, serialPort.port, env.baudRate, env.mtu,
-            env.retransmissionInterval, env.responseTimeout);
+            testutil::Central, serialPort.port, env.baudRate, env.mtu, env.retransmissionInterval,
+            env.responseTimeout);
 
         REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) ==
                 NRF_SUCCESS);
 
-        c->setStatusCallback(
-            [&](const sd_rpc_app_status_t code, const std::string &message) {
-                if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
-                    code == PKT_UNEXPECTED)
-                {
-                    NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
-                                      << ": " << message);
-                }
-            });
+        c->setStatusCallback([&](const sd_rpc_app_status_t code, const std::string &message) {
+            if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
+                code == PKT_UNEXPECTED)
+            {
+                NRF_LOG(c->role() << " error in status callback " << static_cast<uint32_t>(code)
+                                  << ": " << message);
+            }
+        });
 
         for (uint32_t i = 0; i < numberOfIterations; i++)
         {

@@ -24,7 +24,7 @@ void VirtualUart::stopAt(control_pkt_type stopAtPktType_)
 }
 
 uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                           const log_cb_t &log_callback)
+                           const log_cb_t &log_callback) noexcept
 {
     Transport::open(status_callback, data_callback, log_callback);
 
@@ -89,7 +89,7 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
             if (inData.size() > 0)
             {
                 std::for_each(inData.begin(), inData.end(), [&](std::vector<uint8_t> data) {
-                    // TODO: do a proper SLIP decoding later on in case 
+                    // TODO: do a proper SLIP decoding later on in case
                     // TODO: header hits SLIP encoding rules
 
                     if (H5Transport::isResetPacket(data, 2))
@@ -150,7 +150,7 @@ uint32_t VirtualUart::open(const status_cb_t &status_callback, const data_cb_t &
     return NRF_SUCCESS; // TODO: take into account other return codes
 }
 
-uint32_t VirtualUart::close()
+uint32_t VirtualUart::close() noexcept
 {
     if (!isOpen)
         return NRF_ERROR_INTERNAL;
@@ -179,7 +179,7 @@ uint32_t VirtualUart::close()
     return NRF_SUCCESS; // TODO: take into account other return codes
 }
 
-uint32_t VirtualUart::send(const std::vector<uint8_t> &data)
+uint32_t VirtualUart::send(const std::vector<uint8_t> &data) noexcept
 {
     std::unique_lock<std::mutex> lock(outDataMutex);
 

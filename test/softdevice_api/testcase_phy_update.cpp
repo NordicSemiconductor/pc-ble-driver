@@ -279,6 +279,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                NRF_LOG(c->role() << " error in status callback " << std::hex
+                                  << static_cast<uint32_t>(code) << ": " << message);
                 error = true;
             }
         });
@@ -287,6 +289,8 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
             if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
                 code == PKT_UNEXPECTED)
             {
+                NRF_LOG(p->role() << " error in status callback " << std::hex
+                                  << static_cast<uint32_t>(code) << ": " << message);
                 error = true;
             }
         });

@@ -42,7 +42,7 @@
 #include "h5_transport.h"
 #include "serial_port_enum.h"
 #include "serialization_transport.h"
-#include "uart_boost.h"
+#include "uart_transport.h"
 #include "uart_settings_boost.h"
 #include "app_ble_gap.h"
 
@@ -111,7 +111,7 @@ physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint3
     uartSettings.stopBits = UartStopBitsOne;
     uartSettings.dataBits = UartDataBitsEight;
 
-    const auto uart         = new UartBoost(uartSettings);
+    const auto uart         = new UartTransport(uartSettings);
     physicalLayer->internal = static_cast<void *>(uart);
     return physicalLayer;
 }
@@ -120,7 +120,7 @@ data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t 
                                                                uint32_t retransmission_interval)
 {
     const auto dataLinkLayer = static_cast<data_link_layer_t *>(malloc(sizeof(data_link_layer_t)));
-    const auto physicalLayer = static_cast<Transport *>(physical_layer->internal);
+    const auto physicalLayer = static_cast<UartTransport *>(physical_layer->internal);
     const auto h5            = new H5Transport(physicalLayer, retransmission_interval);
     dataLinkLayer->internal  = static_cast<void *>(h5);
     return dataLinkLayer;
@@ -130,7 +130,7 @@ transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_la
                                                  uint32_t response_timeout)
 {
     const auto transportLayer = static_cast<transport_layer_t *>(malloc(sizeof(transport_layer_t)));
-    const auto dataLinkLayer  = static_cast<Transport *>(data_link_layer->internal);
+    const auto dataLinkLayer  = static_cast<H5Transport *>(data_link_layer->internal);
     const auto serialization  = new SerializationTransport(dataLinkLayer, response_timeout);
     transportLayer->internal  = serialization;
     return transportLayer;
@@ -188,10 +188,12 @@ uint32_t sd_rpc_close(adapter_t *adapter)
         return NRF_ERROR_INVALID_PARAM;
     }
 
+    const auto err_code = adapterLayer->close();
+
     // Delete BLE GAP state object
     app_ble_gap_state_delete(adapterLayer->transport);
 
-    return adapterLayer->close();
+    return err_code;
 }
 
 uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
