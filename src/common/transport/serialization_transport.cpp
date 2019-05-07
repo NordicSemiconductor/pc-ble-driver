@@ -111,7 +111,7 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
         // return
         std::unique_lock<std::mutex> eventLock(eventMutex);
         processEvents = true;
-        eventThread = std::thread([this] { eventHandlingRunner(); });
+        eventThread   = std::thread([this] { eventHandlingRunner(); });
         eventWaitCondition.wait(eventLock);
     }
     else
@@ -251,7 +251,7 @@ void SerializationTransport::eventHandlingRunner() noexcept
             {
                 // Get oldest event received from UART thread
                 const auto eventData     = eventQueue.front();
-                const auto eventDataSize = static_cast<uint32_t>(eventData.size());
+                const auto eventDataSize = eventData.size();
 
                 // Remove oldest event received from H5Transport thread
                 eventQueue.pop();
@@ -260,31 +260,44 @@ void SerializationTransport::eventHandlingRunner() noexcept
                 // while popped event is processed
                 eventLock.unlock();
 
-                // Set codec context
-                EventCodecContext context(this);
-
-                // Allocate memory to store decoded event including an unknown quantity of padding
-                auto possibleEventLength = MaxPossibleEventLength;
-                std::vector<uint8_t> eventDecodeBuffer;
-                eventDecodeBuffer.reserve(MaxPossibleEventLength);
-                const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
-
-                // Decode event
-                const auto errCode =
-                    ble_event_dec(eventData.data(), eventDataSize, event, &possibleEventLength);
-
-                if (eventCallback && errCode == NRF_SUCCESS)
-                {
-                    eventCallback(event);
-                }
-
-                if (errCode != NRF_SUCCESS)
+                if (MaxPossibleEventLength < eventDataSize)
                 {
                     std::stringstream logMessage;
-                    logMessage << "Failed to decode event, error code is " << std::dec << errCode
-                               << "/0x" << std::hex << errCode << ".";
+                    logMessage << "Failed to decode event, event data is bigger (" << eventDataSize
+                               << ") than decoding buffer(" << MaxPossibleEventLength << ")";
                     logCallback(SD_RPC_LOG_ERROR, logMessage.str());
                     statusCallback(PKT_DECODE_ERROR, logMessage.str());
+                }
+                else
+                {
+                    // Set codec context
+                    EventCodecContext context(this);
+
+                    // Allocate memory to store decoded event including an unknown quantity of
+                    // padding
+                    auto possibleEventLength = static_cast<uint32_t>(MaxPossibleEventLength);
+                    std::vector<uint8_t> eventDecodeBuffer(MaxPossibleEventLength);
+                    const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
+
+                    // Decode event
+                    const auto errCode =
+                        ble_event_dec(eventData.data(), static_cast<uint32_t>(eventDataSize), event,
+                                      &possibleEventLength);
+
+                    if (eventCallback && errCode == NRF_SUCCESS)
+                    {
+                        eventDecodeBuffer.resize(possibleEventLength);
+                        eventCallback(event);
+                    }
+
+                    if (errCode != NRF_SUCCESS)
+                    {
+                        std::stringstream logMessage;
+                        logMessage << "Failed to decode event, error code is " << std::dec
+                                   << errCode << "/0x" << std::hex << errCode << ".";
+                        logCallback(SD_RPC_LOG_ERROR, logMessage.str());
+                        statusCallback(PKT_DECODE_ERROR, logMessage.str());
+                    }
                 }
 
                 // Prevent UART from adding events to eventQueue

@@ -39,7 +39,6 @@
 #define UART_TRANSPORT_H
 
 #include "transport.h"
-#include "uart_defines.h"
 #include "uart_settings_boost.h"
 
 #include <asio.hpp>
@@ -50,6 +49,11 @@
 #include <thread>
 
 #include <stdint.h>
+
+/**
+ * @brief Controls the buffer sizes for read buffers
+ */
+constexpr size_t UartTransportBufferSize = 1024;
 
 /**
  * @brief The UartTransport class opens, reads and writes a serial port using the boost asio library
@@ -107,7 +111,7 @@ class UartTransport : public Transport
      */
     void asyncWrite();
 
-    std::array<uint8_t, BUFFER_SIZE> readBuffer;
+    std::array<uint8_t, UartTransportBufferSize> readBuffer;
     std::vector<uint8_t> writeBufferVector;
     std::deque<uint8_t> writeQueue;
     std::mutex queueMutex;
