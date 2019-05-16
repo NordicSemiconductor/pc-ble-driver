@@ -1,5 +1,4 @@
 _build
-**/.idea
 **/CMakeFiles
 **/CMakeCache.txt
 *.pyc
@@ -40,3 +39,10 @@ build*/
 *.i*86
 *.x86_64
 
+# Editor specific
+/.vscode/
+/.idea
+
+# Non public connectivity hex files
+/hex/**/*0.0.0*.hex
+/hex/**/*0.0.0*.zip

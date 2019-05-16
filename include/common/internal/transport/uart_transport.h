@@ -41,8 +41,14 @@
 #include "transport.h"
 #include "uart_settings.h"
 
-#include <vector>
 #include <cstdint>
+#include <vector>
+
+
+/**
+ * @brief Controls the buffer sizes for read buffers
+ */
+constexpr size_t UartTransportBufferSize = 1024;
 
 /**
  * @brief The UartTransport class opens, reads and writes a serial port using the boost asio library

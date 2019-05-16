@@ -54,7 +54,7 @@
 typedef uint32_t (*transport_rsp_handler_t)(const uint8_t *p_buffer, uint16_t length);
 typedef std::function<void(ble_evt_t *p_ble_evt)> evt_cb_t;
 
-constexpr uint32_t MaxPossibleEventLength = 700;
+constexpr size_t MaxPossibleEventLength = 700;
 
 struct eventData_t
 {

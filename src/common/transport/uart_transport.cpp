@@ -36,7 +36,6 @@
  */
 
 #include "uart_transport.h"
-#include "uart_defines.h"
 
 #include "nrf_error.h"
 #include "uart_settings_boost.h"
@@ -65,7 +64,7 @@ constexpr auto DELAY_BEFORE_OPEN = std::chrono::milliseconds(200);
 
 struct UartTransport::impl : Transport
 {
-    std::array<uint8_t, BUFFER_SIZE> readBuffer;
+    std::array<uint8_t, UartTransportBufferSize> readBuffer;
     std::vector<uint8_t> writeBufferVector;
     std::deque<uint8_t> writeQueue;
     std::mutex queueMutex;
@@ -165,7 +164,7 @@ struct UartTransport::impl : Transport
 
     void asyncRead()
     {
-        const auto mutableReadBuffer = asio::buffer(readBuffer, BUFFER_SIZE);
+        const auto mutableReadBuffer = asio::buffer(readBuffer, UartTransportBufferSize);
         serialPort->async_read_some(mutableReadBuffer, callbackReadHandle);
     }
 
