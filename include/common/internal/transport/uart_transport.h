@@ -39,17 +39,10 @@
 #define UART_TRANSPORT_H
 
 #include "transport.h"
-#include "uart_defines.h"
-#include "uart_settings_boost.h"
+#include "uart_settings.h"
 
-#include <asio.hpp>
-
-#include <array>
-#include <deque>
-#include <mutex>
-#include <thread>
-
-#include <stdint.h>
+#include <vector>
+#include <cstdint>
 
 /**
  * @brief The UartTransport class opens, reads and writes a serial port using the boost asio library
@@ -82,55 +75,8 @@ class UartTransport : public Transport
     uint32_t send(const std::vector<uint8_t> &data) noexcept override;
 
   private:
-    /**
-     *@brief Called when background thread receives bytes from uart.
-     */
-    void readHandler(const asio::error_code &errorCode, const size_t bytesTransferred);
-
-    /**
-     *@brief Called when write is finished doing asynchronous write.
-     */
-    void writeHandler(const asio::error_code &errorCode, const size_t);
-
-    /**
-     *@brief Starts asynchronous read on a background thread.
-     */
-    void startRead();
-
-    /**
-     *@brief Starts an asynchronous read.
-     */
-    void asyncRead();
-
-    /**
-     *@brief Starts an asynchronous write.
-     */
-    void asyncWrite();
-
-    std::array<uint8_t, BUFFER_SIZE> readBuffer;
-    std::vector<uint8_t> writeBufferVector;
-    std::deque<uint8_t> writeQueue;
-    std::mutex queueMutex;
-
-    bool isOpen;
-    std::recursive_mutex isOpenMutex;
-
-    std::function<void(const asio::error_code, const size_t)> callbackReadHandle;
-    std::function<void(const asio::error_code, const size_t)> callbackWriteHandle;
-
-    UartSettingsBoost uartSettingsBoost;
-    bool asyncWriteInProgress;
-    std::unique_ptr<std::thread> ioServiceThread;
-
-    std::unique_ptr<asio::io_service> ioService;
-    std::unique_ptr<asio::serial_port> serialPort;
-    std::unique_ptr<asio::executor_work_guard<asio::io_context::executor_type>> workNotifier;
-
-    /**
-     * @brief      Purge RX and TX data in serial buffers. On WIN32, in addition, abort any
-     * overlapped operations
-     */
-    void purge() const;
+    struct impl;
+    std::unique_ptr<impl> pimpl;
 };
 
 #endif // UART_TRANSPORT_H
