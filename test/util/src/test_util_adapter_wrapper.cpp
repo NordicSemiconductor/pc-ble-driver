@@ -8,7 +8,7 @@
 #include "test_util_role.h"
 
 // Logging support
-#include <logging.h>
+#include "logging.h"
 
 #include "ble.h"
 #include "sd_rpc.h"
@@ -1212,11 +1212,12 @@ void AdapterWrapper::statusHandler(adapter_t *adapter, sd_rpc_app_status_t code,
     {
         get_logger()->error("{:p}, in statusHandler callback, not able to find adapter to invoke "
                             "status handler on, {}",
-                            adapter, e.what());
+                            static_cast<void *>(adapter), e.what());
     }
     catch (std::system_error &e)
     {
-        get_logger()->error("{:p} std::system_error in statusHandler: {}", adapter, e.what());
+        get_logger()->error("{:p} std::system_error in statusHandler: {}",
+                            static_cast<void *>(adapter), e.what());
     }
 }
 
@@ -1231,11 +1232,12 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
     {
         get_logger()->error(
             "{:p} in eventHandler, not able to find adapter to invoke event handler on, {}",
-            adapter, e.what());
+            static_cast<void*>(adapter), e.what());
     }
     catch (std::system_error &e)
     {
-        get_logger()->error("{:p} in eventHandler, std::system_error, {}", adapter, e.what());
+        get_logger()->error("{:p} in eventHandler, std::system_error, {}",
+                            static_cast<void *>(adapter), e.what());
     }
 }
 
@@ -1250,12 +1252,13 @@ void AdapterWrapper::logHandler(adapter_t *adapter, sd_rpc_log_severity_t severi
     catch (std::out_of_range &e)
     {
         get_logger()->error(
-            "{:p}, in logHandler, not able to find adapter to invoke log handler on, {}", adapter,
-            e.what());
+            "{:p}, in logHandler, not able to find adapter to invoke log handler on, {}",
+            static_cast<void *>(adapter), e.what());
     }
     catch (std::system_error &e)
     {
-        get_logger()->error("{:p}, in logHandler, std::system_error, {}", adapter, e.what());
+        get_logger()->error("{:p}, in logHandler, std::system_error, {}",
+                            static_cast<void *>(adapter), e.what());
     }
 }
 

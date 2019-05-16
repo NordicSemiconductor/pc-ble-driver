@@ -41,6 +41,7 @@
 #include "transport.h"
 #include "uart_transport.h"
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 
