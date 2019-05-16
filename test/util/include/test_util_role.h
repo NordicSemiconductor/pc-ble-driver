@@ -9,6 +9,7 @@ enum class Role { Central = BLE_GAP_ROLE_CENTRAL, Peripheral = BLE_GAP_ROLE_PERI
 }; // namespace testutil
 
 namespace fmt {
+
 template <> struct formatter<testutil::Role>
 {
     template <typename ParseContext> constexpr auto parse(ParseContext &ctx)

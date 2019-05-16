@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ble.h"
-#include "ble_hci.h"
-#include "sd_rpc_types.h"
+#include <ble.h>
+#include <ble_hci.h>
+#include <sd_rpc_types.h>
 
 #include <spdlog/logger.h>
 #include <string>
