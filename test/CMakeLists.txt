@@ -5,14 +5,11 @@ if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-find_package(Catch2 CONFIG REQUIRED)
-find_path(SPDLOG_INCLUDE_DIR spdlog)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
-include_directories (
-    ../include/common/sdk_compat
-    ../include/common
-    ../include/common/internal/transport
-)
+find_package(spdlog CONFIG REQUIRED)
+find_package(Catch2 CONFIG REQUIRED)
 
 set(TESTS_SOFTDEVICE_V2 )
 set(TESTS_SOFTDEVICE_V3 )
@@ -396,19 +393,24 @@ function(setup_test)
     # Build executable
     add_executable(${test_name} ${source_file} ${source_testcases} ${test_util_src})
 
-    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver} FMT_HEADER_ONLY SPDLOG_FMT_EXTERNAL)
-    target_include_directories(${test_name} SYSTEM PRIVATE ../include/sd_api_v${softdevice_api_ver})
-    target_include_directories(${test_name} SYSTEM PRIVATE util/include)
-    target_include_directories(${test_name} SYSTEM PRIVATE ${SPDLOG_INCLUDE_DIR})
+    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver} -DSPDLOG_FMT_EXTERNAL -DFMT_HEADER_ONLY)
+    target_include_directories(${test_name} 
+        SYSTEM PRIVATE 
+        ../include/sd_api_v${softdevice_api_ver}
+        ../include/common/sdk_compat
+        ../include/common
+        ../include/common/internal/transport
+        ../include/common/config
+    )
 
-    if(WIN32)
-        target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static Catch2::Catch2)
-    elseif(APPLE)
-        target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static Catch2::Catch2)
-    else()
-        # Assume Linux
-        target_link_libraries(${test_name} PRIVATE nrf_ble_driver_sd_api_v${softdevice_api_ver}_static "pthread" Catch2::Catch2)
-    endif()
+    target_include_directories(${test_name} SYSTEM PRIVATE util/include)
+
+    target_link_libraries(${test_name} PRIVATE 
+        nrf_ble_driver_sd_api_v${softdevice_api_ver}_static
+        Threads::Threads
+        spdlog::spdlog
+        Catch2::Catch2
+    )
 
     if(NOT ${test_name} STREQUAL "test_uart_boost_v2")
         set(${test_list} ${${test_list}} ${test_name} PARENT_SCOPE)
