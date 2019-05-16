@@ -41,10 +41,10 @@
 #if NRF_SD_BLE_API >= 6
 
 // Logging support
-#include <logging.h>
+#include "logging.h"
 
 // Test support
-#include <test_setup.h>
+#include <test_environment.h>
 #include <test_util.h>
 
 #include <ble.h>

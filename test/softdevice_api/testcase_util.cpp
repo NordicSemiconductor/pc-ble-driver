@@ -39,7 +39,7 @@
 #include "catch2/catch.hpp"
 
 // Test support
-#include <test_setup.h>
+#include <test_environment.h>
 #include <test_util.h>
 
 #include <vector>

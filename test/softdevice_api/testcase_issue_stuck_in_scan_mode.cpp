@@ -39,9 +39,9 @@
 #include "catch2/catch.hpp"
 
 // Logging support
-#include <logger.h>
+#include <logging.h>
 
-#include <test_setup.h>
+#include <test_environment.h>
 #include <test_util.h>
 
 #include <ble.h>

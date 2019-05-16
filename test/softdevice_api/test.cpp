@@ -1,7 +1,8 @@
 #include <iostream>
 #include <mutex>
-#include <test_setup.h>
+#include <test_environment.h>
 
+#include "logging.h"
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
