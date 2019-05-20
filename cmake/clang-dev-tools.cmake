@@ -18,6 +18,18 @@ if(WIN32)
     endif()
 endif()
 
+find_program(clang_format clang-format)
+if (NOT clang_format)
+    message(STATUS "Did not find clang-format, target format is disabled.")
+    message(STATUS "If clang-format is installed, clang-format is in PATH")
+    add_custom_target(format COMMAND echo "clang-format is not installed")
+else()
+    message(STATUS "Found clang-format, use \"cmake --build . --target format\" to run it.")
+    add_custom_target(format
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/clang-format.cmake
+    )
+endif()
+
 find_program(CLANG_TIDY NAMES run-clang-tidy-7.py run-clang-tidy.py)
 
 if(NOT CLANG_TIDY)
