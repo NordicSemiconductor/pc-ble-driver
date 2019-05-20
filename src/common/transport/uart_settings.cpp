@@ -38,28 +38,25 @@
 #include "uart_settings.h"
 
 UartSettings::UartSettings()
-    : portName("COM1"),
-      baudRate(0),
-      flowControl(UartFlowControlNone),
-      parity(UartParityNone),
-      stopBits(UartStopBitsOne),
-      dataBits(UartDataBitsEight)
-{
-}
+    : portName("COM1")
+    , baudRate(0)
+    , flowControl(UartFlowControlNone)
+    , parity(UartParityNone)
+    , stopBits(UartStopBitsOne)
+    , dataBits(UartDataBitsEight)
+{}
 
 UartSettings::UartSettings(const UartCommunicationParameters &communicationParameters)
-    : portName(communicationParameters.portName),
-      baudRate(communicationParameters.baudRate),
-      flowControl(communicationParameters.flowControl),
-      parity(communicationParameters.parity),
-      stopBits(communicationParameters.stopBits),
-      dataBits(communicationParameters.dataBits)
-{
-}
+    : portName(communicationParameters.portName)
+    , baudRate(communicationParameters.baudRate)
+    , flowControl(communicationParameters.flowControl)
+    , parity(communicationParameters.parity)
+    , stopBits(communicationParameters.stopBits)
+    , dataBits(communicationParameters.dataBits)
+{}
 
 UartSettings::~UartSettings()
-{
-}
+{}
 
 void UartSettings::setPortName(const std::string value)
 {

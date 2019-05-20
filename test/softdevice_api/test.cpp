@@ -14,10 +14,10 @@ int main(int argc, char *argv[])
 {
     Catch::Session session;
 
-    auto serialPortA = std::string{};
-    auto serialPortB = std::string{};
+    auto serialPortA  = std::string{};
+    auto serialPortB  = std::string{};
     auto hardwareInfo = std::string{};
-    auto baudRate    = defaultBaudRate;
+    auto baudRate     = defaultBaudRate;
 
     using namespace Catch::clara;
 
@@ -26,9 +26,12 @@ int main(int argc, char *argv[])
         Opt(serialPortA, "serial-port")["--port-a"]("serial port A, usually BLE central") |
         Opt(serialPortB, "serial-port")["--port-b"]("serial port B, usually BLE peripheral") |
         Opt(test::ConfiguredEnvironment.baudRate, "baud-rate")["--baud-rate"]("baud rate") |
-        Opt(test::ConfiguredEnvironment.responseTimeout, "milliseconds")["--response-timeout"]("Transport response timeout") |
-        Opt(test::ConfiguredEnvironment.retransmissionInterval, "milliseconds")["--retransmission-interval"]("Transport retransmission interval") |
-        Opt(test::ConfiguredEnvironment.mtu, "size")["--ble-mtu"]("Default BLE MTU, may be ignored in some tests") |
+        Opt(test::ConfiguredEnvironment.responseTimeout,
+            "milliseconds")["--response-timeout"]("Transport response timeout") |
+        Opt(test::ConfiguredEnvironment.retransmissionInterval,
+            "milliseconds")["--retransmission-interval"]("Transport retransmission interval") |
+        Opt(test::ConfiguredEnvironment.mtu,
+            "size")["--ble-mtu"]("Default BLE MTU, may be ignored in some tests") |
         Opt(test::ConfiguredEnvironment.numberOfIterations,
             "count")["--iterations"]("number of iterations (for tests supporting that)") |
         Opt(
@@ -48,8 +51,7 @@ int main(int argc, char *argv[])
                 }
             },
             "trace|debug|info|warning|error|fatal")["--log-level"]("pc-ble-driver log level") |
-        Opt(hardwareInfo,
-            "text")["--hardware-info"]("hardware info text to show in test reports");
+        Opt(hardwareInfo, "text")["--hardware-info"]("hardware info text to show in test reports");
 
     session.cli(cli);
 

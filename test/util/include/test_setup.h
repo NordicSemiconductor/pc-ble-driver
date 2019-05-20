@@ -115,7 +115,8 @@ class VirtualTransportSendSync : public Transport
 class H5TransportWrapper : public H5Transport
 {
   public:
-    H5TransportWrapper(UartTransport *nextTransportLayer, uint32_t retransmission_interval) noexcept;
+    H5TransportWrapper(UartTransport *nextTransportLayer,
+                       uint32_t retransmission_interval) noexcept;
     ~H5TransportWrapper();
 
     void openThread(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);

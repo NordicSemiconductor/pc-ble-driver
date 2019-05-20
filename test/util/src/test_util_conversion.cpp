@@ -769,7 +769,8 @@ std::string asText(const ble_gap_evt_adv_report_t &advReport)
 #if NRF_SD_BLE_API == 6
     if (advReport.data.p_data != nullptr)
     {
-        data = std::vector<uint8_t>(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
+        data =
+            std::vector<uint8_t>(advReport.data.p_data, advReport.data.p_data + advReport.data.len);
         retval << " type:[" << asText(advReport.type) << "]";
     }
 #else

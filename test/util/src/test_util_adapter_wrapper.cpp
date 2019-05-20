@@ -1217,7 +1217,8 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
     }
     catch (std::out_of_range &e)
     {
-        NRF_LOG("In eventHandler, not able to find adapter to invoke event handler on, " << e.what());
+        NRF_LOG("In eventHandler, not able to find adapter to invoke event handler on, "
+                << e.what());
     }
     catch (std::system_error &e)
     {

@@ -24,8 +24,7 @@ namespace testutil {
 #if NRF_SD_BLE_API < 6
 constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_MAX_SIZE;
 #else
-constexpr size_t ADV_DATA_BUFFER_SIZE =
-    BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED;
+constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED;
 #endif
 
 struct AdapterWrapperScratchpad
@@ -107,9 +106,10 @@ struct AdapterWrapperScratchpad
     ble_gap_adv_data_t adv_report_data{};                       // Data used for advertising
     ble_data_t adv_report_adv_data{};                           // Advertisement data
     uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE]{}; // Advertisement data buffer
-    uint8_t adv_report_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{};            // Advertisement data buffer
-    ble_data_t adv_report_scan_rsp_data{};                      // Scan report data
-    ble_gap_adv_properties_t adv_properties{};                  // Properties used for advertising
+    uint8_t
+        adv_report_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{}; // Advertisement data buffer
+    ble_data_t adv_report_scan_rsp_data{};                            // Scan report data
+    ble_gap_adv_properties_t adv_properties{}; // Properties used for advertising
 #endif
 
     ble_gap_adv_params_t adv_params{}; // Parameters used for advertising
