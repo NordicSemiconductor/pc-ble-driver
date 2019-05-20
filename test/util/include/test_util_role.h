@@ -12,7 +12,7 @@ namespace fmt {
 
 template <> struct formatter<testutil::Role>
 {
-    template <typename ParseContext> constexpr auto parse(ParseContext &ctx)
+    template <typename ParseContext> const constexpr auto parse(ParseContext &ctx)
     {
         return ctx.begin();
     }

@@ -42,8 +42,8 @@
 #include "uart_settings.h"
 
 #include <cstdint>
+#include <memory>
 #include <vector>
-
 
 /**
  * @brief Controls the buffer sizes for read buffers
