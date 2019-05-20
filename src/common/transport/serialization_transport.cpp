@@ -111,7 +111,7 @@ uint32_t SerializationTransport::open(const status_cb_t &status_callback,
         // return
         std::unique_lock<std::mutex> eventLock(eventMutex);
         processEvents = true;
-        eventThread = std::thread([this] { eventHandlingRunner(); });
+        eventThread   = std::thread([this] { eventHandlingRunner(); });
         eventWaitCondition.wait(eventLock);
     }
     else
@@ -264,7 +264,7 @@ void SerializationTransport::eventHandlingRunner() noexcept
                 EventCodecContext context(this);
 
                 // Allocate memory to store decoded event including an unknown quantity of padding
-                auto possibleEventLength = MaxPossibleEventLength;
+                auto possibleEventLength = static_cast<uint32_t>(MaxPossibleEventLength);
                 std::vector<uint8_t> eventDecodeBuffer;
                 eventDecodeBuffer.reserve(MaxPossibleEventLength);
                 const auto event = reinterpret_cast<ble_evt_t *>(eventDecodeBuffer.data());
