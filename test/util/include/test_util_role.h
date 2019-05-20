@@ -9,15 +9,16 @@ enum class Role { Central = BLE_GAP_ROLE_CENTRAL, Peripheral = BLE_GAP_ROLE_PERI
 }; // namespace testutil
 
 namespace fmt {
-
 template <> struct formatter<testutil::Role>
 {
-    template <typename ParseContext> const constexpr auto parse(ParseContext &ctx)
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) -> decltype(ctx.begin())
     {
         return ctx.begin();
     }
 
-    template <typename FormatContext> auto format(const testutil::Role &role, FormatContext &ctx)
+    template <typename FormatContext>
+    auto format(const testutil::Role &role, FormatContext &ctx) -> decltype(ctx.out())
     {
         std::string role_text = "UNKNOWN";
 
@@ -31,7 +32,7 @@ template <> struct formatter<testutil::Role>
                 break;
         };
 
-        return format_to(ctx.begin(), "[{}]", role_text);
+        return format_to(ctx.out(), "[{}]", role_text);
     }
 };
 }; // namespace fmt
