@@ -345,6 +345,7 @@ The following steps are needed only if you want to compile your own `connectivit
     $ mkdir build && cd build
     $ vcpkg install asio
     $ vcpkg install catch2
+    $ vcpkg install --head spdlog
     ```
 
 2. CMake
@@ -377,6 +378,7 @@ The following steps are needed only if you want to compile your own `connectivit
     $ mkdir build && cd build
     $ vcpkg install asio
     $ vcpkg install catch2
+    $ vcpkg install --head spdlog
     ```
 
 2. CMake
@@ -541,7 +543,7 @@ If you meet problems during installation of pc-ble-driver, please see [Issues.md
 
 Feel free to propose changes by creating a pull request.
 
-If you plan to make any non-trivial changes, please start out small and ask seek an agreement before putting too much work in it. 
+If you plan to make any non-trivial changes, please start out small and ask seek an agreement before putting too much work in it.
 A pull request can be declined if it does not fit well within the current product roadmap.
 
 In order to accept your pull request, we need you to sign our Contributor License Agreement (CLA). You will see instructions for doing this after having submitted your first pull request.
