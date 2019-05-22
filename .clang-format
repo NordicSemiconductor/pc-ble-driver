@@ -60,6 +60,10 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Preserve
 IncludeCategories:
+  - Regex: '^("|<)stdafx\.h(pp)?("|>)'
+    Priority: -1
+  - Regex: '^<(W|w)indows.h>'
+    Priority: 1
   - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
     Priority:        2
   - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
