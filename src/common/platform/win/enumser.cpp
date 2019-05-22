@@ -56,11 +56,11 @@ code.
 
 /////////////////////////////////  Includes  //////////////////////////////////
 
+#include "stdafx.h"
 #include "enumser.h"
 #include "AutoHModule.h"
 #include "AutoHandle.h"
 #include "AutoHeapAlloc.h"
-#include "stdafx.h"
 #include <windows.h>
 
 #ifndef NO_ENUMSERIAL_USING_WMI
@@ -258,7 +258,7 @@ BOOL CEnumerateSerial::RegQueryValueString(HKEY kKey, LPCTSTR lpValueName, LPTST
     // Allocate enough bytes for the return value
     DWORD dwAllocatedSize =
         dwDataSize + sizeof(TCHAR); //+sizeof(TCHAR) is to allow us to NULL terminate the data if it
-                                    //is not null terminated in the registry
+                                    // is not null terminated in the registry
     pszValue = reinterpret_cast<LPTSTR>(LocalAlloc(LMEM_FIXED, dwAllocatedSize));
     if (pszValue == NULL)
         return FALSE;
@@ -277,9 +277,9 @@ BOOL CEnumerateSerial::RegQueryValueString(HKEY kKey, LPCTSTR lpValueName, LPTST
     }
 
     // Handle the case where the data just returned is the same size as the allocated size. This
-    // could occur where the data has been updated in the registry with a non null terminator between
-    // the two calls to ReqQueryValueEx above. Rather than return a potentially non-null terminated
-    // block of data, just fail the method call
+    // could occur where the data has been updated in the registry with a non null terminator
+    // between the two calls to ReqQueryValueEx above. Rather than return a potentially non-null
+    // terminated block of data, just fail the method call
     if (dwReturnedSize >= dwAllocatedSize)
     {
         SetLastError(ERROR_INVALID_DATA);
