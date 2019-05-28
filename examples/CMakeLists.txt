@@ -10,7 +10,15 @@ function(setup_example example_directory)
         add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCE_FILES})
 
         target_compile_definitions(${EXAMPLE_NAME} PRIVATE -DNRF_SD_BLE_API=${SD_API_VER})
-        target_include_directories(${EXAMPLE_NAME} PRIVATE ../include/sd_api_v${SD_API_VER})
+
+        target_include_directories(${EXAMPLE_NAME} PRIVATE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/sd_api_v${SD_API_VER}>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/common/config>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/common/sdk_compat>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/common>
+
+            $<INSTALL_INTERFACE:include/sd_api_v${SD_API_VER}>
+        )
 
         if(WIN32)
             target_link_libraries(${EXAMPLE_NAME} PRIVATE nrf_ble_driver_sd_api_v${SD_API_VER}_static)
