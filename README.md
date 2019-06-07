@@ -160,7 +160,7 @@ To compile `pc-ble-driver` you will need the following tools:
 * A C/C++ toolchain
 * [Git](https://git-scm.com/) (>=2.19)
 * [CMake](https://cmake.org/) (>=3.11)
-* [vcpkg](https://github.com/Microsoft/vcpkg)
+* [vcpkg](https://github.com/NordicPlayground/vcpkg.git)
 
 ##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source)
 
@@ -202,9 +202,10 @@ Follow the steps to install dependencies on a specific platform:
     $ choco install -y cmake
     ```
 
-4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg.git).
     ```bash
-    $ git clone https://github.com/Microsoft/vcpkg.git
+    $ git clone https://github.com/NordicPlayground/vcpkg.git
+    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ cd vcpkg
     $ .\bootstrap-vcpkg.bat
     ```
@@ -265,9 +266,10 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Install `CMake` from source if the version is lower than required.
 
-4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg/).
     ```bash
-    $ git clone https://github.com/Microsoft/vcpkg.git
+    $ git clone https://github.com/NordicPlayground/vcpkg.git
+    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ cd vcpkg
     $ ./bootstrap-vcpkg.sh
     ```
@@ -305,9 +307,10 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Install `CMake` from source if the version is lower than required.
 
-4. Install [vcpkg](https://github.com/Microsoft/vcpkg).
+4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg/).
     ```bash
-    $ git clone https://github.com/Microsoft/vcpkg.git
+    $ git clone https://github.com/NordicPlayground/vcpkg/
+    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ cd vcpkg
     $ ./bootstrap-vcpkg.sh
     ```
