@@ -82,6 +82,11 @@ uint32_t slip_decode(const std::vector<uint8_t> &packet, std::vector<uint8_t> &o
         else if (packet[i] == SLIP_ESC)
         {
             i++;
+            if (i == packet.size())
+            {
+                return NRF_ERROR_SD_RPC_H5_TRANSPORT_SLIP_DECODING;
+            }
+
             if (packet[i] == SLIP_ESC_END)
             {
                 out_packet.push_back(SLIP_END);
