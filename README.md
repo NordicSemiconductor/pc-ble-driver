@@ -205,8 +205,8 @@ Follow the steps to install dependencies on a specific platform:
 4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg.git).
     ```bash
     $ git clone https://github.com/NordicPlayground/vcpkg.git
-    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ cd vcpkg
+    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ .\bootstrap-vcpkg.bat
     ```
 
@@ -269,8 +269,8 @@ The following steps are needed only if you want to compile your own `connectivit
 4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg/).
     ```bash
     $ git clone https://github.com/NordicPlayground/vcpkg.git
-    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ cd vcpkg
+    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ ./bootstrap-vcpkg.sh
     ```
 
@@ -310,8 +310,8 @@ The following steps are needed only if you want to compile your own `connectivit
 4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg/).
     ```bash
     $ git clone https://github.com/NordicPlayground/vcpkg/
-    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ cd vcpkg
+    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
     $ ./bootstrap-vcpkg.sh
     ```
 
