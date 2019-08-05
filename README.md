@@ -30,7 +30,7 @@
 
 ## Overview
 
-`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](https://www.nordicsemi.com/DocLib/Content/SoftDevice_API_Doc/S140/v6-1-0/modules) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](https://www.nordicsemi.com/en/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_serialization).
+`pc-ble-driver` consists of a set of static and shared libraries that provide [SoftDevice](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s140.api.v6.1.1/modules.html) functionality to the application via serial port communication with an nRF5 connectivity chip running the SoftDevice and connectivity software, included as a single .hex file [here](./hex/). For more information on SoftDevice serialization see [Serialization](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/lib_serialization.html).
 
 The C/C++ libraries can be interfaced with directly, but are also provided as higher-level bindings that ease development at the cost of reduced control (acceptable in most cases):
 
@@ -42,7 +42,7 @@ The C/C++ libraries can be interfaced with directly, but are also provided as hi
 
 ## Architecture
 
-![Architecture](https://www.nordicsemi.com/en/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/-/media/0905BE636D5E4B27B19F4F179B241DB8.ashx)
+![Architecture](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/architecture_overview_serialization.svg)
 
 Where the 'Application chip' is just generic hardware (i.e. a Windows, Linux or macOS device), although it could also be an Arduino or Raspberry Pi for example.
 
@@ -526,7 +526,7 @@ Programming the connectivity firmware via serial DFU can be done from command li
 
 ##### Programming from command line with nrfutil
 
-Device Firmware Upgrade with [nrfutil](https://www.nordicsemi.com/DocLib/Content/User_Guides/nrfutil/latest/UG/nrfutil/nrfutil_dfu_serial_usb) is normally done in two steps: 1: generating the DFU zip package, and 2: performing the DFU procedure. A DFU zip package has been pre-made and is included in this repository. To run the DFU procedure with nrfutil with the pre-made DFU package:
+Device Firmware Upgrade with [nrfutil](https://infocenter.nordicsemi.com/topic/ug_nrfutil/UG/nrfutil/nrfutil_dfu_serial_usb.html) is normally done in two steps: 1: generating the DFU zip package, and 2: performing the DFU procedure. A DFU zip package has been pre-made and is included in this repository. To run the DFU procedure with nrfutil with the pre-made DFU package:
 
     nrfutil dfu usb_serial -pkg connectivity_x.x.x_usb_with_s<x>_<a>.<b>.<c>_dfu_pkg.zip -p <serial port>
 
