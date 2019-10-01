@@ -553,7 +553,7 @@ In order to accept your pull request, we need you to sign our Contributor Licens
 
 ## Feedback
 
-If you find any bugs, or have questions or other feedback in general, please submit a post on the [Nordic DevZone](http://devzone.nordicsemi.no) portal.
+If you find any bugs, or have questions or other feedback in general, please submit a post on the [Nordic DevZone](https://devzone.nordicsemi.com) portal.
 Note that bug reports should describe in sufficient detail how to reproduce the bug.
 
 ## License
