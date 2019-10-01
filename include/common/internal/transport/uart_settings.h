@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nordic Semiconductor ASA
+ * Copyright (c) 2016-2019 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -38,36 +38,24 @@
 #ifndef UART_SETTINGS_H
 #define UART_SETTINGS_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 /*@brief Flow control modes. */
-typedef enum
-{
+typedef enum {
     UartFlowControlNone,
     UartFlowControlSoftware,
     UartFlowControlHardware
 } UartFlowControl;
 
 /*@brief Parity modes. */
-typedef enum
-{
-    UartParityNone,
-    UartParityOdd,
-    UartParityEven
-} UartParity;
+typedef enum { UartParityNone, UartParityOdd, UartParityEven } UartParity;
 
 /*@brief Stop bit modes. */
-typedef enum
-{
-    UartStopBitsOne,
-    UartStopBitsOnePointFive,
-    UartStopBitsTwo
-} UartStopBits;
+typedef enum { UartStopBitsOne, UartStopBitsOnePointFive, UartStopBitsTwo } UartStopBits;
 
 /*@brief Data bit modes. */
-typedef enum
-{
+typedef enum {
     UartDataBitsFive  = 5,
     UartDataBitsSix   = 6,
     UartDataBitsSeven = 7,
@@ -77,7 +65,7 @@ typedef enum
 /*@brief UART communication parameters. */
 typedef struct
 {
-    const char * portName;
+    const char *portName;
     uint32_t baudRate;
     UartFlowControl flowControl;
     UartParity parity;
@@ -87,12 +75,11 @@ typedef struct
 
 /**
  * @brief The UartSettings class parses a uart_comm_params_t struct and gives out corresponding
- * boost enum values for use in the UartBoost class.
+ * boost enum values for use in the UartTransport class.
  */
 class UartSettings
 {
-public:
-
+  public:
     /*@brief Constructor. */
     UartSettings();
 
@@ -138,15 +125,13 @@ public:
     /*@brief Returns the currently configured Data Bits setting. */
     UartDataBits getDataBits() const;
 
-protected:
-
+  protected:
     std::string portName;
     uint32_t baudRate;
     UartFlowControl flowControl;
     UartParity parity;
     UartStopBits stopBits;
     UartDataBits dataBits;
-
 };
 
-#endif //UART_SETTINGS_H
+#endif // UART_SETTINGS_H

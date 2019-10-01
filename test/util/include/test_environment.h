@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Nordic Semiconductor ASA
+ * Copyright (c) 2018-2019 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -37,19 +37,18 @@
 
 #pragma once
 
-#include "h5_transport.h"
-#include "transport.h"
-
-#include "log.h"
 #include "test_util.h"
-
-#include "virtual_uart.h"
 
 #include <condition_variable>
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
+
+#define STR(s) #s
+#define EXPAND(s) STR(s)
+#define CREATE_TEST_NAME_AND_TAGS(name, tags)                                                      \
+#name "_sdv" EXPAND(NRF_SD_BLE_API), #tags "[sdv" EXPAND(NRF_SD_BLE_API) "]"
 
 constexpr uint32_t defaultRetransmissionInterval()
 {
@@ -60,7 +59,8 @@ constexpr uint32_t defaultRetransmissionInterval()
 #endif
 }
 
-constexpr uint32_t defaultBaudRate = 1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
+constexpr uint32_t defaultBaudRate =
+    1000000; /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #define STR(s) #s
 #define EXPAND(s) STR(s)
@@ -92,46 +92,4 @@ extern Environment ConfiguredEnvironment;
 
 Environment getEnvironment();
 std::string getEnvironmentAsText(const Environment &env);
-
-class VirtualTransportSendSync : public Transport
-{
-  public:
-    explicit VirtualTransportSendSync() noexcept;
-
-    uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                  const log_cb_t &log_callback);
-    uint32_t close();
-    uint32_t send(const std::vector<uint8_t> &data);
-
-  private:
-    std::thread dataPusher;
-    bool pushData;
-};
-
-// Since the H5Transport.open is a blocking call
-// we need to run open in separate threads to
-// make the two H5Transports communicate
-class H5TransportWrapper : public H5Transport
-{
-  public:
-    H5TransportWrapper(Transport *nextTransportLayer, uint32_t retransmission_interval) noexcept;
-    ~H5TransportWrapper();
-
-    void openThread(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);
-
-    // Runs open in a separate thread, call waitForResult to wait for the result of opening.
-    //
-    // It does not override open becase we can not provide a return value that
-    // is of the same type as H5Transport::open
-    void wrappedOpen(status_cb_t status_callback, data_cb_t data_callback, log_cb_t log_callback);
-    uint32_t waitForResult();
-
-  private:
-    std::mutex openWait;
-    bool isOpenDone;
-    std::condition_variable openStateChanged;
-
-    std::thread h5Thread;
-    uint32_t result;
-};
-}; // namespace test
+} // namespace test

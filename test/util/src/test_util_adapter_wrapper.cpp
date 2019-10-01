@@ -8,7 +8,7 @@
 #include "test_util_role.h"
 
 // Logging support
-#include "internal/log.h"
+#include "logging.h"
 
 #include "ble.h"
 #include "sd_rpc.h"
@@ -65,13 +65,21 @@ AdapterWrapper::~AdapterWrapper()
     if (m_adapter != nullptr)
     {
         const auto err_code = sd_rpc_close(m_adapter);
-        NRF_LOG(role() << " sd_rpc_close, " << testutil::errorToString(err_code));
+        get_logger()->debug("{} sd_rpc_close {}", role(), testutil::errorToString(err_code));
 
         // Remove adapter from map of adapters used in callbacks
-        AdapterWrapper::adapters.erase(m_adapter->internal);
+        try
+        {
+            AdapterWrapper::adapters.erase(m_adapter->internal);
+        }
+        catch (const std::exception &e)
+        {
+            get_logger()->error("{} not possible to erase adapter in map of adapters, ", role(),
+                                e.what());
+        }
 
         sd_rpc_adapter_delete(m_adapter);
-        NRF_LOG(role() << " sd_rpc_adapter_delete called and returned.");
+        get_logger()->debug("{} sd_rpc_adapter_delete called and returned.", role());
     }
 }
 
@@ -109,13 +117,14 @@ uint32_t AdapterWrapper::configure()
     err_code = sd_ble_gap_addr_get(m_adapter, &address);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_addr_get, " << testutil::errorToString(err_code));
+        get_logger()->debug("{} sd_ble_gap_addr_get,", role(), testutil::errorToString(err_code));
     }
 #else
     err_code = sd_ble_gap_address_get(m_adapter, &address);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_address_get failed, " << testutil::errorToString(err_code));
+        get_logger()->debug("{} sd_ble_gap_address_get failed, {}", role(),
+                            testutil::errorToString(err_code));
     }
 #endif
 
@@ -125,7 +134,7 @@ uint32_t AdapterWrapper::configure()
     }
     else
     {
-        NRF_LOG(role() << " GAP address is: " << testutil::asText(address));
+        get_logger()->debug("{} GAP address is: {}", role(), testutil::asText(address));
     }
 
     return err_code;
@@ -147,7 +156,7 @@ uint32_t AdapterWrapper::connect(const ble_gap_addr_t *address)
     }
     else
     {
-        NRF_LOG(role() << " sd_ble_gap_connect, " << testutil::errorToString(err_code));
+        get_logger()->debug("{} sd_ble_gap_connect, {}", role(), testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -180,7 +189,8 @@ uint32_t AdapterWrapper::startScan(const bool resume, const bool extended, const
 #if NRF_SD_BLE_API < 6
     if (resume == true)
     {
-        NRF_LOG(role() << " Not possible to resume a scan if SoftDevice API version < 6");
+        get_logger()->debug("{} Not possible to resume a scan if SoftDevice API version < 6",
+                            role());
         return NRF_ERROR_INVALID_STATE;
     }
 #endif
@@ -207,22 +217,24 @@ uint32_t AdapterWrapper::startScan(const bool resume, const bool extended, const
     {
         if (!resume)
         {
-            NRF_LOG(role() << " Scan start failed with " << testutil::errorToString(err_code));
+            get_logger()->debug("{} Scan start failed with {}", role(),
+                                testutil::errorToString(err_code));
         }
         else
         {
-            NRF_LOG(role() << " Scan resume failed with " << testutil::errorToString(err_code));
+            get_logger()->debug("{} Scan resume failed with {}", role(),
+                                testutil::errorToString(err_code));
         }
     }
     else
     {
         if (!resume)
         {
-            NRF_LOG(role() << " Scan started");
+            get_logger()->debug("{} Scan started", role());
         }
         else
         {
-            NRF_LOG(role() << " Scan resumed");
+            get_logger()->debug("{} Scan resumed", role());
         }
     }
 
@@ -245,7 +257,8 @@ uint32_t AdapterWrapper::setupAdvertising(
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_adv_data_set, " << testutil::errorToString(err_code));
+        get_logger()->debug("{}  sd_ble_gap_adv_data_set, {}", role(),
+                            testutil::errorToString(err_code));
         return err_code;
     }
 #endif
@@ -255,7 +268,7 @@ uint32_t AdapterWrapper::setupAdvertising(
 
     if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
     {
-        NRF_LOG(role() << " Advertising data is larger then the buffer set asize.");
+        get_logger()->debug("{} Advertising data is larger then the buffer set asize.", role());
         return NRF_ERROR_INVALID_PARAM;
     }
 
@@ -337,11 +350,12 @@ uint32_t AdapterWrapper::setupAdvertising(
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Setup of advertisement failed, " << testutil::errorToString(err_code));
+        get_logger()->debug("{} Setup of advertisement failed, {}", role(),
+                            testutil::errorToString(err_code));
     }
     else
     {
-        NRF_LOG(role() << " Setting advertisement success.");
+        get_logger()->debug("{} Setting advertisement success.", role());
     }
 
     return err_code;
@@ -349,9 +363,9 @@ uint32_t AdapterWrapper::setupAdvertising(
 
 uint32_t AdapterWrapper::startAdvertising()
 {
-    if (role() != Peripheral)
+    if (role() != Role::Peripheral)
     {
-        NRF_LOG(role() << " Wrong role, must be peripheral to advertise.");
+        get_logger()->debug("{} Wrong role, must be peripheral to advertise.", role());
         return NRF_ERROR_INVALID_STATE;
     }
 
@@ -367,8 +381,8 @@ uint32_t AdapterWrapper::startAdvertising()
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Failed to start advertising, sd_ble_gap_adv_start, "
-                       << testutil::errorToString(err_code));
+        get_logger()->debug("{} Failed to start advertising, sd_ble_gap_adv_start, {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -391,7 +405,7 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
 
     if (advertisingDataSize > testutil::ADV_DATA_BUFFER_SIZE)
     {
-        NRF_LOG(role() << " Advertising data is larger then the buffer set asize.");
+        get_logger()->debug("{} Advertising data is larger then the buffer set aside.", role());
         return NRF_ERROR_INVALID_PARAM;
     }
 
@@ -437,11 +451,13 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
     advertising_data.adv_data      = adv_data;
     advertising_data.scan_rsp_data = scan_rsp_data;
 
-    NRF_LOG(role() << " Changing advertisement data to instance with addresses"
-                   << " adv_data.p_data:" << static_cast<void *>(advertising_data.adv_data.p_data)
-                   << " adv_data.len:" << static_cast<uint32_t>(adv_data.len) << " scan_rsp.p_data:"
-                   << static_cast<void *>(advertising_data.scan_rsp_data.p_data)
-                   << " scan_rsp_data.len:" << static_cast<uint32_t>(scan_rsp_data.len));
+    get_logger()->debug(
+        "{} Changing advertisement data to instance with addresses adv_data.p_data: {} "
+        "adv_data.len: {} scan_rsp.p_data: {} scan_rsp_data.len:{}",
+        role(), static_cast<void *>(advertising_data.adv_data.p_data),
+        static_cast<uint32_t>(adv_data.len),
+        static_cast<void *>(advertising_data.scan_rsp_data.p_data),
+        static_cast<uint32_t>(scan_rsp_data.len));
 
     // Support only undirected advertisement for now
     const auto err_code = sd_ble_gap_adv_set_configure(m_adapter, &(scratchpad.adv_handle),
@@ -449,13 +465,14 @@ uint32_t AdapterWrapper::changeAdvertisingData(const std::vector<uint8_t> &adver
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Changing of advertisement data failed, "
-                       << testutil::errorToString(err_code));
+        get_logger()->debug("{} Changing of advertisement data failed, {}", role(),
+                            testutil::errorToString(err_code));
     }
     else
     {
         m_changeCount++;
-        NRF_LOG(role() << " Changing advertisement data succeeded (#" << m_changeCount << ")");
+        get_logger()->debug("{} Changing advertisement data succeeded (#{})", role(),
+                            m_changeCount);
     }
 
     return err_code;
@@ -469,7 +486,7 @@ uint32_t AdapterWrapper::startServiceDiscovery(const uint8_t type, const uint16_
     uint16_t start_handle = 0x01;
     ble_uuid_t srvc_uuid;
 
-    NRF_LOG(role() << " Starting discovery of GATT Primary Services");
+    get_logger()->debug("{} Starting discovery of GATT Primary Services", role());
 
     srvc_uuid.type = type;
     srvc_uuid.uuid = uuid;
@@ -479,9 +496,9 @@ uint32_t AdapterWrapper::startServiceDiscovery(const uint8_t type, const uint16_
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Failed to initiate or continue a GATT Primary Service Discovery "
-                          "procedure, sd_ble_gattc_primary_services_discover "
-                       << testutil::errorToString(err_code));
+        get_logger()->error("{} Failed to initiate or continue a GATT Primary Service Discovery "
+                            "procedure, sd_ble_gattc_primary_services_discover {}",
+                            role(), testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -508,8 +525,8 @@ uint32_t AdapterWrapper::startAuthentication(const bool bond, const bool mitm, c
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Error calling sd_ble_gap_authenticate: "
-                       << testutil::errorToString(err_code));
+        get_logger()->error("{} Error calling sd_ble_gap_authenticate: {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -521,8 +538,8 @@ uint32_t AdapterWrapper::authKeyReply(const uint8_t keyType, const uint8_t *key)
         sd_ble_gap_auth_key_reply(m_adapter, scratchpad.connection_handle, keyType, key);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " Error calling sd_ble_gap_auth_key_reply: "
-                       << testutil::errorToString(err_code));
+        get_logger()->error("{} Error calling sd_ble_gap_auth_key_reply: {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -550,7 +567,8 @@ uint32_t AdapterWrapper::securityParamsReply(const uint8_t status,
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_sec_params_reply, " << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_gap_sec_params_reply, {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -563,8 +581,8 @@ uint32_t AdapterWrapper::securityParamsReply(const ble_gap_sec_keyset_t &keyset)
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gap_sec_params_reply failed, "
-                       << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_gap_sec_params_reply failed, {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -577,14 +595,15 @@ uint32_t AdapterWrapper::startCharacteristicDiscovery()
     handle_range.start_handle = scratchpad.service_start_handle;
     handle_range.end_handle   = scratchpad.service_end_handle;
 
-    NRF_LOG(role() << " Discovering characteristics, " << testutil::asText(handle_range));
+    get_logger()->debug("{} Discovering characteristics, {}", role(),
+                        testutil::asText(handle_range));
 
     const auto err_code = sd_ble_gattc_characteristics_discover(
         m_adapter, scratchpad.connection_handle, &handle_range);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gattc_characteristics_discover, "
-                       << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_gattc_characteristics_discover, {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -593,11 +612,11 @@ uint32_t AdapterWrapper::startCharacteristicDiscovery()
 uint32_t AdapterWrapper::startDescriptorDiscovery()
 {
     ble_gattc_handle_range_t handle_range;
-    NRF_LOG(role() << " Discovering characteristic's descriptors");
+    get_logger()->debug("{} Discovering characteristic's descriptors", role());
 
     if (scratchpad.characteristic_decl_handle == 0)
     {
-        NRF_LOG(role() << " No characteristic handle specified.");
+        get_logger()->error("{} No characteristic handle specified.", role());
         return NRF_ERROR_INVALID_STATE;
     }
 
@@ -609,8 +628,8 @@ uint32_t AdapterWrapper::startDescriptorDiscovery()
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gattc_descriptors_discover failed, err_code: "
-                       << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_gattc_descriptors_discover failed, err_code: {}", role(),
+                            testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -627,15 +646,16 @@ uint32_t AdapterWrapper::writeCCCDValue(const uint16_t cccdHandle, const uint8_t
     write_params.write_op = BLE_GATT_OP_WRITE_REQ;
     write_params.offset   = 0;
 
-    NRF_LOG(role() << " Writing to connection " << testutil::asText(scratchpad.connection_handle)
-                   << " CCCD handle: " << testutil::asText(cccdHandle) << " value: " << value);
+    get_logger()->debug("{} Writing to connection {} CCCD handle: {} value: {}", role(),
+                        testutil::asText(scratchpad.connection_handle),
+                        testutil::asText(cccdHandle), value);
 
     const auto err_code =
         sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
 
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gattc_write, " << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_gattc_write, {}", role(), testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -651,16 +671,16 @@ uint32_t AdapterWrapper::writeCharacteristicValue(const uint16_t characteristicH
     write_params.write_op = BLE_GATT_OP_WRITE_REQ;
     write_params.offset   = 0;
 
-    NRF_LOG(role() << " Writing to connection_handle: "
-                   << testutil::asText(scratchpad.connection_handle)
-                   << " characteristic_handle: " << testutil::asText(characteristicHandle)
-                   << " length: " << data.size() << " value: 0x" << asHex(data));
+    get_logger()->debug(
+        "{} Writing to connection_handle: {} characteristic_handle: {} length: {}, value: {:x}",
+        role(), testutil::asText(scratchpad.connection_handle),
+        testutil::asText(characteristicHandle), data.size(), asHex(data));
 
     const auto err_code =
         sd_ble_gattc_write(m_adapter, scratchpad.connection_handle, &write_params);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_gattc_write, " << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_gattc_write, {}", role(), testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -684,8 +704,8 @@ std::string AdapterWrapper::port() const
 void AdapterWrapper::processLog(const sd_rpc_log_severity_t severity,
                                 const std::string &log_message)
 {
-    NRF_LOG(role() << "[log] severity:" << testutil::asText(severity)
-                   << " message:" << log_message);
+    get_logger()->debug("{}[log] severity:{} message: {}", role(), testutil::asText(severity),
+                        log_message);
 
     if (m_logCallback)
     {
@@ -698,140 +718,134 @@ void AdapterWrapper::logEvent(const uint16_t eventId, const ble_gap_evt_t &gapEv
     switch (eventId)
     {
         case BLE_GAP_EVT_CONNECTED:
-            NRF_LOG(role() << " BLE_GAP_EVT_CONNECTED ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " connected:[" << testutil::asText(gapEvent.params.connected)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_CONNECTED [conn_handle:{} connected:[{}]]", role(),
+                                testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.connected));
             break;
         case BLE_GAP_EVT_DISCONNECTED:
-            NRF_LOG(role() << " BLE_GAP_EVT_DISCONNECTED ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " disconnected:[" << testutil::asText(gapEvent.params.disconnected)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_DISCONNECTED [conn_handle: {} disconnected:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.disconnected));
             break;
         case BLE_GAP_EVT_TIMEOUT:
-            NRF_LOG(role() << " BLE_GAP_EVT_TIMEOUT ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " timeout:[" << testutil::asText(gapEvent.params.timeout) << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_TIMEOUT [conn_handle: {}  timeout:[{}]]", role(),
+                                testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.timeout));
             break;
         case BLE_GAP_EVT_ADV_REPORT:
-            NRF_LOG(role() << " BLE_GAP_EVT_ADV_REPORT ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " adv_report:[" << testutil::asText(gapEvent.params.adv_report)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_ADV_REPORT [conn_handle: {}  adv_report:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.adv_report));
+
             break;
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_SEC_PARAMS_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " sec_params_request:["
-                           << testutil::asText(gapEvent.params.sec_params_request) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_SEC_PARAMS_REQUEST [conn_handle:{}  sec_params_request:[{}]]",
+                role(), testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.sec_params_request));
             break;
         case BLE_GAP_EVT_SEC_INFO_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_SEC_INFO_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " sec_info_request:["
-                           << testutil::asText(gapEvent.params.sec_info_request) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_SEC_INFO_REQUEST [conn_handle:{} sec_info_request:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.sec_info_request));
             break;
         case BLE_GAP_EVT_PASSKEY_DISPLAY:
-            NRF_LOG(role() << " BLE_GAP_EVT_PASSKEY_DISPLAY ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " passkey_display:["
-                           << testutil::asText(gapEvent.params.passkey_display) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_PASSKEY_DISPLAY [conn_handle:{}  passkey_display:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.passkey_display));
             break;
         case BLE_GAP_EVT_KEY_PRESSED:
-            NRF_LOG(role() << " BLE_GAP_EVT_KEY_PRESSED ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " key_pressed:[" << testutil::asText(gapEvent.params.key_pressed)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_KEY_PRESSED [conn_handle:{} key_pressed:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.key_pressed));
             break;
         case BLE_GAP_EVT_SEC_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_SEC_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " sec_request:[" << testutil::asText(gapEvent.params.sec_request)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_SEC_REQUEST [conn_handle:{} sec_request:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.sec_request));
             break;
         case BLE_GAP_EVT_AUTH_KEY_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_AUTH_KEY_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " auth_key_request:["
-                           << testutil::asText(gapEvent.params.auth_key_request) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_AUTH_KEY_REQUEST [conn_handle:{} auth_key_request:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.auth_key_request));
             break;
         case BLE_GAP_EVT_LESC_DHKEY_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_LESC_DHKEY_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " lesc_dhkey_request:["
-                           << testutil::asText(gapEvent.params.lesc_dhkey_request) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_LESC_DHKEY_REQUEST [conn_handle:{} lesc_dhkey_request:[{}]]",
+                role(), testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.lesc_dhkey_request));
             break;
         case BLE_GAP_EVT_CONN_SEC_UPDATE:
-            NRF_LOG(role() << " BLE_GAP_EVT_CONN_SEC_UPDATE ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " conn_sec_update:["
-                           << testutil::asText(gapEvent.params.conn_sec_update) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_CONN_SEC_UPDATE [conn_handle:{} conn_sec_update:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.conn_sec_update));
             break;
         case BLE_GAP_EVT_AUTH_STATUS:
-            NRF_LOG(role() << " BLE_GAP_EVT_AUTH_STATUS ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " auth_status:[" << testutil::asText(gapEvent.params.auth_status)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_AUTH_STATUS [conn_handle:{} auth_status:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.auth_status));
+
             break;
         case BLE_GAP_EVT_RSSI_CHANGED:
-            NRF_LOG(role() << " BLE_GAP_EVT_RSSI_CHANGED ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " rssi_changed:[" << testutil::asText(gapEvent.params.rssi_changed)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_RSSI_CHANGED [conn_handle:{} rssi_changed:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.rssi_changed));
             break;
         case BLE_GAP_EVT_SCAN_REQ_REPORT:
-            NRF_LOG(role() << " BLE_GAP_EVT_SCAN_REQ_REPORT ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:["
-                           << testutil::asText(gapEvent.params.scan_req_report) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_SCAN_REQ_REPORT [conn_handle:{} scan_req_report:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.scan_req_report));
             break;
 #if NRF_SD_BLE_API == 6
         case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_PHY_UPDATE_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:["
-                           << testutil::asText(gapEvent.params.phy_update_request) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_PHY_UPDATE_REQUEST [conn_handle:{} scan_req_report:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.phy_update_request));
             break;
 
         case BLE_GAP_EVT_PHY_UPDATE:
-            NRF_LOG(role() << " BLE_GAP_EVT_PHY_UPDATE ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:[" << testutil::asText(gapEvent.params.phy_update)
-                           << "]]");
+            get_logger()->debug("{} BLE_GAP_EVT_PHY_UPDATE [conn_handle:{} scan_req_report:[{}]]",
+                                role(), testutil::asText(gapEvent.conn_handle),
+                                testutil::asText(gapEvent.params.phy_update));
             break;
 
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
-            NRF_LOG(role() << " BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:["
-                           << testutil::asText(gapEvent.params.data_length_update_request) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST [conn_handle:{} scan_req_report:[{}]]",
+                role(), testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.data_length_update_request));
             break;
 
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
-            NRF_LOG(role() << " BLE_GAP_EVT_DATA_LENGTH_UPDATE ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:["
-                           << testutil::asText(gapEvent.params.data_length_update) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_DATA_LENGTH_UPDATE [conn_handle:{} scan_req_report:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.data_length_update));
             break;
 
         case BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT:
-            NRF_LOG(role() << " BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:["
-                           << testutil::asText(gapEvent.params.qos_channel_survey_report) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_QOS_CHANNEL_SURVEY_REPORT [conn_handle:{}  scan_req_report:[{}]]",
+                role(), testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.qos_channel_survey_report));
             break;
 
         case BLE_GAP_EVT_ADV_SET_TERMINATED:
-            NRF_LOG(role() << " BLE_GAP_EVT_ADV_SET_TERMINATED ["
-                           << "conn_handle:" << testutil::asText(gapEvent.conn_handle)
-                           << " scan_req_report:["
-                           << testutil::asText(gapEvent.params.adv_set_terminated) << "]]");
+            get_logger()->debug(
+                "{} BLE_GAP_EVT_ADV_SET_TERMINATED [conn_handle:{} scan_req_report:[{}]]", role(),
+                testutil::asText(gapEvent.conn_handle),
+                testutil::asText(gapEvent.params.adv_set_terminated));
             break;
 
 #endif // NRF_SD_BLE_API == 6
         default:
-            NRF_LOG(role() << " UNKNOWN EVENT WITH ID [0x" << std::hex << eventId << "]");
+            get_logger()->debug("{} UNKNOWN EVENT WITH ID [{:x}]", role(), eventId);
             break;
     }
 }
@@ -841,8 +855,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
     auto eventId = p_ble_evt->header.evt_id;
 
     const auto logGenericUnprocessed = [this, &eventId]() {
-        NRF_LOG(role() << " Unprocessed event: 0x" << std::setfill('0') << std::setw(2) << std::hex
-                       << (uint32_t)eventId);
+        get_logger()->debug("{} Unprocessed event: {:x}", role(), (uint32_t)eventId);
     };
 
     if (eventId >= BLE_GAP_EVT_BASE && eventId <= BLE_GAP_EVT_LAST)
@@ -873,7 +886,8 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
         }
 
         const auto logUnprocessed = [this, &eventId]() {
-            NRF_LOG(role() << " Unprocessed GAP event, " << testutil::eventIdAsText(eventId));
+            get_logger()->debug("{} Unprocessed GAP event, {}", role(),
+                                testutil::eventIdAsText(eventId));
         };
 
         if (m_gapEventCallback)
@@ -891,7 +905,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
     else if (eventId >= BLE_GATTC_EVT_BASE && eventId <= BLE_GATTC_EVT_LAST)
     {
         const auto logUnprocessed = [this, &eventId]() {
-            NRF_LOG(role() << " Unprocessed GATTC event, " << eventIdAsText(eventId));
+            get_logger()->debug("{}  Unprocessed GATTC event, {}", role(), eventIdAsText(eventId));
         };
 
         if (m_gattcEventCallback)
@@ -909,7 +923,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
     else if (eventId >= BLE_GATTS_EVT_BASE && eventId <= BLE_GATTS_EVT_LAST)
     {
         const auto logUnprocessed = [this, &eventId]() {
-            NRF_LOG(role() << " Unprocessed GATTS event, " << eventIdAsText(eventId));
+            get_logger()->debug("{} Unprocessed GATTS event, {} ", role(), eventIdAsText(eventId));
         };
 
         if (m_gattsEventCallback)
@@ -942,7 +956,7 @@ void AdapterWrapper::processEvent(const ble_evt_t *p_ble_evt)
 
 void AdapterWrapper::processStatus(const sd_rpc_app_status_t code, const std::string &message)
 {
-    NRF_LOG(role() << "[status] code:" << testutil::asText(code) << " message:" << message);
+    get_logger()->debug("{}[status] code: {} message: {}", role(), testutil::asText(code), message);
 
     if (m_statusCallback)
     {
@@ -994,7 +1008,7 @@ void AdapterWrapper::setupScratchpad(const uint16_t mtu)
     scratchpad.ble_enable_params.common_enable_params.p_conn_bw_counts = nullptr;
     scratchpad.ble_enable_params.common_enable_params.vs_uuid_count    = 1;
 
-    if (m_role == Central)
+    if (m_role == Role::Central)
     {
         scratchpad.common_opt.conn_bw.role = BLE_GAP_ROLE_CENTRAL;
     }
@@ -1092,7 +1106,7 @@ uint32_t AdapterWrapper::setBLEOptions()
     const auto err_code = sd_ble_opt_set(m_adapter, BLE_COMMON_OPT_CONN_BW, &scratchpad.opt);
     if (err_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_opt_set, " << testutil::errorToString(err_code));
+        get_logger()->error("{} sd_ble_opt_set, {}", role(), testutil::errorToString(err_code));
     }
 
     return err_code;
@@ -1117,10 +1131,11 @@ uint32_t AdapterWrapper::initBLEStack()
         case NRF_SUCCESS:
             break;
         case NRF_ERROR_INVALID_STATE:
-            NRF_LOG(role() << " BLE stack already enabled\n");
+            get_logger()->debug("{} BLE stack already enabled", role());
             break;
         default:
-            NRF_LOG(role() << " Failed to enable BLE stack, " << testutil::errorToString(err_code));
+            get_logger()->debug("{}  Failed to enable BLE stack, {}", role(),
+                                testutil::errorToString(err_code));
             break;
     }
 
@@ -1148,8 +1163,9 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
 
     if (error_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT, "
-                       << testutil::errorToString(error_code));
+        get_logger()->debug(
+            "{} sd_ble_cfg_set() failed when attempting to set BLE_GAP_CFG_ROLE_COUNT, {}", role(),
+            testutil::errorToString(error_code));
         return error_code;
     }
 
@@ -1161,8 +1177,9 @@ uint32_t AdapterWrapper::setBLECfg(uint8_t conn_cfg_tag)
 
     if (error_code != NRF_SUCCESS)
     {
-        NRF_LOG(role() << " sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT, "
-                       << testutil::errorToString(error_code));
+        get_logger()->debug(
+            "{} sd_ble_cfg_set() failed when attempting to set BLE_CONN_CFG_GATT, {}", role(),
+            testutil::errorToString(error_code));
         return error_code;
     }
 
@@ -1191,13 +1208,16 @@ void AdapterWrapper::statusHandler(adapter_t *adapter, sd_rpc_app_status_t code,
         const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
         wrappedAdapter->processStatus(code, message);
     }
-    catch (std::out_of_range &)
+    catch (std::out_of_range &e)
     {
-        NRF_LOG("In statusHandler callback, not able to find adapter to invoke status handler on.");
+        get_logger()->error("{:p}, in statusHandler callback, not able to find adapter to invoke "
+                            "status handler on, {}",
+                            static_cast<void *>(adapter), e.what());
     }
     catch (std::system_error &e)
     {
-        NRF_LOG("std::system_error in statusHandler: " << e.what());
+        get_logger()->error("{:p} std::system_error in statusHandler: {}",
+                            static_cast<void *>(adapter), e.what());
     }
 }
 
@@ -1208,13 +1228,16 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
         const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
         wrappedAdapter->processEvent(p_ble_evt);
     }
-    catch (std::out_of_range &)
+    catch (std::out_of_range &e)
     {
-        NRF_LOG("In eventHandler, not able to find adapter to invoke event handler on.");
+        get_logger()->error(
+            "{:p} in eventHandler, not able to find adapter to invoke event handler on, {}",
+            static_cast<void*>(adapter), e.what());
     }
     catch (std::system_error &e)
     {
-        NRF_LOG("std::system_error in eventHandler: " << e.what());
+        get_logger()->error("{:p} in eventHandler, std::system_error, {}",
+                            static_cast<void *>(adapter), e.what());
     }
 }
 
@@ -1226,13 +1249,16 @@ void AdapterWrapper::logHandler(adapter_t *adapter, sd_rpc_log_severity_t severi
         const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
         wrappedAdapter->processLog(severity, log_message);
     }
-    catch (std::out_of_range &)
+    catch (std::out_of_range &e)
     {
-        NRF_LOG("In logHandler, not able to find adapter to invoke log handler on.");
+        get_logger()->error(
+            "{:p}, in logHandler, not able to find adapter to invoke log handler on, {}",
+            static_cast<void *>(adapter), e.what());
     }
     catch (std::system_error &e)
     {
-        NRF_LOG("std::system_error in logHandler: " << e.what());
+        get_logger()->error("{:p}, in logHandler, std::system_error, {}",
+                            static_cast<void *>(adapter), e.what());
     }
 }
 

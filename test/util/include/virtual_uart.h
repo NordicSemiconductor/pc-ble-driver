@@ -1,21 +1,23 @@
 #pragma once
 
+#include "h5_transport.h"
 #include "internal/log.h"
 #include "transport.h"
-#include "h5_transport.h"
 
-#include <vector>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
+
 #include <algorithm>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <vector>
+
 
 class VirtualUart : public Transport
 {
-private:
+  private:
     std::string name;
     bool isOpen;
-    VirtualUart* peer;
+    VirtualUart *peer;
 
     std::mutex outDataMutex;
     std::vector<std::vector<uint8_t>> outData;
@@ -31,14 +33,15 @@ private:
 
     bool stoppedProcessing;
 
-public:
+  public:
     VirtualUart() = delete;
     VirtualUart(const std::string &name);
     void stopAt(control_pkt_type stopAtPktType_);
-    uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback, const log_cb_t &log_callback) override;
-    uint32_t close() override;
-    uint32_t send(const std::vector<uint8_t>& data) override;
-    void setPeer(VirtualUart* connectingPeer);
+    uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                  const log_cb_t &log_callback) noexcept override;
+    uint32_t close() noexcept override;
+    uint32_t send(const std::vector<uint8_t> &data) noexcept override;
+    void setPeer(VirtualUart *connectingPeer);
     void injectInData(const std::vector<uint8_t> data);
     ~VirtualUart() override;
 };

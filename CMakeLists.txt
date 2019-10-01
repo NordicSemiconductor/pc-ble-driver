@@ -133,7 +133,6 @@ foreach(SD_API_VER ${SD_API_VERS})
         include/common/sd_rpc_types.h
         include/common/adapter.h
         include/common/sdk_compat/nrf.h
-        include/common/sdk_compat/compiler_abstraction.h
         include/common/sdk_compat/nrf_svc.h
         include/common/config/platform.h
         include/${SD_API_VER_L}/ble.h
@@ -152,9 +151,16 @@ foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(HEX_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex")
+    set(HEX_FILE_GLOB 
+        "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex"
+        "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
+    )
     set(DFU_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.zip")
-    set(LICENSE_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt")
+
+    set(LICENSE_FILE_GLOB 
+        "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
+        "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
+    )
 
     file(GLOB_RECURSE ${SD_API_VER}_HEX_FILES ${HEX_FILE_GLOB})
     file(GLOB_RECURSE ${SD_API_VER}_DFU_FILES ${DFU_FILE_GLOB})
@@ -214,40 +220,43 @@ endforeach(SD_API_VER)
 # Set common include directories
 find_path(ASIO_INCLUDE_DIR asio.hpp)
 
-include_directories(
-        include/common
-        include/common/config
-        include/common/sdk_compat
-        include/common/internal
-        include/common/internal/transport
-        SYSTEM ${ASIO_INCLUDE_DIR}
-)
-
 # Set per-SD API version include directories and compiler definitions
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
 
+    target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+        src/sd_api_common/sdk/components/libraries/util
+        src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
+    )
+
     # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
     if(SD_API_VER STRGREATER "SD_API_V2")
         target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
-            src/sd_api_common/sdk/components/libraries/util
-            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s132/serializers
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/ble/serializers
             src/sd_api_common/sdk/components/serialization/common
             src/sd_api_common/sdk/components/serialization/common/struct_ser/ble
-            include/${SD_API_VER_L}
         )
     else()
         target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
-            src/${SD_API_VER_L}/sdk/components/libraries/util
-            src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/common
             src/${SD_API_VER_L}/sdk/components/serialization/application/codecs/s130/serializers
             src/${SD_API_VER_L}/sdk/components/serialization/common
             src/${SD_API_VER_L}/sdk/components/serialization/common/struct_ser/s130
-            include/${SD_API_VER_L}
         )
     endif()
+
+    target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+        include/common
+        include/common/internal
+        include/common/internal/transport
+        ${ASIO_INCLUDE_DIR}
+    )
+
+    target_include_directories(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} SYSTEM PRIVATE
+            include/common/config
+            include/common/sdk_compat
+            include/${SD_API_VER_L}
+    )
 
     # Provide the NRF_SD_BLE_API_VERSION macro to each variant
     string(REGEX MATCH "[0-9]+$" _SD_API_VER_NUM "${SD_API_VER}")
@@ -269,10 +278,6 @@ foreach(SD_API_VER ${SD_API_VERS})
         target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "udev" "pthread")
         target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "udev" "pthread")
     endif()
-
-    # Specify libraries to link serialization library with
-    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE ${Boost_LIBRARIES})
-    target_link_libraries (${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE ${Boost_LIBRARIES})
 endforeach(SD_API_VER)
 
 # Add tests

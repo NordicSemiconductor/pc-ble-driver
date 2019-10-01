@@ -109,6 +109,12 @@ typedef struct
      * progress
      */
     std::mutex codec_mutex;
+
+    /**
+     * @brief Mutex that protectes the adapter_id
+     *
+     */
+    std::mutex adapter_id_mutex;
 } adapter_codec_context_t;
 
 /**
@@ -153,11 +159,13 @@ void app_ble_gap_set_current_adapter_id(void *adapter_id,
     if (key_type == EVENT_CODEC_CONTEXT)
     {
         current_event_context.codec_mutex.lock();
+        std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
         current_event_context.adapter_id = adapter_id;
     }
     else if (key_type == REQUEST_REPLY_CODEC_CONTEXT)
     {
         current_request_reply_context.codec_mutex.lock();
+        std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
         current_request_reply_context.adapter_id = adapter_id;
     }
 }
@@ -167,15 +175,23 @@ void app_ble_gap_unset_current_adapter_id(const app_ble_gap_adapter_codec_contex
     if (key_type == EVENT_CODEC_CONTEXT)
     {
         current_event_context.codec_mutex.unlock();
+        std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
         current_event_context.adapter_id = nullptr;
     }
     else if (key_type == REQUEST_REPLY_CODEC_CONTEXT)
     {
         current_request_reply_context.codec_mutex.unlock();
+        std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
         current_request_reply_context.adapter_id = nullptr;
     }
 }
 
+/**
+ * @brief Check if adapter_id is set for current_*_context.
+ *
+ * This function expects that caller has locked access to current_*_context.adapter_id
+ *
+ */
 uint32_t
 app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t codec_context)
 {
@@ -193,12 +209,14 @@ app_ble_gap_check_current_adapter_set(const app_ble_gap_adapter_codec_context_t 
 
 uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_index)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_request_reply_context.adapter_id;
+    const auto adapter_id = current_request_reply_context.adapter_id;
 
     try
     {
@@ -233,12 +251,14 @@ uint32_t app_ble_gap_sec_keys_storage_create(uint16_t conn_handle, uint32_t *p_i
 
 uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
 {
+    std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_event_context.adapter_id;
+    const auto adapter_id = current_event_context.adapter_id;
 
     try
     {
@@ -267,12 +287,14 @@ uint32_t app_ble_gap_sec_keys_storage_destroy(const uint16_t conn_handle)
 
 uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index)
 {
+    std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_event_context.adapter_id;
+    const auto adapter_id = current_event_context.adapter_id;
 
     try
     {
@@ -302,12 +324,14 @@ uint32_t app_ble_gap_sec_keys_find(const uint16_t conn_handle, uint32_t *p_index
 
 uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **keyset)
 {
+    std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_event_context.adapter_id;
+    const auto adapter_id = current_event_context.adapter_id;
 
     try
     {
@@ -327,12 +351,14 @@ uint32_t app_ble_gap_sec_keys_get(const uint32_t index, ble_gap_sec_keyset_t **k
 
 uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_keyset_t *keyset)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_request_reply_context.adapter_id;
+    const auto adapter_id = current_request_reply_context.adapter_id;
 
     try
     {
@@ -353,12 +379,14 @@ uint32_t app_ble_gap_sec_keys_update(const uint32_t index, const ble_gap_sec_key
 
 uint32_t app_ble_gap_state_reset()
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
     }
 
-    auto adapter_id = current_request_reply_context.adapter_id;
+    const auto adapter_id = current_request_reply_context.adapter_id;
 
     try
     {
@@ -395,6 +423,8 @@ static adv_set_data_t adv_set_data[] = {{BLE_GAP_ADV_SET_HANDLE_NOT_SET, nullptr
 
 uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -426,6 +456,8 @@ uint32_t app_ble_gap_scan_data_set(ble_data_t const *p_data)
 
 uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
 {
+    std::unique_lock<std::mutex> lck(current_event_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(EVENT_CODEC_CONTEXT))
     {
         return NRF_ERROR_SD_RPC_INVALID_STATE;
@@ -458,9 +490,12 @@ uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t *p_data)
 
 int app_ble_gap_adv_buf_register(void *p_buf)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << __FUNCTION__ << ": app_ble_gap_adv_buf_register not called from context "
+        std::cerr << __FUNCTION__
+                  << ": app_ble_gap_adv_buf_register not called from context "
                      "REQUEST_REPLY_CODEC_CONTEXT, terminating"
                   << std::endl;
         std::terminate();
@@ -509,7 +544,8 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 {
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
-        std::cerr << __FUNCTION__ << ": app_ble_gap_adv_buf_register not called from context "
+        std::cerr << __FUNCTION__
+                  << ": app_ble_gap_adv_buf_register not called from context "
                      "REQUEST_REPLY_CODEC_CONTEXT, terminating"
                   << std::endl;
         std::terminate();
@@ -558,6 +594,10 @@ int app_ble_gap_adv_buf_addr_unregister(void *p_buf)
 
 void *app_ble_gap_adv_buf_unregister(const int id, const bool event_context)
 {
+    std::unique_lock<std::mutex> lck(event_context
+                                         ? current_event_context.adapter_id_mutex
+                                         : current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(event_context ? EVENT_CODEC_CONTEXT
                                                              : REQUEST_REPLY_CODEC_CONTEXT))
     {
@@ -646,6 +686,8 @@ static void app_ble_gap_ble_adv_data_mark_dirty(uint8_t *p_buf1, uint8_t *p_buf2
 
 void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *buf2)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET)
     {
         adv_handle = BLE_GAP_ADV_SET_COUNT_MAX - 1;
@@ -661,6 +703,8 @@ void app_ble_gap_set_adv_data_set(uint8_t adv_handle, uint8_t *buf1, uint8_t *bu
 // Update the adapter gap state scan_data_id variable based on pointer received???
 void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return;
@@ -698,6 +742,8 @@ void app_ble_gap_scan_data_set(const uint8_t *p_scan_data)
 
 void app_ble_gap_scan_data_unset(bool free)
 {
+    std::unique_lock<std::mutex> lck(current_request_reply_context.adapter_id_mutex);
+
     if (!app_ble_gap_check_current_adapter_set(REQUEST_REPLY_CODEC_CONTEXT))
     {
         return;

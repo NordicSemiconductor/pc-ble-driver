@@ -1,9 +1,10 @@
 #pragma once
 
-#include "ble.h"
-#include "ble_hci.h"
-#include "sd_rpc_types.h"
+#include <ble.h>
+#include <ble_hci.h>
+#include <sd_rpc_types.h>
 
+#include <spdlog/logger.h>
 #include <string>
 #include <vector>
 
@@ -100,5 +101,6 @@ std::string asText(const ble_gattc_desc_t &gattc_desc);
 std::string asText(const sd_rpc_log_severity_t &severity);
 
 sd_rpc_log_severity_t parseLogSeverity(const std::string &level);
+spdlog::level::level_enum parseSpdLogLevel(const std::string &level);
 
 } // namespace testutil

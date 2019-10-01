@@ -2,18 +2,21 @@
 
 namespace testutil {
 
-std::ostream &operator<<(std::ostream &s, const Role &role) {
+std::ostream &operator<<(std::ostream &s, const Role &role)
+{
     if (role == Role::Central)
     {
         s << "[central   ]";
     }
     else if (role == Role::Peripheral)
-    { s << "[peripheral]"; }
+    {
+        s << "[peripheral]";
+    }
     else
-    { s << "[unknown role]"; }
+    {
+        s << "[unknown role]";
+    }
 
     return s;
 }
 } //  namespace testutil
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nordic Semiconductor ASA
+ * Copyright (c) 2016-2018 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -35,17 +35,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UART_DEFINES_H
-#define UART_DEFINES_H
+#ifndef UART_TRANSPORT_H
+#define UART_TRANSPORT_H
 
-/**@brief Set TEST_VERBOSE_LOGGING to 1 to enable logging of buffers.
+#include "transport.h"
+#include "uart_settings.h"
+
+#include <cstdint>
+#include <memory>
+#include <vector>
+
+/**
+ * @brief Controls the buffer sizes for read buffers
  */
-#define TEST_VERBOSE_LOGGING 0
+constexpr size_t UartTransportBufferSize = 1024;
 
-/**@brief Controls the buffer sizes for all read and write buffers as well as the number of
- * bytes we actually read and write
+/**
+ * @brief The UartTransport class opens, reads and writes a serial port using the boost asio library
  */
-#define BUFFER_SIZE 256
-#define BUFFER_SIZE_LARGE 8192
+class UartTransport : public Transport
+{
+  public:
+    /**
+     *@brief Is called by app_uart_init() stores function pointers and sets up necessary boost
+     * variables.
+     */
+    UartTransport(const UartCommunicationParameters &communicationParameters);
 
-#endif // UARTDEFINES_H
+    ~UartTransport() noexcept override;
+
+    /**
+     *@brief Setup of serial port service with parameter data.
+     */
+    uint32_t open(const status_cb_t &status_callback, const data_cb_t &data_callback,
+                  const log_cb_t &log_callback) noexcept override;
+
+    /**
+     *@brief Closes the serial port service.
+     */
+    uint32_t close() noexcept override;
+
+    /**
+     *@brief sends data to serial port to write.
+     */
+    uint32_t send(const std::vector<uint8_t> &data) noexcept override;
+
+  private:
+    struct impl;
+    std::unique_ptr<impl> pimpl;
+};
+
+#endif // UART_TRANSPORT_H
