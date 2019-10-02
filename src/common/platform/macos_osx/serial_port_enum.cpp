@@ -71,6 +71,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cstring>
 
 #include <AvailabilityMacros.h>
 #include <sys/param.h>
