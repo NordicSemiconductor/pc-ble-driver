@@ -250,7 +250,7 @@ void SerializationTransport::eventHandlingRunner() noexcept
             while (!eventQueue.empty() && processEvents)
             {
                 // Get oldest event received from UART thread
-                const auto eventData     = eventQueue.front();
+                const auto eventData     = std::move(eventQueue.front());
                 const auto eventDataSize = static_cast<uint32_t>(eventData.size());
 
                 // Remove oldest event received from H5Transport thread
