@@ -354,7 +354,7 @@ uint32_t ble_gap_evt_phy_update_request_dec(uint8_t const * const p_buf,
                                             ble_evt_t * const     p_event,
                                             uint32_t * const      p_event_len)
 {
-    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_PHY_UPDATE_REQUEST, gap, phy_update);
+    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_PHY_UPDATE_REQUEST, gap, phy_update_request);
 
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.phy_update_request, ble_gap_phys_t_dec);
@@ -368,7 +368,7 @@ uint32_t ble_gap_evt_data_length_update_request_dec(uint8_t const * const p_buf,
                                  ble_evt_t * const     p_event,
                                  uint32_t * const      p_event_len)
 {
-    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST, gap, timeout);
+    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST, gap, data_length_update_request);
 
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.data_length_update_request.peer_params, ble_gap_data_length_params_t_dec);
@@ -380,7 +380,7 @@ uint32_t ble_gap_evt_data_length_update_dec(uint8_t const * const p_buf,
                                  ble_evt_t * const     p_event,
                                  uint32_t * const      p_event_len)
 {
-    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_DATA_LENGTH_UPDATE, gap, timeout);
+    SER_EVT_DEC_BEGIN(BLE_GAP_EVT_DATA_LENGTH_UPDATE, gap, data_length_update);
 
     SER_PULL_uint16(&p_event->evt.gap_evt.conn_handle);
     SER_PULL_FIELD(&p_event->evt.gap_evt.params.data_length_update.effective_params, ble_gap_data_length_params_t_dec);
