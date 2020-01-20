@@ -528,7 +528,7 @@ Programming the connectivity firmware via serial DFU can be done from command li
 
 Device Firmware Upgrade with [nrfutil](https://infocenter.nordicsemi.com/topic/ug_nrfutil/UG/nrfutil/nrfutil_dfu_serial_usb.html) is normally done in two steps: 1: generating the DFU zip package, and 2: performing the DFU procedure. A DFU zip package has been pre-made and is included in this repository. To run the DFU procedure with nrfutil with the pre-made DFU package:
 
-    nrfutil dfu usb_serial -pkg connectivity_x.x.x_usb_with_s<x>_<a>.<b>.<c>_dfu_pkg.zip -p <serial port>
+    nrfutil dfu usb-serial -pkg connectivity_x.x.x_usb_with_s<x>_<a>.<b>.<c>_dfu_pkg.zip -p <serial port>
 
 ---
 
