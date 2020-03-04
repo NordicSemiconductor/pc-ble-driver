@@ -1,116 +1,186 @@
 #!/usr/bin/env python
 
-import pycurl
-import certifi
 from urllib.parse import urlparse
+import json
+import sys
+import os
+import logging
+import tempfile
+
+import certifi
+import pycurl
 
 
 class DownloadCache:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, cache_directory):
+        self.cache_directory = cache_directory
+
+    def __full_path(self, filename):
+        return os.path.join(self.cache_directory, filename)
 
     def exists(self, filename, sha512):
-        pass
+        if os.path.exists(self.__full_path(filename)):
+            if sha512 is None:
+                return True
+            else:
+                # TODO: SHA checksum
+                return False
+        else:
+            return False
 
-    def path(self, filename, sha512):
-        pass
+    def path(self, filename):
+        return self.__full_path(filename)
+
+    def __str__(self):
+        return f"[cache_directory:{self.cache_directory}]"
 
 
 class Downloader:
-    def __init__(self, download_url, download_cache):
-        self.downloadCache = downloadCache
+    def __init__(self, download_cache):
+        self.download_cache = download_cache
 
-    def download(self, download_url, download_filename=None):
+    def download(self, url, filename=None, sha512=None):
         # TODO: extract download filename
-        url = download_url
+        download_url = url
 
-        filename = None
+        download_filename = None
 
-        if download_filename is None:
-            url = urlparse(download_url)
-            filename = url.path.split("/")[-1]
+        if filename is None:
+            download_url = urlparse(url)
+            download_filename = download_url.path.split("/")[-1]
         else:
-            filename = download_filename
+            download_filename = filename
 
-        if self.downloadCache and self.downloadCache.exists(filename):
-            return self.downloadCache.path(filename)
+        logging.debug(
+            'Checking if requested file %s to download exists in local cache and has valid sha512', download_filename)
+        if self.download_cache and self.download_cache.exists(download_filename, sha512):
+            return self.download_cache.path(download_filename)
+
+        download_path = None
+
+        if self.download_cache:
+            download_path = self.download_cache.path(download_filename)
+        else:
+            download_path = os.path.join(
+                tempfile.TemporaryDirectory(
+                    prefix='nordic_toolchain'),
+                download_filename
+            )
 
         # Download SDK
-        with open(filename, "wb") as f:
-            c = pycurl.Curl()
-            c.setopt(c.URL, url)
-            c.setopt(c.WRITEDATA, f)
-            c.setopt(c.FOLLOWLOCATION, True)
-            c.setopt(c.MAXREDIRS, 5)
-            c.setopt(c.CAINFO, certifi.where())
-            c.perform()
-            c.close()
+        logging.debug(
+            'Starting to download SDK from %s. Stored filename is %s', url, download_filename)
+        with open(download_path, "wb") as download_file:
+            curl_handle = pycurl.Curl()
+            curl_handle.setopt(curl_handle.URL, download_url)
+            curl_handle.setopt(curl_handle.WRITEDATA, download_file)
+            curl_handle.setopt(curl_handle.FOLLOWLOCATION, True)
+            curl_handle.setopt(curl_handle.MAXREDIRS, 5)
+            curl_handle.setopt(curl_handle.CAINFO, certifi.where())
+            curl_handle.perform()
+            curl_handle.close()
 
+        # Check sha512
 
-class DownloadInfo:
-    def __init__(self, download_url, download_filename, download_sha512):
-        self.download_url = download_url
-        self.download_filename = download_filename
-        self.download_sha512 = download_sha512
+    def __str__(self):
+        return f"[download_cache:{self.download_cache}]"
 
 
 class Compiler:
-    def __init__(self, downloadInfo):
-        self.downloadInfo = downloadInfo
-        self.cacheDirectory = None
+    def __init__(self, url, filename, sha512):
+        self.url = url
+        self.filename = filename
+        self.sha512 = sha512
 
-    def download(self):
-        if self.downloadInfo is None:
-            raise Exception("Not download info specified for compiler")
+    def download(self, downloader):
+        if self.url is None:
+            raise Exception("No download info specified for compiler")
+
+        downloader.download(self.url,
+                            self.filename,
+                            self.sha512)
 
     def install(self, prefix):
         pass
 
+    def __str__(self):
+        return f"[url:{self.url} filename:{self.filename} sha512:{self.sha512}]"
 
-class Sdk:
-    def __init__(self, version, compiler):
+
+class Toolchain:
+    def __init__(self, version, compiler, downloader):
         self.version = version
         self.compiler = compiler
+        self.downloader = downloader
 
-    def setup(self, install_prefix, download_cache):
-        if self.compiler is None:
-            self.compiler.download(download_cache)
+    def __str__(self):
+        return f"[version:{self.version} compiler:{str(self.compiler)} downloader:{str(self.downloader)}]"
+
+    def setup(self, install_prefix):
+        if self.compiler is not None:
+            self.compiler.download(self.downloader)
             self.compiler.install(install_prefix)
 
-        # TODO: add compiler env variables in return
+
+def get_toolchains():
+    downloader = Downloader(DownloadCache("C:\\tmp\\dlcache"))
+    toolchains_file = 'toolchains.json'
+    toolchains = {}
+
+    with open(toolchains_file, 'r') as file:
+        j = json.load(file)
+
+        if j.get('toolchains') is None:
+            raise Exception(f'Unexpected format of {toolchains_file}')
+
+        toolchains = j.get('toolchains')
+
+        for toolchain_key in toolchains.keys():
+            toolchain = toolchains.get(toolchain_key)
+
+            if toolchain.get('platforms') is None:
+                raise Exception(
+                    f'Not platforms supported for toolchain {toolchain_key}')
+
+            platforms = toolchain.get('platforms')
+
+            if platforms is None:
+                raise Exception(
+                    'Unexpected format, expected platforms attribute')
+
+            platform = platforms.get(sys.platform)
+
+            if platform is None:
+                raise Exception(
+                    f'No toolchain found for platform {sys.platform}')
+
+            compiler = platform.get('compiler')
+
+            if compiler is None:
+                logging.warning('No compiler found for platform %s', platform)
+
+            toolchains[toolchain_key] = Toolchain(
+                toolchain_key,
+                Compiler(
+                    compiler.get('url'),
+                    compiler.get('filename'),
+                    compiler.get('sha512')
+                ),
+                downloader
+            )
+
+        return toolchains
 
 
-def setup_nordic_sdk(sdk_version, install_prefix):
-    download_cache = DownloadCache("C:\\tmp\\dlcache")
+def setup_nordic_toolchain(toolchains_version, install_prefix):
+    toolchain = get_toolchains()[toolchains_version]
 
-    sdks = {
-        "nRF5_SDK_v11": Sdk("nRF5_SDK_v11", Compiler(DownloadInfo("", "", ""))),
-        "nRF5_SDK_v12": Sdk("nRF5_SDK_v12", Compiler(DownloadInfo("", "", ""))),
-        "nRF5_SDK_v13": Sdk("nRF5_SDK_v13", Compiler(DownloadInfo("", "", ""))),
-        "nRF5_SDK_v14": Sdk("nRF5_SDK_v14", Compiler(DownloadInfo("", "", ""))),
-        "nRF5_SDK_v15": Sdk("nRF5_SDK_v15", Compiler(DownloadInfo("", "", ""))),
-        "nRF5_SDK_v16": Sdk("nRF5_SDK_v16", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v4": Sdk("nRF51_SDK_v4", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v5": Sdk("nRF51_SDK_v5", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v6": Sdk("nRF51_SDK_v6", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v7": Sdk("nRF51_SDK_v7", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v8": Sdk("nRF51_SDK_v8", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v9": Sdk("nRF51_SDK_v9", Compiler(DownloadInfo("", "", ""))),
-        "nRF51_SDK_v10": Sdk("nRF51_SDK_v10", Compiler(DownloadInfo("", "", ""))),
-        "ncs-0.3.0": Sdk("ncs-0.3.0", Compiler(DownloadInfo("", "", ""))),
-        "ncs-0.4.0": Sdk("ncs-0.4.0", Compiler(DownloadInfo("", "", ""))),
-        "ncs-1.0.0": Sdk("ncs-1.0.0", Compiler(DownloadInfo("", "", ""))),
-        "ncs-1.1.0": Sdk("ncs-1.1.0", Compiler(DownloadInfo("", "", ""))),
-        "ncs-1.2.0": Sdk("ncs-1.2.0", Compiler(DownloadInfo("", "", ""))),
-    }
+    if toolchain is None:
+        raise Exception(f"Toolchain version {toolchains_version} not found")
 
-    sdk = sdks[sdk_version]
-
-    if sdks[sdk_version] is None:
-        raise Exception(f"SDK version {sdk_version} not found")
-
-    sdk.setup(install_prefix, download_cache)
+    toolchain.setup(install_prefix)
 
 
 if __name__ == "__main__":
-    setup_nordic_sdk("nRF5_SDK_v16", "c:\\tmp")
+    logging.basicConfig()
+    setup_nordic_toolchain("nRF5_SDK_v16", "c:\\tmp")

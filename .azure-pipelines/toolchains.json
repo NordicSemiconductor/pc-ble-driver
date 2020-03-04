@@ -1,0 +1,35 @@
+{
+    "toolchains":
+    {
+        "nRF5_SDK_v16":
+        {
+            "platforms":
+            {
+                "win32":
+                {
+                    "compiler": {
+                        "url": "https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2018q4/gcc-arm-none-eabi-8-2018-q4-major-win32.zip?revision=89e544bd-20ec-4b47-ba1e-3837684abb14?product=GNU%20Arm%20Embedded%20Toolchain,ZIP,,Windows,8-2018-q4-major",
+                        "filename": "gcc-arm-none-eabi-8-2018-q4-major-win32.exe",
+                        "sha512": "b5f1a427117115a4613ee3ecb18a4c0ada019ccec09bea70a9a21a74628a497dea92c1fc2d2dfc8784d1383756483a901dc4c8161ba035bc4e1995af08865f24"
+                    }
+                },
+                "darwin":
+                {
+                    "compiler": {
+                        "url": "",
+                        "filename": "",
+                        "sha512": ""
+                    }
+                },
+                "linux":
+                {
+                    "compiler": {
+                        "url": "",
+                        "filename": "",
+                        "sha512": ""
+                    }
+                }
+            }
+        }
+    }
+}
