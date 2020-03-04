@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Python 3.2 or later required
 
 from urllib.parse import urlparse
 import json
@@ -6,14 +7,26 @@ import sys
 import os
 import logging
 import tempfile
+import hashlib
+import zipfile
+import argparse
+import pathlib
 
 import certifi
 import pycurl
 
 
+class NordicSetupException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class DownloadCache:
     def __init__(self, cache_directory):
         self.cache_directory = cache_directory
+
+        if not os.path.exists(cache_directory):
+            pathlib.Path(self.cache_directory).mkdir(parents=True, exist_ok=True)
 
     def __full_path(self, filename):
         return os.path.join(self.cache_directory, filename)
@@ -23,7 +36,17 @@ class DownloadCache:
             if sha512 is None:
                 return True
             else:
-                # TODO: SHA checksum
+                hash = hashlib.sha512()
+
+                with open(self.__full_path(filename), 'rb') as file:
+                    for block in iter(lambda: file.read(4096), b""):
+                        hash.update(block)
+
+                digest = hash.hexdigest()
+
+                if digest == sha512:
+                    return True
+
                 return False
         else:
             return False
@@ -40,21 +63,30 @@ class Downloader:
         self.download_cache = download_cache
 
     def download(self, url, filename=None, sha512=None):
-        # TODO: extract download filename
         download_url = url
-
         download_filename = None
 
         if filename is None:
-            download_url = urlparse(url)
-            download_filename = download_url.path.split("/")[-1]
+            download_filename = urlparse(url).path.split("/")[-1]
         else:
             download_filename = filename
 
         logging.debug(
-            'Checking if requested file %s to download exists in local cache and has valid sha512', download_filename)
+            'Checking if file %s to exists in '
+            'local cache and has valid digest',
+            download_filename
+        )
+
         if self.download_cache and self.download_cache.exists(download_filename, sha512):
+            logging.debug(
+                'Cache hit for %s with sha512 %s',
+                download_filename, sha512
+            )
             return self.download_cache.path(download_filename)
+        else:
+            logging.debug(
+                'Cache miss for %s with sha512 %s',
+                download_filename, sha512)
 
         download_path = None
 
@@ -69,7 +101,11 @@ class Downloader:
 
         # Download SDK
         logging.debug(
-            'Starting to download SDK from %s. Stored filename is %s', url, download_filename)
+            'Starting to download SDK from %s. Stored filename is %s',
+            url,
+            download_path
+        )
+
         with open(download_path, "wb") as download_file:
             curl_handle = pycurl.Curl()
             curl_handle.setopt(curl_handle.URL, download_url)
@@ -80,31 +116,66 @@ class Downloader:
             curl_handle.perform()
             curl_handle.close()
 
-        # Check sha512
+        # Check digest
+        if self.download_cache:
+            if not self.download_cache.exists(download_filename, sha512):
+                raise NordicSetupException(f'{download_filename} file does not match digest {sha512}')
+
+        return download_path
 
     def __str__(self):
         return f"[download_cache:{self.download_cache}]"
 
 
-class Compiler:
+class GnuCompiler:
     def __init__(self, url, filename, sha512):
         self.url = url
-        self.filename = filename
         self.sha512 = sha512
+        self.download_path = None
+
+        if filename is None:
+            self.filename = urlparse(url).path.split("/")[-1]
+        else:
+            self.filename = filename
 
     def download(self, downloader):
         if self.url is None:
-            raise Exception("No download info specified for compiler")
+            raise NordicSetupException(
+                'No download info specified for compiler'
+            )
 
-        downloader.download(self.url,
-                            self.filename,
-                            self.sha512)
+        self.download_path = downloader.download(
+            self.url,
+            self.filename,
+            self.sha512
+        )
 
     def install(self, prefix):
-        pass
+        compiler_path = os.path.join(prefix, 'compiler')
+
+        if not os.path.exists(compiler_path):
+            pathlib.Path(compiler_path).mkdir(parents=True, exist_ok=True)
+
+        logging.debug(
+            'Installing %s into %s',
+            self.download_path,
+            compiler_path
+        )
+
+        if self.download_path.endswith('.zip'):
+            with zipfile.ZipFile(self.download_path, 'r') as zip_ref:
+                zip_ref.extractall(compiler_path)
+
+        return [
+            # Old env variable used by some projects
+            f'GNUARMEMB_TOOLCHAIN_PATH={compiler_path}',
+            # Newer env variable for compiler
+            f'GCCARMEMB_TOOLCHAIN_PATH={compiler_path}'
+        ]
 
     def __str__(self):
-        return f"[url:{self.url} filename:{self.filename} sha512:{self.sha512}]"
+        return f"[url:{self.url} filename:{self.filename} "\
+            "sha512:{self.sha512}]"
 
 
 class Toolchain:
@@ -114,16 +185,22 @@ class Toolchain:
         self.downloader = downloader
 
     def __str__(self):
-        return f"[version:{self.version} compiler:{str(self.compiler)} downloader:{str(self.downloader)}]"
+        return f"[version:{self.version} compiler:{str(self.compiler)}"\
+            " downloader:{str(self.downloader)}]"
 
     def setup(self, install_prefix):
+        compiler_path = None
+        env = []
+
         if self.compiler is not None:
             self.compiler.download(self.downloader)
-            self.compiler.install(install_prefix)
+            env.extend(self.compiler.install(install_prefix))
+
+        return env
 
 
-def get_toolchains():
-    downloader = Downloader(DownloadCache("C:\\tmp\\dlcache"))
+def get_toolchains(cache_directory):
+    downloader = Downloader(DownloadCache(cache_directory))
     toolchains_file = 'toolchains.json'
     toolchains = {}
 
@@ -131,7 +208,9 @@ def get_toolchains():
         j = json.load(file)
 
         if j.get('toolchains') is None:
-            raise Exception(f'Unexpected format of {toolchains_file}')
+            raise NordicSetupException(
+                f'Unexpected format of {toolchains_file}'
+            )
 
         toolchains = j.get('toolchains')
 
@@ -139,19 +218,19 @@ def get_toolchains():
             toolchain = toolchains.get(toolchain_key)
 
             if toolchain.get('platforms') is None:
-                raise Exception(
+                raise NordicSetupException(
                     f'Not platforms supported for toolchain {toolchain_key}')
 
             platforms = toolchain.get('platforms')
 
             if platforms is None:
-                raise Exception(
+                raise NordicSetupException(
                     'Unexpected format, expected platforms attribute')
 
             platform = platforms.get(sys.platform)
 
             if platform is None:
-                raise Exception(
+                raise NordicSetupException(
                     f'No toolchain found for platform {sys.platform}')
 
             compiler = platform.get('compiler')
@@ -161,7 +240,7 @@ def get_toolchains():
 
             toolchains[toolchain_key] = Toolchain(
                 toolchain_key,
-                Compiler(
+                GnuCompiler(
                     compiler.get('url'),
                     compiler.get('filename'),
                     compiler.get('sha512')
@@ -172,15 +251,45 @@ def get_toolchains():
         return toolchains
 
 
-def setup_nordic_toolchain(toolchains_version, install_prefix):
-    toolchain = get_toolchains()[toolchains_version]
+def setup_nordic_toolchain(toolchain_version, install_prefix):
+    toolchains = get_toolchains('c:\\tmp\\dlcache2')
+
+    toolchain = toolchains.get(toolchain_version)
 
     if toolchain is None:
-        raise Exception(f"Toolchain version {toolchains_version} not found")
+        raise NordicSetupException(f'Toolchain {toolchain_version} not found.')
 
-    toolchain.setup(install_prefix)
+    env = toolchain.setup(install_prefix)
+    retval = ''
 
+    if os.name == 'posix':
+        for var in env:
+            retval += f'export {var}{os.linesep}'
+
+    if os.name == 'nt':
+        for var in env:
+            retval += f'set {var}{os.linesep}'
+
+    return retval
 
 if __name__ == "__main__":
-    logging.basicConfig()
-    setup_nordic_toolchain("nRF5_SDK_v16", "c:\\tmp")
+    logging.basicConfig(level=logging.ERROR)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--prefix', help="Install prefix")
+    parser.add_argument('--tcversion', help="Toolchain version")
+    parser.add_argument('-e', '--env', action='store_true')
+    args = parser.parse_args()
+
+    try:
+        env = setup_nordic_toolchain(args.tcversion, args.prefix)
+
+        if args.env:
+            print(env)
+        else:
+            logging.debug(
+                'Successfully setup toolchain version %s in %s',
+                args.tcversion,
+                args.prefix
+            )
+    except NordicSetupException as setup_exception:
+        logging.error(setup_exception.message)
