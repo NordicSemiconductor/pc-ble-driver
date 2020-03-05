@@ -151,13 +151,14 @@ foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(HEX_FILE_GLOB 
+    set(HEX_FILE_GLOB
         "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex"
         "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
     )
+
     set(DFU_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.zip")
 
-    set(LICENSE_FILE_GLOB 
+    set(LICENSE_FILE_GLOB
         "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
         "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
     )

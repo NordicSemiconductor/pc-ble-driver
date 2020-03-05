@@ -14,13 +14,13 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
      # Configure armgcc related files (if armgcc is available)
     find_program(GCC "arm-none-eabi-gcc")
 
-    if(DEFINED ENV{GCCARMEMB_TOOLCHAIN_PATH} OR GCC)
+    if(DEFINED ENV{GNUARMEMB_TOOLCHAIN_PATH} OR GCC)
         # Get gcc version
         if(GCC)
             get_filename_component(GCC_TOOLCHAIN_PATH "${GCC}" DIRECTORY)
             set(GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}/..")
         else()
-            set(GCC_TOOLCHAIN_PATH "$ENV{GCCARMEMB_TOOLCHAIN_PATH}")
+            set(GCC_TOOLCHAIN_PATH "$ENV{GNUARMEMB_TOOLCHAIN_PATH}")
             # Environment variables are quoted, remove the quote
             string(REPLACE "\"" "" GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}")
         endif()
@@ -36,7 +36,7 @@ function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
             OUTPUT_VARIABLE GCC_VERSION
         )
 
-        # SDKv15 requires bin in addition to GCCARMEMB_TOOLCHAIN_PATH set by gccvar
+        # SDKv15 requires bin in addition to GNUARMEMB_TOOLCHAIN_PATH set by gccvar
         if(SDK_VERSION EQUAL 15)
             set(GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}/bin/")
         endif()
