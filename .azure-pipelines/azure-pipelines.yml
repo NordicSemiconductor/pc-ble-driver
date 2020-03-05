@@ -2,6 +2,7 @@ trigger:
   - feature/azure-devops-builds
 
 variables:
+  system.debug: true
   CONFIGURATION: 'Debug'
   NRF_BLE_DRIVER_VERSION: 4.1.0-alpha
   NRF_BLE_CONNECTIVITY_VERSION: $(NRF_BLE_DRIVER_VERSION)
@@ -31,8 +32,8 @@ jobs:
       dir /s
       echo ============================================
       dir /s $(Build.SourcesDirectory)
-      pip3 install -r $(Build.SourcesDirectory)/.azure_pipelines/requirements.txt
-      python $(Build.SourcesDirectory)/.azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
+      pip3 install -r %BUILD_SOURCESDIRECTORY%/.azure_pipelines/requirements.txt
+      python %BUILD_SOURCESDIRECTORY%/.azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Install build dependencies'
   - script: |
