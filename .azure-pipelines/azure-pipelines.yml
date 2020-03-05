@@ -56,6 +56,7 @@ jobs:
       del "C:\Strawberry\c\bin\g++.exe"
       del "C:\Strawberry\c\bin\gcc.exe"
       call $(Agent.BuildDirectory)/tcenv.bat
+      set PATH=$(Agent.BuildDirectory);%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
       cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
       cmake --build _build --config $(CONFIGURATION) --target install
     condition: contains(variables['imageName'], 'win')
