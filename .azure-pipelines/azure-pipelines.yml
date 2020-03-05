@@ -28,12 +28,12 @@ jobs:
     vmImage: $(imageName)
   steps:
   - script: |
-      choco install ninja make
       dir /s
       echo ============================================
       dir /s $(Build.SourcesDirectory)
-      pip3 install -r %BUILD_SOURCESDIRECTORY%\\.azure_pipelines\\requirements.txt
-      python %BUILD_SOURCESDIRECTORY%\\.azure_pipelines\\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
+      pip3 install -r %BUILD_SOURCESDIRECTORY%\.azure_pipelines\requirements.txt
+      python %BUILD_SOURCESDIRECTORY%\.azure_pipelines\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)\tcenv.bat
+      choco install ninja make
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Install build dependencies'
   - script: |
