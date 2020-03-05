@@ -201,7 +201,12 @@ class Toolchain:
 
 def get_toolchains(cache_directory):
     downloader = Downloader(DownloadCache(cache_directory))
-    toolchains_file = 'toolchains.json'
+
+    toolchains_file = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        'toolchains.json'
+    )
+
     toolchains = {}
 
     with open(toolchains_file, 'r') as file:
