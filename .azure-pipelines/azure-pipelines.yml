@@ -1,0 +1,60 @@
+trigger:
+- master
+- test-azure
+
+variables:
+  NRF_BLE_DRIVER_VERSION: 4.1.0-alpha
+  NRF_BLE_CONNECTIVITY_VERSION: $(NRF_BLE_DRIVER_VERSION)
+  NRF_BLE_DRIVER_ARTIFACT_PREFIX: nrf-ble-driver-$(NRF_BLE_DRIVER_VERSION)
+  NRF_BLE_DRIVER_INSTALL_PREFIX: artifacts/$(NRF_BLE_DRIVER_ARTIFACT_PREFIX)
+  GITHUB_CONNECTION: 'waylandCI'
+  GITHUB_REPO: 'NordicSemiconductor/pc-ble-driver'
+  GITHUB_TAG: v$(NRF_BLE_DRIVER_VERSION)
+  VCPKG_REPOSITORY: 'https://github.com/Microsoft/vcpkg.git'
+  VCPKG_ROOT: '$(Agent.HomeDirectory)/vcpkg'
+
+jobs:
+- job: Windows_vs2017_x86
+  variables:
+    vcpkg_triplet: 'x86'
+    vcvars_path: 'C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/vc/Auxiliary/build/vcvarsall.bat'
+    architecture: 'x86'
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - script: |
+      choco install ninja make
+      python3 .azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Install tools'
+  - script: |
+      @echo off
+      echo "VCPKG_ROOT is %VCPKG_ROOT%"
+      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT%
+      cd /d %VCPKG_ROOT%
+      bootstrap-vcpkg.bat
+      cd /d $(Build.SourcesDirectory)
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Install vcpkg'
+  - script: |
+      %VCPKG_ROOT%\vcpkg install asio:$(vcpkg_triplet) catch2:$(vcpkg_triplet)
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Install pc-ble-driver dependencies'
+  - script: |
+      @echo off
+      call "$(vcvars_path)" $(architecture)
+      del "C:\ProgramData\chocolatey\bin\c++.exe"
+      del "C:\ProgramData\chocolatey\bin\g++.exe"
+      del "C:\ProgramData\chocolatey\bin\gcc.exe"
+      del "C:\Strawberry\c\bin\c++.exe"
+      del "C:\Strawberry\c\bin\g++.exe"
+      del "C:\Strawberry\c\bin\gcc.exe"
+      call $(Agent.BuildDirectory)/tcenv.bat
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DBUILD_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_DRIVER_CONNECTIVITY_VERSION)
+      cmake --build _build --config $(CONFIGURATION) --target install
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Run cmake and build project'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      path: $(Build.ArtifactStagingDirectory)
+      artifact: pc-ble-driver-$(Agent.OS)-$(architecture)
