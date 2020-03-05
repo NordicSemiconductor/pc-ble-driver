@@ -25,10 +25,10 @@ jobs:
   steps:
   - script: |
       choco install ninja make
-      pip3 install -r $(Agent.BuildDirectory)/requirements.txt
-      python3 .azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
+      pip3 install -r $(Build.SourcesDirectory)\\requirements.txt
+      python .azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
     condition: contains(variables['imageName'], 'win')
-    displayName: '[Windows] Install tools'
+    displayName: '[Windows] Install build dependencies'
   - script: |
       @echo off
       echo "VCPKG_ROOT is %VCPKG_ROOT%"
@@ -52,7 +52,7 @@ jobs:
       del "C:\Strawberry\c\bin\g++.exe"
       del "C:\Strawberry\c\bin\gcc.exe"
       call $(Agent.BuildDirectory)/tcenv.bat
-      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DBUILD_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_DRIVER_CONNECTIVITY_VERSION)
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DBUILD_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
       cmake --build _build --config $(CONFIGURATION) --target install
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
