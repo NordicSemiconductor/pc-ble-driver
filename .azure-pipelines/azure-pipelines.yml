@@ -1,8 +1,5 @@
-trigger:
-- master
-- test-azure
-
 variables:
+  CONFIGURATION: 'Debug'
   NRF_BLE_DRIVER_VERSION: 4.1.0-alpha
   NRF_BLE_CONNECTIVITY_VERSION: $(NRF_BLE_DRIVER_VERSION)
   NRF_BLE_DRIVER_ARTIFACT_PREFIX: nrf-ble-driver-$(NRF_BLE_DRIVER_VERSION)
@@ -14,13 +11,17 @@ variables:
   VCPKG_ROOT: '$(Agent.HomeDirectory)/vcpkg'
 
 jobs:
-- job: Windows_vs2017_x86
-  variables:
-    vcpkg_triplet: 'x86'
-    vcvars_path: 'C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/vc/Auxiliary/build/vcvarsall.bat'
-    architecture: 'x86'
+- job: Build
+  strategy:
+    matrix:
+      win32:
+        imageName: 'vs2017-win2016'
+        architecture: 'x86'
+        generator_platform: 'Win32'
+        vcpkg_triplet: 'x86-windows'
+        vcvars_path: "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/vc/Auxiliary/build/vcvarsall.bat"
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: $(imageName)
   steps:
   - script: |
       choco install ninja make
