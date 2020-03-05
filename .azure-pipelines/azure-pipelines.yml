@@ -28,8 +28,8 @@ jobs:
   steps:
   - script: |
       choco install ninja make
-      pip3 install -r .azure_pipelines/requirements.txt
-      python .azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
+      pip3 install -r $(Build.SourcesDirectory)/.azure_pipelines/requirements.txt
+      python $(Build.SourcesDirectory)/.azure_pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDKv16 --env > $(Agent.BuildDirectory)/tcenv.bat
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Install build dependencies'
   - script: |
