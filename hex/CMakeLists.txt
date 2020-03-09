@@ -188,6 +188,16 @@ function(nrf_create_connectivity_compile_targets)
                     set(SD_ID)
                     nrf_extract_softdevice_info("${SOFTDEVICE_HEX_PATH}" SD_VERSION SOC_FAMILY SD_API_VERSION SD_ID)
 
+                    if(NOT DEFINED _CONNECTIVITY_ARTIFACTS_${SD_API_VERSION})
+                        set("_CONNECTIVITY_ARTIFACTS_${SD_API_VERSION}" "")
+
+                        if(NOT DEFINED _CONNECTIVITY_ARTIFACTS)
+                            set(_CONNECTIVITY_ARTIFACTS "")
+                        endif()
+
+                        list(APPEND _CONNECTIVITY_ARTIFACTS _CONNECTIVITY_ARTIFACTS_${SD_API_VERSION})
+                    endif()
+
                     set(CONNECTIVITY_NAME "connectivity_${VERSION}_${TRANSPORT}")
                     set(TARGET_NAME "${CONNECTIVITY_NAME}_with_${SD_VERSION}_${SD_API_VERSION}")
 
@@ -244,7 +254,7 @@ function(nrf_create_connectivity_compile_targets)
                             APPEND COMMAND ${CMAKE_COMMAND} -E copy "${HEX_MERGED}" "${OUTPUT_DIRECTORY}"
                         )
 
-                        list(APPEND _CONNECTIVITY_ARTIFACTS "${OUTPUT_DIRECTORY}/${HEX_MERGED}")
+                        list(APPEND _CONNECTIVITY_ARTIFACTS_${SD_API_VERSION} "${OUTPUT_DIRECTORY}/${HEX_MERGED}")
 
                         # Create a DFU package if it is a nRF52 device with USB support
                         if(SOC_FAMILY EQUAL 52 AND TRANSPORT STREQUAL "usb")
@@ -267,7 +277,7 @@ function(nrf_create_connectivity_compile_targets)
                                     APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}_for_${SD_VERSION}_${SD_API_VERSION}.hex"
                                 )
 
-                                list(APPEND _CONNECTIVITY_ARTIFACTS "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}_for_${SD_VERSION}_${SD_API_VERSION}.hex")
+                                list(APPEND _CONNECTIVITY_ARTIFACTS_${SD_API_VERSION} "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}_for_${SD_VERSION}_${SD_API_VERSION}.hex")
                             endif()
                         endif()
 
@@ -320,6 +330,17 @@ nrf_create_connectivity_compile_targets(
     CONNECTIVITY_ARTIFACTS CONNECTIVITY_SDK_VERSION_15_ARTIFACTS
 )
 
-message(FATAL_ERROR "SDK_V11: ${CONNECTIVITY_SDK_VERSION_11_ARTIFACTS} SDK_V15: ${CONNECTIVITY_SDK_VERSION_15_ARTIFACTS}")
+message("v11")
+foreach(sd_api_ver ${CONNECTIVITY_SDK_VERSION_11_ARTIFACTS})
+    message("sd_api_ver: ${sd_api_ver}: ${${sd_api_ver}}")
+endforeach()
+
+
+message("v15")
+foreach(sd_api_ver ${CONNECTIVITY_SDK_VERSION_15_ARTIFACTS})
+    message("sd_api_ver: ${sd_api_ver}: ${${sd_api_ver}}")
+endforeach()
+
+message(FATAL_ERROR "sd_api_ver done")
 
 add_custom_target("compile_connectivity" DEPENDS ${CONNECTIVITY_BUILD_TARGETS})
