@@ -338,14 +338,12 @@ function(nrf_find_alternative_softdevice SOFTDEVICE_HEX_PATH ALTERNATIVE_SOFTDEV
     nrf_extract_softdevice_info(${FOUND_SOFTDEVICE_HEX} SD_VERSION SOC_FAMILY SD_API_VERSION SD_ID)
     #message(STATUS "SD_VERSION:${SD_VERSION} SOC_FAMILY:${SD_VERSION} SD_API_VERSION:${SD_API_VERSION} SD_ID:${SD_ID}")
 
-    set(MAJOR)
-    set(MINOR)
-    set(PATCH)
-    nrf_extract_version_number("${SD_API_VERSION}" MAJOR MINOR PATCH)
+    set(SD_API_VERSION_MAJOR)
+    set(SD_API_VERSION_MINOR)
+    set(SD_API_VERSION_PATCH)
+    nrf_extract_version_number("${SD_API_VERSION}" SD_API_VERSION_MAJOR SD_API_VERSION_MINOR SD_API_VERSION_PATCH)
 
-    set(SOFTDEVICE_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/hex/sd_api_v${MAJOR}/${SD_VERSION}_nrf${SOC_FAMILY}_${MAJOR}.*_softdevice.hex")
-    message("SOFTDEVICE_SEARCH_PATH ${SOFTDEVICE_SEARCH_PATH}")
-
+    set(SOFTDEVICE_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/hex/sd_api_v${MAJOR}/${SD_VERSION}_nrf${SOC_FAMILY}_${SD_API_VERSION_MAJOR}.*_softdevice.hex")
     file(GLOB ALTERNATIVE_SOFTDEVICE_HEX LIST_DIRECTORIES false "${SOFTDEVICE_SEARCH_PATH}")
 
     if(ALTERNATIVE_SOFTDEVICE_HEX)
@@ -356,7 +354,7 @@ function(nrf_find_alternative_softdevice SOFTDEVICE_HEX_PATH ALTERNATIVE_SOFTDEV
 
         set(ALTERNATIVE_SD_VERSION)
         set(ALTERNATIVE_SOC_FAMILY)
-        set(ALTERNATIVE_SOC_SD_API_VERSION)
+        set(ALTERNATIVE_SD_API_VERSION)
         set(ALTERNATIVE_SD_ID)
 
         nrf_extract_softdevice_info(${ALTERNATIVE_SOFTDEVICE_HEX} ALTERNATIVE_SD_VERSION ALTERNATIVE_SOC_FAMILY ALTERNATIVE_SD_API_VERSION ALTERNATIVE_SD_ID)
@@ -368,6 +366,6 @@ function(nrf_find_alternative_softdevice SOFTDEVICE_HEX_PATH ALTERNATIVE_SOFTDEV
             message(STATUS "SoftDevice version found is the same version(${ALTERNATIVE_SOFTDEVICE_HEX}) as the one in the SDK(${SD_API_VERSION}). Using the one found in the SDK.")
         endif()
     else()
-        #message(STATUS "No newer SoftDevice found.")
+        message(STATUS "No newer SoftDevice found.")
     endif()
 endfunction()
