@@ -35,6 +35,10 @@ if(IS_BIG_ENDIAN)
     message(FATAL_ERROR "Protocol implementation does not support big endian platforms.")
 endif()
 
+if(COMPILE_CONNECTIVITY)
+    add_subdirectory(hex EXCLUDE_FROM_ALL)
+endif()
+
 # Common source files
 file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")
 file(GLOB LIB_BASE_CPP_SRC_FILES "src/common/*.cpp")
@@ -104,8 +108,14 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+set(SDK_V11_HEX_FILES)
+set(SDK_V15_HEX_FILES)
+
+nrf_create_compile_targets(SDK_V11_HEX_FILES SDK_V15_HEX_FILES)
+
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
+    message("SD_API_VER: ${SD_API_VER}")
     # Object library, from which both shared and static will be built
     add_library(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} OBJECT ${LIB_${SD_API_VER}_C_SRC_FILES} ${LIB_${SD_API_VER}_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
@@ -152,6 +162,8 @@ foreach(SD_API_VER ${SD_API_VERS})
     set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
     set(HEX_FILE_GLOB
+        # Use glob if no compile targets are provided (COMPILE_CONNECTIVITY not set)
+        # Use targets from nrf_create_compile_targets if COMPILED_CONNECTIVITY is set)
         "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex"
         "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
     )
@@ -168,6 +180,35 @@ foreach(SD_API_VER ${SD_API_VERS})
     file(GLOB_RECURSE ${SD_API_VER}_LICENSE_FILES ${LICENSE_FILE_GLOB})
 
     set(${SD_API_VER}_CONNECTIVITY_FILES )
+
+    foreach(conn SDK_V11_HEX_FILES)
+        foreach(ver ${SDK_V11_HEX_FILES})
+            if(ver MATCHES "^\_")
+                string(SUBSTRING ${ver} 1 -1 o)
+                message("SDv: ${o}")
+            elseif(ver MATCHES "^\|")
+                string(SUBSTRING ${ver} 1 -1 o)
+                message("HEX: ${o}")
+            else()
+                string("|| ${conn}")
+            endif()
+        endforeach()
+    endforeach()
+
+    foreach(conn SDK_V15_HEX_FILES)
+        foreach(ver ${SDK_V15_HEX_FILES})
+            if(ver MATCHES "^\_")
+                string(SUBSTRING ${ver} 1 -1 o)
+                message("SDv: ${o}")
+            elseif(ver MATCHES "^\|")
+                string(SUBSTRING ${ver} 1 -1 o)
+                message("HEX: ${o}")
+            else()
+                string("|| ${conn}")
+            endif()
+        endforeach()
+    endforeach()
+
     list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_HEX_FILES})
     list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_DFU_FILES})
     list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_LICENSE_FILES})
@@ -215,7 +256,6 @@ foreach(SD_API_VER ${SD_API_VERS})
             RESOURCE "${${SD_API_VER}_CONNECTIVITY_FILES}"
         )
     endif()
-
 endforeach(SD_API_VER)
 
 # Set common include directories
@@ -297,10 +337,6 @@ endif()
 
 # Add install target
 include(cmake/install-target.cmake)
-
-if(COMPILE_CONNECTIVITY)
-    add_subdirectory(hex EXCLUDE_FROM_ALL)
-endif()
 
 include (cmake/clang-dev-tools.cmake)
 

@@ -2,9 +2,9 @@ function(nrf_extract_version_number VERSION_NUMBER MAJOR MINOR PATCH)
     string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" MATCHES ${VERSION_NUMBER})
 
     if(VERSION)
-        set(MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
-        set(MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
-        set(PATCH "${CMAKE_MATCH_3}" PARENT_SCOPE)
+        set(${MAJOR} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set(${MINOR} "${CMAKE_MATCH_2}" PARENT_SCOPE)
+        set(${PATCH} "${CMAKE_MATCH_3}" PARENT_SCOPE)
     else()
         message(FATAL_ERROR "Not able to parse version:${VERSION}")
     endif()
@@ -161,8 +161,6 @@ function(nrf_prepare_sdk)
     file(TO_CMAKE_PATH "${SDKS_DIRECTORY}" SDKS_DIRECTORY)
     set(SDK_DIRECTORY "${SDKS_DIRECTORY}/v${nrf_prepare_sdk_SDK_VERSION}")
     set(SDK_VERSION "${nrf_prepare_sdk_SDK_VERSION}")
-
-    SET(SDK_VERSION "${nrf_prepare_sdk_SDK_VERSION}")
 
     set(SDK_SETUP_SUCCESS_FILE "${SDK_DIRECTORY}/.sdk-setup-success")
 
@@ -343,8 +341,11 @@ function(nrf_find_alternative_softdevice SOFTDEVICE_HEX_PATH ALTERNATIVE_SOFTDEV
     set(MAJOR)
     set(MINOR)
     set(PATCH)
-    nrf_extract_version_number("${SD_API_VERSION}" MAJOR MAJOR MINOR PATCH)
-    set(SOFTDEVICE_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sd_api_v${MAJOR}/${SD_VERSION}_nrf${SOC_FAMILY}_${MAJOR}.*_softdevice.hex")
+    nrf_extract_version_number("${SD_API_VERSION}" MAJOR MINOR PATCH)
+
+    set(SOFTDEVICE_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/hex/sd_api_v${MAJOR}/${SD_VERSION}_nrf${SOC_FAMILY}_${MAJOR}.*_softdevice.hex")
+    message("SOFTDEVICE_SEARCH_PATH ${SOFTDEVICE_SEARCH_PATH}")
+
     file(GLOB ALTERNATIVE_SOFTDEVICE_HEX LIST_DIRECTORIES false "${SOFTDEVICE_SEARCH_PATH}")
 
     if(ALTERNATIVE_SOFTDEVICE_HEX)
