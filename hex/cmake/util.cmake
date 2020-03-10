@@ -132,21 +132,28 @@ endfunction()
     The function sets the parent scope variable SDK to location of the prepared SDK
 ]]
 function(nrf_prepare_sdk)
-    set(oneValueArgs SHA512 FILENAME SDK_VERSION)
+    set(oneValueArgs SHA512 FILENAME SDK_VERSION SDK_PATH)
     set(multipleValuesArgs URLS PATCH_FILES)
     cmake_parse_arguments(nrf_prepare_sdk "" "${oneValueArgs}" "${multipleValuesArgs}" ${ARGN})
+
+    if(NOT DEFINED nrf_prepare_sdk_SHA512)
+        message(FATAL_ERROR "nrf_prepare_sdk requires a SHA512 argument.")
+    endif()
+
+    if(NOT DEFINED nrf_prepare_sdk_FILENAME)
+        message(FATAL_ERROR "nrf_prepare_sdk requires a FILENAME argument.")
+    endif()
 
     if(NOT DEFINED nrf_prepare_sdk_SDK_VERSION)
         message(FATAL_ERROR "nrf_prepare_sdk requires a SDK_VERSION argument.")
     endif()
+
+    if(NOT DEFINED nrf_prepare_sdk_SDK_PATH)
+        message(FATAL_ERROR "nrf_prepare_sdk requires a SDK_PATH argument.")
+    endif()
+
     if(NOT DEFINED nrf_prepare_sdk_URLS)
         message(FATAL_ERROR "nrf_prepare_sdk requires a URLS argument.")
-    endif()
-    if(NOT DEFINED nrf_prepare_sdk_FILENAME)
-        message(FATAL_ERROR "nrf_prepare_sdk requires a FILENAME argument.")
-    endif()
-    if(NOT DEFINED nrf_prepare_sdk_SHA512)
-        message(FATAL_ERROR "nrf_prepare_sdk requires a SHA512 argument.")
     endif()
 
     #message(STATUS "URLS: ${nrf_prepare_sdk_URLS}")
@@ -202,7 +209,7 @@ function(nrf_prepare_sdk)
     endif()
 
     nrf_get_sdk_dir_root(${SDK_DIRECTORY})
-    set(SDK_PATH "${SDK_DIRECTORY}" PARENT_SCOPE)
+    set(${nrf_prepare_sdk_SDK_PATH} "${SDK_DIRECTORY}" PARENT_SCOPE)
 endfunction()
 
 function(nrf_get_sdk_dir_root SDK_DIRECTORY)

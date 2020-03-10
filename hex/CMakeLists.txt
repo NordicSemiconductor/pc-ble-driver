@@ -137,7 +137,7 @@ function(nrf_create_connectivity_compile_targets)
     endif()
 
     if(NOT DEFINED nrf_create_connectivity_compile_targets_CONNECTIVITY_ARTIFACTS)
-        message(FATAL_ERROR "nrf_create_connectivity_compile_targets requires a SDK_VERSION argument.")
+        message(FATAL_ERROR "nrf_create_connectivity_compile_targets requires a CONNECTIVITY_ARTIFACTS argument.")
     endif()
 
     set(SDK_ROOT "${nrf_create_connectivity_compile_targets_SDK_ROOT}")
@@ -315,22 +315,27 @@ endfunction(nrf_create_connectivity_compile_targets)
 
 
 function(nrf_create_compile_targets CONNECTIVITY_SDK_VERSION_11_ARTIFACTS CONNECTIVITY_SDK_VERSION_15_ARTIFACTS)
-    set(SDK_PATH )
     set(CONNECTIVITY_BUILD_TARGETS "")
+
     set(_CONNECTIVITY_SDK_VERSION_11_ARTIFACTS "")
+    set(_CONNECTIVITY_SDK_VERSION_14_ARTIFACTS "")
     set(_CONNECTIVITY_SDK_VERSION_15_ARTIFACTS "")
+
+    set(SDK_V11_PATH)
+    set(SDK_V15_PATH)
 
     nrf_prepare_sdk(
         SDK_VERSION 11
         URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip"
         FILENAME "nRF5_SDK_11.0.0_89a8197.zip"
         SHA512 4fe84c4080e2eab664672366a5abfcd605777297835b7b864e0f51f376cd946a28178dfda7e6cefdd04b791058038711d78901ec5d260477a68eb5527c3b2c06
-        PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK_11.0.0_connectivity.patch"
+        PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/hex/nRF5_SDK_11.0.0_connectivity.patch"
+        SDK_PATH SDK_V11_PATH
     )
 
     nrf_create_connectivity_compile_targets(
         SDK_VERSION 11
-        SDK_ROOT "${SDK_PATH}"
+        SDK_ROOT "${SDK_V11_PATH}"
         PROJECT_DIRECTORY "examples/ble_central_and_peripheral/ble_connectivity"
         VERSION "${CONNECTIVITY_VERSION}"
         CONNECTIVITY_ARTIFACTS _CONNECTIVITY_SDK_VERSION_11_ARTIFACTS
@@ -341,12 +346,13 @@ function(nrf_create_compile_targets CONNECTIVITY_SDK_VERSION_11_ARTIFACTS CONNEC
         URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.3.0_59ac345.zip"
         FILENAME "nRF5_SDK_15.3.0_59ac345.zip"
         SHA512 7cdf1652e828b7c5266c21e1a12e16c90f51213130268e7138950c070c2271d357410a103427e0f67dc56816a8cf6f69df93a6462e2b5e18d6be0a9bb465484f
-        PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK_15.3.0_connectivity.patch"
+        PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/hex/nRF5_SDK_15.3.0_connectivity.patch"
+        SDK_PATH SDK_V15_PATH
     )
 
     nrf_create_connectivity_compile_targets(
         SDK_VERSION 15
-        SDK_ROOT "${SDK_PATH}"
+        SDK_ROOT "${SDK_V15_PATH}"
         PROJECT_DIRECTORY "examples/connectivity/ble_connectivity"
         VERSION "${CONNECTIVITY_VERSION}"
         CONNECTIVITY_ARTIFACTS _CONNECTIVITY_SDK_VERSION_15_ARTIFACTS
