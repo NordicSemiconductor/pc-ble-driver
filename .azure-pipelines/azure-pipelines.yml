@@ -57,9 +57,12 @@ jobs:
       call $(Agent.BuildDirectory)/tcenv.bat
       set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
-      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory)\nrf-ble-driver -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
-      cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
-      cmake --build _build --config $(CONFIGURATION) --target install
+      echo Creating project files
+      start /wait cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory)\nrf-ble-driver -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      echo Executing target compile_connectivity
+      start /wait cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
+      echo Executing target install
+      start /wait cmake --build _build --config $(CONFIGURATION) --target install
       copy _build\install_manifest.txt $(Build.ArtifactStagingDirectory)
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
