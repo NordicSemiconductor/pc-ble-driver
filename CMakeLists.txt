@@ -172,11 +172,6 @@ foreach(SD_API_VER ${SD_API_VERS})
 
     foreach(conn SDK_HEX_FILES)
         foreach(ver ${SDK_HEX_FILES})
-            message("ver: ${SDK_HEX_FILES}")
-            foreach(_x ${ver})
-                message("_x: ${_x}")
-            endforeach()
-
             if(ver MATCHES "^\_")
                 string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
 
@@ -207,7 +202,9 @@ foreach(SD_API_VER ${SD_API_VERS})
         endforeach()
     endforeach()
 
+    message("Before ${${SD_API_VER}_CONNECTIVITY_FILES}")
     list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
+    message("After ${${SD_API_VER}_CONNECTIVITY_FILES}")
 
     message("Connectivity files for ${SD_API_VER}_CONNECTIVITY_FILES is ${${SD_API_VER}_CONNECTIVITY_FILES}")
 
