@@ -2,7 +2,6 @@ trigger:
   - feature/azure-devops-builds
 
 variables:
-  system.debug: true
   CONFIGURATION: 'Debug'
   NRF_BLE_DRIVER_VERSION: '4.1.0'
   NRF_BLE_CONNECTIVITY_VERSION: $(NRF_BLE_DRIVER_VERSION)
