@@ -206,6 +206,8 @@ foreach(SD_API_VER ${SD_API_VERS})
     #list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_DFU_FILES})
     list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
 
+    message("Connectivity files for ${SD_API_VER}_CONNECTIVITY_FILES is ${${SD_API_VER}_SOFTDEVICE_FILES}")
+
     if(WIN32)
         set_target_properties(
             ${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PROPERTIES
