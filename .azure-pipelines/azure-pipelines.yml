@@ -58,11 +58,29 @@ jobs:
       set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
       echo Creating project files
-      start /wait cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory)\nrf-ble-driver -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory)\nrf-ble-driver -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+
+      if %ERRORLEVEL% neq 0 (
+        echo Error generating project file
+        exit -1
+      )
+
       echo Executing target compile_connectivity
-      start /wait cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
+      cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
+
+      if %ERRORLEVEL% neq 0 (
+        echo Error compiling connectivity
+        exit -1
+      )
+
       echo Executing target install
-      start /wait cmake --build _build --config $(CONFIGURATION) --target install
+      cmake --build _build --config $(CONFIGURATION) --target install
+
+      if %ERRORLEVEL% neq 0 (
+        echo Error installing
+        exit -1
+      )
+
       copy _build\install_manifest.txt $(Build.ArtifactStagingDirectory)
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
