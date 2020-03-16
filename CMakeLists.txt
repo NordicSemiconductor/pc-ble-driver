@@ -108,14 +108,12 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-set(SDK_V11_HEX_FILES)
-set(SDK_V15_HEX_FILES)
+set(SDK_HEX_FILES)
 
-nrf_create_compile_targets(SDK_V11_HEX_FILES SDK_V15_HEX_FILES)
+nrf_create_compile_targets(SDK_HEX_FILES)
 
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
-    message("SD_API_VER: ${SD_API_VER}")
     # Object library, from which both shared and static will be built
     add_library(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} OBJECT ${LIB_${SD_API_VER}_C_SRC_FILES} ${LIB_${SD_API_VER}_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
 
@@ -161,57 +159,51 @@ foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(HEX_FILE_GLOB
-        # Use glob if no compile targets are provided (COMPILE_CONNECTIVITY not set)
-        # Use targets from nrf_create_compile_targets if COMPILED_CONNECTIVITY is set)
-        "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex"
+    set(SOFTDEVICE_FILE_GLOB
+        "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
+        "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
         "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
     )
 
-    set(DFU_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.zip")
+    file(GLOB_RECURSE ${SD_API_VER}_SOFTDEVICE_FILES ${SOFTDEVICE_FILE_GLOB})
 
-    set(LICENSE_FILE_GLOB
-        "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
-        "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
-    )
+    set(${SD_API_VER}_CONNECTIVITY_FILES "")
 
-    file(GLOB_RECURSE ${SD_API_VER}_HEX_FILES ${HEX_FILE_GLOB})
-    file(GLOB_RECURSE ${SD_API_VER}_DFU_FILES ${DFU_FILE_GLOB})
-    file(GLOB_RECURSE ${SD_API_VER}_LICENSE_FILES ${LICENSE_FILE_GLOB})
-
-    set(${SD_API_VER}_CONNECTIVITY_FILES )
-
-    foreach(conn SDK_V11_HEX_FILES)
-        foreach(ver ${SDK_V11_HEX_FILES})
+    foreach(conn SDK_HEX_FILES)
+        foreach(ver ${SDK_HEX_FILES})
             if(ver MATCHES "^\_")
-                string(SUBSTRING ${ver} 1 -1 o)
-                message("SDv: ${o}")
-            elseif(ver MATCHES "^\|")
-                string(SUBSTRING ${ver} 1 -1 o)
-                message("HEX: ${o}")
-            else()
-                string("|| ${conn}")
+                string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
+
+                if(NOT ${MATCHES})
+                    message(FATAL_ERROR "Was not able to match SD_API version ${ver}")
+                endif()
+
+                set(SD_API_EQUAL "SD_API_V${CMAKE_MATCH_1}")
+
+                if("${SD_API_EQUAL}" STREQUAL "${SD_API_VER}")
+                    set(CURRENT_SD_FOUND TRUE)
+                else()
+                    set(CURRENT_SD_FOUND FALSE)
+                endif()
+            endif()
+
+            if(ver MATCHES "^\|")
+                if(CURRENT_SD_FOUND)
+                    foreach(_hex ${ver})
+                        string(SUBSTRING "${_hex}" 1 -1 HEX)
+
+                        if(NOT ("${HEX}" STRGREATER_EQUAL "CONNECTIVITY_ARTIFACTS_SDv"))
+                            list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES "${HEX}")
+                        endif()
+                    endforeach()
+                endif()
             endif()
         endforeach()
     endforeach()
 
-    foreach(conn SDK_V15_HEX_FILES)
-        foreach(ver ${SDK_V15_HEX_FILES})
-            if(ver MATCHES "^\_")
-                string(SUBSTRING ${ver} 1 -1 o)
-                message("SDv: ${o}")
-            elseif(ver MATCHES "^\|")
-                string(SUBSTRING ${ver} 1 -1 o)
-                message("HEX: ${o}")
-            else()
-                string("|| ${conn}")
-            endif()
-        endforeach()
-    endforeach()
-
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_HEX_FILES})
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_DFU_FILES})
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_LICENSE_FILES})
+    #list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_HEX_FILES})
+    #list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_DFU_FILES})
+    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
 
     if(WIN32)
         set_target_properties(

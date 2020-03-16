@@ -75,7 +75,6 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
 
     nrf_extract_info_from_path(${PROJECT_PATH} PROJECT_NAME PCA_TYPE SOFTDEVICE_TYPE_VERSION TRANSPORT)
     set(SOFTDEVICE_SEARCH_PATH "${SDK_ROOT}/components/softdevice/${SOFTDEVICE_TYPE_VERSION}/hex/*.hex")
-    message("SOFTDEVICE_SEARCH_PATH ${SOFTDEVICE_SEARCH_PATH}")
     file(GLOB FOUND_SOFTDEVICE_HEX "${SOFTDEVICE_SEARCH_PATH}")
 
     if(FOUND_SOFTDEVICE_HEX STREQUAL "")
@@ -141,7 +140,6 @@ function(nrf_create_connectivity_compile_targets)
     endif()
 
     set(SDK_ROOT "${nrf_create_connectivity_compile_targets_SDK_ROOT}")
-    message(STATUS "SDK_ROOT:" ${SDK_ROOT})
 
     set(SDK_VERSION ${nrf_create_connectivity_compile_targets_SDK_VERSION})
     set(VERSION ${nrf_create_connectivity_compile_targets_VERSION})
@@ -183,7 +181,6 @@ function(nrf_create_connectivity_compile_targets)
                     set(SOFTDEVICE_HEX_PATH)
                     set(APP_HEX_PATH)
                     nrf_get_hex_paths("${SDK_ROOT}" "${SDK_VERSION}" "${ARMGCC_PROJECT_DIRECTORY}" APP_HEX_PATH SOFTDEVICE_HEX_PATH)
-                    #message(STATUS "APP_HEX_PATH: ${APP_HEX_PATH} SOFTDEVICE_HEX_PATH: ${SOFTDEVICE_HEX_PATH}")
 
                     set(SD_VERSION)
                     set(SOC_FAMILY)
@@ -195,17 +192,11 @@ function(nrf_create_connectivity_compile_targets)
                     set(SD_API_VERSION_PATCH)
 
                     nrf_extract_softdevice_info("${SOFTDEVICE_HEX_PATH}" SD_VERSION SOC_FAMILY SD_API_VERSION SD_ID)
-                    message("SoftDevice API version SD_API_VERSION: ${SD_API_VERSION}")
-
                     nrf_extract_version_number("${SD_API_VERSION}" SD_API_VERSION_MAJOR SD_API_VERSION_MINOR SD_API_VERSION_PATCH)
 
                     if(NOT DEFINED _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR})
                         set(_CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR} "")
-
-                        message("Appending to _CONNECTIVITY_ARTIFACTS _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR}: ${_CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR}}")
                         list(APPEND _CONNECTIVITY_ARTIFACTS _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR})
-                    else()
-                        message("${_CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR}} already appended")
                     endif()
 
                     set(CONNECTIVITY_NAME "connectivity_${VERSION}_${TRANSPORT}")
@@ -272,6 +263,8 @@ function(nrf_create_connectivity_compile_targets)
                                     APPEND COMMAND ${NRFUTIL} pkg generate "--application" "${APP_HEX_PATH}" "--hw-version" 52 "--sd-req" 0 "--sd-id" ${SD_ID} "--debug-mode" "--softdevice" "${SOFTDEVICE_HEX_PATH}" "${DFU_PKG}"
                                 )
 
+                                list(APPEND _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR} "${OUTPUT_DIRECTORY}/${DFU_PKG}")
+
                                 add_custom_command(
                                     OUTPUT "${COMMAND_NAME}"
                                     APPEND COMMAND ${CMAKE_COMMAND} -E copy "${DFU_PKG}" "${OUTPUT_DIRECTORY}"
@@ -314,7 +307,7 @@ function(nrf_create_connectivity_compile_targets)
 endfunction(nrf_create_connectivity_compile_targets)
 
 
-function(nrf_create_compile_targets CONNECTIVITY_SDK_VERSION_11_ARTIFACTS CONNECTIVITY_SDK_VERSION_15_ARTIFACTS)
+function(nrf_create_compile_targets CONNECTIVITY_ARTIFACTS)
     set(CONNECTIVITY_BUILD_TARGETS "")
 
     set(_CONNECTIVITY_SDK_VERSION_11_ARTIFACTS "")
@@ -359,6 +352,9 @@ function(nrf_create_compile_targets CONNECTIVITY_SDK_VERSION_11_ARTIFACTS CONNEC
 
     add_custom_target("compile_connectivity" DEPENDS ${CONNECTIVITY_BUILD_TARGETS})
 
-    set(${CONNECTIVITY_SDK_VERSION_11_ARTIFACTS} ${_CONNECTIVITY_SDK_VERSION_11_ARTIFACTS} PARENT_SCOPE)
-    set(${CONNECTIVITY_SDK_VERSION_15_ARTIFACTS} ${_CONNECTIVITY_SDK_VERSION_15_ARTIFACTS} PARENT_SCOPE)
+    set(_CONNECTIVITY_ARTIFACTS)
+    list(APPEND _CONNECTIVITY_ARTIFACTS ${_CONNECTIVITY_SDK_VERSION_11_ARTIFACTS})
+    list(APPEND _CONNECTIVITY_ARTIFACTS ${_CONNECTIVITY_SDK_VERSION_15_ARTIFACTS})
+
+    set(${CONNECTIVITY_ARTIFACTS} ${_CONNECTIVITY_ARTIFACTS} PARENT_SCOPE)
 endfunction(nrf_create_compile_targets)
