@@ -27,6 +27,7 @@ jobs:
     vmImage: $(imageName)
   steps:
   - script: |
+      cmake --version
       pip3 install -r %BUILD_SOURCESDIRECTORY%\.azure-pipelines\requirements.txt
       python %BUILD_SOURCESDIRECTORY%\.azure-pipelines\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)\tcenv.bat
       choco install ninja make
