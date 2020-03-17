@@ -158,7 +158,6 @@ foreach(SD_API_VER ${SD_API_VERS})
 
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
     set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
-    message("CONNECTIVITY_DIRECTORY is ${CONNECTIVITY_DIRECTORY}")
 
     set(SOFTDEVICE_FILE_GLOB
         "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
@@ -172,8 +171,6 @@ foreach(SD_API_VER ${SD_API_VERS})
     set(CURRENT_SD_FOUND FALSE)
 
     foreach(ver ${SDK_HEX_FILES})
-        message("ver: ${ver}")
-
         if(ver MATCHES "^_")
             string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
 
@@ -188,26 +185,17 @@ foreach(SD_API_VER ${SD_API_VERS})
             else()
                 set(CURRENT_SD_FOUND FALSE)
             endif()
-
-            message("CURRENT_SD_FOUND is ${CURRENT_SD_FOUND}. Based on SD_API_EQUAL: ${SD_API_EQUAL} SD_API_VER: ${SD_API_VER}")
         endif()
 
         if(CURRENT_SD_FOUND)
             if (ver MATCHES "^\\|")
-                message("CURRENT_SD_FOUND")
                 string(SUBSTRING "${ver}" 1 -1 HEX)
-                message("-----> CURRENT_SD_FOUND: ver: ${ver} HEX:${HEX}")
                 list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${HEX})
-                message("Appended ${HEX} to ${SD_API_VER}_CONNECTIVITY_FILES")
             endif()
         endif()
     endforeach()
 
-    message("Before ${${SD_API_VER}_CONNECTIVITY_FILES}")
     list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
-    message("After ${${SD_API_VER}_CONNECTIVITY_FILES}")
-
-    message("Connectivity files for ${SD_API_VER}_CONNECTIVITY_FILES is ${${SD_API_VER}_CONNECTIVITY_FILES}")
 
     if(WIN32)
         set_target_properties(
