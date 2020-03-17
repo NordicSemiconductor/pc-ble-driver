@@ -168,7 +168,7 @@ foreach(SD_API_VER ${SD_API_VERS})
 
     file(GLOB_RECURSE ${SD_API_VER}_SOFTDEVICE_FILES ${SOFTDEVICE_FILE_GLOB})
 
-    set(${SD_API_VER}_CONNECTIVITY_FILES "")
+    set(${SD_API_VER}_CONNECTIVITY_FILES)
 
     foreach(conn SDK_HEX_FILES)
         foreach(ver ${SDK_HEX_FILES})
@@ -186,6 +186,8 @@ foreach(SD_API_VER ${SD_API_VERS})
                 else()
                     set(CURRENT_SD_FOUND FALSE)
                 endif()
+
+                message("CURRENT_SD_FOUND is ${CURRENT_SD_FOUND}. Based on SD_API_EQUAL: ${SD_API_EQUAL} SD_API_VER: ${SD_API_VER}")
             endif()
 
             if(ver MATCHES "^\|")
