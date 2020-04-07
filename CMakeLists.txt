@@ -35,10 +35,6 @@ if(IS_BIG_ENDIAN)
     message(FATAL_ERROR "Protocol implementation does not support big endian platforms.")
 endif()
 
-if(COMPILE_CONNECTIVITY)
-    add_subdirectory(hex EXCLUDE_FROM_ALL)
-endif()
-
 # Common source files
 file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")
 file(GLOB LIB_BASE_CPP_SRC_FILES "src/common/*.cpp")
@@ -108,9 +104,11 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-set(SDK_HEX_FILES)
-
-nrf_create_compile_targets(SDK_HEX_FILES)
+if(COMPILE_CONNECTIVITY)
+    set(SDK_HEX_FILES)
+    add_subdirectory(hex EXCLUDE_FROM_ALL)
+    nrf_create_compile_targets(SDK_HEX_FILES)
+endif()
 
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
@@ -157,45 +155,48 @@ foreach(SD_API_VER ${SD_API_VERS})
     )
 
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(SOFTDEVICE_FILE_GLOB
-        "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
-        "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
-        "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
-    )
+    if(COMPILE_CONNECTIVITY)
+        set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    file(GLOB_RECURSE ${SD_API_VER}_SOFTDEVICE_FILES ${SOFTDEVICE_FILE_GLOB})
+        set(SOFTDEVICE_FILE_GLOB
+            "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
+            "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
+            "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
+        )
 
-    set(${SD_API_VER}_CONNECTIVITY_FILES "")
-    set(CURRENT_SD_FOUND FALSE)
+        file(GLOB_RECURSE ${SD_API_VER}_SOFTDEVICE_FILES ${SOFTDEVICE_FILE_GLOB})
 
-    foreach(ver ${SDK_HEX_FILES})
-        if(ver MATCHES "^_")
-            string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
+        set(${SD_API_VER}_CONNECTIVITY_FILES "")
+        set(CURRENT_SD_FOUND FALSE)
 
-            if(NOT ${MATCHES})
-                message(FATAL_ERROR "Was not able to match SD_API version ${ver}")
+        foreach(ver ${SDK_HEX_FILES})
+            if(ver MATCHES "^_")
+                string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
+
+                if(NOT ${MATCHES})
+                    message(FATAL_ERROR "Was not able to match SD_API version ${ver}")
+                endif()
+
+                set(SD_API_EQUAL "SD_API_V${CMAKE_MATCH_1}")
+
+                if("${SD_API_EQUAL}" STREQUAL "${SD_API_VER}")
+                    set(CURRENT_SD_FOUND TRUE)
+                else()
+                    set(CURRENT_SD_FOUND FALSE)
+                endif()
             endif()
 
-            set(SD_API_EQUAL "SD_API_V${CMAKE_MATCH_1}")
-
-            if("${SD_API_EQUAL}" STREQUAL "${SD_API_VER}")
-                set(CURRENT_SD_FOUND TRUE)
-            else()
-                set(CURRENT_SD_FOUND FALSE)
+            if(CURRENT_SD_FOUND)
+                if (ver MATCHES "^\\|")
+                    string(SUBSTRING "${ver}" 1 -1 HEX)
+                    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${HEX})
+                endif()
             endif()
-        endif()
+        endforeach()
 
-        if(CURRENT_SD_FOUND)
-            if (ver MATCHES "^\\|")
-                string(SUBSTRING "${ver}" 1 -1 HEX)
-                list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${HEX})
-            endif()
-        endif()
-    endforeach()
-
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
+        list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
+    endif(COMPILE_CONNECTIVITY)
 
     if(WIN32)
         set_target_properties(
@@ -332,7 +333,6 @@ if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 else()
     set(ARCH_SUFFIX "x86_32")
 endif()
-
 
 if(APPLE)
     set(OS_SUFFIX "macos")
