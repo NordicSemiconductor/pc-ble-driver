@@ -87,3 +87,43 @@ jobs:
     inputs:
       targetPath: $(Build.ArtifactStagingDirectory)
       artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
+
+# Test jobs below this point
+- job: test_win86
+  displayName: 'Test Win32'
+  dependsOn: 'Build'
+  pool:
+    name: test-pool
+    demands: Agent.OS -equals Windows_NT
+  variables:
+    TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'current'
+      artifact: 'pc-ble-driver-$(Agent.OS)-x86'
+  - script: |
+      mkdir %TEST_REPORT_DIR%
+  - script: |
+      set ITERATIONS=10
+
+      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=2.0.1 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=2.0.1 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=3.1.0 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=5.1.0 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=6.1.1 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=3.1.0 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=5.1.0 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=6.1.1 -DITERATIONS=%ITERATIONS% -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P .azure-pipelines/run_test.cmake
+
+    continueOnError: true
+    failOnStderr: false
+    displayName: 'Run tests'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/*-result.xml'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Linux tests'
+    condition: succeededOrFailed()
