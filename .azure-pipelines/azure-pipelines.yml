@@ -93,7 +93,7 @@ jobs:
 # Ubuntu
   - bash: |
       sudo apt-get update
-      sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi
+      sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools
       /usr/bin/python3 -m pip install --ignore-installed nrfutil
       /usr/bin/python3 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
