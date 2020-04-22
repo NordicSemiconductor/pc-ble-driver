@@ -11,12 +11,19 @@ variables:
   GITHUB_REPO: 'NordicSemiconductor/pc-ble-driver'
   GITHUB_TAG: v$(NRF_BLE_DRIVER_VERSION)
   VCPKG_REPOSITORY: 'https://github.com/Microsoft/vcpkg.git'
+  VCPKG_CHECKOUT: 1e19af09e53e5f306ed89c2033817a21e5ee0bcf
   VCPKG_ROOT: '$(Agent.HomeDirectory)/vcpkg'
-
+  
 jobs:
 - job: Build
   strategy:
     matrix:
+      Linux:
+        imageName: 'ubuntu-latest'
+        architecture: 'x64'
+        cc_compiler_path: '/usr/bin/gcc-8'
+        cxx_compiler_path: '/usr/bin/g++-8'
+        vcpkg_triplet: 'x64-linux'
       win32:
         imageName: 'vs2017-win2016'
         architecture: 'x86'
@@ -27,7 +34,6 @@ jobs:
     vmImage: $(imageName)
   steps:
   - script: |
-      cmake --version
       pip3 install -r %BUILD_SOURCESDIRECTORY%\.azure-pipelines\requirements.txt
       python %BUILD_SOURCESDIRECTORY%\.azure-pipelines\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)\tcenv.bat
       choco install ninja make
@@ -36,7 +42,7 @@ jobs:
   - script: |
       @echo off
       echo "VCPKG_ROOT is %VCPKG_ROOT%"
-      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT%
+      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT% $(VCPKG_CHECKOUT)
       cd /d %VCPKG_ROOT%
       bootstrap-vcpkg.bat
       cd /d $(Build.SourcesDirectory)
@@ -87,6 +93,37 @@ jobs:
     inputs:
       targetPath: $(Build.ArtifactStagingDirectory)
       artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
+# Ubuntu
+  - bash: |
+      sudo apt-get update
+      sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9
+      python3 -m pip install -r $BUILD_SOURCESDIRECTORY\.azure-pipelines\requirements.txt
+      python3 $BUILD_SOURCESDIRECTORY\.azure-pipelines\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)\tcenv.sh
+      chmod $(Agent.BuildDirectory)\tcenv.sh
+    condition: contains(variables['imageName'], 'ubuntu')
+    displayName: '[Linux] Install build dependencies'
+  - bash: |
+      git clone $(VCPKG_REPOSITORY) $VCPKG_ROOT
+      git -C $VCPKG_ROOT checkout $VCPKG_CHECKOUT
+      $VCPKG_ROOT/bootstrap-vcpkg.sh
+      $VCPKG_ROOT/vcpkg install asio:$(vcpkg_triplet) catch2:$(vcpkg_triplet) spdlog:$(vcpkg_triplet)
+    condition: contains(variables['imageName'], 'ubuntu')
+    displayName: '[Linux] Install nrf-device-lib dependencies'
+  - bash: |
+      set -o errexit -o pipefail
+      export CC=$(cc_compiler_path)
+      export CXX=$(cxx_compiler_path)
+      $(Agent.BuildDirectory)/tcenv.sh
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
+      cmake --build _build --config $(CONFIGURATION) --target install
+    condition: not(contains(variables['imageName'], 'win'))
+    displayName: '[Linux/macOS] Build project'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: $(Build.ArtifactStagingDirectory)
+      artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
+
 
 # Test jobs below this point
 - job: test_win86
