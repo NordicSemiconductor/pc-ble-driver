@@ -42,7 +42,8 @@ jobs:
   - script: |
       @echo off
       echo "VCPKG_ROOT is %VCPKG_ROOT%"
-      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT% $(VCPKG_CHECKOUT)
+      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT%
+      git -C %VCPKG_ROOT% checkout $(VCPKG_CHECKOUT)
       cd /d %VCPKG_ROOT%
       bootstrap-vcpkg.bat
       cd /d $(Build.SourcesDirectory)
@@ -96,7 +97,7 @@ jobs:
 # Ubuntu
   - bash: |
       sudo apt-get update
-      sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9
+      sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-setuptools
       python3 -m pip install -r $BUILD_SOURCESDIRECTORY/.azure-pipelines/requirements.txt
       python3 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
       chmod $(Agent.BuildDirectory)/tcenv.sh
