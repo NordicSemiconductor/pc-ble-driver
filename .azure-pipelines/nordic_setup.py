@@ -9,6 +9,7 @@ import logging
 import tempfile
 import hashlib
 import zipfile
+import tarfile
 import argparse
 import pathlib
 import tempfile
@@ -166,6 +167,9 @@ class GnuCompiler:
         if self.download_path.endswith('.zip'):
             with zipfile.ZipFile(self.download_path, 'r') as zip_ref:
                 zip_ref.extractall(compiler_path)
+        elif self.download_path.endswith('.tar.bz2'):
+            with tarfile.open(self.download_path, 'r:bz2') as tar:
+                tar.extractall(compiler_path)
 
         return [
             # Old env variable used by some projects
