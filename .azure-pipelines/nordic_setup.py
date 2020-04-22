@@ -11,6 +11,7 @@ import hashlib
 import zipfile
 import argparse
 import pathlib
+import tempfile
 
 import certifi
 import pycurl
@@ -257,7 +258,7 @@ def get_toolchains(cache_directory):
 
 
 def setup_nordic_toolchain(toolchain_version, install_prefix):
-    toolchains = get_toolchains('c:\\tmp\\dlcache2')
+    toolchains = get_toolchains(os.path.join(tempfile.gettempdir(), 'dlcache'))
 
     toolchain = toolchains.get(toolchain_version)
 
