@@ -13,6 +13,7 @@ import tarfile
 import argparse
 import pathlib
 import tempfile
+import re
 
 import certifi
 import pycurl
@@ -170,7 +171,9 @@ class GnuCompiler:
         elif self.download_path.endswith('.tar.bz2'):
             with tarfile.open(self.download_path, 'r:bz2') as tar:
                 tar.extractall(compiler_path)
-
+            # tar packaged version of compiler contains a root directory
+            compiler_path = os.path.join(compiler_path, re.search('\/([^/.]*)-[linux]*\.tar\.bz2$', self.download_path).group(1))
+        
         return [
             # Old env variable used by some projects
             f'GNUARMEMB_TOOLCHAIN_PATH={compiler_path}',
