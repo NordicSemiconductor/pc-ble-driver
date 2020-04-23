@@ -111,7 +111,7 @@ jobs:
       set -o errexit -o pipefail
       export CC=$(cc_compiler_path)
       export CXX=$(cxx_compiler_path)
-      $(Agent.BuildDirectory)/tcenv.sh
+      source $(Agent.BuildDirectory)/tcenv.sh
       cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
       cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
       cmake --build _build --config $(CONFIGURATION) --target install
