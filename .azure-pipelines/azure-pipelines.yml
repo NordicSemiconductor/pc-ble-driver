@@ -98,7 +98,7 @@ jobs:
       /usr/bin/python3 -m pip install nrfutil
       /usr/bin/python3 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
-      which nrfutil
+      echo "which: `which nrfutil`"
       echo "PATH: $PATH"
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'ubuntu')
@@ -116,6 +116,9 @@ jobs:
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
+      /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
+      echo "which: `which nrfutil`"
+      echo "PATH: $PATH"
       cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
       cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
       cmake --build _build --config $(CONFIGURATION) --target install
