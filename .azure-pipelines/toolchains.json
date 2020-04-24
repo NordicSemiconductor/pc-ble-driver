@@ -10,9 +10,8 @@
                 },
                 "darwin": {
                     "compiler": {
-                        "url": "",
-                        "filename": "",
-                        "sha512": ""
+                        "url": "https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-mac.tar.bz2",
+                        "sha512": "dea4690f77c93affa8b35044395360d363a8ce1e12c27aba0bae8e5091df387cf33d7937eaa9ff66ce9eb534bf273e89c64a61d15228f52471d508729bb7fb31"
                     }
                 },
                 "linux": {
