@@ -36,7 +36,7 @@ jobs:
         architecture: 'x64'
         cc_compiler_path: '/usr/local/opt/llvm/bin/clang'
         cxx_compiler_path: '/usr/local/opt/llvm/bin/clang++'
-
+        vcpkg_triplet: 'x64-osx'
   pool:
     vmImage: $(imageName)
   steps:
@@ -124,8 +124,6 @@ jobs:
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
-      echo "which: `which nrfutil`"
-      echo "PATH: $PATH"
       cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
       cmake --build _build --config $(CONFIGURATION) --target compile_connectivity
       cmake --build _build --config $(CONFIGURATION) --target install
