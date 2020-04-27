@@ -226,6 +226,8 @@ jobs:
       artifact: 'pc-ble-driver-$(Agent.OS)-x64'
   - script: |
       mkdir $TEST_REPORT_DIR
+      chmod a+x $(Pipeline.Workspace)/bin/test*
+      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$LD_LIBRARY_PATH
 
       cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=2.0.1 -DITERATIONS=$(ITERATIONS_TEST) -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
       cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=2.0.1 -DITERATIONS=$(ITERATIONS_TEST) -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
