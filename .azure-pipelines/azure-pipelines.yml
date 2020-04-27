@@ -135,6 +135,7 @@ jobs:
       artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
 # MacOS
   - bash: |
+      set -o errexit -o pipefail
       # Note that installing gcc@6 will not change `gcc`/`g++` on
       # PATH, and those will still be Apple Clang.
       brew install ninja llvm@9 gcc@9 libusb
@@ -148,6 +149,7 @@ jobs:
     condition: contains(variables['imageName'], 'mac')
     displayName: '[macOS] Install toolchain'
   - bash: |
+      set -o errexit -o pipefail
       git clone $(VCPKG_REPOSITORY) $VCPKG_ROOT
       git -C $VCPKG_ROOT checkout $VCPKG_CHECKOUT
       CC=gcc-9 CXX=g++-9 $VCPKG_ROOT/bootstrap-vcpkg.sh
