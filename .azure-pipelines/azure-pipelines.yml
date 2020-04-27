@@ -40,7 +40,7 @@ jobs:
   pool:
     vmImage: $(imageName)
   steps:
-# Windows
+  # Windows
   - script: |
       pip3 install -r %BUILD_SOURCESDIRECTORY%\.azure-pipelines\requirements.txt
       python %BUILD_SOURCESDIRECTORY%\.azure-pipelines\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)\tcenv.bat
@@ -98,7 +98,8 @@ jobs:
       )
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
-# Ubuntu
+
+  # Ubuntu
   - bash: |
       sudo apt-get update
       sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools libusb-1.0-0-dev libudev-dev
@@ -129,11 +130,8 @@ jobs:
       cmake --build _build --config $(CONFIGURATION) --target install
     condition: contains(variables['imageName'], 'ubuntu')
     displayName: '[Linux/macOS] Build project'
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: $(Build.ArtifactStagingDirectory)
-      artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
-# MacOS
+
+    # MacOS
   - bash: |
       set -o errexit -o pipefail
       # Note that installing gcc@6 will not change `gcc`/`g++` on
@@ -169,6 +167,8 @@ jobs:
       cmake --build _build --config $(CONFIGURATION) --target install
     condition: contains(variables['imageName'], 'mac')
     displayName: '[macOS] Build project'
+
+  # Publish artifacts (any platform)
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: $(Build.ArtifactStagingDirectory)
@@ -176,7 +176,7 @@ jobs:
 
 # Test jobs below this point
 - job: test_win86
-  displayName: 'Test Win32'
+  displayName: 'Run Win32(x86) tests'
   dependsOn: 'Build'
   pool:
     name: test-pool
