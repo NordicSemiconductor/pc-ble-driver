@@ -172,7 +172,7 @@ class GnuCompiler:
             with tarfile.open(self.download_path, 'r:bz2') as tar:
                 tar.extractall(compiler_path)
             # tar packaged version of compiler contains a root directory
-            compiler_path = os.path.join(compiler_path, re.search('\/([^/.]*)-[linux]*\.tar\.bz2$', self.download_path).group(1))
+            compiler_path = os.path.join(compiler_path, re.search('\/([^/.]*)-[linux|mac]*\.tar\.bz2$', self.download_path).group(1))
         
         return [
             # Old env variable used by some projects
