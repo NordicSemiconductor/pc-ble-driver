@@ -58,6 +58,12 @@ parameters:
   - name: ITERATIONS_TEST
     displayName: Number of iterations to run tests
     default: 10
+  - name: TEST_POOL
+    displayName: Test pool to use for running tests
+    default: test-pool-onv12-1
+    values:
+      - test-pool-onv12-1
+ 
 
 variables:
   NRF_BLE_DRIVER_VERSION: '4.1.0'
@@ -245,7 +251,7 @@ jobs:
   displayName: 'Run Win32(x86) tests'
   dependsOn: 'Build'
   pool:
-    name: test-pool
+    name: ${{ parameters.TEST_POOL }
     demands: Agent.OS -equals Windows_NT
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
@@ -282,7 +288,7 @@ jobs:
   displayName: 'Run Win32(x64) tests'
   dependsOn: 'Build'
   pool:
-    name: test-pool
+    name: ${{ parameters.TEST_POOL }
     demands: Agent.OS -equals Windows_NT
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
@@ -319,7 +325,7 @@ jobs:
   displayName: 'Run Linux(x64) tests'
   dependsOn: 'Build'
   pool:
-    name: test-pool
+    name: ${{ parameters.TEST_POOL }
     demands: Agent.OS -equals Linux
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
@@ -358,7 +364,7 @@ jobs:
   displayName: 'Run macOS(x64) tests'
   dependsOn: 'Build'
   pool:
-    name: test-pool
+    name: ${{ parameters.TEST_POOL }
     demands: Agent.OS -equals Darwin
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
