@@ -3,7 +3,7 @@ if(NRF_BLE_DRIVER_CMAKE_INCLUDED)
     return()
 endif(NRF_BLE_DRIVER_CMAKE_INCLUDED)
 set(NRF_BLE_DRIVER_CMAKE_INCLUDED true)
-  
+
 math(EXPR COMPILER_ARCH_BITS "8*${CMAKE_SIZEOF_VOID_P}")
 # Default to compiler architecture
 set(ARCH_BITS ${COMPILER_ARCH_BITS})
@@ -93,7 +93,7 @@ function(git_repo_metadata dir commit branch remotes)
       WORKING_DIRECTORY ${dir}
       OUTPUT_VARIABLE GIT_COMMIT_HASH
       OUTPUT_STRIP_TRAILING_WHITESPACE
-    )    
+    )
 
     set(${commit} ${GIT_COMMIT_HASH} PARENT_SCOPE)
 
@@ -123,19 +123,19 @@ function(build_metadata dir dst)
     string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S (YY-MM-DD HH:MM:SS, UTC)" UTC)
 
     set(str "\n")
-    string(CONCAT str ${str} "* System: " ${CMAKE_SYSTEM} "\n") 
-    string(CONCAT str ${str} "* Hostname: " ${BUILD_MD_HOSTNAME} "\n") 
-    string(CONCAT str ${str} "* Timestamp: " ${BUILD_TIMESTAMP} "\n") 
-    string(CONCAT str ${str} "* Generator: " ${CMAKE_GENERATOR} "\n") 
-    string(CONCAT str ${str} "* Build type: " ${CMAKE_BUILD_TYPE} "\n") 
-    string(CONCAT str ${str} "* C Compiler: " "${CMAKE_C_COMPILER_ID} (${ARCH_BITS}-bit)" "\n") 
-    string(CONCAT str ${str} "* C++ Compiler: " "${CMAKE_CXX_COMPILER_ID} (${ARCH_BITS}-bit)" "\n") 
-    string(CONCAT str ${str} "* CMake version: " ${CMAKE_VERSION} "\n") 
-    string(CONCAT str ${str} "* SD API Versions:") 
+    string(CONCAT str ${str} "* System: " ${CMAKE_SYSTEM} "\n")
+    string(CONCAT str ${str} "* Hostname: " ${BUILD_MD_HOSTNAME} "\n")
+    string(CONCAT str ${str} "* Timestamp: " ${BUILD_TIMESTAMP} "\n")
+    string(CONCAT str ${str} "* Generator: " ${CMAKE_GENERATOR} "\n")
+    string(CONCAT str ${str} "* Build type: " ${CMAKE_BUILD_TYPE} "\n")
+    string(CONCAT str ${str} "* C Compiler: " "${CMAKE_C_COMPILER_ID} (${ARCH_BITS}-bit)" "\n")
+    string(CONCAT str ${str} "* C++ Compiler: " "${CMAKE_CXX_COMPILER_ID} (${ARCH_BITS}-bit)" "\n")
+    string(CONCAT str ${str} "* CMake version: " ${CMAKE_VERSION} "\n")
+    string(CONCAT str ${str} "* SD API Versions:")
     foreach(SD_API_VER ${SD_API_VERS})
-        string(CONCAT str ${str} " <${SD_API_VER}>") 
+        string(CONCAT str ${str} " <${SD_API_VER}>")
     endforeach()
-    string(CONCAT str ${str} "\n") 
-     
+    string(CONCAT str ${str} "\n")
+
     set(${dst} ${str} PARENT_SCOPE)
 endfunction()

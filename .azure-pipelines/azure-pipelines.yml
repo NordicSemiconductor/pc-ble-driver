@@ -1,0 +1,400 @@
+trigger:
+  - feature/azure-devops-builds
+
+parameters:
+  - name: BUILD_CONFIGURATION
+    displayName: Build configuration
+    type: string
+    default: Release
+    values:
+    - Release
+    - RelWithDebInfo
+    - MinSizeRel
+    - Debug
+  - name: VCPKG_CHECKOUT
+    displayName: VCPKG commit
+    type: string
+    default: 2020.04
+    values:
+    - master
+    - 2020.06
+    - 2020.04
+    - 2020.01
+    - 2019.12
+    - 2019.11
+    - 2019.10
+    - 2019.09
+    - 2019.08
+    - 2019.07
+    - 2019.06
+  - name: WINDOWS_IMAGE
+    displayName: Windows image
+    type: string
+    default: vs2017-win2016
+    values:
+    - windows-latest
+    - windows-2019
+    - vs2017-win2016
+  - name: MACOS_IMAGE
+    displayName: macOS image
+    type: string
+    default: macOS-10.15
+    values:
+    - macOS-latest
+    - macOS-10.15
+    - macOS-10.14
+  - name: LINUX_IMAGE
+    displayName: Linux image
+    type: string
+    default: ubuntu-18.04
+    values:
+    - ubuntu-latest
+    - ubuntu-18.04
+    - ubuntu-16.04
+  - name: TEST_TIMEOUT
+    displayName: Timeout value for tests (in minutes)
+    type: number
+    default: 10
+  - name: ITERATIONS_TEST
+    displayName: Number of iterations to run tests
+    default: 10
+  - name: TEST_POOL
+    displayName: Test pool to use for running tests
+    default: test-pool-onv12-1
+    values:
+      - test-pool-onv12-1
+ 
+
+variables:
+  NRF_BLE_DRIVER_VERSION: '4.1.0'
+  NRF_BLE_CONNECTIVITY_VERSION: $(NRF_BLE_DRIVER_VERSION)
+  NRF_BLE_DRIVER_ARTIFACT_PREFIX: nrf-ble-driver-$(NRF_BLE_DRIVER_VERSION)
+  NRF_BLE_DRIVER_INSTALL_PREFIX: artifacts/$(NRF_BLE_DRIVER_ARTIFACT_PREFIX)
+  GITHUB_CONNECTION: 'waylandCI'
+  GITHUB_REPO: 'NordicSemiconductor/pc-ble-driver'
+  GITHUB_TAG: v$(NRF_BLE_DRIVER_VERSION)
+  VCPKG_REPOSITORY: 'https://github.com/Microsoft/vcpkg.git'
+  VCPKG_ROOT: '$(Agent.HomeDirectory)/vcpkg'
+  COMMON_VCPKG_PACKAGES: 'spdlog catch2 cli11 nlohmann-json asio crc32c bitsery'
+  SDV2_VERSION: 2.0.1
+  SDV3_VERSION: 3.1.0
+  SDV5_VERSION: 5.1.0
+  SDV6_VERSION: 6.1.1
+  
+jobs:
+- job: Build
+  strategy:
+    matrix:
+      Linux:
+        imageName: ${{ parameters.LINUX_IMAGE }}
+        architecture: 'x64'
+        cc_compiler_path: '/usr/bin/gcc-8'
+        cxx_compiler_path: '/usr/bin/g++-8'
+        vcpkg_triplet: 'x64-linux'
+      win32:
+        imageName: ${{ parameters.WINDOWS_IMAGE }}
+        architecture: 'x86'
+        generator_platform: 'Win32'
+        vcpkg_triplet: 'x86-windows'
+        vcvars_path: "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/vc/Auxiliary/build/vcvarsall.bat"
+      win64:
+        imageName: ${{ parameters.WINDOWS_IMAGE }}
+        architecture: 'x64'
+        generator_platform: 'Win32'
+        vcpkg_triplet: 'x64-windows'
+        vcvars_path: "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/vc/Auxiliary/build/vcvarsall.bat"
+      macOS:
+        imageName: ${{ parameters.MACOS_IMAGE }}
+        architecture: 'x64'
+        cc_compiler_path: '/usr/local/opt/llvm/bin/clang'
+        cxx_compiler_path: '/usr/local/opt/llvm/bin/clang++'
+        vcpkg_triplet: 'x64-osx'
+  pool:
+    vmImage: $(imageName)
+  steps:
+  # Windows
+  - script: |
+      pip3 install -r %BUILD_SOURCESDIRECTORY%\.azure-pipelines\requirements.txt
+      python %BUILD_SOURCESDIRECTORY%\.azure-pipelines\nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)\tcenv.bat
+      choco install ninja make
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Install build dependencies'
+  - script: |
+      @echo off
+      echo "VCPKG_ROOT is %VCPKG_ROOT%"
+      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT%
+      git -C %VCPKG_ROOT% checkout ${{ parameters.VCPKG_CHECKOUT }}
+      cd /d %VCPKG_ROOT%
+      bootstrap-vcpkg.bat
+      cd /d $(Build.SourcesDirectory)
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Install vcpkg'
+  - script: |
+      %VCPKG_ROOT%\vcpkg install $(COMMON_VCPKG_PACKAGES) --triplet $(vcpkg_triplet)
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Install pc-ble-driver dependencies'
+  - script: |
+      @echo off
+      call "$(vcvars_path)" $(architecture)
+      del "C:\ProgramData\chocolatey\bin\c++.exe"
+      del "C:\ProgramData\chocolatey\bin\g++.exe"
+      del "C:\ProgramData\chocolatey\bin\gcc.exe"
+      del "C:\Strawberry\c\bin\c++.exe"
+      del "C:\Strawberry\c\bin\g++.exe"
+      del "C:\Strawberry\c\bin\gcc.exe"
+      call $(Agent.BuildDirectory)/tcenv.bat
+      set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
+      echo Setting install directory to $(Build.ArtifactStagingDirectory)
+      echo Creating project files
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+
+      if %ERRORLEVEL% neq 0 (
+        echo Error generating project file
+        exit -1
+      )
+
+      echo Executing target compile_connectivity
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
+
+      if %ERRORLEVEL% neq 0 (
+        echo Error compiling connectivity
+        exit -1
+      )
+
+      echo Executing target install
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target install
+
+      if %ERRORLEVEL% neq 0 (
+        echo Error installing
+        exit -1
+      )
+    condition: contains(variables['imageName'], 'win')
+    displayName: '[Windows] Run cmake and build project'
+
+  # Ubuntu
+  - bash: |
+      sudo apt-get update
+      sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools libusb-1.0-0-dev libudev-dev
+      /usr/bin/python3 -m pip install -U pip
+      /usr/bin/python3 -m pip install nrfutil
+      /usr/bin/python3 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
+      cat $(Agent.BuildDirectory)/tcenv.sh
+      chmod a+x $(Agent.BuildDirectory)/tcenv.sh
+    condition: contains(variables['imageName'], 'ubuntu')
+    displayName: '[Linux] Install build dependencies'
+  - bash: |
+      git clone $(VCPKG_REPOSITORY) $VCPKG_ROOT
+      git -C $VCPKG_ROOT checkout ${{ parameters.VCPKG_CHECKOUT }}
+      $VCPKG_ROOT/bootstrap-vcpkg.sh
+      $VCPKG_ROOT/vcpkg install $(COMMON_VCPKG_PACKAGES) --triplet $(vcpkg_triplet)
+    condition: contains(variables['imageName'], 'ubuntu')
+    displayName: '[Linux] Install nrf-device-lib dependencies'
+  - bash: |
+      set -o errexit -o pipefail
+      export CC=$(cc_compiler_path)
+      export CXX=$(cxx_compiler_path)
+      source $(Agent.BuildDirectory)/tcenv.sh
+      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
+      /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
+      export TMP=$(Agent.TempDirectory)
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target install
+    condition: contains(variables['imageName'], 'ubuntu')
+    displayName: '[Linux/macOS] Build project'
+
+    # MacOS
+  - bash: |
+      set -o errexit -o pipefail
+      # Note that installing gcc@6 will not change `gcc`/`g++` on
+      # PATH, and those will still be Apple Clang.
+      brew install ninja llvm@9 gcc@9 libusb
+      ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
+      ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
+      python3 -m pip install -U pip
+      python3 -m pip install nrfutil certifi pycurl
+      python3 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
+      cat $(Agent.BuildDirectory)/tcenv.sh
+      chmod a+x $(Agent.BuildDirectory)/tcenv.sh
+    condition: contains(variables['imageName'], 'mac')
+    displayName: '[macOS] Install toolchain'
+  - bash: |
+      set -o errexit -o pipefail
+      git clone $(VCPKG_REPOSITORY) $VCPKG_ROOT
+      git -C $VCPKG_ROOT checkout ${{ parameters.VCPKG_CHECKOUT }}
+      CC=gcc-9 CXX=g++-9 $VCPKG_ROOT/bootstrap-vcpkg.sh
+      $VCPKG_ROOT/vcpkg install $(COMMON_VCPKG_PACKAGES) --triplet $(vcpkg_triplet)
+    condition: contains(variables['imageName'], 'mac')
+    displayName: '[macOS] Install nrf-device-lib dependencies'
+  - bash: |
+      set -o errexit -o pipefail
+      export CC=$(cc_compiler_path)
+      export CXX=$(cxx_compiler_path)
+      source $(Agent.BuildDirectory)/tcenv.sh
+      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/darwin
+      /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
+      export TMP=$(Agent.TempDirectory)
+      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target install
+    condition: contains(variables['imageName'], 'mac')
+    displayName: '[macOS] Build project'
+
+  # Publish artifacts (any platform)
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: $(Build.ArtifactStagingDirectory)
+      artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
+
+# Test jobs below this point
+- job: test_win86
+  displayName: 'Run Win32(x86) tests'
+  dependsOn: 'Build'
+  pool:
+    name: ${{ parameters.TEST_POOL }}
+    demands: Agent.OS -equals Windows_NT
+  variables:
+    TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'current'
+      artifact: 'pc-ble-driver-$(Agent.OS)-x86'
+  - script: |
+      mkdir %TEST_REPORT_DIR%
+
+      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+    continueOnError: true
+    failOnStderr: false
+    timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
+    displayName: 'Run Windows(x86) tests'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/*-result.xml'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Publish Windows(x86) tests'
+    condition: succeededOrFailed()
+
+- job: test_win64
+  displayName: 'Run Win32(x64) tests'
+  dependsOn: 'Build'
+  pool:
+    name: ${{ parameters.TEST_POOL }}
+    demands: Agent.OS -equals Windows_NT
+  variables:
+    TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'current'
+      artifact: 'pc-ble-driver-$(Agent.OS)-x64'
+  - script: |
+      mkdir %TEST_REPORT_DIR%
+
+      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
+    continueOnError: true
+    failOnStderr: false
+    timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
+    displayName: 'Run Windows(x64) tests'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/*-result.xml'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Publish Windows(x64) tests'
+    condition: succeededOrFailed()
+  
+- job: test_linux64
+  displayName: 'Run Linux(x64) tests'
+  dependsOn: 'Build'
+  pool:
+    name: ${{ parameters.TEST_POOL }}
+    demands: Agent.OS -equals Linux
+  variables:
+    TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'current'
+      artifact: 'pc-ble-driver-$(Agent.OS)-x64'
+  - script: |
+      mkdir $TEST_REPORT_DIR
+      chmod a+x $(Pipeline.Workspace)/bin/test*
+      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$LD_LIBRARY_PATH
+
+      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+    continueOnError: true
+    failOnStderr: false
+    timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
+    displayName: 'Run tests'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/*-result.xml'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Publish Linux(x64) tests'
+    condition: succeededOrFailed()
+
+- job: test_macos
+  displayName: 'Run macOS(x64) tests'
+  dependsOn: 'Build'
+  pool:
+    name: ${{ parameters.TEST_POOL }}
+    demands: Agent.OS -equals Darwin
+  variables:
+    TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'current'
+      artifact: 'pc-ble-driver-$(Agent.OS)-x64'
+  - script: |
+      mkdir $TEST_REPORT_DIR
+      chmod a+x $(Pipeline.Workspace)/bin/test*
+      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$LD_LIBRARY_PATH
+
+      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
+    continueOnError: true
+    failOnStderr: false
+    timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
+    displayName: 'Run macOS(x64) tests'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/*-result.xml'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Publish macOS(x64) tests'
+    condition: succeededOrFailed()

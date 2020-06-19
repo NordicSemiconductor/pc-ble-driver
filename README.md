@@ -225,11 +225,11 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Follow the install instructions.
 
-    Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    Set its installation path as `GNUARMEMB_TOOLCHAIN_PATH` in environment variables.
     For example:
 
     ```bash
-    $ set GCCARMEMB_TOOLCHAIN_PATH=c:\gccarmemb
+    $ set GNUARMEMB_TOOLCHAIN_PATH=c:\gccarmemb
     ```
 
 3. Install `Python` and `pip`, and then install `nrfutil`
@@ -281,7 +281,7 @@ The following steps are needed only if you want to compile your own `connectivit
 1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
-    * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    * Set its location as `GNUARMEMB_TOOLCHAIN_PATH` in environment variables.
 
 2. Install `Python` and `pip`, and then install `nrfutil`.
     ```bash
@@ -322,7 +322,7 @@ The following steps are needed only if you want to compile your own `connectivit
 1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
-    * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    * Set its location as `GNUARMEMB_TOOLCHAIN_PATH` in environment variables.
 
 2. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
@@ -420,7 +420,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
 Make sure the following environment variables are set:
 * `VCPKG_ROOT`
-* `GCCARMEMB_TOOLCHAIN_PATH`
+* `GNUARMEMB_TOOLCHAIN_PATH`
 
 Make sure the following paths have been added to PATH:
 * `VCPKG_ROOT`

@@ -104,6 +104,12 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+if(COMPILE_CONNECTIVITY)
+    set(SDK_HEX_FILES)
+    add_subdirectory(hex EXCLUDE_FROM_ALL)
+    nrf_create_compile_targets(SDK_HEX_FILES)
+endif()
+
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
     # Object library, from which both shared and static will be built
@@ -149,27 +155,48 @@ foreach(SD_API_VER ${SD_API_VERS})
     )
 
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(HEX_FILE_GLOB 
-        "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex"
-        "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
-    )
-    set(DFU_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.zip")
+    if(COMPILE_CONNECTIVITY)
+        set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(LICENSE_FILE_GLOB 
-        "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
-        "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
-    )
+        set(SOFTDEVICE_FILE_GLOB
+            "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
+            "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
+            "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
+        )
 
-    file(GLOB_RECURSE ${SD_API_VER}_HEX_FILES ${HEX_FILE_GLOB})
-    file(GLOB_RECURSE ${SD_API_VER}_DFU_FILES ${DFU_FILE_GLOB})
-    file(GLOB_RECURSE ${SD_API_VER}_LICENSE_FILES ${LICENSE_FILE_GLOB})
+        file(GLOB_RECURSE ${SD_API_VER}_SOFTDEVICE_FILES ${SOFTDEVICE_FILE_GLOB})
 
-    set(${SD_API_VER}_CONNECTIVITY_FILES )
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_HEX_FILES})
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_DFU_FILES})
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_LICENSE_FILES})
+        set(${SD_API_VER}_CONNECTIVITY_FILES "")
+        set(CURRENT_SD_FOUND FALSE)
+
+        foreach(ver ${SDK_HEX_FILES})
+            if(ver MATCHES "^_")
+                string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
+
+                if(NOT ${MATCHES})
+                    message(FATAL_ERROR "Was not able to match SD_API version ${ver}")
+                endif()
+
+                set(SD_API_EQUAL "SD_API_V${CMAKE_MATCH_1}")
+
+                if("${SD_API_EQUAL}" STREQUAL "${SD_API_VER}")
+                    set(CURRENT_SD_FOUND TRUE)
+                else()
+                    set(CURRENT_SD_FOUND FALSE)
+                endif()
+            endif()
+
+            if(CURRENT_SD_FOUND)
+                if (ver MATCHES "^\\|")
+                    string(SUBSTRING "${ver}" 1 -1 HEX)
+                    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${HEX})
+                endif()
+            endif()
+        endforeach()
+
+        list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
+    endif(COMPILE_CONNECTIVITY)
 
     if(WIN32)
         set_target_properties(
@@ -214,7 +241,6 @@ foreach(SD_API_VER ${SD_API_VERS})
             RESOURCE "${${SD_API_VER}_CONNECTIVITY_FILES}"
         )
     endif()
-
 endforeach(SD_API_VER)
 
 # Set common include directories
@@ -297,10 +323,6 @@ endif()
 # Add install target
 include(cmake/install-target.cmake)
 
-if(COMPILE_CONNECTIVITY)
-    add_subdirectory(hex EXCLUDE_FROM_ALL)
-endif()
-
 include (cmake/clang-dev-tools.cmake)
 
 # Create package
@@ -311,7 +333,6 @@ if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 else()
     set(ARCH_SUFFIX "x86_32")
 endif()
-
 
 if(APPLE)
     set(OS_SUFFIX "macos")
