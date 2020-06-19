@@ -452,12 +452,12 @@ uint32_t sd_ble_gap_scan_stop(adapter_t *adapter)
 
     const auto err_code = gap_encode_decode(adapter, encode_function, decode_function);
 
-    #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
     if (err_code == NRF_SUCCESS)
     {
         app_ble_gap_scan_data_unset(true);
     }
-    #endif
+#endif
 
     return err_code;
 }

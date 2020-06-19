@@ -103,8 +103,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
         switch (eventId)
         {
-            case BLE_GAP_EVT_CONNECTED:
-            {
+            case BLE_GAP_EVT_CONNECTED: {
                 const auto err_code = sd_ble_gap_rssi_start(c->unwrap(), gapEvent->conn_handle,
                                                             rssiThreshold, rssiSkipCount);
 
@@ -153,8 +152,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                     }
                 }
                 return true;
-            case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
-            {
+            case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: {
                 const auto err_code = sd_ble_gap_conn_param_update(
                     c->unwrap(), c->scratchpad.connection_handle,
                     &(gapEvent->params.conn_param_update_request.conn_params));
@@ -168,8 +166,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
             }
                 return true;
 
-            case BLE_GAP_EVT_RSSI_CHANGED:
-            {
+            case BLE_GAP_EVT_RSSI_CHANGED: {
                 centralRssiReportsCount++;
 
                 if (centralRssiReportsCount >= maxRssiReportsWanted && !centralRssiStop)
@@ -244,8 +241,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
     p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
         switch (eventId)
         {
-            case BLE_GAP_EVT_CONNECTED:
-            {
+            case BLE_GAP_EVT_CONNECTED: {
                 const auto err_code = sd_ble_gap_rssi_start(p->unwrap(), gapEvent->conn_handle,
                                                             rssiThreshold, rssiSkipCount);
 
@@ -260,8 +256,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                 }
             }
                 return true;
-            case BLE_GAP_EVT_DISCONNECTED:
-            {
+            case BLE_GAP_EVT_DISCONNECTED: {
                 // Use scratchpad defaults when advertising
                 get_logger()->debug(
                     "{} Disconnected, connection handle: {:x}. Starting advertising.", p->role(),
@@ -277,8 +272,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(rssi, [PCA10028][PCA10031][PCA10040][PCA1005
                     return true;
                 }
             }
-            case BLE_GAP_EVT_RSSI_CHANGED:
-            {
+            case BLE_GAP_EVT_RSSI_CHANGED: {
                 peripheralRssiReportsCount++;
 
                 if (peripheralRssiReportsCount >= maxRssiReportsWanted && !periperalRssiStop)

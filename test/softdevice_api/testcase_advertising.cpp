@@ -115,8 +115,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
-                case BLE_GAP_EVT_ADV_REPORT:
-                {
+                case BLE_GAP_EVT_ADV_REPORT: {
                     const auto advReport = gapEvent->params.adv_report;
 
                     if (testutil::findAdvName(advReport, peripheralAdvName))
@@ -206,8 +205,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             {
                 case BLE_GAP_EVT_TIMEOUT:
                     return false;
-                case BLE_GAP_EVT_SCAN_REQ_REPORT:
-                {
+                case BLE_GAP_EVT_SCAN_REQ_REPORT: {
                     const auto scanRequestReport = gapEvent->params.scan_req_report;
                     if (scanRequestReport.adv_handle != p->scratchpad.adv_handle)
                     {
@@ -235,8 +233,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_ADV_SET_TERMINATED:
-                {
+                case BLE_GAP_EVT_ADV_SET_TERMINATED: {
                     const auto setTerminated = gapEvent->params.adv_set_terminated;
 
                     if (setTerminated.adv_handle != p->scratchpad.adv_handle)

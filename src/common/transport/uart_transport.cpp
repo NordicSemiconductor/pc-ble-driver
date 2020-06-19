@@ -40,11 +40,11 @@
 #include "nrf_error.h"
 #include "uart_settings_boost.h"
 
+#include <deque>
 #include <functional>
 #include <mutex>
 #include <sstream>
 #include <system_error>
-#include <deque>
 
 #if defined(__APPLE__)
 #include <IOKit/serial/ioss.h>
@@ -54,7 +54,6 @@
 
 #include "uart_settings_boost.h"
 #include <asio.hpp>
-
 
 constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
 

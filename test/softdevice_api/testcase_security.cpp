@@ -109,8 +109,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
         c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
-                case BLE_GAP_EVT_CONNECTED:
-                {
+                case BLE_GAP_EVT_CONNECTED: {
                     const auto err_code = c->startAuthentication(true, true, false, true);
 
                     if (err_code != NRF_SUCCESS)
@@ -163,8 +162,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                         }
                     }
                     return true;
-                case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
-                {
+                case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: {
                     const auto err_code = sd_ble_gap_conn_param_update(
                         c->unwrap(), c->scratchpad.connection_handle,
                         &(gapEvent->params.conn_param_update_request.conn_params));
@@ -177,8 +175,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-                {
+                case BLE_GAP_EVT_SEC_PARAMS_REQUEST: {
                     ble_gap_sec_keyset_t keyset;
                     memset(&keyset, 0, sizeof(ble_gap_sec_keyset_t));
 
@@ -200,8 +197,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_PASSKEY_DISPLAY:
-                {
+                case BLE_GAP_EVT_PASSKEY_DISPLAY: {
                     size_t size = 0;
 
                     switch (p->scratchpad.key_type)
@@ -257,8 +253,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
         p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
             switch (eventId)
             {
-                case BLE_GAP_EVT_DISCONNECTED:
-                {
+                case BLE_GAP_EVT_DISCONNECTED: {
                     // Use scratchpad defaults when advertising
                     get_logger()->debug("{} Starting advertising.", p->role());
                     const auto err_code = p->startAdvertising();
@@ -273,8 +268,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(security, [PCA10028][PCA10031][PCA10040][PCA
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
                     return true;
-                case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-                {
+                case BLE_GAP_EVT_SEC_PARAMS_REQUEST: {
                     ble_gap_sec_keyset_t keyset;
                     std::memset(&keyset, 0, sizeof(keyset));
 

@@ -4,13 +4,11 @@
 #include "internal/log.h"
 #include "transport.h"
 
-
 #include <algorithm>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 #include <vector>
-
 
 class VirtualUart : public Transport
 {

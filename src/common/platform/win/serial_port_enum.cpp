@@ -38,7 +38,8 @@
  *
  *
  *
- * Portions of this code is from the node-serialport project: https://github.com/voodootikigod/node-serialport
+ * Portions of this code is from the node-serialport project:
+ https://github.com/voodootikigod/node-serialport
  *
  * The license that code is release under is:
  *
@@ -63,12 +64,12 @@
  *
  */
 
-
 #include <list>
 #include <string>
 
 #include "disphelper.h"
 #include "stdafx.h"
+
 #include "enumser.h"
 #include "jlinkid_reg_lookup.h"
 
@@ -103,45 +104,49 @@ std::list<SerialPortDesc> EnumSerialPorts()
     dhToggleExceptions(FALSE);
 
     dhGetObject(L"winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2", nullptr, &wmiSvc);
-    dhGetValue(L"%o", &colDevices, wmiSvc, L".ExecQuery(%S)", L"Select * from Win32_PnPEntity WHERE Name LIKE '%COM%'");
+    dhGetValue(L"%o", &colDevices, wmiSvc, L".ExecQuery(%S)",
+               L"Select * from Win32_PnPEntity WHERE Name LIKE '%COM%'");
 
-    FOR_EACH(objDevice, colDevices, NULL) {
-        char* name = nullptr;
-        char* pnpid = nullptr;
-        char* manu = nullptr;
-        char* match;
+    FOR_EACH(objDevice, colDevices, NULL)
+    {
+        char *name  = nullptr;
+        char *pnpid = nullptr;
+        char *manu  = nullptr;
+        char *match;
 
-        dhGetValue(L"%s", &name,  objDevice, L".Name");
+        dhGetValue(L"%s", &name, objDevice, L".Name");
         dhGetValue(L"%s", &pnpid, objDevice, L".PnPDeviceID");
 
-        if( name != nullptr && ((match = strstr( name, "(COM" )) != nullptr) ) { // look for "(COM23)"
+        if (name != nullptr && ((match = strstr(name, "(COM")) != nullptr))
+        { // look for "(COM23)"
             // 'Manufacturuer' can be null, so only get it if we need it
-            dhGetValue(L"%s", &manu, objDevice,  L".Manufacturer");
+            dhGetValue(L"%s", &manu, objDevice, L".Manufacturer");
 
-            if((strcmp("SEGGER", manu) == 0)
-                || (_stricmp("arm", manu) == 0)
-                || (_stricmp("mbed", manu) == 0))
+            if ((strcmp("SEGGER", manu) == 0) || (_stricmp("arm", manu) == 0) ||
+                (_stricmp("mbed", manu) == 0))
             {
-				char *next_token = NULL;
-                auto comname = strtok_s( match, "()", &next_token);
+                char *next_token          = NULL;
+                auto comname              = strtok_s(match, "()", &next_token);
                 SerialPortDesc resultItem = {};
-                resultItem.comName = comname;
-                resultItem.manufacturer = manu;
-                resultItem.pnpId = pnpid;
+                resultItem.comName        = comname;
+                resultItem.manufacturer   = manu;
+                resultItem.pnpId          = pnpid;
 
                 string jlinkId = portNameToJlinkId(string(comname));
-                if (jlinkId != "") {
+                if (jlinkId != "")
+                {
                     resultItem.serialNumber = jlinkId;
                 }
                 descs.push_back(resultItem);
             }
 
             dhFreeString(manu);
-          }
+        }
 
         dhFreeString(name);
         dhFreeString(pnpid);
-    } NEXT(objDevice);
+    }
+    NEXT(objDevice);
 
     SAFE_RELEASE(colDevices);
     SAFE_RELEASE(wmiSvc);
