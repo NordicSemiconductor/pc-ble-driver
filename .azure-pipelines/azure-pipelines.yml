@@ -251,7 +251,7 @@ jobs:
   displayName: 'Run Win32(x86) tests'
   dependsOn: 'Build'
   pool:
-    name: ${{ parameters.TEST_POOL }
+    name: ${{ parameters.TEST_POOL }}
     demands: Agent.OS -equals Windows_NT
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
@@ -288,7 +288,7 @@ jobs:
   displayName: 'Run Win32(x64) tests'
   dependsOn: 'Build'
   pool:
-    name: ${{ parameters.TEST_POOL }
+    name: ${{ parameters.TEST_POOL }}
     demands: Agent.OS -equals Windows_NT
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
@@ -325,7 +325,7 @@ jobs:
   displayName: 'Run Linux(x64) tests'
   dependsOn: 'Build'
   pool:
-    name: ${{ parameters.TEST_POOL }
+    name: ${{ parameters.TEST_POOL }}
     demands: Agent.OS -equals Linux
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
@@ -364,7 +364,7 @@ jobs:
   displayName: 'Run macOS(x64) tests'
   dependsOn: 'Build'
   pool:
-    name: ${{ parameters.TEST_POOL }
+    name: ${{ parameters.TEST_POOL }}
     demands: Agent.OS -equals Darwin
   variables:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)/tests
