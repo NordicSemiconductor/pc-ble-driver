@@ -52,48 +52,53 @@ function(setup_test)
         ${ARGN}
     )
 
-    set(softdevice_api_ver "${SETUP_TEST_SOFTDEVICE_API_VER}")
-    set(source_file "${SETUP_TEST_SOURCE_FILE}")
-    set(source_testcases "${SETUP_TEST_SOURCE_TESTCASES}")
-    set(test_list "${SETUP_TEST_TEST_LIST}")
+    set(SOFTDEVICE_API_VER "${SETUP_TEST_SOFTDEVICE_API_VER}")
+    set(SOURCE_FILE "${SETUP_TEST_SOURCE_FILE}")
+    set(SOURCE_TESTCASES "${SETUP_TEST_SOURCE_TESTCASES}")
+    set(TEST_LIST "${SETUP_TEST_TEST_LIST}")
 
-    file(GLOB test_util_src "util/src/*.cpp")
+    set(TEST_UTIL_SRC
+        util/src/logging.cpp
+        util/src/test_environment.cpp
+        util/src/test_util.cpp
+        util/src/test_util_adapter_wrapper.cpp
+        util/src/test_util_conversion.cpp
+        util/src/test_util_role.cpp
+    )
 
-    #message(STATUS "softdevice_api_ver:${softdevice_api_ver} source_file:${source_file} source_testcases:${source_testcases} test_list:${test_list}")
-
-    get_filename_component(test_name ${source_file} NAME_WE)
-    set(test_name "${test_name}_sd_api_v${softdevice_api_ver}")
+    get_filename_component(TEST_NAME ${SOURCE_FILE} NAME_WE)
+    set(TEST_NAME "${TEST_NAME}_sd_api_v${SOFTDEVICE_API_VER}")
 
     # Build executable
-    add_executable(${test_name} ${source_file} ${source_testcases} ${test_util_src})
+    add_executable(${TEST_NAME} ${SOURCE_FILE} ${SOURCE_TESTCASES} ${TEST_UTIL_SRC})
 
-    target_compile_definitions(${test_name} PRIVATE -DNRF_SD_BLE_API=${softdevice_api_ver})
-    target_include_directories(${test_name} 
+    target_compile_definitions(${TEST_NAME} PRIVATE -DNRF_SD_BLE_API=${SOFTDEVICE_API_VER})
+    target_include_directories(${TEST_NAME} 
         SYSTEM PRIVATE 
-        ../include/sd_api_v${softdevice_api_ver}
+        ../include/sd_api_v${SOFTDEVICE_API_VER}
         ../include/common/sdk_compat
         ../include/common
         ../include/common/internal/transport
         ../include/common/config
     )
 
-    target_include_directories(${test_name} SYSTEM PRIVATE util/include)
+    target_include_directories(${TEST_NAME} SYSTEM PRIVATE util/include)
 
-    target_link_libraries(${test_name} PRIVATE 
-        nrf_ble_driver_sd_api_v${softdevice_api_ver}_static
+    target_link_libraries(${TEST_NAME} PRIVATE 
+        nrf_ble_driver_sd_api_v${SOFTDEVICE_API_VER}_static
         Threads::Threads
         spdlog::spdlog
         Catch2::Catch2
     )
 
-    if(NOT ${test_name} STREQUAL "test_uart_boost_v2")
-        set(${test_list} ${${test_list}} ${test_name} PARENT_SCOPE)
+    if(NOT ${TEST_NAME} STREQUAL "test_uart_boost_v2")
+        set(${TEST_LIST} ${${TEST_LIST}} ${TEST_NAME} PARENT_SCOPE)
     else()
-        message(STATUS "${test_name} NOT ADDED to ${test_list} since the test is a serial port loopback test.")
+        message(STATUS "${TEST_NAME} NOT ADDED to ${TEST_LIST} since the test is a serial port loopback test.")
     endif()
 
     install(
-        TARGETS ${test_name}
+        TARGETS ${TEST_NAME}
         EXPORT ${PROJECT_NAME}-targets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -122,13 +127,23 @@ if(TEST_TRANSPORT)
 endif()
 
 if(TEST_SOFTDEVICE_API)
-    file(GLOB tests_src "softdevice_api/test.cpp")
-    file(GLOB testcases_src "softdevice_api/testcase_*.cpp")
+    set(TESTS_SRC softdevice_api/test.cpp)
+    set(TESTCASES_SRC 
+        softdevice_api/testcase_advertising.cpp
+        softdevice_api/testcase_driver_open_close.cpp
+        softdevice_api/testcase_issue_128bit_uuid.cpp
+        softdevice_api/testcase_issue_gh_112.cpp
+        softdevice_api/testcase_issue_stuck_in_scan_mode.cpp
+        softdevice_api/testcase_phy_update.cpp
+        softdevice_api/testcase_rssi.cpp
+        softdevice_api/testcase_security.cpp
+        softdevice_api/testcase_util.cpp
+    )
 
     foreach(SD_API_VER ${SD_API_VER_NUMS})
-        foreach(test_src ${tests_src})
-            setup_test(SOURCE_FILE ${test_src} SOURCE_TESTCASES ${testcases_src} SOFTDEVICE_API_VER ${SD_API_VER} TEST_LIST TESTS_SOFTDEVICE_V${SD_API_VER})
-        endforeach(test_src)
+        foreach(TEST_SRC ${TESTS_SRC})
+            setup_test(SOURCE_FILE ${TEST_SRC} SOURCE_TESTCASES ${TESTCASES_SRC} SOFTDEVICE_API_VER ${SD_API_VER} TEST_LIST TESTS_SOFTDEVICE_V${SD_API_VER})
+        endforeach()
     endforeach(SD_API_VER)
 
     message(STATUS "Compiled tests are installed in directory \"${CMAKE_INSTALL_BINDIR}\"")
