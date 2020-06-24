@@ -63,11 +63,17 @@ parameters:
     default: test-pool-onv12-1
     values:
       - test-pool-onv12-1
- 
+  - name: CONNECTIVITY_FIRMWARE_VERSION
+    displayName: Set connectivity firmware version
+    default: 0.0.0
+  - name: BLE_DRIVER_VERSION
+    displayName: Set BLE driver version
+    default: 0.0.0
+
 
 variables:
-  NRF_BLE_DRIVER_VERSION: '4.1.0'
-  NRF_BLE_CONNECTIVITY_VERSION: $(NRF_BLE_DRIVER_VERSION)
+  NRF_BLE_DRIVER_VERSION: ${{ parameters.BLE_DRIVER_VERSION }}
+  NRF_BLE_CONNECTIVITY_VERSION: ${{ parameters.CONNECTIVITY_FIRMWARE_VERSION }}
   NRF_BLE_DRIVER_ARTIFACT_PREFIX: nrf-ble-driver-$(NRF_BLE_DRIVER_VERSION)
   NRF_BLE_DRIVER_INSTALL_PREFIX: artifacts/$(NRF_BLE_DRIVER_ARTIFACT_PREFIX)
   GITHUB_CONNECTION: 'waylandCI'
