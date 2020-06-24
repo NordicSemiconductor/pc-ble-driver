@@ -153,7 +153,6 @@ jobs:
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
       echo Creating project files
       
-      # CPack does not normalize paths to /, do it manually here
       set STAGING_DIR=$(Build.ArtifactStagingDirectory)
       set STAGING_DIR=%STAGING_DIR:\=/%
       cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=%STAGING_DIR%
@@ -179,7 +178,7 @@ jobs:
         exit -1
       )
 
-      rmdir /s /q $(Build.ArtifactStagingDirectory)/_*
+      rmdir /s /q $(Build.ArtifactStagingDirectory)\_*
       
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
