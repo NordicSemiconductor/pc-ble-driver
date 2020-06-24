@@ -168,6 +168,9 @@ jobs:
         echo Error packaging
         exit -1
       )
+
+      rmdir /s /q $(Build.ArtifactStagingDirectory)/_*
+      
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
 
@@ -200,6 +203,7 @@ jobs:
       cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
+      rm -rf $(Build.ArtifactStagingDirectory)/_*
     condition: contains(variables['imageName'], 'ubuntu')
     displayName: '[Linux/macOS] Build project'
 
@@ -237,6 +241,7 @@ jobs:
       cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
+      rm -rf $(Build.ArtifactStagingDirectory)/_*
     condition: contains(variables['imageName'], 'mac')
     displayName: '[macOS] Build project'
 
