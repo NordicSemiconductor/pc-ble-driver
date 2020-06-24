@@ -90,12 +90,6 @@ set(LIB_NEWER_SDK_API_COMMON_C_SRC_FILES
     src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
 )
 
-foreach(SD_API_VER ${SD_API_VERS})
-    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_C_SRC_FILES "src/${SD_API_VER_L}/sdk/*.c")
-    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_CPP_SRC_FILES "src/${SD_API_VER_L}/*.cpp")
-endforeach(SD_API_VER)
-
 # Set C, CPP and platform source file groups and properties
 foreach(SD_API_VER ${SD_API_VERS})
     set(LIB_${SD_API_VER}_C_SRC_FILES
