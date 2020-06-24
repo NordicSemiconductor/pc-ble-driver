@@ -146,7 +146,7 @@ jobs:
       set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
       echo Creating project files
-      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
 
       if %ERRORLEVEL% neq 0 (
         echo Error generating project file
@@ -161,11 +161,11 @@ jobs:
         exit -1
       )
 
-      echo Executing target install
-      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target install
+      echo Executing target package
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
 
       if %ERRORLEVEL% neq 0 (
-        echo Error installing
+        echo Error packaging
         exit -1
       )
     condition: contains(variables['imageName'], 'win')
@@ -197,9 +197,9 @@ jobs:
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
-      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
-      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target install
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
     condition: contains(variables['imageName'], 'ubuntu')
     displayName: '[Linux/macOS] Build project'
 
@@ -234,9 +234,9 @@ jobs:
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/darwin
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
-      cmake -H. -B_build -GNinja -DCMAKE_INSTALL_PREFIX=$(Build.ArtifactStagingDirectory) -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION)
+      cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
-      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target install
+      cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
     condition: contains(variables['imageName'], 'mac')
     displayName: '[macOS] Build project'
 
