@@ -148,3 +148,30 @@ if(TEST_SOFTDEVICE_API)
 
     message(STATUS "Compiled tests are installed in directory \"${CMAKE_INSTALL_BINDIR}\"")
 endif()
+
+
+if(WIN32)
+    string(REPLACE "\\" "/" VCPKG_ROOT_FWD $ENV{VCPKG_ROOT})
+    if("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" MATCHES "x64")
+        set(VCPKG_TRIPLET "x64-windows")
+    elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" MATCHES "X86")
+        set(VCPKG_TRIPLET "x86-windows")
+    else()
+        message(WARNING "Could not find generator platform on Windows. Defaulting to x86. Was: ${CMAKE_GENERATOR_PLATFORM}")
+        set(VCPKG_TRIPLET "x86-windows")
+    endif()
+
+    set(BINARY_SOURCE_PATH "${VCPKG_ROOT_FWD}/installed/${VCPKG_TRIPLET}")
+
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+        set(BINARY_SOURCE_PATH "${BINARY_SOURCE_PATH}/debug/bin")
+    else()
+        set(BINARY_SOURCE_PATH "${BINARY_SOURCE_PATH}/bin")
+    endif()
+
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+        install(FILES "${BINARY_SOURCE_PATH}/fmtd.dll" DESTINATION bin)
+    else()
+        install(FILES "${BINARY_SOURCE_PATH}/fmt.dll" DESTINATION bin)
+    endif()
+endif()
