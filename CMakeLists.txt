@@ -28,6 +28,7 @@ project(
 )
 
 include(cmake/nrf-ble-driver.cmake)
+include(cmake/softdevice-file-list.cmake)
 
 include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
@@ -36,28 +37,58 @@ if(IS_BIG_ENDIAN)
 endif()
 
 # Common source files
-file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")
-file(GLOB LIB_BASE_CPP_SRC_FILES "src/common/*.cpp")
+set(LIB_BASE_CPP_SRC_FILES 
+    src/common/adapter_internal.cpp
+    src/common/app_ble_gap.cpp
+    src/common/ble_common.cpp
+    src/common/sd_rpc_impl.cpp
+)
 
-file(GLOB LIB_TRANSPORT_C_SRC_FILES "src/common/transport/*.c")
-file(GLOB LIB_TRANSPORT_CPP_SRC_FILES "src/common/transport/*.cpp")
+set(LIB_TRANSPORT_CPP_SRC_FILES 
+    src/common/transport/h5.cpp
+    src/common/transport/h5_transport.cpp
+    src/common/transport/serialization_transport.cpp
+    src/common/transport/slip.cpp
+    src/common/transport/transport.cpp
+    src/common/transport/uart_settings.cpp
+    src/common/transport/uart_settings_boost.cpp
+    src/common/transport/uart_transport.cpp
+)
 
 if(WIN32)
-    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/common/platform/win/*.c")
-    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/win/*.cpp")
+    set(LIB_PLATFORM_C_SRC_FILES
+        src/common/platform/win/disphelper.c
+    )
+
+    set(LIB_PLATFORM_CPP_SRC_FILES
+        src/common/platform/win/enumser.cpp
+        src/common/platform/win/jlinkid_reg_lookup.cpp
+        src/common/platform/win/serial_port_enum.cpp
+    )
 elseif(APPLE)
-    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/common/platform/macos_osx/*.c")
-    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/macos_osx/*.cpp")
+    set(LIB_PLATFORM_CPP_SRC_FILES 
+        src/common/platform/macos_osx/serial_port_enum.cpp
+    )
 else()
     # Assume Linux
-    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/common/platform/linux/*.c")
-    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/linux/*.cpp")
+    set(LIB_PLATFORM_CPP_SRC_FILES 
+        src/common/platform/linux/serial_port_enum.cpp
+    )
 endif()
 
 # SDK source files, different per API version
 
 # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
-file(GLOB_RECURSE LIB_NEWER_SDK_API_COMMON_C_SRC_FILES "src/sd_api_common/sdk/*.c")
+set(LIB_NEWER_SDK_API_COMMON_C_SRC_FILES
+    src/sd_api_common/sdk/components/serialization/common/ble_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/cond_field_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_gap_struct_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_gattc_struct_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_gatts_struct_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_gatt_struct_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_l2cap_struct_serialization.c
+    src/sd_api_common/sdk/components/serialization/common/struct_ser/ble/ble_struct_serialization.c
+)
 
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
@@ -67,9 +98,8 @@ endforeach(SD_API_VER)
 
 # Set C, CPP and platform source file groups and properties
 foreach(SD_API_VER ${SD_API_VERS})
-    set(LIB_${SD_API_VER}_C_SRC_FILES ${LIB_BASE_C_SRC_FILES}
+    set(LIB_${SD_API_VER}_C_SRC_FILES
                         ${LIB_SDK_${SD_API_VER}_C_SRC_FILES}
-                        ${LIB_TRANSPORT_C_SRC_FILES}
     )
 
     if(SD_API_VER STRGREATER "SD_API_V2")
