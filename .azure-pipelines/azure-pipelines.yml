@@ -152,7 +152,7 @@ jobs:
       set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
       echo Creating project files
-      cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
+      cmake -H. -B_build -GNinja -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY="$(Build.ArtifactStagingDirectory)"
 
       if %ERRORLEVEL% neq 0 (
         echo Error generating project file
