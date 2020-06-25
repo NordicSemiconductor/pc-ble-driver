@@ -179,7 +179,7 @@ jobs:
       )
 
       echo Deleting unnecessary directories from artifact directory
-      rmdir /s /q $(Build.ArtifactStagingDirectory)\_*
+      echo rmdir /s /q $(Build.ArtifactStagingDirectory)\_*
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
 
