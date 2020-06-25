@@ -109,14 +109,14 @@ jobs:
         generator_platform: 'Win32'
         vcpkg_triplet: 'x64-windows'
         vcvars_path: "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/vc/Auxiliary/build/vcvarsall.bat"
-        extract_dir: 'nrf-ble-driver-${{ parameters.CONNECTIVITY_VERSION }}-win_x86_64'
+        extract_dir: 'nrf-ble-driver-${{ parameters.BLE_DRIVER_VERSION }}-win_x86_64'
       macOS:
         imageName: ${{ parameters.MACOS_IMAGE }}
         architecture: 'x64'
         cc_compiler_path: '/usr/local/opt/llvm/bin/clang'
         cxx_compiler_path: '/usr/local/opt/llvm/bin/clang++'
         vcpkg_triplet: 'x64-osx'
-        extract_dir: 'nrf-ble-driver-${{ parameters.CONNECTIVITY_VERSION }}-win_x86_32'
+        extract_dir: 'nrf-ble-driver-${{ parameters.BLE_DRIVER_VERSION }}-win_x86_32'
   pool:
     vmImage: $(imageName)
   steps:
