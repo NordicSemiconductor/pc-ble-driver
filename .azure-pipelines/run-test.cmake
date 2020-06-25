@@ -1,4 +1,4 @@
-find_program(NRFC "nrfc" HINTS "C:/")
+find_program(NRFC "nrfc" HINTS "C:/opt/nrf-device-lib/bin" "/opt/nrf-device-lib/bin")
 if(NOT NRFC)
     message(FATAL_ERROR "nrfc not found, tests will not be ran.")
 endif()
@@ -73,6 +73,8 @@ execute_process(
 if(NOT RESULT EQUAL 0)
     message(FATAL_ERROR "Result of running nrfc is ${RESULT}")
 endif()
+
+message(STATUS "Output from nrfc:\"${DEVICE_LIST_CONTENT}\"")
 
 string(REGEX REPLACE ";" "\\\\;" DEVICE_LIST_CONTENT "${DEVICE_LIST_CONTENT}")
 string(REGEX REPLACE "\n" ";" DEVICE_LIST_CONTENT "${DEVICE_LIST_CONTENT}")
