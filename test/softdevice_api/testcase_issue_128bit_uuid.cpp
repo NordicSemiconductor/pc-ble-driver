@@ -63,37 +63,50 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
-    // ff4421cb-6797-449c-8f32-a407367ec041
-    // constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE = {{0x41, 0xc0, 0x7e, 0x36, 0x07, 0xa4,
-    // 0x32,
-    //                                                      0x8f, 0x9c, 0x44, 0x97, 0x67, 0xcb,
-    //                                                      0x21, 0x44, 0xff}};
+    // Service #1
+    constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE_1 = {{0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+                                                           0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00,
+                                                           0x00, 0xf0}};
 
-    // f001f000-dead-beef-cafe-deacc0de1234
-    constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE = {{0x41, 0xc0, 0x7e, 0x36, 0xad, 0xde, 0xfe,
-                                                         0xca, 0xef, 0xbe, 0xad, 0xde, 0x02, 0xf0,
-                                                         0x01, 0xf0}};
+    constexpr uint16_t CUSTOM_SERVICE_UUID_1 = 0xf000;
 
-    // 8766a864-98c5-4918-a080-7cf731b74bc2
-    // constexpr ble_uuid128_t CUSTOM_CHARACTERISTIC_UUID_BASE_1 = {{0xc2, 0x4b, 0xb7, 0x31, 0xf7,
-    // 0x7c,
-    //                                                             0x80, 0xa0, 0x18, 0x49, 0xc5,
-    //                                                             0x98, 0x64, 0xa8, 0x66, 0x87}};
+    // Service #2
+    constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE_2 = {{0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+                                                           0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00,
+                                                           0x01, 0xf0}};
 
-    // f002f000-dead-beef-cafe-deacc0de1234
-    constexpr ble_uuid128_t CUSTOM_CHARACTERISTIC_UUID_BASE_1 = {
-        {0xc2, 0x4b, 0xb7, 0x31, 0xf7, 0x7c, 0x80, 0xa0, 0x18, 0x49, 0xc5, 0x98, 0x64, 0xa8, 0x66,
-         0x87}};
+    constexpr uint16_t CUSTOM_SERVICE_UUID_2 = 0xf000;
 
-    constexpr uint16_t CUSTOM_SERVICE_UUID      = 0x1400;
-    constexpr uint16_t CUSTOM_VALUE_CHAR_UUID_1 = 0x1401;
-    constexpr uint16_t CUSTOM_VALUE_CHAR_UUID_2 = 0x1401;
-    constexpr uint16_t BLE_UUID_CCCD            = 0x2902;
+    constexpr ble_uuid128_t CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_1 = {
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x01,
+         0xf0}};
+    constexpr uint16_t CUSTOM_SERVICE_2_VALUE_CHAR_UUID_1 = 0xf001;
 
-    // 57e62e72-4028-45c5-b125-88604efeb3ec
-    constexpr ble_uuid128_t CUSTOM_CHARACTERISTIC_UUID_BASE_2 = {
-        {0xc2, 0x4b, 0xb7, 0x31, 0xf7, 0x7c, 0x80, 0xa0, 0x18, 0x49, 0xc5, 0x98, 0x64, 0xa8, 0x66,
-         0x87}};
+    constexpr ble_uuid128_t CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_2 = {
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x01,
+         0xf0}};
+    constexpr uint16_t CUSTOM_SERVICE_2_VALUE_CHAR_UUID_2 = 0xf002;
+
+    // Service #3
+    constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE_3 = {{0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+                                                           0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00,
+                                                           0x02, 0xf0}};
+
+    constexpr uint16_t CUSTOM_SERVICE_UUID_3 = 0xf000;
+
+    constexpr ble_uuid128_t CUSTOM_SERVICE_3_CHARACTERISTIC_UUID_BASE_1 = {
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x02,
+         0xf0}};
+
+    constexpr uint16_t CUSTOM_SERVICE_3_VALUE_CHAR_UUID_1 = 0xf001;
+
+    constexpr ble_uuid128_t CUSTOM_SERVICE_3_CHARACTERISTIC_UUID_BASE_2 = {
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x02,
+         0xf0}};
+    constexpr uint16_t CUSTOM_SERVICE_3_VALUE_CHAR_UUID_2 = 0xf001;
+
+    // CCCD
+    constexpr uint16_t BLE_UUID_CCCD = 0x2902;
 
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an
@@ -106,8 +119,14 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
 
     // 128-bit UUID needed by lambdas
     uint8_t p_service_uuid_type;
-    uint8_t p_characteristic_uuid_type_1;
-    uint8_t p_characteristic_uuid_type_2;
+
+    uint8_t p_service_2_uuid_type;
+    uint8_t p_service_2_characteristic_uuid_type_1;
+    uint8_t p_service_2_characteristic_uuid_type_2;
+
+    uint8_t p_service_3_uuid_type;
+    uint8_t p_service_3_characteristic_uuid_type_1;
+    uint8_t p_service_3_characteristic_uuid_type_2;
 
     uint8_t c_service_uuid_type;
 
@@ -123,59 +142,193 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
         if (err_code != NRF_SUCCESS)
             return err_code;
 
-        // Setup service, use service UUID specified in scratchpad.target_service
+        // Setup service #1
         err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
                                             &(p->scratchpad.target_service),
                                             &(p->scratchpad.service_handle));
         if (err_code != NRF_SUCCESS)
             return err_code;
 
-        // Setup characteristic, use characteristic UUID specified in
-        // scratchpad.target_characteristic
-        ble_gatts_char_md_t char_md;
-        ble_gatts_attr_md_t cccd_md;
-        ble_gatts_attr_t attr_char_value;
-        ble_gatts_attr_md_t attr_md;
+        // Setup service #2 - getting invalid param
+        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_SECONDARY,
+                                            &(p->scratchpad.target_service_2),
+                                            &(p->scratchpad.service_handle_2));
+        if (err_code != NRF_SUCCESS)
+            return err_code;
 
-        memset(&cccd_md, 0, sizeof(cccd_md));
+        ble_gatts_char_md_t service_2_char_md_1{0};
+        ble_gatts_attr_md_t service_2_cccd_md_1{0};
+        ble_gatts_attr_t service_2_attr_char_value_1{0};
+        ble_gatts_attr_md_t service_2_attr_md_1{0};
 
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
-        cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+        ble_gatts_char_md_t service_2_char_md_2{0};
+        ble_gatts_attr_md_t service_2_cccd_md_2{0};
+        ble_gatts_attr_t service_2_attr_char_value_2{0};
+        ble_gatts_attr_md_t service_2_attr_md_2{0};
 
-        memset(&char_md, 0, sizeof(char_md));
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_cccd_md_1.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_cccd_md_1.write_perm);
+        service_2_cccd_md_1.vloc = BLE_GATTS_VLOC_STACK;
 
-        char_md.char_props.read          = 1;
-        char_md.char_props.notify        = 1;
-        char_md.char_props.write         = 1;
-        char_md.char_props.write_wo_resp = 1;
-        char_md.p_char_user_desc         = nullptr;
-        char_md.p_char_pf                = nullptr;
-        char_md.p_user_desc_md           = nullptr;
-        char_md.p_cccd_md                = &cccd_md;
-        char_md.p_sccd_md                = nullptr;
+        service_2_char_md_1.char_props.read          = 1;
+        service_2_char_md_1.char_props.notify        = 1;
+        service_2_char_md_1.char_props.write         = 1;
+        service_2_char_md_1.char_props.write_wo_resp = 1;
+        service_2_char_md_1.p_char_user_desc         = nullptr;
+        service_2_char_md_1.p_char_pf                = nullptr;
+        service_2_char_md_1.p_user_desc_md           = nullptr;
+        service_2_char_md_1.p_cccd_md                = &service_2_cccd_md_1;
+        service_2_char_md_1.p_sccd_md                = nullptr;
 
-        memset(&attr_md, 0, sizeof(attr_md));
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_attr_md_1.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_attr_md_1.write_perm);
+        service_2_attr_md_1.vloc    = BLE_GATTS_VLOC_STACK;
+        service_2_attr_md_1.rd_auth = 0;
+        service_2_attr_md_1.wr_auth = 0;
+        service_2_attr_md_1.vlen    = 1;
 
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
-        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
-        attr_md.vloc    = BLE_GATTS_VLOC_STACK;
-        attr_md.rd_auth = 0;
-        attr_md.wr_auth = 0;
-        attr_md.vlen    = 1;
+        service_2_attr_char_value_1.p_uuid    = &(p->scratchpad.target_characteristic);
+        service_2_attr_char_value_1.p_attr_md = &service_2_attr_md_1;
+        service_2_attr_char_value_1.init_len =
+            static_cast<uint16_t>(initialCharacteristicValue.size());
+        service_2_attr_char_value_1.init_offs = 0;
+        service_2_attr_char_value_1.max_len   = characteristicValueMaxLength;
+        service_2_attr_char_value_1.p_value =
+            const_cast<uint8_t *>(initialCharacteristicValue.data());
 
-        memset(&attr_char_value, 0, sizeof(attr_char_value));
+        auto ret = sd_ble_gatts_characteristic_add(
+            p->unwrap(), p->scratchpad.service_handle_2, &service_2_char_md_1,
+            &service_2_attr_char_value_1, &(p->scratchpad.gatts_characteristic_handle));
 
-        attr_char_value.p_uuid    = &(p->scratchpad.target_characteristic);
-        attr_char_value.p_attr_md = &attr_md;
-        attr_char_value.init_len  = static_cast<uint16_t>(initialCharacteristicValue.size());
-        attr_char_value.init_offs = 0;
-        attr_char_value.max_len   = characteristicValueMaxLength;
-        attr_char_value.p_value   = const_cast<uint8_t *>(initialCharacteristicValue.data());
+        if (ret != NRF_SUCCESS)
+        {
+            return ret;
+        }
 
-        return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle, &char_md,
-                                               &attr_char_value,
-                                               &(p->scratchpad.gatts_characteristic_handle));
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_cccd_md_2.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_cccd_md_2.write_perm);
+        service_2_cccd_md_2.vloc = BLE_GATTS_VLOC_STACK;
+
+        service_2_char_md_2.char_props.read          = 1;
+        service_2_char_md_2.char_props.notify        = 1;
+        service_2_char_md_2.char_props.write         = 1;
+        service_2_char_md_2.char_props.write_wo_resp = 1;
+        service_2_char_md_2.p_char_user_desc         = nullptr;
+        service_2_char_md_2.p_char_pf                = nullptr;
+        service_2_char_md_2.p_user_desc_md           = nullptr;
+        service_2_char_md_2.p_cccd_md                = &service_2_cccd_md_1;
+        service_2_char_md_2.p_sccd_md                = nullptr;
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_attr_md_2.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_attr_md_2.write_perm);
+        service_2_attr_md_2.vloc    = BLE_GATTS_VLOC_STACK;
+        service_2_attr_md_2.rd_auth = 0;
+        service_2_attr_md_2.wr_auth = 0;
+        service_2_attr_md_2.vlen    = 1;
+
+        service_2_attr_char_value_2.p_uuid    = &(p->scratchpad.target_characteristic_2);
+        service_2_attr_char_value_2.p_attr_md = &service_2_attr_md_2;
+        service_2_attr_char_value_2.init_len =
+            static_cast<uint16_t>(initialCharacteristicValue.size());
+        service_2_attr_char_value_2.init_offs = 0;
+        service_2_attr_char_value_2.max_len   = characteristicValueMaxLength;
+        service_2_attr_char_value_2.p_value =
+            const_cast<uint8_t *>(initialCharacteristicValue.data());
+
+        ret = sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle_2,
+                                              &service_2_char_md_2, &service_2_attr_char_value_2,
+                                              &(p->scratchpad.gatts_characteristic_handle_2));
+
+        if (ret != NRF_SUCCESS)
+        {
+            return ret;
+        }
+
+        // Setup service #3
+        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_SECONDARY,
+                                            &(p->scratchpad.target_service_3),
+                                            &(p->scratchpad.service_handle_3));
+
+        ble_gatts_char_md_t service_3_char_md_1{0};
+        ble_gatts_attr_md_t service_3_cccd_md_1{0};
+        ble_gatts_attr_t service_3_attr_char_value_1{0};
+        ble_gatts_attr_md_t service_3_attr_md_1{0};
+
+        ble_gatts_char_md_t service_3_char_md_2{0};
+        ble_gatts_attr_md_t service_3_cccd_md_2{0};
+        ble_gatts_attr_t service_3_attr_char_value_2{0};
+        ble_gatts_attr_md_t service_3_attr_md_2{0};
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_1.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_1.write_perm);
+        service_3_cccd_md_1.vloc = BLE_GATTS_VLOC_STACK;
+
+        service_3_char_md_1.char_props.read          = 1;
+        service_3_char_md_1.char_props.notify        = 1;
+        service_3_char_md_1.char_props.write         = 1;
+        service_3_char_md_1.char_props.write_wo_resp = 1;
+        service_3_char_md_1.p_char_user_desc         = nullptr;
+        service_3_char_md_1.p_char_pf                = nullptr;
+        service_3_char_md_1.p_user_desc_md           = nullptr;
+        service_3_char_md_1.p_cccd_md                = &service_3_cccd_md_1;
+        service_3_char_md_1.p_sccd_md                = nullptr;
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_attr_md_1.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_attr_md_1.write_perm);
+        service_3_attr_md_1.vloc    = BLE_GATTS_VLOC_STACK;
+        service_3_attr_md_1.rd_auth = 0;
+        service_3_attr_md_1.wr_auth = 0;
+        service_3_attr_md_1.vlen    = 1;
+
+        service_3_attr_char_value_1.p_uuid    = &(p->scratchpad.target_characteristic_3);
+        service_3_attr_char_value_1.p_attr_md = &service_3_attr_md_1;
+        service_3_attr_char_value_1.init_len =
+            static_cast<uint16_t>(initialCharacteristicValue.size());
+        service_3_attr_char_value_1.init_offs = 0;
+        service_3_attr_char_value_1.max_len   = characteristicValueMaxLength;
+        service_3_attr_char_value_1.p_value =
+            const_cast<uint8_t *>(initialCharacteristicValue.data());
+
+        ret = sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle_3,
+                                              &service_3_char_md_1, &service_3_attr_char_value_1,
+                                              &(p->scratchpad.gatts_characteristic_handle_3));
+
+        if (ret != NRF_SUCCESS)
+            return ret;
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_2.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_2.write_perm);
+        service_3_cccd_md_2.vloc = BLE_GATTS_VLOC_STACK;
+
+        service_3_char_md_2.char_props.read          = 1;
+        service_3_char_md_2.char_props.notify        = 1;
+        service_3_char_md_2.char_props.write         = 1;
+        service_3_char_md_2.char_props.write_wo_resp = 1;
+        service_3_char_md_2.p_char_user_desc         = nullptr;
+        service_3_char_md_2.p_char_pf                = nullptr;
+        service_3_char_md_2.p_user_desc_md           = nullptr;
+        service_3_char_md_2.p_cccd_md                = &service_3_cccd_md_1;
+        service_3_char_md_2.p_sccd_md                = nullptr;
+
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_attr_md_2.read_perm);
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_attr_md_2.write_perm);
+        service_3_attr_md_2.vloc    = BLE_GATTS_VLOC_STACK;
+        service_3_attr_md_2.rd_auth = 0;
+        service_3_attr_md_2.wr_auth = 0;
+        service_3_attr_md_2.vlen    = 1;
+
+        service_3_attr_char_value_2.p_uuid    = &(p->scratchpad.target_characteristic_4);
+        service_3_attr_char_value_2.p_attr_md = &service_3_attr_md_2;
+        service_3_attr_char_value_2.init_len =
+            static_cast<uint16_t>(initialCharacteristicValue.size());
+        service_3_attr_char_value_2.init_offs = 0;
+        service_3_attr_char_value_2.max_len   = characteristicValueMaxLength;
+        service_3_attr_char_value_2.p_value =
+            const_cast<uint8_t *>(initialCharacteristicValue.data());
+
+        return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle_3,
+                                               &service_3_char_md_2, &service_3_attr_char_value_2,
+                                               &(p->scratchpad.gatts_characteristic_handle_4));
     };
 
     const auto peripheralAdvName = testutil::createRandomAdvertisingName();
@@ -197,7 +350,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
         switch (eventId)
         {
             case BLE_GAP_EVT_CONNECTED:
-                c->startServiceDiscovery(c_service_uuid_type, CUSTOM_SERVICE_UUID);
+                c->startServiceDiscovery(c_service_uuid_type, CUSTOM_SERVICE_UUID_1);
                 return true;
             case BLE_GAP_EVT_DISCONNECTED:
                 return true;
@@ -567,28 +720,75 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
     REQUIRE(c->configure() == NRF_SUCCESS);
     REQUIRE(p->configure() == NRF_SUCCESS);
 
-    ble_uuid128_t p_service_base_uuid = {CUSTOM_SERVICE_UUID_BASE};
-    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_base_uuid, &p_service_uuid_type) ==
+    // Service #1
+    ble_uuid128_t p_service_base_uuid_1 = {CUSTOM_SERVICE_UUID_BASE_1};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_base_uuid_1, &p_service_uuid_type) ==
             NRF_SUCCESS);
 
-    p->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID;
+    p->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID_1;
     p->scratchpad.target_service.type = p_service_uuid_type;
 
-    ble_uuid128_t p_characteristic_base_uuid_1 = {CUSTOM_CHARACTERISTIC_UUID_BASE_1};
-    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_characteristic_base_uuid_1,
-                               &p_characteristic_uuid_type_1) == NRF_SUCCESS);
+    // Service #2
+    ble_uuid128_t p_service_base_uuid_2 = {CUSTOM_SERVICE_UUID_BASE_2};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_base_uuid_2, &p_service_2_uuid_type) ==
+            NRF_SUCCESS);
 
-    ble_uuid128_t p_characteristic_base_uuid_2 = {CUSTOM_CHARACTERISTIC_UUID_BASE_2};
-    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_characteristic_base_uuid_2,
-                               &p_characteristic_uuid_type_2) == NRF_SUCCESS);
+    p->scratchpad.target_service_2.uuid = CUSTOM_SERVICE_UUID_2;
+    p->scratchpad.target_service_2.type = p_service_2_uuid_type;
 
-    p->scratchpad.target_characteristic.uuid = CUSTOM_VALUE_CHAR_UUID_1;
-    p->scratchpad.target_characteristic.type = p_characteristic_uuid_type;
+    // Characteristic #2.1
+    ble_uuid128_t p_service_2_characteristic_base_uuid_1 = {
+        CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_1};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_2_characteristic_base_uuid_1,
+                               &p_service_2_characteristic_uuid_type_1) == NRF_SUCCESS);
+    p->scratchpad.target_characteristic.uuid = CUSTOM_SERVICE_2_VALUE_CHAR_UUID_1;
+    p->scratchpad.target_characteristic.type = p_service_2_characteristic_uuid_type_1;
+    p->scratchpad.target_descriptor.uuid     = BLE_UUID_CCCD;
+    p->scratchpad.target_descriptor.type     = BLE_UUID_TYPE_BLE;
 
-    p->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
-    p->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
-    p->scratchpad.mtu                    = 150;
+    // Characteristic #2.2
+    ble_uuid128_t p_service_2_characteristic_base_uuid_2 = {
+        CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_2};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_2_characteristic_base_uuid_2,
+                               &p_service_2_characteristic_uuid_type_2) == NRF_SUCCESS);
+    p->scratchpad.target_characteristic_2.uuid = CUSTOM_SERVICE_2_VALUE_CHAR_UUID_2;
+    p->scratchpad.target_characteristic_2.type = p_service_2_characteristic_uuid_type_2;
 
+    p->scratchpad.target_descriptor_2.uuid = BLE_UUID_CCCD;
+    p->scratchpad.target_descriptor_2.type = BLE_UUID_TYPE_BLE;
+
+    // Service #3
+    ble_uuid128_t p_service_base_uuid_3 = {CUSTOM_SERVICE_UUID_BASE_3};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_base_uuid_3, &p_service_3_uuid_type) ==
+            NRF_SUCCESS);
+    p->scratchpad.target_service_3.uuid = CUSTOM_SERVICE_UUID_3;
+    p->scratchpad.target_service_3.type = p_service_2_uuid_type;
+
+    // Characteristic #3.1
+    ble_uuid128_t p_service_3_characteristic_base_uuid_1 = {
+        CUSTOM_SERVICE_3_CHARACTERISTIC_UUID_BASE_1};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_3_characteristic_base_uuid_1,
+                               &p_service_3_characteristic_uuid_type_1) == NRF_SUCCESS);
+    p->scratchpad.target_characteristic_3.uuid = CUSTOM_SERVICE_3_VALUE_CHAR_UUID_1;
+    p->scratchpad.target_characteristic_3.type = p_service_3_characteristic_uuid_type_1;
+    p->scratchpad.target_descriptor_3.uuid     = BLE_UUID_CCCD;
+    p->scratchpad.target_descriptor_3.type     = BLE_UUID_TYPE_BLE;
+
+    // Characteristic #3.2
+    ble_uuid128_t p_service_3_characteristic_base_uuid_2 = {
+        CUSTOM_SERVICE_3_CHARACTERISTIC_UUID_BASE_2};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_3_characteristic_base_uuid_2,
+                               &p_service_3_characteristic_uuid_type_2) == NRF_SUCCESS);
+    p->scratchpad.target_characteristic_4.uuid = CUSTOM_SERVICE_3_VALUE_CHAR_UUID_2;
+    p->scratchpad.target_characteristic_4.type = p_service_3_characteristic_uuid_type_2;
+
+    p->scratchpad.target_descriptor_4.uuid = BLE_UUID_CCCD;
+    p->scratchpad.target_descriptor_4.type = BLE_UUID_TYPE_BLE;
+
+    // Generic setup
+    p->scratchpad.mtu = 150;
+
+#if 0
     // BLE Central scratchpad
     ble_uuid128_t c_service_base_uuid = {CUSTOM_SERVICE_UUID_BASE};
     REQUIRE(sd_ble_uuid_vs_add(c->unwrap(), &c_service_base_uuid, &c_service_uuid_type) ==
@@ -597,7 +797,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
     c->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID;
     c->scratchpad.target_service.type = c_service_uuid_type;
 
-#if 0
     uint8_t c_characteristic_uuid_type;
     ble_uuid128_t c_characteristic_base_uuid = {CUSTOM_CHARACTERISTIC_UUID_BASE_1};
     REQUIRE(sd_ble_uuid_vs_add(c->unwrap(), &c_characteristic_base_uuid,
