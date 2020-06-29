@@ -4,6 +4,7 @@
 #include "ble_hci.h"
 #include "sd_rpc_types.h"
 
+#include <fmt/core.h>
 #include <spdlog/logger.h>
 
 #include <cctype>
@@ -25,14 +26,7 @@ namespace testutil {
  */
 std::string asHex(const std::vector<uint8_t> &data)
 {
-    std::stringstream retval;
-
-    for (uint8_t const &value : data)
-    {
-        retval << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(value) << ' ';
-    }
-
-    return retval.str();
+    return fmt::format("{:#x}", fmt::join(data, " "));
 }
 
 std::string asHex(const uint16_t &data)
