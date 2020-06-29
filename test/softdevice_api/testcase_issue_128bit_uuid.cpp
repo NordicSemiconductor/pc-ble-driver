@@ -55,7 +55,7 @@
 #include <string>
 #include <thread>
 
-TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][PCA10056][PCA10059]))
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA10056][PCA10059]))
 {
     auto env = ::test::getEnvironment();
     INFO(::test::getEnvironmentAsText(env));
@@ -63,9 +63,37 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
     const auto central    = env.serialPorts.at(0);
     const auto peripheral = env.serialPorts.at(1);
 
-    constexpr uint16_t BLE_UUID_HEART_RATE_SERVICE          = 0x180D;
-    constexpr uint16_t BLE_UUID_HEART_RATE_MEASUREMENT_CHAR = 0x2A37;
-    constexpr uint16_t BLE_UUID_CCCD                        = 0x2902;
+    // ff4421cb-6797-449c-8f32-a407367ec041
+    // constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE = {{0x41, 0xc0, 0x7e, 0x36, 0x07, 0xa4,
+    // 0x32,
+    //                                                      0x8f, 0x9c, 0x44, 0x97, 0x67, 0xcb,
+    //                                                      0x21, 0x44, 0xff}};
+
+    // f001f000-dead-beef-cafe-deacc0de1234
+    constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE = {{0x41, 0xc0, 0x7e, 0x36, 0xad, 0xde, 0xfe,
+                                                         0xca, 0xef, 0xbe, 0xad, 0xde, 0x02, 0xf0,
+                                                         0x01, 0xf0}};
+
+    // 8766a864-98c5-4918-a080-7cf731b74bc2
+    // constexpr ble_uuid128_t CUSTOM_CHARACTERISTIC_UUID_BASE_1 = {{0xc2, 0x4b, 0xb7, 0x31, 0xf7,
+    // 0x7c,
+    //                                                             0x80, 0xa0, 0x18, 0x49, 0xc5,
+    //                                                             0x98, 0x64, 0xa8, 0x66, 0x87}};
+
+    // f002f000-dead-beef-cafe-deacc0de1234
+    constexpr ble_uuid128_t CUSTOM_CHARACTERISTIC_UUID_BASE_1 = {
+        {0xc2, 0x4b, 0xb7, 0x31, 0xf7, 0x7c, 0x80, 0xa0, 0x18, 0x49, 0xc5, 0x98, 0x64, 0xa8, 0x66,
+         0x87}};
+
+    constexpr uint16_t CUSTOM_SERVICE_UUID      = 0x1400;
+    constexpr uint16_t CUSTOM_VALUE_CHAR_UUID_1 = 0x1401;
+    constexpr uint16_t CUSTOM_VALUE_CHAR_UUID_2 = 0x1401;
+    constexpr uint16_t BLE_UUID_CCCD            = 0x2902;
+
+    // 57e62e72-4028-45c5-b125-88604efeb3ec
+    constexpr ble_uuid128_t CUSTOM_CHARACTERISTIC_UUID_BASE_2 = {
+        {0xc2, 0x4b, 0xb7, 0x31, 0xf7, 0x7c, 0x80, 0xa0, 0x18, 0x49, 0xc5, 0x98, 0x64, 0xa8, 0x66,
+         0x87}};
 
     // Indicates if an error has occurred in a callback.
     // The test framework is not thread safe so this variable is used to communicate that an
@@ -76,6 +104,13 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
     // Set to true when the test is complete
     auto testComplete = false;
 
+    // 128-bit UUID needed by lambdas
+    uint8_t p_service_uuid_type;
+    uint8_t p_characteristic_uuid_type_1;
+    uint8_t p_characteristic_uuid_type_2;
+
+    uint8_t c_service_uuid_type;
+
     auto setupPeripheral = [&](const std::shared_ptr<testutil::AdapterWrapper> &p,
                                const std::string &advertisingName,
                                const std::vector<uint8_t> &initialCharacteristicValue,
@@ -83,13 +118,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
         // Setup the advertisement data
         std::vector<uint8_t> advertisingData;
         testutil::appendAdvertisingName(advertisingData, advertisingName);
-        advertisingData.push_back(3); // Length of upcoming advertisement type
-        advertisingData.push_back(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
-
-        // Store BLE_UUID_HEART_RATE_SERVICE in little - endian format.
-        advertisingData.push_back(BLE_UUID_HEART_RATE_SERVICE & 0xFF);
-        advertisingData.push_back((BLE_UUID_HEART_RATE_SERVICE & 0xFF00) >> 8);
-
+        get_logger()->info("Advertising as '{}'", advertisingName);
         auto err_code = p->setupAdvertising(advertisingData);
         if (err_code != NRF_SUCCESS)
             return err_code;
@@ -161,31 +190,6 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
         testutil::Role::Peripheral, peripheral.port, env.baudRate, env.mtu,
         env.retransmissionInterval, env.responseTimeout);
 
-    // Use Heart rate service and characteristics as target for testing but
-    // the values sent are not according to the Heart Rate service
-
-    // BLE Central scratchpad
-    c->scratchpad.target_service.uuid = BLE_UUID_HEART_RATE_SERVICE;
-    c->scratchpad.target_service.type = BLE_UUID_TYPE_BLE;
-
-    c->scratchpad.target_characteristic.uuid = BLE_UUID_HEART_RATE_MEASUREMENT_CHAR;
-    c->scratchpad.target_characteristic.type = BLE_UUID_TYPE_BLE;
-
-    c->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
-    c->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
-    c->scratchpad.mtu                    = 150;
-
-    // BLE Peripheral scratchpad
-    p->scratchpad.target_service.uuid = BLE_UUID_HEART_RATE_SERVICE;
-    p->scratchpad.target_service.type = BLE_UUID_TYPE_BLE;
-
-    p->scratchpad.target_characteristic.uuid = BLE_UUID_HEART_RATE_MEASUREMENT_CHAR;
-    p->scratchpad.target_characteristic.type = BLE_UUID_TYPE_BLE;
-
-    p->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
-    p->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
-    p->scratchpad.mtu                    = 150;
-
     REQUIRE(sd_rpc_log_handler_severity_filter_set(c->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
     REQUIRE(sd_rpc_log_handler_severity_filter_set(p->unwrap(), env.driverLogLevel) == NRF_SUCCESS);
 
@@ -193,7 +197,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
         switch (eventId)
         {
             case BLE_GAP_EVT_CONNECTED:
-                c->startServiceDiscovery(BLE_UUID_TYPE_BLE, BLE_UUID_HEART_RATE_SERVICE);
+                c->startServiceDiscovery(c_service_uuid_type, CUSTOM_SERVICE_UUID);
                 return true;
             case BLE_GAP_EVT_DISCONNECTED:
                 return true;
@@ -540,7 +544,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
         if (code == PKT_DECODE_ERROR || code == PKT_SEND_MAX_RETRIES_REACHED ||
             code == PKT_UNEXPECTED)
         {
-            get_logger()->error("{}  error in status callback {:x}:{}", c->role(),
+            get_logger()->error("{} error in status callback {:x}:{}", c->role(),
                                 static_cast<uint32_t>(code), message);
             centralError = true;
         }
@@ -563,14 +567,59 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_issue_128bit_uuid, [issue][PCA10040][P
     REQUIRE(c->configure() == NRF_SUCCESS);
     REQUIRE(p->configure() == NRF_SUCCESS);
 
+    ble_uuid128_t p_service_base_uuid = {CUSTOM_SERVICE_UUID_BASE};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_base_uuid, &p_service_uuid_type) ==
+            NRF_SUCCESS);
+
+    p->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID;
+    p->scratchpad.target_service.type = p_service_uuid_type;
+
+    ble_uuid128_t p_characteristic_base_uuid_1 = {CUSTOM_CHARACTERISTIC_UUID_BASE_1};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_characteristic_base_uuid_1,
+                               &p_characteristic_uuid_type_1) == NRF_SUCCESS);
+
+    ble_uuid128_t p_characteristic_base_uuid_2 = {CUSTOM_CHARACTERISTIC_UUID_BASE_2};
+    REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_characteristic_base_uuid_2,
+                               &p_characteristic_uuid_type_2) == NRF_SUCCESS);
+
+    p->scratchpad.target_characteristic.uuid = CUSTOM_VALUE_CHAR_UUID_1;
+    p->scratchpad.target_characteristic.type = p_characteristic_uuid_type;
+
+    p->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
+    p->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
+    p->scratchpad.mtu                    = 150;
+
+    // BLE Central scratchpad
+    ble_uuid128_t c_service_base_uuid = {CUSTOM_SERVICE_UUID_BASE};
+    REQUIRE(sd_ble_uuid_vs_add(c->unwrap(), &c_service_base_uuid, &c_service_uuid_type) ==
+            NRF_SUCCESS);
+
+    c->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID;
+    c->scratchpad.target_service.type = c_service_uuid_type;
+
+#if 0
+    uint8_t c_characteristic_uuid_type;
+    ble_uuid128_t c_characteristic_base_uuid = {CUSTOM_CHARACTERISTIC_UUID_BASE_1};
+    REQUIRE(sd_ble_uuid_vs_add(c->unwrap(), &c_characteristic_base_uuid,
+                                &c_characteristic_uuid_type) == NRF_SUCCESS);
+
+    c->scratchpad.target_characteristic.uuid = CUSTOM_VALUE_CHAR_UUID;
+    c->scratchpad.target_characteristic.type = c_characteristic_uuid_type;
+
+    c->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
+    c->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
+    c->scratchpad.mtu                    = 150;
+#endif
+
     REQUIRE(setupPeripheral(p, peripheralAdvName, {0x00}, p->scratchpad.mtu) == NRF_SUCCESS);
     REQUIRE(p->startAdvertising() == NRF_SUCCESS);
 
     // Starting the scan starts the sequence of operations to get a connection established
-    REQUIRE(c->startScan() == NRF_SUCCESS);
+
+    // REQUIRE(c->startScan() == NRF_SUCCESS);
 
     // Wait for the test to complete
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::seconds(300));
 
     CHECK(centralError == false);
     CHECK(peripheralError == false);
