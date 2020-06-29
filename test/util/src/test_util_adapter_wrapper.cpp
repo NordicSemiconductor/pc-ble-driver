@@ -672,7 +672,7 @@ uint32_t AdapterWrapper::writeCharacteristicValue(const uint16_t characteristicH
     write_params.offset   = 0;
 
     get_logger()->debug(
-        "{} Writing to connection_handle: {} characteristic_handle: {} length: {}, value: {:x}",
+        "{} Writing to connection_handle: {} characteristic_handle: {} length: {}, value: {}",
         role(), testutil::asText(scratchpad.connection_handle),
         testutil::asText(characteristicHandle), data.size(), asHex(data));
 
