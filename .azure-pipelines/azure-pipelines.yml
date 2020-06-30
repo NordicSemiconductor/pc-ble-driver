@@ -277,7 +277,6 @@ jobs:
       artifact: 'pc-ble-driver-$(Agent.OS)-x86'
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: 'nrf-ble-driver-*.zip'
       destinationFolder: _e
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
