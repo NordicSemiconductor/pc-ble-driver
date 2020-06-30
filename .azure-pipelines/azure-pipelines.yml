@@ -274,7 +274,6 @@ jobs:
   - task: DownloadPipelineArtifact@2
     inputs:
       source: 'current'
-      artifact: 'pc-ble-driver-$(Agent.OS)-x86'
   - task: ExtractFiles@1
     inputs:
       destinationFolder: _e
