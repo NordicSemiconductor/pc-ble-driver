@@ -150,7 +150,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
             return err_code;
 
         // Setup service #2 - getting invalid param
-        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_SECONDARY,
+        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
                                             &(p->scratchpad.target_service_2),
                                             &(p->scratchpad.service_handle_2));
         if (err_code != NRF_SUCCESS)
@@ -245,7 +245,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
         }
 
         // Setup service #3
-        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_SECONDARY,
+        err_code = sd_ble_gatts_service_add(p->unwrap(), BLE_GATTS_SRVC_TYPE_PRIMARY,
                                             &(p->scratchpad.target_service_3),
                                             &(p->scratchpad.service_handle_3));
 
@@ -293,9 +293,11 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
                                               &service_3_char_md_1, &service_3_attr_char_value_1,
                                               &(p->scratchpad.gatts_characteristic_handle_3));
 
-        if (ret != NRF_SUCCESS)
-            return ret;
+        return ret;
+        //        if (ret != NRF_SUCCESS)
+        //            return ret;
 
+#if 0
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_2.read_perm);
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_2.write_perm);
         service_3_cccd_md_2.vloc = BLE_GATTS_VLOC_STACK;
@@ -329,6 +331,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
         return sd_ble_gatts_characteristic_add(p->unwrap(), p->scratchpad.service_handle_3,
                                                &service_3_char_md_2, &service_3_attr_char_value_2,
                                                &(p->scratchpad.gatts_characteristic_handle_4));
+#endif
     };
 
     const auto peripheralAdvName = testutil::createRandomAdvertisingName();
