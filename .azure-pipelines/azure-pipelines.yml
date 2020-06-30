@@ -276,6 +276,9 @@ jobs:
       source: 'current'
       artifact: 'pc-ble-driver-$(Agent.OS)-x86'
   - task: ExtractFiles@1
+    inputs:
+      destinationFolder: $(Build.SourcesDirectory)/artifact
+      cleanDestinationFolder: true
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
