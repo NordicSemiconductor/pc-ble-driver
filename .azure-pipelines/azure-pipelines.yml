@@ -274,6 +274,7 @@ jobs:
   - task: DownloadPipelineArtifact@2
     inputs:
       artifact: pc-ble-driver-Windows_NT-x86
+      path: $(System.ArtifactsDirectory)
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '*.zip'
@@ -282,6 +283,7 @@ jobs:
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
+      dir /s ..
       dir /s
       dir /s $(System.ArtifactsDirectory)
 
