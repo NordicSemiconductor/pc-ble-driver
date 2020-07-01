@@ -277,7 +277,7 @@ jobs:
       path: $(System.ArtifactsDirectory)
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '*.zip'
+      archiveFilePatterns: '$(System.ArtifactsDirectory)/*.zip'
       destinationFolder: $(Pipeline.Workspace)/_e
       cleanDestinationFolder: true
   - script: |
