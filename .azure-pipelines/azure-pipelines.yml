@@ -283,9 +283,7 @@ jobs:
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
-      dir /s ..
-      dir /s
-      dir /s $(System.ArtifactsDirectory)
+      set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
 
       cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
       cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
