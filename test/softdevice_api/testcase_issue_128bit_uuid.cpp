@@ -73,35 +73,35 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
     // Service #2
     constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE_2 = {{0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
                                                            0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00,
-                                                           0x01, 0xf0}};
+                                                           0x04, 0xf0}};
 
     constexpr uint16_t CUSTOM_SERVICE_UUID_2 = 0xf000;
 
     constexpr ble_uuid128_t CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_1 = {
-        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x01,
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x04,
          0xf0}};
     constexpr uint16_t CUSTOM_SERVICE_2_VALUE_CHAR_UUID_1 = 0xf001;
 
     constexpr ble_uuid128_t CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_2 = {
-        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x01,
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x04,
          0xf0}};
     constexpr uint16_t CUSTOM_SERVICE_2_VALUE_CHAR_UUID_2 = 0xf002;
 
     // Service #3
     constexpr ble_uuid128_t CUSTOM_SERVICE_UUID_BASE_3 = {{0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
                                                            0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00,
-                                                           0x02, 0xf0}};
+                                                           0x05, 0xf0}};
 
     constexpr uint16_t CUSTOM_SERVICE_UUID_3 = 0xf000;
 
     constexpr ble_uuid128_t CUSTOM_SERVICE_3_CHARACTERISTIC_UUID_BASE_1 = {
-        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x02,
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x05,
          0xf0}};
 
     constexpr uint16_t CUSTOM_SERVICE_3_VALUE_CHAR_UUID_1 = 0xf001;
 
     constexpr ble_uuid128_t CUSTOM_SERVICE_3_CHARACTERISTIC_UUID_BASE_2 = {
-        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x02,
+        {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0x05,
          0xf0}};
     constexpr uint16_t CUSTOM_SERVICE_3_VALUE_CHAR_UUID_2 = 0xf001;
 
@@ -293,11 +293,10 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
                                               &service_3_char_md_1, &service_3_attr_char_value_1,
                                               &(p->scratchpad.gatts_characteristic_handle_3));
 
-        return ret;
-        //        if (ret != NRF_SUCCESS)
-        //            return ret;
+        if (ret != NRF_SUCCESS)
+            return ret;
 
-#if 0
+#if 1
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_2.read_perm);
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_3_cccd_md_2.write_perm);
         service_3_cccd_md_2.vloc = BLE_GATTS_VLOC_STACK;
@@ -765,7 +764,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
     REQUIRE(sd_ble_uuid_vs_add(p->unwrap(), &p_service_base_uuid_3, &p_service_3_uuid_type) ==
             NRF_SUCCESS);
     p->scratchpad.target_service_3.uuid = CUSTOM_SERVICE_UUID_3;
-    p->scratchpad.target_service_3.type = p_service_2_uuid_type;
+    p->scratchpad.target_service_3.type = p_service_3_uuid_type;
 
     // Characteristic #3.1
     ble_uuid128_t p_service_3_characteristic_base_uuid_1 = {
@@ -791,37 +790,35 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
     // Generic setup
     p->scratchpad.mtu = 150;
 
-#if 0
     // BLE Central scratchpad
-    ble_uuid128_t c_service_base_uuid = {CUSTOM_SERVICE_UUID_BASE};
+    ble_uuid128_t c_service_base_uuid = {CUSTOM_SERVICE_UUID_BASE_2};
     REQUIRE(sd_ble_uuid_vs_add(c->unwrap(), &c_service_base_uuid, &c_service_uuid_type) ==
             NRF_SUCCESS);
 
-    c->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID;
+    c->scratchpad.target_service.uuid = CUSTOM_SERVICE_UUID_2;
     c->scratchpad.target_service.type = c_service_uuid_type;
 
     uint8_t c_characteristic_uuid_type;
-    ble_uuid128_t c_characteristic_base_uuid = {CUSTOM_CHARACTERISTIC_UUID_BASE_1};
+    ble_uuid128_t c_characteristic_base_uuid = {CUSTOM_SERVICE_2_CHARACTERISTIC_UUID_BASE_1};
     REQUIRE(sd_ble_uuid_vs_add(c->unwrap(), &c_characteristic_base_uuid,
-                                &c_characteristic_uuid_type) == NRF_SUCCESS);
+                               &c_characteristic_uuid_type) == NRF_SUCCESS);
 
-    c->scratchpad.target_characteristic.uuid = CUSTOM_VALUE_CHAR_UUID;
+    c->scratchpad.target_characteristic.uuid = CUSTOM_SERVICE_2_VALUE_CHAR_UUID_1;
     c->scratchpad.target_characteristic.type = c_characteristic_uuid_type;
 
     c->scratchpad.target_descriptor.uuid = BLE_UUID_CCCD;
     c->scratchpad.target_descriptor.type = BLE_UUID_TYPE_BLE;
     c->scratchpad.mtu                    = 150;
-#endif
 
     REQUIRE(setupPeripheral(p, peripheralAdvName, {0x00}, p->scratchpad.mtu) == NRF_SUCCESS);
     REQUIRE(p->startAdvertising() == NRF_SUCCESS);
 
     // Starting the scan starts the sequence of operations to get a connection established
 
-    // REQUIRE(c->startScan() == NRF_SUCCESS);
+    REQUIRE(c->startScan() == NRF_SUCCESS);
 
     // Wait for the test to complete
-    std::this_thread::sleep_for(std::chrono::seconds(300));
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     CHECK(centralError == false);
     CHECK(peripheralError == false);
