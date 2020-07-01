@@ -278,7 +278,7 @@ jobs:
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '*.zip'
-      destinationFolder: _e
+      destinationFolder: $(Pipeline.Workspace)/_e
       cleanDestinationFolder: true
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
