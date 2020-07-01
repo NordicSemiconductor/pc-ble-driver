@@ -272,9 +272,13 @@ jobs:
     EXTRACT_DIR: 'nrf-ble-driver-${{ parameters.BLE_DRIVER_VERSION }}-win_x86_32'
   steps:
   - task: DownloadBuildArtifacts@0
+    inputs:
+      artifactName: pc-ble-driver-Windows_NT-x86
   - task: ExtractFiles@1
     inputs:
+      archiveFilePatterns: '*.zip'
       destinationFolder: _e
+      cleanDestinationFolder: true
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
