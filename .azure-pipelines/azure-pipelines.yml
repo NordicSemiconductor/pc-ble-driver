@@ -271,9 +271,9 @@ jobs:
     TEST_REPORT_DIR: $(System.DefaultWorkingDirectory)\tests
     EXTRACT_DIR: 'nrf-ble-driver-${{ parameters.BLE_DRIVER_VERSION }}-win_x86_32'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@2
     inputs:
-      artifactName: pc-ble-driver-Windows_NT-x86
+      artifact: pc-ble-driver-Windows_NT-x86
   - task: ExtractFiles@1
     inputs:
       archiveFilePatterns: '*.zip'
