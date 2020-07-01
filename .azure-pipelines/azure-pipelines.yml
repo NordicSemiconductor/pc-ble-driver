@@ -257,7 +257,7 @@ jobs:
   # Publish artifacts (any platform)
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: $(Build.ArtifactStagingDirectory)
+      path: $(Build.ArtifactStagingDirectory)
       artifactName: pc-ble-driver-$(Agent.OS)-$(architecture)
 
 # Test jobs below this point
