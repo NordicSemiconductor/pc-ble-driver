@@ -54,7 +54,7 @@ parameters:
   - name: TEST_TIMEOUT
     displayName: Timeout value for tests (in minutes)
     type: number
-    default: 20
+    default: 40
   - name: ITERATIONS_TEST
     displayName: Number of iterations to run tests
     default: 10
