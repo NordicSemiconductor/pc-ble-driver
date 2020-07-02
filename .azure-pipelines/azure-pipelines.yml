@@ -341,14 +341,14 @@ jobs:
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
       displayName: 'Run Windows(x64) tests'
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results'
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '**/*-result.xml'
-      failTaskOnFailedTests: true
-      testRunTitle: 'Publish Windows(x64) tests'
-    condition: succeededOrFailed()
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/*-result.xml'
+        failTaskOnFailedTests: true
+        testRunTitle: 'Publish Windows(x64) tests'
+      condition: succeededOrFailed()
   
 - job: test_linux64
   displayName: 'Run Linux(x64) tests'
@@ -386,14 +386,14 @@ jobs:
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
       displayName: 'Run tests'
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results'
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '**/*-result.xml'
-      failTaskOnFailedTests: true
-      testRunTitle: 'Publish Linux(x64) tests'
-    condition: succeededOrFailed()
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/*-result.xml'
+        failTaskOnFailedTests: true
+        testRunTitle: 'Publish Linux(x64) tests'
+      condition: succeededOrFailed()
 
 - job: test_macos
   displayName: 'Run macOS(x64) tests'
