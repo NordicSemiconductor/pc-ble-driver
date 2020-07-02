@@ -337,10 +337,10 @@ jobs:
         cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
         cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
         cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\.azure-pipelines\run-test.cmake
-    continueOnError: true
-    failOnStderr: false
-    timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
-    displayName: 'Run Windows(x64) tests'
+      continueOnError: true
+      failOnStderr: false
+      timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
+      displayName: 'Run Windows(x64) tests'
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
     inputs:
@@ -382,10 +382,10 @@ jobs:
         cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
         cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
         cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/.azure-pipelines/run-test.cmake
-    continueOnError: true
-    failOnStderr: false
-    timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
-    displayName: 'Run tests'
+      continueOnError: true
+      failOnStderr: false
+      timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
+      displayName: 'Run tests'
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
     inputs:
