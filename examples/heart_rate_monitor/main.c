@@ -605,6 +605,9 @@ static uint32_t heart_rate_measurement_send()
 static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 {
     uint32_t err_code;
+    #if NRF_SD_BLE_API >= 5
+    ble_gap_data_length_params_t dl_params;
+    #endif
 
     if (p_ble_evt == NULL)
     {
@@ -677,6 +680,54 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             fflush(stdout);
 #endif
             break;
+
+#if NRF_SD_BLE_API >= 5
+	case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
+            printf("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST.\n");
+            fflush(stdout);
+
+            memset(&dl_params, 0, sizeof(ble_gap_data_length_params_t));
+
+            err_code = sd_ble_gap_data_length_update(adapter, p_ble_evt->evt.gap_evt.conn_handle, &dl_params, NULL);
+            if (err_code != NRF_SUCCESS)
+            {
+        	    printf("Data len update error: %x\n", err_code);
+        	    fflush(stdout);
+    	    }
+
+	        break;
+
+    case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
+            printf("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE (max_rx_octets:%d, max_rx_time_us:%d, max_tx_octets:%d, max_tx_time_us:%d)\n",
+                    p_ble_evt->evt.gap_evt.params.data_length_update.effective_params.max_rx_octets,
+                    p_ble_evt->evt.gap_evt.params.data_length_update.effective_params.max_rx_time_us,
+                    p_ble_evt->evt.gap_evt.params.data_length_update.effective_params.max_tx_octets,
+                    p_ble_evt->evt.gap_evt.params.data_length_update.effective_params.max_tx_time_us);
+            fflush(stdout);
+            break;
+
+	case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
+            printf("Received BLE_GAP_EVT_PHY_UPDATE_REQUEST.\n");
+	        fflush(stdout);
+
+            ble_gap_phys_t const phys =
+            {
+                .rx_phys = BLE_GAP_PHY_AUTO,
+                .tx_phys = BLE_GAP_PHY_AUTO,
+            };
+            err_code = sd_ble_gap_phy_update(adapter, p_ble_evt->evt.gap_evt.conn_handle, &phys);           
+	        break;
+
+    case BLE_GAP_EVT_PHY_UPDATE:
+            printf("Received BLE_GAP_EVT_PHY_UPDATE (RX:%d, TX:%d, status:%d)\n",
+                    p_ble_evt->evt.gap_evt.params.phy_update.rx_phy,
+                    p_ble_evt->evt.gap_evt.params.phy_update.tx_phy,
+                    p_ble_evt->evt.gap_evt.params.phy_update.status);
+
+            fflush(stdout);
+            break;
+#endif
+
 
         default:
             printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id);
