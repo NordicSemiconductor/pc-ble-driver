@@ -415,17 +415,10 @@ jobs:
       archiveFilePatterns: '$(System.ArtifactsDirectory)/*.tar.gz'
       destinationFolder: $(Pipeline.Workspace)/_e
       cleanDestinationFolder: true
-  - bash: |
-      shopt -s nullglob
-      function join_by { local IFS="$1"; shift; echo "$*"; }
-      lib_path=$(join_by ';' /opt/nrf-device-lib/bin)
-      echo LD_LIBRARY_PATH: $lib_path
-      echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]$lib_path"
-    displayName: Update LD_LIBRARY_PATH for nrfc
   - script: |
       mkdir $TEST_REPORT_DIR
       chmod a+x $(Pipeline.Workspace)/bin/test*
-      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$LD_LIBRARY_PATH
+      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:/opt/nrf-device-lib/bin
       echo "PATH: $PATH"
       echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 
