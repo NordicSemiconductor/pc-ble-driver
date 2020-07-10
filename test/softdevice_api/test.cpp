@@ -51,10 +51,6 @@ int main(int argc, char *argv[])
                 {
                     try
                     {
-                        test::ConfiguredEnvironment.driverLogLevel =
-                            testutil::parseLogSeverity(value);
-                        test::ConfiguredEnvironment.driverLogLevelSet = true;
-
                         auto logLevel = testutil::parseSpdLogLevel(value);
                         spdlog::set_level(logLevel);
                     }
@@ -64,7 +60,7 @@ int main(int argc, char *argv[])
                     }
                 }
             },
-            "trace|debug|info|warning|error|fatal")["--log-level"]("pc-ble-driver log level") |
+            "trace|debug|info|warning|error|fatal")["--log-level"]("Logger log level") |
         Opt(
             [&](const std::string &value) {
                 if (!value.empty())
@@ -81,7 +77,7 @@ int main(int argc, char *argv[])
                     }
                 }
             },
-            "trace|debug|info|warning|error|fatal")["--log-level"]("pc-ble-driver log level") |
+            "trace|debug|info|warning|error|fatal")["--driver-log-level"]("Driver log level") |
         Opt(hardwareInfo, "text")["--hardware-info"]("hardware info text to show in test reports");
 
     session.cli(cli);
