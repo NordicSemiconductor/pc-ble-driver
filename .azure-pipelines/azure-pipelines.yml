@@ -81,7 +81,7 @@ variables:
   GITHUB_TAG: v$(NRF_BLE_DRIVER_VERSION)
   VCPKG_REPOSITORY: 'https://github.com/Microsoft/vcpkg.git'
   VCPKG_ROOT: '$(Agent.HomeDirectory)/vcpkg'
-  COMMON_VCPKG_PACKAGES: 'spdlog catch2 cli11 nlohmann-json asio crc32c bitsery'
+  COMMON_VCPKG_PACKAGES: 'spdlog catch2 cli11 asio'
   SDV2_VERSION: 2.0.1
   SDV3_VERSION: 3.1.0
   SDV5_VERSION: 5.1.0
