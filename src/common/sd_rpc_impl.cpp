@@ -38,13 +38,13 @@
 #include "sd_rpc.h"
 
 #include "adapter_internal.h"
+#include "app_ble_gap.h"
 #include "ble_common.h"
 #include "h5_transport.h"
 #include "serial_port_enum.h"
 #include "serialization_transport.h"
-#include "uart_transport.h"
 #include "uart_settings_boost.h"
-#include "app_ble_gap.h"
+#include "uart_transport.h"
 
 #include <cstdlib>
 

@@ -148,8 +148,7 @@ uint32_t sd_ble_cfg_set(adapter_t *adapter, uint32_t cfg_id, ble_cfg_t const *p_
     return encode_decode(adapter, encode_function, decode_function);
 }
 
-uint32_t sd_ble_enable(adapter_t *adapter,
-                       uint32_t *p_app_ram_base)
+uint32_t sd_ble_enable(adapter_t *adapter, uint32_t *p_app_ram_base)
 {
     (void)p_app_ram_base;
 
@@ -160,8 +159,7 @@ uint32_t sd_ble_enable(adapter_t *adapter,
     app_ble_gap_state_reset();
 
     encode_function_t encode_function = [&](uint8_t *buffer, uint32_t *length) -> uint32_t {
-        return ble_enable_req_enc(
-            buffer, length);
+        return ble_enable_req_enc(buffer, length);
     };
 
     decode_function_t decode_function = [&](uint8_t *buffer, uint32_t length,

@@ -672,7 +672,7 @@ uint32_t AdapterWrapper::writeCharacteristicValue(const uint16_t characteristicH
     write_params.offset   = 0;
 
     get_logger()->debug(
-        "{} Writing to connection_handle: {} characteristic_handle: {} length: {}, value: {:x}",
+        "{} Writing to connection_handle: {} characteristic_handle: {} length: {}, value: {}",
         role(), testutil::asText(scratchpad.connection_handle),
         testutil::asText(characteristicHandle), data.size(), asHex(data));
 
@@ -1232,7 +1232,7 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
     {
         get_logger()->error(
             "{:p} in eventHandler, not able to find adapter to invoke event handler on, {}",
-            static_cast<void*>(adapter), e.what());
+            static_cast<void *>(adapter), e.what());
     }
     catch (std::system_error &e)
     {

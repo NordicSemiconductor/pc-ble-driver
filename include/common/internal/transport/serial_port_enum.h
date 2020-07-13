@@ -38,7 +38,8 @@
  *
  *
  *
- * Portions of this code is from the node-serialport project: https://github.com/voodootikigod/node-serialport
+ * Portions of this code is from the node-serialport project:
+ https://github.com/voodootikigod/node-serialport
  *
  * The license that code is release under is:
  *
@@ -66,13 +67,13 @@
 #ifndef SERIAL_PORT_ENUM_H
 #define SERIAL_PORT_ENUM_H
 
-
+#include <cstdint>
 #include <list>
 #include <string>
-#include <cstdint>
 
-struct SerialPortDesc {
-public:
+struct SerialPortDesc
+{
+  public:
     std::string comName;
     std::string manufacturer;
     std::string serialNumber;

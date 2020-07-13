@@ -126,7 +126,8 @@ void AdapterInternal::logHandler(const sd_rpc_log_severity_t severity,
     adapter_t adapter = {};
     adapter.internal  = static_cast<void *>(this);
 
-    if (logCallback != nullptr && (static_cast<uint32_t>(severity) >= static_cast<uint32_t>(logSeverityFilter)))
+    if (logCallback != nullptr &&
+        (static_cast<uint32_t>(severity) >= static_cast<uint32_t>(logSeverityFilter)))
     {
         logCallback(&adapter, severity, log_message.c_str());
     }

@@ -55,8 +55,8 @@
 #include <string>
 #include <thread>
 
-TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
-                                    [issue][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]))
+TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
+    issue_gh_112, [issue][PCA10028][PCA10031][PCA10040][PCA10056][PCA10059]))
 {
     auto env = ::test::getEnvironment();
     INFO(::test::getEnvironmentAsText(env));
@@ -235,8 +235,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                     }
                 }
                 return true;
-            case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
-            {
+            case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: {
                 const auto err_code = sd_ble_gap_conn_param_update(
                     c->unwrap(), c->scratchpad.connection_handle,
                     &(gapEvent->params.conn_param_update_request.conn_params));
@@ -257,8 +256,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                                  const ble_gattc_evt_t *gattcEvent) -> bool {
         switch (eventId)
         {
-            case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP:
-            {
+            case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
                 get_logger()->debug("{} Received service discovery response.", c->role());
 
                 if (gattcEvent->gatt_status != NRF_SUCCESS)
@@ -323,8 +321,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 }
             }
                 return true;
-            case BLE_GATTC_EVT_CHAR_DISC_RSP:
-            {
+            case BLE_GATTC_EVT_CHAR_DISC_RSP: {
                 const auto count = gattcEvent->params.char_disc_rsp.count;
 
                 if (gattcEvent->gatt_status != NRF_SUCCESS)
@@ -383,8 +380,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
 
                 return true;
             }
-            case BLE_GATTC_EVT_DESC_DISC_RSP:
-            {
+            case BLE_GATTC_EVT_DESC_DISC_RSP: {
                 const auto count = gattcEvent->params.desc_disc_rsp.count;
 
                 if (gattcEvent->gatt_status != NRF_SUCCESS)
@@ -426,8 +422,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 }
 
                 return true;
-            case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
-            {
+            case BLE_GATTC_EVT_EXCHANGE_MTU_RSP: {
                 auto const server_rx_mtu = gattcEvent->params.exchange_mtu_rsp.server_rx_mtu;
                 get_logger()->debug("{} MTU response received. New ATT_MTU is  {}", c->role(),
                                     server_rx_mtu);
@@ -458,8 +453,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
         [&](const uint16_t eventId, const ble_gatts_evt_t *gattsEvent) -> bool {
             switch (eventId)
             {
-                case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-                {
+                case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
                     const auto err_code = sd_ble_gatts_exchange_mtu_reply(
                         c->unwrap(), c->scratchpad.connection_handle, c->scratchpad.mtu);
 
@@ -479,8 +473,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
     p->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) {
         switch (eventId)
         {
-            case BLE_GAP_EVT_DISCONNECTED:
-            {
+            case BLE_GAP_EVT_DISCONNECTED: {
                 // Use scratchpad defaults when advertising
                 get_logger()->debug("{} Starting advertising.", p->role());
 
@@ -493,8 +486,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 }
             }
                 return true;
-            case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-            {
+            case BLE_GAP_EVT_SEC_PARAMS_REQUEST: {
                 const auto err_code =
                     sd_ble_gap_sec_params_reply(p->unwrap(), p->scratchpad.connection_handle,
                                                 BLE_GAP_SEC_STATUS_SUCCESS, nullptr, nullptr);
@@ -507,8 +499,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
                 }
             }
                 return true;
-            case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-            {
+            case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
                 const auto err_code = sd_ble_gatts_sys_attr_set(
                     p->unwrap(), p->scratchpad.connection_handle, nullptr, 0, 0);
 
@@ -529,8 +520,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_gh_112,
         [&](const uint16_t eventId, const ble_gatts_evt_t *gattsEvent) -> bool {
             switch (eventId)
             {
-                case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-                {
+                case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
                     const auto err_code = sd_ble_gatts_exchange_mtu_reply(
                         p->unwrap(), p->scratchpad.connection_handle, p->scratchpad.mtu);
 
