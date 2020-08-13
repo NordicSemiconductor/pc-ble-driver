@@ -469,7 +469,6 @@ Follow the steps to install dependencies on a specific platform:
 
 2. CMake
     ```bash
-    $ cd hex
     $ mkdir build && cd build
 
     # Modify -DCONNECTIVITY_VERSION=a.b.c
