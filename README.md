@@ -346,9 +346,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
     # Make sure %VCPKG_ROOT% is set and added to %PATH%
     $ mkdir build && cd build
-    $ vcpkg install asio
-    $ vcpkg install catch2
-    $ vcpkg install --head spdlog
+    $ vcpkg install asio catch2 spdlog
     ```
 
 2. CMake
@@ -379,9 +377,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
     # Make sure $VCPKG_ROOT is set and added to $PATH
     $ mkdir build && cd build
-    $ vcpkg install asio
-    $ vcpkg install catch2
-    $ vcpkg install --head spdlog
+    $ vcpkg install asio catch2 spdlog
     ```
 
 2. CMake
@@ -473,7 +469,6 @@ Follow the steps to install dependencies on a specific platform:
 
 2. CMake
     ```bash
-    $ cd hex
     $ mkdir build && cd build
 
     # Modify -DCONNECTIVITY_VERSION=a.b.c
