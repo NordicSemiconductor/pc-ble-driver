@@ -35,10 +35,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /** @file
-*
-* @brief Type definitions and API calls for SoftDevice RPC module.
-*
-*/
+ *
+ * @brief Type definitions and API calls for SoftDevice RPC module.
+ *
+ */
+
+// clang-format off
 
 #ifndef SD_RPC_H__
 #define SD_RPC_H__
@@ -119,11 +121,12 @@ SD_RPC_API void sd_rpc_adapter_delete(adapter_t *adapter);
  * @param[in]  status_handler  The status handler callback.
  * @param[in]  evt_handler  The event handler callback.
  * @param[in]  log_handler  The log handler callback.
+ * @param[in]  user_data User data provided in callbacks.
  *
  * @retval NRF_SUCCESS  The module was opened successfully.
  * @retval NRF_ERROR    There was an error opening the module.
  */
-SD_RPC_API uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler, sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler);
+SD_RPC_API uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler, sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler, void *user_data_status, void *user_data_event, void *user_data_log);
 
 /**@brief Close the SoftDevice RPC module.
  *
@@ -163,3 +166,5 @@ SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_m
 #endif // __cplusplus
 
 #endif // SD_RPC_H__
+
+// clang-format on

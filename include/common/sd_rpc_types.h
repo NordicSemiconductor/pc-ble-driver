@@ -35,6 +35,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// clang-format off
+
 #ifndef SD_RPC_TYPES_H__
 #define SD_RPC_TYPES_H__
 
@@ -131,13 +133,14 @@ typedef enum {
 #define NRF_ERROR_SD_RPC_SERIAL_PORT_INTERNAL_ERROR (NRF_ERROR_SD_RPC_BASE_NUM + 64)
 
 /**@brief Function pointer type for event callbacks. */
-typedef void (*sd_rpc_status_handler_t)(adapter_t *adapter, sd_rpc_app_status_t code,
-                                        const char *message);
-typedef void (*sd_rpc_evt_handler_t)(adapter_t *adapter, ble_evt_t *p_ble_evt);
+typedef void (*sd_rpc_status_handler_t)(adapter_t *adapter, sd_rpc_app_status_t code, const char *message, const void *user_data);
+typedef void (*sd_rpc_evt_handler_t)(adapter_t *adapter, ble_evt_t *p_ble_evt, const void *user_data);
 typedef void (*sd_rpc_log_handler_t)(adapter_t *adapter, sd_rpc_log_severity_t severity,
-                                     const char *log_message);
+                                     const char *log_message, const void *user_data);
 
 #ifdef __cplusplus
 }
 #endif
 #endif // SD_RPC_TYPES_H__
+
+// clang-format on
