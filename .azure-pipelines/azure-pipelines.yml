@@ -216,7 +216,7 @@ jobs:
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
       rm -rf $(Build.ArtifactStagingDirectory)/_*
     condition: contains(variables['imageName'], 'ubuntu')
-    displayName: '[Linux/macOS] Build project'
+    displayName: '[Linux] Build project'
 
     # MacOS
   - bash: |
@@ -247,7 +247,7 @@ jobs:
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/darwin
-      /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
+      /usr/bin/python3.7 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3.7 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
