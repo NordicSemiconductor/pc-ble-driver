@@ -226,9 +226,9 @@ jobs:
       brew install ninja llvm@9 gcc@9 libusb
       ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
       ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
-      python3 -m pip install -U pip
-      python3 -m pip install nrfutil certifi pycurl
-      python3 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
+      python3.7 -m pip install -U pip
+      python3.7 -m pip install nrfutil certifi pycurl
+      python3.7 $BUILD_SOURCESDIRECTORY/.azure-pipelines/nordic_setup.py --prefix=$(Agent.BuildDirectory)/toolchain --tcversion nRF5_SDK_v16.0.0 --env > $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'mac')
