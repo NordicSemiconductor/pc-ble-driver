@@ -173,6 +173,8 @@ jobs:
 
       set STAGING_DIR=$(Build.ArtifactStagingDirectory)
       set STAGING_DIR=%STAGING_DIR:\=/%
+      cd pc-ble-driver
+
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=%STAGING_DIR%
 
       if %ERRORLEVEL% neq 0 (
@@ -227,6 +229,8 @@ jobs:
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/linux
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
+      cd pc-ble-driver
+
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
@@ -265,6 +269,8 @@ jobs:
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/darwin
       /usr/bin/python3.7 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3.7 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
+      cd pc-ble-driver
+
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
