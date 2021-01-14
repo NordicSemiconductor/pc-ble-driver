@@ -130,7 +130,7 @@ jobs:
   - checkout: self
   - checkout: nrftc
   - script: |
-      cargo install dust && dust
+      cargo install du-dust && dust
       cargo install nrftc --path nrftc
 
   # Windows
