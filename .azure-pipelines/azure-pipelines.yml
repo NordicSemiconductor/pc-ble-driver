@@ -137,7 +137,8 @@ jobs:
   # Windows
   - script: |
       pip3 install --timeout 30 --retries 15 -r %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\requirements.txt
-      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
+      nrftc -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
+      dust
       echo "Exported environment variables:"
       cat $(Agent.BuildDirectory)/tcenv.bat
       choco install ninja make
@@ -209,7 +210,8 @@ jobs:
       sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools libusb-1.0-0-dev libudev-dev
       /usr/bin/python3 -m pip install -U pip
       /usr/bin/python3 -m pip install nrfutil
-      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.bat
+      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      dust
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'ubuntu')
@@ -248,7 +250,8 @@ jobs:
       ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
       python3 -m pip install -U pip
       python3 -m pip install nrfutil
-      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.bat
+      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      dust
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'mac')
