@@ -79,6 +79,9 @@ parameters:
   - name: ARMGCC_VERSION
     displayName: Version of ARMGCC to install
     default: 7-2018-q2-update
+  - name: PYTHON_VERSION
+    displayName: Python version to use when using nrfutil
+    default: 3.7.3
 
 variables:
   NRF_BLE_DRIVER_VERSION: ${{ parameters.BLE_DRIVER_VERSION }}
@@ -248,9 +251,10 @@ jobs:
       brew install ninja llvm@9 gcc@9 libusb pyenv
       ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
       ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
-      pyenv install 3.7
-      pyenv global 3.7
-      pyenv -m pip install nrfutil
+      pyenv install ${{ parameters.PYTHON_VERSION }}
+      pyenv global ${{ parameters.PYTHON_VERSION }}
+      export PYTHON_EXECUTABLE=`pyenv which python`
+      $PYTHON_EXECUTABLE -m pip install nrfutil
       nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       dust
       cat $(Agent.BuildDirectory)/tcenv.sh
@@ -271,7 +275,8 @@ jobs:
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/darwin
-      /usr/bin/python3.7 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3.7 -m site --user-base`/bin"
+      export PYTHON_EXECUTABLE=`pyenv which python`
+      $PYTHON_EXECUTABLE -m site &> /dev/null && PATH="$PATH:`$PYTHON_EXECUTABLE -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
       cd pc-ble-driver
 
