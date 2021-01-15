@@ -139,7 +139,7 @@ jobs:
     displayName: Install nrftc
   # Windows
   - script: |
-      pip3 install --timeout 30 --retries 15 -r %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\requirements.txt
+      pip3 install --timeout 30 --retries 15 nrfutil
       nrftc -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
       dust
       echo "Exported environment variables:"
@@ -163,15 +163,17 @@ jobs:
     displayName: '[Windows] Install pc-ble-driver dependencies'
   - script: |
       @echo off
-      call "$(vcvars_path)" $(architecture)
       del "C:\ProgramData\chocolatey\bin\c++.exe"
       del "C:\ProgramData\chocolatey\bin\g++.exe"
       del "C:\ProgramData\chocolatey\bin\gcc.exe"
       del "C:\Strawberry\c\bin\c++.exe"
       del "C:\Strawberry\c\bin\g++.exe"
       del "C:\Strawberry\c\bin\gcc.exe"
+
       call $(Agent.BuildDirectory)/tcenv.bat
       set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\tools\win32
+      call "$(vcvars_path)" $(architecture)
+      set
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
       echo Creating project files
 
