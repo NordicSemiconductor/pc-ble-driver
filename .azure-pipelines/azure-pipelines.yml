@@ -276,7 +276,8 @@ jobs:
       source $(Agent.BuildDirectory)/tcenv.sh
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/darwin
       export PYTHON_EXECUTABLE=`pyenv which python`
-      $PYTHON_EXECUTABLE -m site &> /dev/null && PATH="$PATH:`$PYTHON_EXECUTABLE -m site --user-base`/bin"
+      export PATH=`pyenv prefix`/bin:$PATH
+      echo "Path is $PATH"
       export TMP=$(Agent.TempDirectory)
       cd pc-ble-driver
 
