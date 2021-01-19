@@ -139,7 +139,7 @@ jobs:
     displayName: Install nrftc
   # Windows
   - script: |
-      pip3 install --timeout 30 --retries 15 nrfutil
+      pip3 install --use-deprecated legacy-resolver nrfutil
       nrftc -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
       dust
       echo "Exported environment variables:"
