@@ -140,7 +140,7 @@ jobs:
   # Windows
   - script: |
       pip3 install --use-deprecated legacy-resolver nrfutil
-      nrftc -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
+      nrftc install -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
       dust
       echo "Exported environment variables:"
       cat $(Agent.BuildDirectory)/tcenv.bat
@@ -215,7 +215,7 @@ jobs:
       sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools libusb-1.0-0-dev libudev-dev
       /usr/bin/python3 -m pip install -U pip
       /usr/bin/python3 -m pip install nrfutil
-      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       dust
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
@@ -257,7 +257,7 @@ jobs:
       pyenv global ${{ parameters.PYTHON_VERSION }}
       export PYTHON_EXECUTABLE=`pyenv which python`
       $PYTHON_EXECUTABLE -m pip install nrfutil
-      nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       dust
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
