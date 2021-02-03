@@ -140,7 +140,7 @@ jobs:
   # Windows
   - script: |
       pip3 install --use-deprecated legacy-resolver nrfutil
-      nrftc -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
+      nrftc install -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
       dust
       echo "Exported environment variables:"
       cat $(Agent.BuildDirectory)/tcenv.bat
