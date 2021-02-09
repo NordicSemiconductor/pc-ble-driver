@@ -133,15 +133,12 @@ jobs:
   - checkout: self
   - checkout: nrftc
   - script: |
-      cargo install du-dust
       cargo install nrftc --path nrftc
-      dust
     displayName: Install nrftc
   # Windows
   - script: |
       pip3 install --use-deprecated legacy-resolver nrfutil
       nrftc install -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
-      dust
       echo "Exported environment variables:"
       cat $(Agent.BuildDirectory)/tcenv.bat
       choco install ninja make
@@ -216,7 +213,6 @@ jobs:
       /usr/bin/python3 -m pip install -U pip
       /usr/bin/python3 -m pip install nrfutil
       nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
-      dust
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'ubuntu')
@@ -258,7 +254,6 @@ jobs:
       export PYTHON_EXECUTABLE=`pyenv which python`
       $PYTHON_EXECUTABLE -m pip install nrfutil
       nrftc -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
-      dust
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'mac')
@@ -321,14 +316,7 @@ jobs:
       mkdir %TEST_REPORT_DIR%
       set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
 
-      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
+      nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -365,14 +353,7 @@ jobs:
         rmdir /Q /S %TEST_REPORT_DIR%
         mkdir %TEST_REPORT_DIR%
 
-        cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
-        cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P %BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\run-test.cmake
+        nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -411,14 +392,7 @@ jobs:
         export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$LD_LIBRARY_PATH
         echo "PATH: $PATH"
 
-        cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-        cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
+        nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -458,14 +432,7 @@ jobs:
       echo "PATH: $PATH"
       echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 
-      cmake -DBOARD=pca10028 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10031 -DSD_TYPE=s130 -DSD_VERSION=$(SDV2_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10040 -DSD_TYPE=s132 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV3_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10056 -DSD_TYPE=s132 -DSD_VERSION=$(SDV5_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
-      cmake -DBOARD=pca10056 -DSD_TYPE=s140 -DSD_VERSION=$(SDV6_VERSION) -DITERATIONS=${{ parameters.ITERATIONS_TEST }} -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DINSTALL_DIRECTORY=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR) -DTEST_OUTPUT_DIRECTORY=$(TEST_REPORT_DIR) -P $BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/run-test.cmake
+      nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
