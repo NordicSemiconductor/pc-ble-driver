@@ -311,6 +311,12 @@ jobs:
       archiveFilePatterns: '$(System.ArtifactsDirectory)/*.zip'
       destinationFolder: $(Pipeline.Workspace)/_e
       cleanDestinationFolder: true
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'specific'
+      project: '2e9dc8f5-526c-47f3-8753-881022a0c2b1'
+      pipeline: 'NordicPlayground.nrftc'
+      artifact: 'nrftc-$(Agent.OS)'
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
@@ -349,6 +355,13 @@ jobs:
         archiveFilePatterns: '$(System.ArtifactsDirectory)/*.zip'
         destinationFolder: $(Pipeline.Workspace)/_e
         cleanDestinationFolder: true
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        source: 'specific'
+        project: '2e9dc8f5-526c-47f3-8753-881022a0c2b1'
+        pipeline: 'NordicPlayground.nrftc'
+        artifact: 'nrftc-$(Agent.OS)'
+        path: $(System.ArtifactsDirectory)
     - script: |
         rmdir /Q /S %TEST_REPORT_DIR%
         mkdir %TEST_REPORT_DIR%
@@ -386,7 +399,15 @@ jobs:
         archiveFilePatterns: '$(System.ArtifactsDirectory)/*.tar.gz'
         destinationFolder: $(Pipeline.Workspace)/_e
         cleanDestinationFolder: true
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        source: 'specific'
+        project: '2e9dc8f5-526c-47f3-8753-881022a0c2b1'
+        pipeline: 'NordicPlayground.nrftc'
+        artifact: 'nrftc-$(Agent.OS)'
+        path: $(System.ArtifactsDirectory)
     - script: |
+        ls -lart $(System.ArtifactsDirectory)
         rm -rf $TEST_REPORT_DIR && mkdir $TEST_REPORT_DIR
         chmod a+x $(Pipeline.Workspace)/bin/test*
         export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$LD_LIBRARY_PATH
@@ -425,6 +446,13 @@ jobs:
       archiveFilePatterns: '$(System.ArtifactsDirectory)/*.tar.gz'
       destinationFolder: $(Pipeline.Workspace)/_e
       cleanDestinationFolder: true
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'specific'
+      project: '2e9dc8f5-526c-47f3-8753-881022a0c2b1'
+      pipeline: 'NordicPlayground.nrftc'
+      artifact: 'nrftc-$(Agent.OS)'
+      path: $(System.ArtifactsDirectory)
   - script: |
       mkdir $TEST_REPORT_DIR
       chmod a+x $(Pipeline.Workspace)/bin/test*
