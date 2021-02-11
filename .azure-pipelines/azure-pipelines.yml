@@ -317,12 +317,14 @@ jobs:
       project: '2e9dc8f5-526c-47f3-8753-881022a0c2b1'
       pipeline: 'NordicPlayground.nrftc'
       artifact: 'nrftc-$(Agent.OS)'
+      path: $(System.ArtifactsDirectory)
+    displayName: Download nrftc
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
       set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
 
-      nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -362,11 +364,12 @@ jobs:
         pipeline: 'NordicPlayground.nrftc'
         artifact: 'nrftc-$(Agent.OS)'
         path: $(System.ArtifactsDirectory)
+      displayName: Download nrftc
     - script: |
         rmdir /Q /S %TEST_REPORT_DIR%
         mkdir %TEST_REPORT_DIR%
 
-        nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -406,6 +409,7 @@ jobs:
         pipeline: 'NordicPlayground.nrftc'
         artifact: 'nrftc-$(Agent.OS)'
         path: $(System.ArtifactsDirectory)
+      displayName: Download nrftc
     - script: |
         ls -lart $(System.ArtifactsDirectory)
         rm -rf $TEST_REPORT_DIR && mkdir $TEST_REPORT_DIR
@@ -413,7 +417,7 @@ jobs:
         export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$LD_LIBRARY_PATH
         echo "PATH: $PATH"
 
-        nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -453,14 +457,12 @@ jobs:
       pipeline: 'NordicPlayground.nrftc'
       artifact: 'nrftc-$(Agent.OS)'
       path: $(System.ArtifactsDirectory)
+    displayName: Download nrftc      
   - script: |
       mkdir $TEST_REPORT_DIR
       chmod a+x $(Pipeline.Workspace)/bin/test*
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:/opt/nrf-device-lib/bin
-      echo "PATH: $PATH"
-      echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-
-      nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
