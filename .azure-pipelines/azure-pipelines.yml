@@ -323,6 +323,7 @@ jobs:
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
       set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
+      set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
 
       $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
     continueOnError: true
@@ -368,7 +369,8 @@ jobs:
     - script: |
         rmdir /Q /S %TEST_REPORT_DIR%
         mkdir %TEST_REPORT_DIR%
-
+        set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
+        set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
         $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
       continueOnError: true
       failOnStderr: false
@@ -414,7 +416,9 @@ jobs:
         ls -lart $(System.ArtifactsDirectory)
         rm -rf $TEST_REPORT_DIR && mkdir $TEST_REPORT_DIR
         chmod a+x $(Pipeline.Workspace)/bin/test*
-        export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$LD_LIBRARY_PATH
+        export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
+        export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$NRF_DEVICE_LIB_INSTALL:$LD_LIBRARY_PATH
+        export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
         echo "PATH: $PATH"
 
         $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
@@ -461,7 +465,12 @@ jobs:
   - script: |
       mkdir $TEST_REPORT_DIR
       chmod a+x $(Pipeline.Workspace)/bin/test*
-      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:/opt/nrf-device-lib/bin
+
+      export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
+      export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
+      echo "PATH: $PATH"
+
+      export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
     continueOnError: true
     failOnStderr: false
