@@ -417,20 +417,17 @@ jobs:
         path: $(System.ArtifactsDirectory)
       displayName: Download nrftc
     - script: |
-        echo "Listing System.ArtifactsDirectory"
-        ls -lart $(System.ArtifactsDirectory)
-
         rm -rf $TEST_REPORT_DIR && mkdir $TEST_REPORT_DIR
 
-        echo "Listing Pipeline.Workspace"
-        ls -lart $(Pipeline.Workspace)
-
-        chmod a+x $(Pipeline.Workspace)/bin/test*
         export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
         export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
+
+        echo "INSTALL_DIR is $INSTALL_DIR, content is:"
+        ls -lart $INSTALLDIR
+
+        chmod a+x $INSTALL_DIR/bin/test*
         export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$NRF_DEVICE_LIB_INSTALL:$LD_LIBRARY_PATH
         export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
-        echo "PATH: $PATH"
 
         chmod a+x $(System.ArtifactsDirectory)/nrftc
         $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR
@@ -476,13 +473,16 @@ jobs:
     displayName: Download nrftc      
   - script: |
       mkdir $TEST_REPORT_DIR
-      ls -R
-      chmod a+x $(Pipeline.Workspace)/bin/test*
 
       export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
       export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
+
+      echo "INSTALL_DIR is $INSTALL_DIR, content is:"
+      ls -lart $INSTALLDIR
+
       export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
 
+      chmod a+x $INSTALL_DIR/bin/test*
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       chmod a+x $(System.ArtifactsDirectory)/nrftc
       $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR
