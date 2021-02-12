@@ -65,6 +65,12 @@ parameters:
   - name: ITERATIONS_TEST
     displayName: Number of iterations to run tests
     default: 10
+  - name: TEST_DRIVER_LOG_LEVEL
+    displayName: Log level to use in nrf-ble-driver
+    default: debug
+  - name: TEST_LOG_LEVEL
+    displayName: Log level to use in Catch2 log framework
+    default: debug
   - name: TEST_POOL
     displayName: Test pool to use for running tests
     default: test-pool-onv12-1
@@ -274,7 +280,6 @@ jobs:
       export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/darwin
       export PYTHON_EXECUTABLE=`pyenv which python`
       export PATH=`pyenv prefix`/bin:$PATH
-      echo "Path is $PATH"
       export TMP=$(Agent.TempDirectory)
       cd pc-ble-driver
 
@@ -324,9 +329,7 @@ jobs:
       mkdir %TEST_REPORT_DIR%
       set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
       set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
-      echo "Path is: %PATH%"
-
-      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR%
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -372,8 +375,7 @@ jobs:
         mkdir %TEST_REPORT_DIR%
         set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
         set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
-        echo "Path is: %PATH%"
-        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR%
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -431,7 +433,7 @@ jobs:
         echo "PATH: $PATH"
 
         chmod a+x $(System.ArtifactsDirectory)/nrftc
-        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -480,11 +482,10 @@ jobs:
       export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
       export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
       export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
-      echo "PATH: $PATH"
 
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       chmod a+x $(System.ArtifactsDirectory)/nrftc
-      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
