@@ -322,11 +322,11 @@ jobs:
   - script: |
       rmdir /Q /S %TEST_REPORT_DIR%
       mkdir %TEST_REPORT_DIR%
-      set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
+      set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
       set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
       echo "Path is: %PATH%"
 
-      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -370,10 +370,10 @@ jobs:
     - script: |
         rmdir /Q /S %TEST_REPORT_DIR%
         mkdir %TEST_REPORT_DIR%
-        set PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)\bin;%PATH%
+        set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
         set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
         echo "Path is: %PATH%"
-        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -l debug -o %TEST_REPORT_DIR%
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -425,12 +425,13 @@ jobs:
 
         chmod a+x $(Pipeline.Workspace)/bin/test*
         export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
+        export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
         export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$NRF_DEVICE_LIB_INSTALL:$LD_LIBRARY_PATH
         export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
         echo "PATH: $PATH"
 
         chmod a+x $(System.ArtifactsDirectory)/nrftc
-        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -477,12 +478,13 @@ jobs:
       chmod a+x $(Pipeline.Workspace)/bin/test*
 
       export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
+      export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
       export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
       echo "PATH: $PATH"
 
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       chmod a+x $(System.ArtifactsDirectory)/nrftc
-      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $(Pipeline.Workspace) -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -l debug -o $TEST_REPORT_DIR
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
