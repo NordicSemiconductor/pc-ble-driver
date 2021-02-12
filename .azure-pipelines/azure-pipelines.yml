@@ -422,9 +422,6 @@ jobs:
         export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
         export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
 
-        echo "INSTALL_DIR is $INSTALL_DIR, content is:"
-        ls -lart $INSTALLDIR
-
         chmod a+x $INSTALL_DIR/bin/test*
         export LD_LIBRARY_PATH=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)/lib:$NRF_DEVICE_LIB_INSTALL:$LD_LIBRARY_PATH
         export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
@@ -476,9 +473,6 @@ jobs:
 
       export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
       export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
-
-      echo "INSTALL_DIR is $INSTALL_DIR, content is:"
-      ls -lart $INSTALLDIR
 
       export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
 
