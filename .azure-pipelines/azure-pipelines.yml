@@ -472,7 +472,7 @@ jobs:
       path: $(System.ArtifactsDirectory)
     displayName: Download nrftc      
   - script: |
-      mkdir $TEST_REPORT_DIR
+      rm -rf $TEST_REPORT_DIR && mkdir $TEST_REPORT_DIR
 
       export NRF_DEVICE_LIB_INSTALL=/opt/nrf-device-lib-install/bin
       export INSTALL_DIR=$(Pipeline.Workspace)/_e/$(EXTRACT_DIR)
