@@ -332,7 +332,7 @@ jobs:
       mkdir %TEST_REPORT_DIR%
       set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
       set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
-      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }}
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -378,7 +378,7 @@ jobs:
         mkdir %TEST_REPORT_DIR%
         set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
         set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
-        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }}
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -430,7 +430,7 @@ jobs:
         export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
 
         chmod a+x $(System.ArtifactsDirectory)/nrftc
-        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }}
+        $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
       continueOnError: true
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
@@ -482,7 +482,7 @@ jobs:
       chmod a+x $INSTALL_DIR/bin/test*
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       chmod a+x $(System.ArtifactsDirectory)/nrftc
-      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }}
+      $(System.ArtifactsDirectory)/nrftc tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
     continueOnError: true
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
