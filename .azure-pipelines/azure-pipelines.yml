@@ -1,13 +1,6 @@
 trigger:
   - feature/azure-devops-builds
 
-resources:
-  repositories:
-  - repository: nrftc
-    type: github
-    endpoint: NordicPlayground
-    name: NordicPlayground/nrftc
-
 parameters:
   - name: BUILD_CONFIGURATION
     displayName: Build configuration
@@ -140,14 +133,18 @@ jobs:
     vmImage: $(imageName)
   steps:
   - checkout: self
-  - checkout: nrftc
-  - script: |
-      cargo install nrftc --path nrftc
-    displayName: Install nrftc
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: 'specific'
+      project: '2e9dc8f5-526c-47f3-8753-881022a0c2b1'
+      pipeline: 'NordicPlayground.nrftc'
+      artifact: 'nrftc-$(Agent.OS)'
+      path: $(System.ArtifactsDirectory)
+    displayName: Download nrftc
   # Windows
   - script: |
       pip3 install --use-deprecated legacy-resolver nrfutil
-      nrftc install -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
+      $(System.ArtifactsDirectory)/nrftc install -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
       echo "Exported environment variables:"
       cat $(Agent.BuildDirectory)/tcenv.bat
       choco install ninja make
@@ -221,7 +218,8 @@ jobs:
       sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools libusb-1.0-0-dev libudev-dev
       /usr/bin/python3 -m pip install -U pip
       /usr/bin/python3 -m pip install nrfutil
-      nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      chmod a+x $(System.ArtifactsDirectory)/nrftc
+      $(System.ArtifactsDirectory)/nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'ubuntu')
@@ -262,7 +260,8 @@ jobs:
       pyenv global ${{ parameters.PYTHON_VERSION }}
       export PYTHON_EXECUTABLE=`pyenv which python`
       $PYTHON_EXECUTABLE -m pip install nrfutil
-      nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      chmod a+x $(System.ArtifactsDirectory)/nrftc
+      $(System.ArtifactsDirectory)/nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'mac')
