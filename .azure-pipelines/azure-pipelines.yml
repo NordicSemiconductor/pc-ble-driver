@@ -132,7 +132,6 @@ jobs:
   pool:
     vmImage: $(imageName)
   steps:
-  - checkout: self
   - task: DownloadPipelineArtifact@2
     inputs:
       source: 'specific'
@@ -174,7 +173,7 @@ jobs:
       del "C:\Strawberry\c\bin\gcc.exe"
 
       call $(Agent.BuildDirectory)/tcenv.bat
-      set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\pc-ble-driver\.azure-pipelines\tools\win32
+      set PATH=%PATH%;%BUILD_SOURCESDIRECTORY%\.azure-pipelines\tools\win32
       call "$(vcvars_path)" $(architecture)
       set
       echo Setting install directory to $(Build.ArtifactStagingDirectory)
@@ -182,7 +181,6 @@ jobs:
 
       set STAGING_DIR=$(Build.ArtifactStagingDirectory)
       set STAGING_DIR=%STAGING_DIR:\=/%
-      cd pc-ble-driver
 
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=%STAGING_DIR%
 
@@ -236,10 +234,9 @@ jobs:
       export CC=$(cc_compiler_path)
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
-      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/linux
+      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
-      cd pc-ble-driver
 
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
@@ -279,11 +276,10 @@ jobs:
       export CC=$(cc_compiler_path)
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
-      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/darwin
+      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/darwin
       export PYTHON_EXECUTABLE=`pyenv which python`
       export PATH=`pyenv prefix`/bin:$PATH
       export TMP=$(Agent.TempDirectory)
-      cd pc-ble-driver
 
       cmake -H. -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.BUILD_CONFIGURATION }} -DBUILD_SHARED_LIBS=ON -DCOMPILE_CONNECTIVITY=1 -DCONNECTIVITY_VERSION=$(NRF_BLE_CONNECTIVITY_VERSION) -DNRF_BLE_DRIVER_VERSION=$(NRF_BLE_DRIVER_VERSION) -DCPACK_PACKAGE_DIRECTORY=$(Build.ArtifactStagingDirectory)
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
