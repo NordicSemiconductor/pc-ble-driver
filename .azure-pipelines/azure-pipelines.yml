@@ -57,6 +57,7 @@ parameters:
     default: 10
   - name: TEST_EXCLUDE_SOFTDEVICE_TYPES
     displayName: SoftDevice types to exclude from tests
+    default: none
   - name: TEST_DRIVER_LOG_LEVEL
     displayName: Log level to use in nrf-ble-driver
     default: debug
