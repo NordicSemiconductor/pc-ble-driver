@@ -1,3 +1,1 @@
-pycurl
-certifi
 nrfutil
