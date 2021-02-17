@@ -214,6 +214,7 @@ jobs:
 
       echo Deleting unnecessary directories from artifact directory
       rmdir /s /q $(Build.ArtifactStagingDirectory)\_CPack_Packages
+      del $(System.ArtifactsDirectory)\nrftc
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
 
@@ -241,7 +242,7 @@ jobs:
       export CC=$(cc_compiler_path)
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
-      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/linux
+      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
 
@@ -249,6 +250,7 @@ jobs:
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
       rm -rf $(Build.ArtifactStagingDirectory)/_*
+      rm $(System.ArtifactsDirectory)/nrftc
     condition: contains(variables['imageName'], 'ubuntu')
     displayName: '[Linux] Build project'
 
@@ -292,6 +294,7 @@ jobs:
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
       rm -rf $(Build.ArtifactStagingDirectory)/_*
+      rm $(System.ArtifactsDirectory)/nrftc
     condition: contains(variables['imageName'], 'mac')
     displayName: '[macOS] Build project'
 
