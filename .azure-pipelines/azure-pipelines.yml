@@ -241,7 +241,7 @@ jobs:
       export CC=$(cc_compiler_path)
       export CXX=$(cxx_compiler_path)
       source $(Agent.BuildDirectory)/tcenv.sh
-      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/pc-ble-driver/.azure-pipelines/tools/linux
+      export PATH=$PATH:$BUILD_SOURCESDIRECTORY/.azure-pipelines/tools/linux
       /usr/bin/python3 -m site &> /dev/null && PATH="$PATH:`/usr/bin/python3 -m site --user-base`/bin"
       export TMP=$(Agent.TempDirectory)
 
