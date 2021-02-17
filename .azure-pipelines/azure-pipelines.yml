@@ -214,6 +214,7 @@ jobs:
 
       echo Deleting unnecessary directories from artifact directory
       rmdir /s /q $(Build.ArtifactStagingDirectory)\_CPack_Packages
+      del $(System.ArtifactsDirectory)\nrftc
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
 
@@ -249,6 +250,7 @@ jobs:
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
       rm -rf $(Build.ArtifactStagingDirectory)/_*
+      rm $(System.ArtifactsDirectory)/nrftc
     condition: contains(variables['imageName'], 'ubuntu')
     displayName: '[Linux] Build project'
 
@@ -292,6 +294,7 @@ jobs:
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target compile_connectivity
       cmake --build _build --config ${{ parameters.BUILD_CONFIGURATION }} --target package
       rm -rf $(Build.ArtifactStagingDirectory)/_*
+      rm $(System.ArtifactsDirectory)/nrftc
     condition: contains(variables['imageName'], 'mac')
     displayName: '[macOS] Build project'
 
