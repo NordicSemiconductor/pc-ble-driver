@@ -328,7 +328,7 @@ jobs:
       set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
       set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
       $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-    continueOnError: true
+    continueOnError: false
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
     displayName: 'Run Windows(x86) tests'
@@ -374,7 +374,7 @@ jobs:
         set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
         set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
         $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-      continueOnError: true
+      continueOnError: false
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
       displayName: 'Run Windows(x64) tests'
@@ -426,7 +426,7 @@ jobs:
 
         chmod a+x $(System.ArtifactsDirectory)/nrftc
         $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-      continueOnError: true
+      continueOnError: false
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
       displayName: 'Run tests'
@@ -478,7 +478,7 @@ jobs:
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       chmod a+x $(System.ArtifactsDirectory)/nrftc
       $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-    continueOnError: true
+    continueOnError: false
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
     displayName: 'Run macOS(x64) tests'
