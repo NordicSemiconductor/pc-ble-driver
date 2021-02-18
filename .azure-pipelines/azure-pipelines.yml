@@ -1,13 +1,3 @@
-trigger:
-  - feature/azure-devops-builds
-
-resources:
-  repositories:
-  - repository: nrftc
-    type: github
-    endpoint: NordicPlayground
-    name: NordicPlayground/nrftc
-
 parameters:
   - name: BUILD_CONFIGURATION
     displayName: Build configuration
@@ -67,7 +57,7 @@ parameters:
     default: 10
   - name: TEST_EXCLUDE_SOFTDEVICE_TYPES
     displayName: SoftDevice types to exclude from tests
-    default: s130
+    default: none
   - name: TEST_DRIVER_LOG_LEVEL
     displayName: Log level to use in nrf-ble-driver
     default: debug
@@ -214,7 +204,7 @@ jobs:
 
       echo Deleting unnecessary directories from artifact directory
       rmdir /s /q $(Build.ArtifactStagingDirectory)\_CPack_Packages
-      del $(System.ArtifactsDirectory)\nrftc
+      del $(System.ArtifactsDirectory)\nrftc.exe
     condition: contains(variables['imageName'], 'win')
     displayName: '[Windows] Run cmake and build project'
 
