@@ -140,7 +140,7 @@ jobs:
   # Windows
   - script: |
       pip3 install --use-deprecated legacy-resolver nrfutil
-      $(System.ArtifactsDirectory)/nrftc install -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
+      $(System.ArtifactsDirectory)/nrftc install arm-toolchain -a $(Agent.BuildDirectory)\toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)\tcenv.bat
       echo "Exported environment variables:"
       cat $(Agent.BuildDirectory)/tcenv.bat
       choco install ninja make
@@ -215,7 +215,7 @@ jobs:
       /usr/bin/python3 -m pip install -U pip
       /usr/bin/python3 -m pip install nrfutil
       chmod a+x $(System.ArtifactsDirectory)/nrftc
-      $(System.ArtifactsDirectory)/nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      $(System.ArtifactsDirectory)/nrftc install arm-toolchain -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'ubuntu')
@@ -257,7 +257,7 @@ jobs:
       export PYTHON_EXECUTABLE=`pyenv which python`
       $PYTHON_EXECUTABLE -m pip install nrfutil
       chmod a+x $(System.ArtifactsDirectory)/nrftc
-      $(System.ArtifactsDirectory)/nrftc install -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
+      $(System.ArtifactsDirectory)/nrftc install arm-toolchain -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
       chmod a+x $(Agent.BuildDirectory)/tcenv.sh
     condition: contains(variables['imageName'], 'mac')
@@ -327,8 +327,8 @@ jobs:
       mkdir %TEST_REPORT_DIR%
       set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
       set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
-      $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-    continueOnError: true
+      $(System.ArtifactsDirectory)/nrftc nrf-ble-driver run-tests -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
+    continueOnError: false
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
     displayName: 'Run Windows(x86) tests'
@@ -373,8 +373,8 @@ jobs:
         mkdir %TEST_REPORT_DIR%
         set INSTALL_PATH=$(Pipeline.Workspace)\_e\$(EXTRACT_DIR)
         set PATH=c:\opt\nrf-device-lib-install\bin;%PATH%
-        $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-      continueOnError: true
+        $(System.ArtifactsDirectory)/nrftc nrf-ble-driver run-tests -i %INSTALL_PATH% -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o %TEST_REPORT_DIR% --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
+      continueOnError: false
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
       displayName: 'Run Windows(x64) tests'
@@ -425,8 +425,8 @@ jobs:
         export PATH=$NRF_DEVICE_LIB_INSTALL:$PATH
 
         chmod a+x $(System.ArtifactsDirectory)/nrftc
-        $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-      continueOnError: true
+        $(System.ArtifactsDirectory)/nrftc nrf-ble-driver run-tests -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
+      continueOnError: false
       failOnStderr: false
       timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
       displayName: 'Run tests'
@@ -477,8 +477,8 @@ jobs:
       chmod a+x $INSTALL_DIR/bin/test*
       export LD_LIBRARY_PATH=$(Pipeline.Workspace)/lib:$NRF_DEVICE_LIB_INSTALL
       chmod a+x $(System.ArtifactsDirectory)/nrftc
-      $(System.ArtifactsDirectory)/nrftc -vvv tests-nrf-ble-driver -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
-    continueOnError: true
+      $(System.ArtifactsDirectory)/nrftc nrf-ble-driver run-tests -i $INSTALL_DIR -c ${{ parameters.ITERATIONS_TEST }} -d ${{ parameters.TEST_DRIVER_LOG_LEVEL }} -l ${{ parameters.TEST_LOG_LEVEL }} -o $TEST_REPORT_DIR --exclude-softdevice-types ${{ parameters.TEST_EXCLUDE_SOFTDEVICE_TYPES }} --resume-on-test-failure
+    continueOnError: false
     failOnStderr: false
     timeoutInMinutes: ${{ parameters.TEST_TIMEOUT }}
     displayName: 'Run macOS(x64) tests'
