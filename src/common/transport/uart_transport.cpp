@@ -52,6 +52,10 @@
 #include <system_error>
 #endif
 
+#if defined(_WIN32)
+#include <string>
+#endif
+
 #include "uart_settings_boost.h"
 #include <asio.hpp>
 
@@ -280,6 +284,42 @@ struct UartTransport::impl : Transport
                 const auto error = std::error_code(errno, std::system_category());
                 throw std::system_error(error,
                                         "Failed to set baud rate to " + std::to_string(speed));
+            }
+#endif
+
+#if defined(_WIN32)
+            ::COMMTIMEOUTS timeouts;
+
+            const auto readIntervalTimeout_ =
+                std::getenv("NRF_BLE_DRIVER_UART_READ_INTERVAL_TIMEOUT");
+            const auto readTotalTimeoutMultiplier_ =
+                std::getenv("NRF_BLE_DRIVER_UART_READ_TOTAL_TIMEOUT_MULTIPLIER");
+            const auto readTotalTimeoutConstant_ =
+                std::getenv("NRF_BLE_DRIVER_UART_READ_TOTAL_TIMEOUT_CONSTANT");
+
+            const auto readIntervalTimeout        = std::stoul(readIntervalTimeout_);
+            const auto readTotalTimeoutMultiplier = std::stoul(readTotalTimeoutMultiplier_);
+            const auto readTotalTimeoutConstant   = std::stoul(readTotalTimeoutConstant_);
+
+            timeouts.ReadIntervalTimeout        = readIntervalTimeout;
+            timeouts.ReadTotalTimeoutMultiplier = readTotalTimeoutMultiplier;
+            timeouts.ReadTotalTimeoutConstant   = readTotalTimeoutConstant;
+
+            const auto writeTotalTimeoutMultiplier_ =
+                std::getenv("NRF_BLE_DRIVER_UART_WRITE_TOTAL_TIMEOUT_MULTIPLIER");
+            const auto writeTotalTimeoutConstant_ =
+                std::getenv("NRF_BLE_DRIVER_UART_WRITE_TOTAL_TIMEOUT_CONSTANT");
+
+            const auto writeTotalTimeoutMultiplier = std::stoul(writeTotalTimeoutMultiplier_);
+            const auto writeTotalTimeoutConstant   = std::stoul(writeTotalTimeoutConstant_);
+
+            timeouts.WriteTotalTimeoutMultiplier = writeTotalTimeoutMultiplier;
+            timeouts.WriteTotalTimeoutConstant   = writeTotalTimeoutConstant;
+
+            if (!::SetCommTimeouts(serialPort->native_handle(), &timeouts))
+            {
+                const auto error = std::error_code(errno, std::system_category());
+                throw std::system_error(error, "Failed to set communication timeout parameters");
             }
 #endif
 
