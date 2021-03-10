@@ -52,10 +52,6 @@
 #include <system_error>
 #endif
 
-#if defined(_WIN32)
-#include <string>
-#endif
-
 #include "uart_settings_boost.h"
 #include <asio.hpp>
 
@@ -290,31 +286,15 @@ struct UartTransport::impl : Transport
 #if defined(_WIN32)
             ::COMMTIMEOUTS timeouts;
 
-            const auto readIntervalTimeout_ =
-                std::getenv("NRF_BLE_DRIVER_UART_READ_INTERVAL_TIMEOUT");
-            const auto readTotalTimeoutMultiplier_ =
-                std::getenv("NRF_BLE_DRIVER_UART_READ_TOTAL_TIMEOUT_MULTIPLIER");
-            const auto readTotalTimeoutConstant_ =
-                std::getenv("NRF_BLE_DRIVER_UART_READ_TOTAL_TIMEOUT_CONSTANT");
+            // See
+            // https://docs.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-commtimeouts
+            // for documentation of these parameters
+            timeouts.ReadIntervalTimeout        = MAXDWORD;
+            timeouts.ReadTotalTimeoutMultiplier = MAXDWORD;
+            timeouts.ReadTotalTimeoutConstant   = 20; // Wait for 20ms for data
 
-            const auto readIntervalTimeout        = std::stoul(readIntervalTimeout_);
-            const auto readTotalTimeoutMultiplier = std::stoul(readTotalTimeoutMultiplier_);
-            const auto readTotalTimeoutConstant   = std::stoul(readTotalTimeoutConstant_);
-
-            timeouts.ReadIntervalTimeout        = readIntervalTimeout;
-            timeouts.ReadTotalTimeoutMultiplier = readTotalTimeoutMultiplier;
-            timeouts.ReadTotalTimeoutConstant   = readTotalTimeoutConstant;
-
-            const auto writeTotalTimeoutMultiplier_ =
-                std::getenv("NRF_BLE_DRIVER_UART_WRITE_TOTAL_TIMEOUT_MULTIPLIER");
-            const auto writeTotalTimeoutConstant_ =
-                std::getenv("NRF_BLE_DRIVER_UART_WRITE_TOTAL_TIMEOUT_CONSTANT");
-
-            const auto writeTotalTimeoutMultiplier = std::stoul(writeTotalTimeoutMultiplier_);
-            const auto writeTotalTimeoutConstant   = std::stoul(writeTotalTimeoutConstant_);
-
-            timeouts.WriteTotalTimeoutMultiplier = writeTotalTimeoutMultiplier;
-            timeouts.WriteTotalTimeoutConstant   = writeTotalTimeoutConstant;
+            timeouts.WriteTotalTimeoutMultiplier = 0;
+            timeouts.WriteTotalTimeoutConstant   = 0;
 
             if (!::SetCommTimeouts(serialPort->native_handle(), &timeouts))
             {
