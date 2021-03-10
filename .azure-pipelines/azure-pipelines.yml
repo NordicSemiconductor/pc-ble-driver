@@ -213,8 +213,11 @@ jobs:
       sudo apt-get update
       sudo apt-get install ninja-build gcc-8 g++-8 clang-9 clang-format-9 clang-tidy-9 python3-pycurl python3-pip python3-certifi python3-setuptools libusb-1.0-0-dev libudev-dev
       /usr/bin/python3 -m pip install -U pip
+      echo "pip registry before nrfutil install"
       /usr/bin/python3 -m pip list
       /usr/bin/python3 -m pip install nrfutil
+      echo "pip registry after nrfutil install"
+      /usr/bin/python3 -m pip list
       chmod a+x $(System.ArtifactsDirectory)/nrftc
       $(System.ArtifactsDirectory)/nrftc install arm-toolchain -a $(Agent.BuildDirectory)/toolchain -i armgcc:${{ parameters.ARMGCC_VERSION }} -e $(Agent.BuildDirectory)/tcenv.sh
       cat $(Agent.BuildDirectory)/tcenv.sh
