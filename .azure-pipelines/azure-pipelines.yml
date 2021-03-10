@@ -215,7 +215,7 @@ jobs:
       /usr/bin/python3 -m pip install -U pip
       echo "pip registry before nrfutil install"
       /usr/bin/python3 -m pip list
-      /usr/bin/python3 -m pip install nrfutil
+      /usr/bin/python3 -m pip install --ignore-installed nrfutil
       echo "pip registry after nrfutil install"
       /usr/bin/python3 -m pip list
       chmod a+x $(System.ArtifactsDirectory)/nrftc
