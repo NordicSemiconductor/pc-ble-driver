@@ -26,27 +26,6 @@ set(LIB_TRANSPORT_CPP_SRC_FILES
     src/common/transport/uart_transport.cpp
 )
 
-if(WIN32)
-    set(LIB_PLATFORM_C_SRC_FILES
-        src/common/platform/win/disphelper.c
-    )
-
-    set(LIB_PLATFORM_CPP_SRC_FILES
-        src/common/platform/win/enumser.cpp
-        src/common/platform/win/jlinkid_reg_lookup.cpp
-        src/common/platform/win/serial_port_enum.cpp
-    )
-elseif(APPLE)
-    set(LIB_PLATFORM_CPP_SRC_FILES 
-        src/common/platform/macos_osx/serial_port_enum.cpp
-    )
-else()
-    # Assume Linux
-    set(LIB_PLATFORM_CPP_SRC_FILES 
-        src/common/platform/linux/serial_port_enum.cpp
-    )
-endif()
-
 # SDK source files, different per API version
 
 # Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
