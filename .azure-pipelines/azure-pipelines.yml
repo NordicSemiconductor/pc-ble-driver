@@ -11,19 +11,14 @@ parameters:
   - name: VCPKG_CHECKOUT
     displayName: VCPKG commit
     type: string
-    default: 2020.04
+    default: 2020.11-1
     values:
-    - master
+    - 2020.11-1
+    - 2020.11
+    - 2020.07
     - 2020.06
     - 2020.04
-    - 2020.01
-    - 2019.12
-    - 2019.11
-    - 2019.10
-    - 2019.09
-    - 2019.08
-    - 2019.07
-    - 2019.06
+    - master
   - name: WINDOWS_IMAGE
     displayName: Windows image
     type: string
@@ -92,12 +87,13 @@ variables:
   GITHUB_TAG: v$(NRF_BLE_DRIVER_VERSION)
   VCPKG_REPOSITORY: 'https://github.com/Microsoft/vcpkg.git'
   VCPKG_ROOT: '$(Agent.HomeDirectory)/vcpkg'
+  VCPKG_OVERLAY_PORTS_REPOSITORY: https://github.com/NordicPlayground/vcpkg-overlay-ports-public  
   COMMON_VCPKG_PACKAGES: 'spdlog catch2 cli11 asio'
   SDV2_VERSION: 2.0.1
   SDV3_VERSION: 3.1.0
   SDV5_VERSION: 5.1.0
   SDV6_VERSION: 6.1.1
-  
+
 jobs:
 - job: Build
   strategy:
@@ -149,8 +145,8 @@ jobs:
   - script: |
       @echo off
       echo "VCPKG_ROOT is %VCPKG_ROOT%"
-      git clone $(VCPKG_REPOSITORY) %VCPKG_ROOT%
-      git -C %VCPKG_ROOT% checkout ${{ parameters.VCPKG_CHECKOUT }}
+      git clone $(VCPKG_REPOSITORY) $(VCPKG_ROOT_DIR) --branch ${{ parameters.VCPKG_CHECKOUT }} --depth 1
+      git clone $(VCPKG_OVERLAY_PORTS_REPOSITORY) $(VCPKG_OVERLAY_PORTS_DIR) --depth 1
       cd /d %VCPKG_ROOT%
       bootstrap-vcpkg.bat
       cd /d $(Build.SourcesDirectory)
@@ -221,8 +217,8 @@ jobs:
     condition: contains(variables['imageName'], 'ubuntu')
     displayName: '[Linux] Install build dependencies'
   - bash: |
-      git clone $(VCPKG_REPOSITORY) $VCPKG_ROOT
-      git -C $VCPKG_ROOT checkout ${{ parameters.VCPKG_CHECKOUT }}
+      git clone $(VCPKG_REPOSITORY) $(VCPKG_ROOT_DIR) --branch ${{ parameters.VCPKG_CHECKOUT }} --depth 1
+      git clone $(VCPKG_OVERLAY_PORTS_REPOSITORY) $(VCPKG_OVERLAY_PORTS_DIR) --depth 1
       $VCPKG_ROOT/bootstrap-vcpkg.sh
       $VCPKG_ROOT/vcpkg install $(COMMON_VCPKG_PACKAGES) --triplet $(vcpkg_triplet)
     condition: contains(variables['imageName'], 'ubuntu')
@@ -264,8 +260,8 @@ jobs:
     displayName: '[macOS] Install toolchain'
   - bash: |
       set -o errexit -o pipefail
-      git clone $(VCPKG_REPOSITORY) $VCPKG_ROOT
-      git -C $VCPKG_ROOT checkout ${{ parameters.VCPKG_CHECKOUT }}
+      git clone $(VCPKG_REPOSITORY) $(VCPKG_ROOT_DIR) --branch ${{ parameters.VCPKG_CHECKOUT }} --depth 1
+      git clone $(VCPKG_OVERLAY_PORTS_REPOSITORY) $(VCPKG_OVERLAY_PORTS_DIR) --depth 1
       CC=gcc-9 CXX=g++-9 $VCPKG_ROOT/bootstrap-vcpkg.sh
       $VCPKG_ROOT/vcpkg install $(COMMON_VCPKG_PACKAGES) --triplet $(vcpkg_triplet)
     condition: contains(variables['imageName'], 'mac')
