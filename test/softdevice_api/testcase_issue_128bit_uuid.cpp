@@ -156,15 +156,15 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(issue_128bit_uuid, [issue][PCA10040][PCA1005
         if (err_code != NRF_SUCCESS)
             return err_code;
 
-        ble_gatts_char_md_t service_2_char_md_1{0};
-        ble_gatts_attr_md_t service_2_cccd_md_1{0};
-        ble_gatts_attr_t service_2_attr_char_value_1{0};
-        ble_gatts_attr_md_t service_2_attr_md_1{0};
+        ble_gatts_char_md_t service_2_char_md_1{{}};
+        ble_gatts_attr_md_t service_2_cccd_md_1{{}};
+        ble_gatts_attr_t service_2_attr_char_value_1{{}};
+        ble_gatts_attr_md_t service_2_attr_md_1{{}};
 
-        ble_gatts_char_md_t service_2_char_md_2{0};
-        ble_gatts_attr_md_t service_2_cccd_md_2{0};
-        ble_gatts_attr_t service_2_attr_char_value_2{0};
-        ble_gatts_attr_md_t service_2_attr_md_2{0};
+        ble_gatts_char_md_t service_2_char_md_2{{}};
+        ble_gatts_attr_md_t service_2_cccd_md_2{{}};
+        ble_gatts_attr_t service_2_attr_char_value_2{{}};
+        ble_gatts_attr_md_t service_2_attr_md_2{{}};
 
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_cccd_md_1.read_perm);
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&service_2_cccd_md_1.write_perm);
