@@ -60,8 +60,6 @@ foreach(SD_API_VER ${SD_API_VERS})
     endif()
 endforeach(SD_API_VER)
 
-set(LIB_PLATFORM_SRC_FILES ${LIB_PLATFORM_C_SRC_FILES} ${LIB_PLATFORM_CPP_SRC_FILES})
-
 # Add common compiler definitions
 add_definitions(
     -DASIO_STANDALONE
@@ -82,7 +80,7 @@ endif()
 # Add libraries
 foreach(SD_API_VER ${SD_API_VERS})
     # Object library, from which both shared and static will be built
-    add_library(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} OBJECT ${LIB_${SD_API_VER}_C_SRC_FILES} ${LIB_${SD_API_VER}_CPP_SRC_FILES} ${LIB_PLATFORM_SRC_FILES})
+    add_library(${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} OBJECT ${LIB_${SD_API_VER}_C_SRC_FILES} ${LIB_${SD_API_VER}_CPP_SRC_FILES})
 
     # shared libraries need PIC
     set_property(TARGET ${NRF_BLE_DRIVER_${SD_API_VER}_OBJ_LIB} PROPERTY POSITION_INDEPENDENT_CODE 1)

@@ -35,36 +35,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /** @file
-*
-* @brief Type definitions and API calls for SoftDevice RPC module.
-*
-*/
+ *
+ * @brief Type definitions and API calls for SoftDevice RPC module.
+ *
+ */
 
 #ifndef SD_RPC_H__
 #define SD_RPC_H__
 
+#include "adapter.h"
 #include "platform.h"
 #include "sd_rpc_types.h"
-#include "adapter.h"
 
 #include "ble.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-/**@brief Enumerate available serial ports.
- *
- * @param[out] serial_port_descs  The array of serial port descriptors to be filled in.
- * @param[in,out]  size The size of the array. The number of ports found is stored here.
- *
- * @retval NRF_SUCCESS  The serial ports were enumerated successfully.
- * @retval NRF_ERROR_NULL size was a null pointer.
- * @retval NRF_ERROR_DATA_SIZE The size of the array was not large enough to keep all descriptors found.
- *                      No descriptors where copied. Call again with an larger array.
- * @retval NRF_ERROR    There was an error enumerating the serial ports.
- */
-SD_RPC_API uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size);
 
 /**@brief Create a new serial physical layer.
  *
@@ -75,7 +62,10 @@ SD_RPC_API uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_por
  *
  * @retval The physical layer or NULL.
  */
-SD_RPC_API physical_layer_t *sd_rpc_physical_layer_create_uart(const char * port_name, uint32_t baud_rate, sd_rpc_flow_control_t flow_control, sd_rpc_parity_t parity);
+SD_RPC_API physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name,
+                                                               uint32_t baud_rate,
+                                                               sd_rpc_flow_control_t flow_control,
+                                                               sd_rpc_parity_t parity);
 
 /**@brief Create a new data link layer.
  *
@@ -84,7 +74,9 @@ SD_RPC_API physical_layer_t *sd_rpc_physical_layer_create_uart(const char * port
  *
  * @retval The data link layer or NULL.
  */
-SD_RPC_API data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer, uint32_t retransmission_interval);
+SD_RPC_API data_link_layer_t *
+sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer,
+                                            uint32_t retransmission_interval);
 
 /**@brief Create a new transport layer.
  *
@@ -93,7 +85,8 @@ SD_RPC_API data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physic
  *
  * @retval The transport layer or NULL.
  */
-SD_RPC_API transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer, uint32_t response_timeout);
+SD_RPC_API transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer,
+                                                            uint32_t response_timeout);
 
 /**@brief Create a new transport adapter.
  *
@@ -101,7 +94,7 @@ SD_RPC_API transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *d
  *
  * @retval The adapter or NULL.
  */
-SD_RPC_API adapter_t *sd_rpc_adapter_create(transport_layer_t* transport_layer);
+SD_RPC_API adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer);
 
 /**@brief Delete a transport adapter.
  *
@@ -123,7 +116,9 @@ SD_RPC_API void sd_rpc_adapter_delete(adapter_t *adapter);
  * @retval NRF_SUCCESS  The module was opened successfully.
  * @retval NRF_ERROR    There was an error opening the module.
  */
-SD_RPC_API uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler, sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler);
+SD_RPC_API uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
+                                sd_rpc_evt_handler_t event_handler,
+                                sd_rpc_log_handler_t log_handler);
 
 /**@brief Close the SoftDevice RPC module.
  *
@@ -146,7 +141,8 @@ SD_RPC_API uint32_t sd_rpc_close(adapter_t *adapter);
  * @retval NRF_ERROR_INVALID_PARAM  severity_filter is not one of the valid enum values
  *                                  in app_log_severity_t
  */
-SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter, sd_rpc_log_severity_t severity_filter);
+SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
+                                                           sd_rpc_log_severity_t severity_filter);
 
 /**@brief Reset the connectivity chip.
  *
