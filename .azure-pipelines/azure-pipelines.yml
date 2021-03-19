@@ -54,7 +54,7 @@ parameters:
     default: 40
   - name: ITERATIONS_TEST
     displayName: Number of iterations to run tests
-    default: 10
+    default: 1
   - name: TEST_EXCLUDE_SOFTDEVICE_TYPES
     displayName: SoftDevice types to exclude from tests
     default: none
