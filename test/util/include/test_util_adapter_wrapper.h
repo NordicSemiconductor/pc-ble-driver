@@ -187,12 +187,13 @@ class AdapterWrapper
     adapter_t *adapterInit(const char *serial_port, const uint32_t baud_rate,
                            const uint32_t retransmission_interval, const uint32_t response_timeout);
 
-    static void statusHandler(adapter_t *adapter, sd_rpc_app_status_t code, const char *message);
+    static void statusHandler(adapter_t *adapter, sd_rpc_app_status_t code, const char *message,
+                              const void *user_data);
 
-    static void eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt);
+    static void eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt, const void *user_data);
 
     static void logHandler(adapter_t *adapter, sd_rpc_log_severity_t severity,
-                           const char *log_message);
+                           const char *log_message, const void *user_data);
 };
 
 } //  namespace testutil

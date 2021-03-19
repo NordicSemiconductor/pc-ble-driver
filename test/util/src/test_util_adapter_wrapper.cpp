@@ -169,7 +169,8 @@ bool AdapterWrapper::error() const
 
 uint32_t AdapterWrapper::open()
 {
-    return sd_rpc_open(m_adapter, statusHandler, eventHandler, logHandler);
+    return sd_rpc_open(m_adapter, statusHandler, eventHandler, logHandler, nullptr, nullptr,
+                       nullptr);
 }
 
 uint32_t AdapterWrapper::close()
@@ -1201,7 +1202,7 @@ adapter_t *AdapterWrapper::adapterInit(const char *serial_port, const uint32_t b
 }
 
 void AdapterWrapper::statusHandler(adapter_t *adapter, sd_rpc_app_status_t code,
-                                   const char *message)
+                                   const char *message, const void *user_data)
 {
     try
     {
@@ -1221,7 +1222,7 @@ void AdapterWrapper::statusHandler(adapter_t *adapter, sd_rpc_app_status_t code,
     }
 }
 
-void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
+void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt, const void *user_data)
 {
     try
     {
@@ -1242,7 +1243,7 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt)
 }
 
 void AdapterWrapper::logHandler(adapter_t *adapter, sd_rpc_log_severity_t severity,
-                                const char *log_message)
+                                const char *log_message, const void *user_data)
 {
     try
     {

@@ -142,7 +142,7 @@ static ble_gap_adv_params_t     m_adv_params;
  * @param[in] code Error code that the error message is associated with.
  * @param[in] message The error message that the callback is associated with.
  */
-static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message)
+static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const char * message, const void *user_data)
 {
     printf("Status: %d, message: %s\n", (uint32_t)code, message);
     fflush(stdout);
@@ -154,7 +154,7 @@ static void status_handler(adapter_t * adapter, sd_rpc_app_status_t code, const 
  * @param[in] severity Level of severity that the log message is associated with.
  * @param[in] message The log message that the callback is associated with.
  */
-static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, const char * message)
+static void log_handler(adapter_t * adapter, sd_rpc_log_severity_t severity, const char * message, const void *user_data)
 {
     switch (severity)
     {
@@ -602,7 +602,7 @@ static uint32_t heart_rate_measurement_send()
  * @param[in] adapter The transport adapter.
  * @param[in] p_ble_evt Bluetooth stack event.
  */
-static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
+static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt, const void *user_data)
 {
     uint32_t err_code;
     #if NRF_SD_BLE_API >= 5
@@ -760,7 +760,7 @@ int main(int argc, char * argv[])
 
     m_adapter =  adapter_init(serial_port, baud_rate);
     sd_rpc_log_handler_severity_filter_set(m_adapter, SD_RPC_LOG_INFO);
-    error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler);
+    error_code = sd_rpc_open(m_adapter, status_handler, ble_evt_dispatch, log_handler, NULL, NULL, NULL);
 
     if (error_code != NRF_SUCCESS)
     {

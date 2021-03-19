@@ -84,8 +84,9 @@ physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint3
     return physicalLayer;
 }
 
-data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer,
-                                                               uint32_t retransmission_interval)
+data_link_layer_t *const
+sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *const physical_layer,
+                                            uint32_t retransmission_interval)
 {
     const auto dataLinkLayer = static_cast<data_link_layer_t *>(malloc(sizeof(data_link_layer_t)));
     const auto physicalLayer = static_cast<UartTransport *>(physical_layer->internal);
@@ -94,8 +95,8 @@ data_link_layer_t *sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t 
     return dataLinkLayer;
 }
 
-transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer,
-                                                 uint32_t response_timeout)
+transport_layer_t *const sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer,
+                                                       uint32_t response_timeout)
 {
     const auto transportLayer = static_cast<transport_layer_t *>(malloc(sizeof(transport_layer_t)));
     const auto dataLinkLayer  = static_cast<H5Transport *>(data_link_layer->internal);
@@ -104,7 +105,7 @@ transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_la
     return transportLayer;
 }
 
-adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer)
+adapter_t *const sd_rpc_adapter_create(transport_layer_t *transport_layer)
 {
     const auto adapterLayer   = static_cast<adapter_t *>(malloc(sizeof(adapter_t)));
     const auto transportLayer = static_cast<SerializationTransport *>(transport_layer->internal);
@@ -113,7 +114,7 @@ adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer)
     return adapterLayer;
 }
 
-void sd_rpc_adapter_delete(adapter_t *adapter)
+void sd_rpc_adapter_delete(adapter_t *const adapter)
 {
     const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
@@ -126,8 +127,10 @@ void sd_rpc_adapter_delete(adapter_t *adapter)
     adapter->internal = nullptr;
 }
 
-uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
-                     sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler)
+uint32_t sd_rpc_open(adapter_t *const adapter, sd_rpc_status_handler_t status_handler,
+                     sd_rpc_evt_handler_t event_handler, sd_rpc_log_handler_t log_handler,
+                     const void *const user_data_status, const void *const user_data_event,
+                     const void *const user_data_log)
 {
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
@@ -136,7 +139,8 @@ uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
         return NRF_ERROR_INVALID_PARAM;
     }
 
-    const auto err_code = adapterLayer->open(status_handler, event_handler, log_handler);
+    const auto err_code = adapterLayer->open(status_handler, event_handler, log_handler,
+                                             user_data_status, user_data_event, user_data_log);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -147,7 +151,7 @@ uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
     return app_ble_gap_state_create(adapterLayer->transport);
 }
 
-uint32_t sd_rpc_close(adapter_t *adapter)
+uint32_t sd_rpc_close(adapter_t *const adapter)
 {
     const auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 
@@ -164,7 +168,7 @@ uint32_t sd_rpc_close(adapter_t *adapter)
     return err_code;
 }
 
-uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
+uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *const adapter,
                                                 sd_rpc_log_severity_t severity_filter)
 {
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
@@ -177,7 +181,7 @@ uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
     return adapterLayer->logSeverityFilterSet(severity_filter);
 }
 
-uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode)
+uint32_t sd_rpc_conn_reset(adapter_t *const adapter, sd_rpc_reset_t reset_mode)
 {
     auto adapterLayer = static_cast<AdapterInternal *>(adapter->internal);
 

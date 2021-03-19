@@ -53,6 +53,8 @@
 extern "C" {
 #endif // __cplusplus
 
+// clang-format off
+
 /**@brief Create a new serial physical layer.
  *
  * @param[in]  port_name  The serial port name.
@@ -62,10 +64,7 @@ extern "C" {
  *
  * @retval The physical layer or NULL.
  */
-SD_RPC_API physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name,
-                                                               uint32_t baud_rate,
-                                                               sd_rpc_flow_control_t flow_control,
-                                                               sd_rpc_parity_t parity);
+SD_RPC_API physical_layer_t *const sd_rpc_physical_layer_create_uart(const char *const port_name, uint32_t baud_rate, sd_rpc_flow_control_t flow_control, sd_rpc_parity_t parity);
 
 /**@brief Create a new data link layer.
  *
@@ -74,9 +73,7 @@ SD_RPC_API physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_
  *
  * @retval The data link layer or NULL.
  */
-SD_RPC_API data_link_layer_t *
-sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer,
-                                            uint32_t retransmission_interval);
+SD_RPC_API data_link_layer_t *const sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *const physical_layer, uint32_t retransmission_interval);
 
 /**@brief Create a new transport layer.
  *
@@ -85,8 +82,7 @@ sd_rpc_data_link_layer_create_bt_three_wire(physical_layer_t *physical_layer,
  *
  * @retval The transport layer or NULL.
  */
-SD_RPC_API transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *data_link_layer,
-                                                            uint32_t response_timeout);
+SD_RPC_API transport_layer_t *const sd_rpc_transport_layer_create(data_link_layer_t *const data_link_layer, uint32_t response_timeout);
 
 /**@brief Create a new transport adapter.
  *
@@ -94,14 +90,14 @@ SD_RPC_API transport_layer_t *sd_rpc_transport_layer_create(data_link_layer_t *d
  *
  * @retval The adapter or NULL.
  */
-SD_RPC_API adapter_t *sd_rpc_adapter_create(transport_layer_t *transport_layer);
+SD_RPC_API adapter_t *const sd_rpc_adapter_create(transport_layer_t *const transport_layer);
 
 /**@brief Delete a transport adapter.
  *
  * @param[in]  adapter  The transport adapter.
  *
  */
-SD_RPC_API void sd_rpc_adapter_delete(adapter_t *adapter);
+SD_RPC_API void sd_rpc_adapter_delete(adapter_t *const adapter);
 
 /**@brief Initialize the SoftDevice RPC module.
  *
@@ -112,13 +108,18 @@ SD_RPC_API void sd_rpc_adapter_delete(adapter_t *adapter);
  * @param[in]  status_handler  The status handler callback.
  * @param[in]  evt_handler  The event handler callback.
  * @param[in]  log_handler  The log handler callback.
+ * @param[in]  user_data User data provided in callbacks.
  *
  * @retval NRF_SUCCESS  The module was opened successfully.
  * @retval NRF_ERROR    There was an error opening the module.
  */
-SD_RPC_API uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t status_handler,
+SD_RPC_API uint32_t sd_rpc_open(adapter_t *const adapter,
+                                sd_rpc_status_handler_t status_handler,
                                 sd_rpc_evt_handler_t event_handler,
-                                sd_rpc_log_handler_t log_handler);
+                                sd_rpc_log_handler_t log_handler,
+                                const void *const user_data_status,
+                                const void *const user_data_event,
+                                const void *const user_data_log);
 
 /**@brief Close the SoftDevice RPC module.
  *
@@ -129,7 +130,7 @@ SD_RPC_API uint32_t sd_rpc_open(adapter_t *adapter, sd_rpc_status_handler_t stat
  * @retval NRF_SUCCESS  The module was closed successfully.
  * @retval NRF_ERROR    There was an error closing the module.
  */
-SD_RPC_API uint32_t sd_rpc_close(adapter_t *adapter);
+SD_RPC_API uint32_t sd_rpc_close(adapter_t *const adapter);
 
 /**@brief Set the lowest log level for messages to be logged to handler.
  *        Default log handler severity filter is LOG_INFO.
@@ -141,7 +142,7 @@ SD_RPC_API uint32_t sd_rpc_close(adapter_t *adapter);
  * @retval NRF_ERROR_INVALID_PARAM  severity_filter is not one of the valid enum values
  *                                  in app_log_severity_t
  */
-SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
+SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *const adapter,
                                                            sd_rpc_log_severity_t severity_filter);
 
 /**@brief Reset the connectivity chip.
@@ -152,10 +153,12 @@ SD_RPC_API uint32_t sd_rpc_log_handler_severity_filter_set(adapter_t *adapter,
  * @retval NRF_SUCCESS  The connectivity chip was reset successfully.
  * @retval NRF_ERROR    There was an error reset the connectivity chip.
  */
-SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *adapter, sd_rpc_reset_t reset_mode);
+SD_RPC_API uint32_t sd_rpc_conn_reset(adapter_t *const adapter, sd_rpc_reset_t reset_mode);
 
 #ifdef __cplusplus
 }
 #endif // __cplusplus
 
 #endif // SD_RPC_H__
+
+// clang-format on
