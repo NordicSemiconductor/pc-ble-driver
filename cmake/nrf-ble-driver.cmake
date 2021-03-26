@@ -34,8 +34,9 @@ if(NOT MSVC)
 endif()
 
 # Set C++ standard to use
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF) # For g++ this ensures -std=c++11 and not -std=gnu++11
 
 # Compiler specific
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -75,13 +76,13 @@ endforeach(SD_API_VER_NUM)
 
 set(SD_API_VER_COMPILER_DEF "NRF_SD_BLE_API_VERSION")
 
-# pc-ble-driver root folder
+# nrf-ble-driver root folder
 set(NRF_BLE_DRIVER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
-# pc-ble-driver hex folder
+# nrf-ble-driver hex folder
 set(NRF_BLE_DRIVER_HEX_DIR ${NRF_BLE_DRIVER_ROOT_DIR}/hex)
 
-# pc-ble-driver include path
+# nrf-ble-driver include path
 set(NRF_BLE_DRIVER_INCLUDE_DIR ${NRF_BLE_DRIVER_ROOT_DIR}/include)
 
 find_package(Git REQUIRED)

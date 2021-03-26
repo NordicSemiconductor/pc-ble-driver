@@ -39,6 +39,7 @@
 
 #include "ble.h"
 #include "ble_app.h"
+#include "log_helper.h"
 #include "nrf_error.h"
 
 #include "ble_common.h"
@@ -205,7 +206,7 @@ uint32_t SerializationTransport::send(const std::vector<uint8_t> &cmdBuffer,
 
     if (!responseReceived)
     {
-        logCallback(SD_RPC_LOG_WARNING, "Failed to receive response for command");
+        getLogger()->warn("Failed to receive response for command");
         return NRF_ERROR_SD_RPC_SERIALIZATION_TRANSPORT_NO_RESPONSE;
     }
 
@@ -224,9 +225,9 @@ void SerializationTransport::drainEventQueue()
             eventQueue.pop();
         }
     }
-    catch (const std::exception &)
+    catch (const std::exception &ex)
     {
-        logCallback(SD_RPC_LOG_ERROR, "Error in SerializationTransport::drainEventQueue");
+        LogHelper::tryToLogException(spdlog::level::err, ex, "Error in SerializationTransport::drainEventQueue");
     }
 }
 
@@ -280,11 +281,10 @@ void SerializationTransport::eventHandlingRunner() noexcept
 
                 if (errCode != NRF_SUCCESS)
                 {
-                    std::stringstream logMessage;
-                    logMessage << "Failed to decode event, error code is " << std::dec << errCode
-                               << "/0x" << std::hex << errCode << ".";
-                    logCallback(SD_RPC_LOG_ERROR, logMessage.str());
-                    statusCallback(PKT_DECODE_ERROR, logMessage.str());
+                    const auto errmsg = fmt::format(
+                        "Failed to decode event, error code is {}/{:#04x}", errCode, errCode);
+                    getLogger()->error(errmsg);
+                    statusCallback(PKT_DECODE_ERROR, errmsg);
                 }
 
                 // Prevent UART from adding events to eventQueue
@@ -296,9 +296,7 @@ void SerializationTransport::eventHandlingRunner() noexcept
     }
     catch (const std::exception &e)
     {
-        std::stringstream ss;
-        ss << "Error in SerializationTransport::eventHandlingRunner, " << e.what() << std::endl;
-        logCallback(SD_RPC_LOG_FATAL, ss.str());
+        LogHelper::tryToLogException(spdlog::level::critical, e, "Error in SerializationTransport::eventHandlingRunner");
     }
 }
 
@@ -320,14 +318,12 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
             }
             else
             {
-                logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE with a packet that "
-                                              "is larger than the allocated buffer.");
+                getLogger()->error("Received SERIALIZATION_RESPONSE with a packet that is larger than the allocated buffer.");
             }
         }
         else
         {
-            logCallback(SD_RPC_LOG_ERROR, "Received SERIALIZATION_RESPONSE but command did not "
-                                          "provide a buffer for the reply.");
+            getLogger()->error("Received SERIALIZATION_RESPONSE but command did not provide a buffer for the reply.");
         }
 
         std::lock_guard<std::mutex> responseGuard(responseMutex);
@@ -345,7 +341,6 @@ void SerializationTransport::readHandler(const uint8_t *data, const size_t lengt
     }
     else
     {
-        logCallback(SD_RPC_LOG_WARNING,
-                    "Unknown Nordic Semiconductor vendor specific packet received");
+        getLogger()->warn("Unknown Nordic Semiconductor vendor specific packet received");
     }
 }

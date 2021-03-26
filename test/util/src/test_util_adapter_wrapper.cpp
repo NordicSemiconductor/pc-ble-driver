@@ -1222,7 +1222,7 @@ void AdapterWrapper::statusHandler(adapter_t *adapter, sd_rpc_app_status_t code,
     }
 }
 
-void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt, const void *user_data)
+void AdapterWrapper::eventHandler(adapter_t *adapter, const ble_evt_t *p_ble_evt, const void *user_data)
 {
     try
     {
@@ -1242,13 +1242,12 @@ void AdapterWrapper::eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt, cons
     }
 }
 
-void AdapterWrapper::logHandler(adapter_t *adapter, sd_rpc_log_severity_t severity,
-                                const char *log_message, const void *user_data)
+void AdapterWrapper::logHandler(adapter_t *adapter, const sd_rpc_log_t *log_entry, const void *user_data)
 {
     try
     {
         const auto wrappedAdapter = AdapterWrapper::adapters.at(adapter->internal);
-        wrappedAdapter->processLog(severity, log_message);
+        wrappedAdapter->processLog(log_entry->severity, log_entry->message);
     }
     catch (std::out_of_range &e)
     {

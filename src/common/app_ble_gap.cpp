@@ -47,7 +47,7 @@
 #include <mutex>
 #include <sd_rpc_types.h>
 
-typedef struct
+typedef struct adv_set_t
 {
     bool active;
     uint8_t adv_handle;
@@ -61,7 +61,7 @@ typedef enum {
     BLE_DATA_BUF_LAST_DIRTY,
 } ble_data_buf_state_t;
 
-typedef struct
+typedef struct ble_data_item_t
 {
     ble_data_buf_state_t state;
     uint32_t id;
@@ -70,7 +70,7 @@ typedef struct
 /**
  * @brief This structure keeps GAP states for one adapter
  */
-typedef struct
+typedef struct adapter_ble_gap_state_t
 {
     // GAP connection - BLE security keys table for storage.
     ser_ble_gap_app_keyset_t app_keys_table[SER_MAX_CONNECTIONS]{};
@@ -96,7 +96,7 @@ static std::map<void *, std::shared_ptr<adapter_ble_gap_state_t>> adapters_gap_s
  * use during encoding and decoding.
  *
  */
-typedef struct
+typedef struct adapter_codec_context_t
 {
     /**
      * @brief adapter_id that points to the @ref adapter_ble_gap_state_t [adapter GAP state]

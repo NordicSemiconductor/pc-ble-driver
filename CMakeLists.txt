@@ -7,7 +7,8 @@ if(NOT DEFINED NRF_BLE_DRIVER_VERSION)
     set(NRF_BLE_DRIVER_VERSION "${NRF_BLE_DRIVER_DEFAULT_VERSION}")
 endif()
 
-set(NRF_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION "0.0.0")
+# Keep connectivity version and driver version aligned
+set(NRF_BLE_DRIVER_CONNECTIVITY_DEFAULT_VERSION $(NRF_BLE_DRIVER_VERSION))
 
 # Add connectivity firmware building
 if(NOT DEFINED CONNECTIVITY_VERSION)
@@ -26,6 +27,15 @@ project(
     nrf-ble-driver
     VERSION ${NRF_BLE_DRIVER_VERSION}
 )
+
+option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
+if (${FORCE_COLORED_OUTPUT})
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+       add_compile_options (-fdiagnostics-color=always)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+       add_compile_options (-fcolor-diagnostics)
+    endif ()
+endif ()
 
 include(cmake/nrf-ble-driver.cmake)
 include(cmake/source-file-list.cmake)
@@ -213,6 +223,12 @@ endforeach(SD_API_VER)
 # Set common include directories
 find_path(ASIO_INCLUDE_DIR asio.hpp)
 
+# Library related requirements
+find_package(Threads REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
+
+
 # Set per-SD API version include directories and compiler definitions
 foreach(SD_API_VER ${SD_API_VERS})
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
@@ -271,6 +287,19 @@ foreach(SD_API_VER ${SD_API_VERS})
         target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} PRIVATE "udev" "pthread")
         target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB} PRIVATE "udev" "pthread")
     endif()
+
+    target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_STATIC_LIB} 
+        PRIVATE
+            spdlog::spdlog
+            fmt::fmt
+            Threads::Threads
+    )
+
+    target_link_libraries(${NRF_BLE_DRIVER_${SD_API_VER}_SHARED_LIB}
+        PRIVATE
+            spdlog::spdlog
+            Threads::Threads
+    )
 endforeach(SD_API_VER)
 
 # Add tests

@@ -38,6 +38,9 @@
 #include "h5.h"
 #include "nrf_error.h"
 #include "sd_rpc_types.h"
+
+#include "enum_helper.h"
+
 #include <algorithm>
 #include <vector>
 
@@ -105,10 +108,10 @@ void add_crc16(std::vector<uint8_t> &out_packet)
 
 void h5_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet,
                const uint8_t seq_num, const uint8_t ack_num, const bool crc_present,
-               const bool reliable_packet, const h5_pkt_type_t packet_type)
+               const bool reliable_packet, const h5_pkt_type packet_type)
 {
-    add_h5_header(out_packet, seq_num, ack_num, crc_present, reliable_packet, packet_type,
-                  static_cast<uint16_t>(in_packet.size()));
+    add_h5_header(out_packet, seq_num, ack_num, crc_present, reliable_packet,
+                  as_integer(packet_type), static_cast<uint16_t>(in_packet.size()));
 
     out_packet.insert(out_packet.end(), in_packet.begin(), in_packet.end());
 
@@ -122,7 +125,7 @@ void h5_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_
 uint32_t h5_decode(const std::vector<uint8_t> &slipPayload, std::vector<uint8_t> &h5Payload,
                    uint8_t *seq_num, uint8_t *ack_num, bool *_data_integrity,
                    uint16_t *_payload_length, uint8_t *_header_checksum, bool *reliable_packet,
-                   h5_pkt_type_t *packet_type)
+                   h5_pkt_type *packet_type)
 {
     if (slipPayload.size() < 4)
     {
@@ -135,7 +138,7 @@ uint32_t h5_decode(const std::vector<uint8_t> &slipPayload, std::vector<uint8_t>
         static_cast<bool>(((slipPayload[0] >> crcPresentPos) & crcPresentMask) != 0);
     *reliable_packet =
         static_cast<bool>(((slipPayload[0] >> reliablePacketPos) & reliablePacketMask) != 0);
-    *packet_type = static_cast<h5_pkt_type_t>(slipPayload[1] & packetTypeMask);
+    *packet_type = static_cast<h5_pkt_type>(slipPayload[1] & packetTypeMask);
     const uint16_t payload_length =
         ((slipPayload[1] >> payloadLengthOffset) & payloadLengthFirstNibbleMask) +
         (static_cast<uint16_t>(slipPayload[2]) << payloadLengthOffset);

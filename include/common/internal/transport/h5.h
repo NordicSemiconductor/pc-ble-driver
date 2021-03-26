@@ -35,15 +35,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef H5_H
-#define H5_H
+#pragma once
 
 #include <stdint.h>
 #include <vector>
 
-const uint32_t H5_HEADER_LENGTH = 4;
+constexpr uint32_t H5_HEADER_LENGTH = 4;
 
-typedef enum {
+enum class h5_pkt_type : uint8_t {
     ACK_PACKET             = 0,
     HCI_COMMAND_PACKET     = 1,
     ACL_DATA_PACKET        = 2,
@@ -52,25 +51,23 @@ typedef enum {
     RESET_PACKET           = 5,
     VENDOR_SPECIFIC_PACKET = 14,
     LINK_CONTROL_PACKET    = 15
-} h5_pkt_type_t;
+};
 
-typedef enum {
-    CONTROL_PKT_RESET                = 0,
-    CONTROL_PKT_ACK                  = 1,
-    CONTROL_PKT_SYNC                 = 2,
-    CONTROL_PKT_SYNC_RESPONSE        = 3,
-    CONTROL_PKT_SYNC_CONFIG          = 4,
-    CONTROL_PKT_SYNC_CONFIG_RESPONSE = 5,
-    CONTROL_PKT_LAST                 = 10
-} control_pkt_type;
+enum class control_pkt_type : uint8_t {
+    RESET                = 0,
+    ACK                  = 1,
+    SYNC                 = 2,
+    SYNC_RESPONSE        = 3,
+    SYNC_CONFIG          = 4,
+    SYNC_CONFIG_RESPONSE = 5,
+    LAST                 = 10
+};
 
 void h5_encode(const std::vector<uint8_t> &in_packet, std::vector<uint8_t> &out_packet,
                uint8_t seq_num, uint8_t ack_num, bool crc_present, bool reliable_packet,
-               h5_pkt_type_t packet_type);
+               h5_pkt_type packet_type);
 
 uint32_t h5_decode(const std::vector<uint8_t> &slip_dec_packet, std::vector<uint8_t> &h5_dec_packet,
                    uint8_t *seq_num, uint8_t *ack_num, bool *_data_integrity,
                    uint16_t *_payload_length, uint8_t *_header_checksum, bool *reliable_packet,
-                   h5_pkt_type_t *packet_type);
-
-#endif // H5_H
+                   h5_pkt_type *packet_type);

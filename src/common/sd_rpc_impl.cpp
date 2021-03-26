@@ -41,16 +41,43 @@
 #include "app_ble_gap.h"
 #include "ble_common.h"
 #include "h5_transport.h"
+#include "log_helper.h"
+#include "logger_sink.h"
 #include "serial_port_enum.h"
 #include "serialization_transport.h"
 #include "uart_settings_boost.h"
 #include "uart_transport.h"
 
+#include <spdlog/spdlog.h>
+
 #include <cstdlib>
 
-physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint32_t baud_rate,
-                                                    sd_rpc_flow_control_t flow_control,
-                                                    sd_rpc_parity_t parity)
+// NOLINTNEXTLINE
+static const std::shared_ptr<::LoggerSink<std::mutex>> *logger_sink;
+
+/* Function for properly initializing the logger sink.
+ * - Adds the sink to the non-thread safe logger->sinks only once.
+ * - Keeps the logger sink alive "forever" to prevent static initialization fiasco. Otherwise, the
+ *   sink may be working on a log message while being destructed at the same time.
+ */
+static void s_initialize_logger_sink()
+{
+    if (logger_sink == nullptr)
+    {
+        auto logger               = getLogger();
+        using nrf_ble_driver_sink = ::LoggerSink<std::mutex>;
+
+        // NOLINTNEXTLINE
+        logger_sink = new std::shared_ptr<nrf_ble_driver_sink>(new nrf_ble_driver_sink());
+
+        /* Warning: logger->sinks is not thread safe. */
+        logger->sinks().push_back(*logger_sink);
+    }
+}
+
+physical_layer_t *const sd_rpc_physical_layer_create_uart(const char *port_name, uint32_t baud_rate,
+                                                          sd_rpc_flow_control_t flow_control,
+                                                          sd_rpc_parity_t parity)
 {
     const auto physicalLayer = static_cast<physical_layer_t *>(malloc(sizeof(physical_layer_t)));
 
@@ -111,6 +138,9 @@ adapter_t *const sd_rpc_adapter_create(transport_layer_t *transport_layer)
     const auto transportLayer = static_cast<SerializationTransport *>(transport_layer->internal);
     const auto adapter        = new AdapterInternal(transportLayer);
     adapterLayer->internal    = static_cast<void *>(adapter);
+
+    s_initialize_logger_sink();
+
     return adapterLayer;
 }
 

@@ -37,7 +37,9 @@
 
 #include "uart_transport.h"
 
+#include "log_helper.h"
 #include "nrf_error.h"
+#include "uart_settings.h"
 #include "uart_settings_boost.h"
 
 #include <deque>
@@ -52,8 +54,8 @@
 #include <system_error>
 #endif
 
-#include "uart_settings_boost.h"
 #include <asio.hpp>
+#include <fmt/format.h>
 
 constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
 
@@ -113,11 +115,8 @@ struct UartTransport::impl : Transport
         }
         else if (errorCode == asio::error::operation_aborted)
         {
-            std::stringstream message;
-            message << "serial port read on port " << uartSettingsBoost.getPortName()
-                    << " aborted.";
-
-            log(SD_RPC_LOG_DEBUG, message.str());
+            getLogger()->debug("serial port read on port {} aborted.",
+                               uartSettingsBoost.getPortName());
         }
         else
         {
@@ -138,11 +137,8 @@ struct UartTransport::impl : Transport
         }
         else if (errorCode == asio::error::operation_aborted)
         {
-            std::stringstream message;
-            message << "serial port write operation on port " << uartSettingsBoost.getPortName()
-                    << " aborted.";
-
-            log(SD_RPC_LOG_DEBUG, message.str());
+            getLogger()->debug("serial port write operation on port {} aborted.",
+                               uartSettingsBoost.getPortName());
 
             // In case of an aborted write operation, suppress notifications and return (i.e. no
             // asyncWrite)
@@ -153,11 +149,9 @@ struct UartTransport::impl : Transport
         }
         else
         {
-            std::stringstream message;
-            message << "serial port write operation on port " << uartSettingsBoost.getPortName()
-                    << " failed. Error: " << errorCode.message() << "[" << errorCode.value() << "]";
-
-            log(SD_RPC_LOG_ERROR, message.str());
+            getLogger()->error("serial port write operation on port {} failed. Error {} [{}]",
+                               uartSettingsBoost.getPortName(), errorCode.message(),
+                               errorCode.value());
         }
     }
 
@@ -214,9 +208,7 @@ struct UartTransport::impl : Transport
 
             if (lastError != ERROR_SUCCESS)
             {
-                std::stringstream message;
-                message << "Error purging UART " << static_cast<uint32_t>(lastError);
-                log(SD_RPC_LOG_ERROR, message.str());
+                getLogger()->error("Error purging UART {}", lastError);
             }
         }
 #endif
@@ -226,9 +218,7 @@ struct UartTransport::impl : Transport
 
         if (result == -1)
         {
-            std::stringstream message;
-            message << "Error purging UART " << static_cast<uint32_t>(result);
-            log(SD_RPC_LOG_ERROR, message.str());
+            getLogger()->error("Error purging UART {}", result);
         }
 #endif
     }
@@ -328,7 +318,7 @@ struct UartTransport::impl : Transport
             }
             catch (const std::exception &)
             {
-                log(SD_RPC_LOG_ERROR, "Error creating status message entry");
+                getLogger()->error("Error creating status message entry");
             }
 
             return NRF_ERROR_SD_RPC_SERIAL_PORT;
@@ -352,13 +342,11 @@ struct UartTransport::impl : Transport
                     }
 
                     const auto count = ioService->run();
-                    std::stringstream message;
-                    message << "serial io_context executed " << count << " handlers.";
-                    log(SD_RPC_LOG_TRACE, message.str());
+                    getLogger()->trace("serial io_context executed {} handlers.", count);
                 }
                 catch (std::exception &e)
                 {
-                    log(SD_RPC_LOG_ERROR, "serial io_context error", e);
+                    LogHelper::tryToLogException(spdlog::level::err, e, "serial io_context error");
                 }
             };
 
@@ -375,7 +363,7 @@ struct UartTransport::impl : Transport
             }
             catch (const std::exception &)
             {
-                log(SD_RPC_LOG_ERROR,
+                getLogger()->error(
                     "Error creating status message entry or invoking status callback.");
             }
 
@@ -386,50 +374,17 @@ struct UartTransport::impl : Transport
 
         try
         {
-            std::stringstream flow_control_string;
-            std::stringstream parity_string;
+            /*            getLogger()->info("Successfully opened {}. Baud rate: {}. Flow control:
+               {}. Parity: {}", uartSettingsBoost.getPortName(), uartSettingsBoost.getBaudRate(),
+                                          uartSettingsBoost.getFlowControl(),
+               uartSettingsBoost.getParity());*/
 
-            switch (uartSettingsBoost.getParity())
-            {
-                case UartParityEven:
-                    parity_string << "even";
-                    break;
-                case UartParityOdd:
-                    parity_string << "odd";
-                    break;
-                case UartParityNone:
-                    parity_string << "none";
-                    break;
-                default:
-                    parity_string << "unknown";
-            }
-
-            switch (uartSettingsBoost.getFlowControl())
-            {
-                case UartFlowControlNone:
-                    flow_control_string << "none";
-                    break;
-                case UartFlowControlHardware:
-                    flow_control_string << "hardware";
-                    break;
-                case UartFlowControlSoftware:
-                    flow_control_string << "software";
-                    break;
-                default:
-                    flow_control_string << "unknown";
-            }
-
-            std::stringstream message;
-            message << "Successfully opened " << uartSettingsBoost.getPortName() << ". "
-                    << "Baud rate: " << uartSettingsBoost.getBaudRate() << ". "
-                    << "Flow control: " << flow_control_string.str() << ". "
-                    << "Parity: " << parity_string.str() << ".";
-
-            log(SD_RPC_LOG_INFO, message.str());
+            getLogger()->info("Successfully opened {}. Baud rate: {}.",
+                              uartSettingsBoost.getPortName(), uartSettingsBoost.getBaudRate());
         }
-        catch (const std::exception &)
+        catch (...)
         {
-            log(SD_RPC_LOG_ERROR, "Error creating log entry");
+            std::terminate();
         }
 
         return NRF_SUCCESS;
@@ -465,15 +420,13 @@ struct UartTransport::impl : Transport
             serialPort.reset();
             ioService.reset();
 
-            std::stringstream message;
-            message << "serial port " << uartSettingsBoost.getPortName() << " closed.";
-            log(SD_RPC_LOG_INFO, message.str());
+            getLogger()->info("serial port {} closed.", uartSettingsBoost.getPortName());
 
             asyncWriteInProgress = false;
         }
         catch (std::exception &ex)
         {
-            log(SD_RPC_LOG_ERROR, "Error closing serial port", ex);
+            LogHelper::tryToLogException(spdlog::level::err, ex, "Error closing serial port");
             return NRF_ERROR_SD_RPC_SERIAL_PORT_INTERNAL_ERROR;
         }
 
@@ -487,9 +440,8 @@ struct UartTransport::impl : Transport
 
             if (!isOpen)
             {
-                log(SD_RPC_LOG_ERROR,
-                    "Trying to send packets to device when serial device is closed is not "
-                    "supported");
+                getLogger()->error("Trying to send packets to device when serial device is closed "
+                                   "is not supported");
 
                 return NRF_ERROR_SD_RPC_SERIAL_PORT_STATE;
             }
@@ -504,7 +456,7 @@ struct UartTransport::impl : Transport
             }
             catch (const std::exception &e)
             {
-                log(SD_RPC_LOG_ERROR, "Error adding TX data", e);
+                LogHelper::tryToLogException(spdlog::level::err, e, "Error adding TX data");
                 return NRF_ERROR_SD_RPC_SERIAL_PORT_INTERNAL_ERROR;
             }
         }
@@ -517,7 +469,8 @@ struct UartTransport::impl : Transport
             }
             catch (const std::exception &e)
             {
-                log(SD_RPC_LOG_ERROR, "Error writing data async to device", e);
+                LogHelper::tryToLogException(spdlog::level::err, e,
+                                             "Error writing data async to device");
                 return NRF_ERROR_SD_RPC_SERIAL_PORT_INTERNAL_ERROR;
             }
         }

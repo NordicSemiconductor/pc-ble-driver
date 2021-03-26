@@ -35,11 +35,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UART_SETTINGS_BOOST_H
-#define UART_SETTINGS_BOOST_H
+#pragma once
 
 #include "uart_settings.h"
-
 #include <asio/serial_port.hpp>
 
 /**
@@ -69,5 +67,3 @@ class UartSettingsBoost : public UartSettings
     /*@brief Returns character size in Boost format. */
     asio::serial_port::character_size getBoostCharacterSize() const;
 };
-
-#endif // UART_SETTINGS_BOOST_H

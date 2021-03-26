@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nordic Semiconductor ASA
+ * Copyright (c) 2020 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,72 +34,89 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/** @file
+ *
+ * @brief Implementation of a log message in C++. Wraps around a C representation of a log message.
+ *
+ */
 
-#include "transport.h"
+#pragma once
 
-#include "nrf_error.h"
+#include "sd_rpc_types.h"
+#include <string>
+#include <string_helper.h>
 
-#include <cstdint>
-#include <iostream>
-#include <sstream>
-
-using namespace std;
-
-Transport::Transport()           = default;
-Transport::~Transport() noexcept = default;
-
-uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                         const log_cb_t &log_callback) noexcept
+/**@brief Log message.
+ *
+ * This class keeps all the information of a log message. The underlying
+ * implementation has a raw C structure of the message. This C++ class
+ * manages all the memory related to the C structure and makes sure it is
+ * consistent when manipulating the C++ object.
+ */
+class LogMessage
 {
-    if (!status_callback || !data_callback || !log_callback)
+  private:
+    sd_rpc_log_t log_raw{};
+    std::string message;
+
+  public:
+    LogMessage(const sd_rpc_log_severity_t severity, std::string msg)
+        : message(std::move(msg))
     {
-        return NRF_ERROR_SD_RPC_INVALID_ARGUMENT;
+        log_raw.severity = severity;
+        log_raw.message  = message.c_str();
     }
 
-    upperStatusCallback = status_callback;
-    upperDataCallback   = data_callback;
-    upperLogCallback    = log_callback;
-
-    return NRF_SUCCESS;
-}
-
-void Transport::status(const sd_rpc_app_status_t code, const std::string &message) const noexcept
-{
-    if (upperLogCallback)
+    explicit LogMessage(const sd_rpc_log_t *other_raw)
+        : LogMessage(SD_RPC_LOG_FATAL, "")
     {
-        try
+        if (other_raw == nullptr)
         {
-            upperStatusCallback(code, message);
+            return;
         }
-        catch (const std::exception &ex)
-        {
-            try
-            {
-                std::cerr << "Exception thrown in status callback, " << ex.what() << '\n';
-            }
-            catch (const std::exception &)
-            {
-                std::cerr << "Fatal error creating status callback string" << std::endl;
-            }
-        }
+        log_raw         = *other_raw;
+        message         = StringHelper::toOptional(other_raw->message).value_or("");
+        log_raw.message = message.c_str();
     }
-    else
-    {
-        std::cerr << "status(" << static_cast<uint32_t>(code) << ") " << message << std::endl;
-    }
-}
 
-void Transport::status(const sd_rpc_app_status_t code, const std::string &message,
-                       const std::exception &ex) const noexcept
-{
-    try
+    LogMessage(const LogMessage &other)
     {
-        std::stringstream status_with_exception;
-        status_with_exception << message << ", " << ex.what();
-        status(code, status_with_exception.str());
+        *this = other;
     }
-    catch (const std::exception &)
+
+    LogMessage(LogMessage &&other) noexcept
     {
-        std::cerr << "Fatal error creating status callback string" << std::endl;
+        *this = other;
     }
-}
+
+    auto operator=(const LogMessage &other) -> LogMessage &
+    {
+        if (this != &other)
+        {
+            log_raw         = other.log_raw;
+            message         = other.message;
+            log_raw.message = message.c_str();
+        }
+        return *this;
+    }
+
+    auto operator=(LogMessage &&other) noexcept -> LogMessage &
+    {
+        *this = other;
+        return *this;
+    }
+
+    ~LogMessage() = default;
+
+    /**@brief Get the raw data.
+     *
+     * This will return a pointer to the underlying raw data represented as a C-struct.
+     * The raw data is managed and kept consistent by this class.
+     *
+     * @returns  The raw data as a pointer to a C-struct.
+     */
+    auto data() const noexcept -> const sd_rpc_log_t *
+    {
+        return &log_raw;
+    }
+};

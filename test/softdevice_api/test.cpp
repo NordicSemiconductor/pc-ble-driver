@@ -85,7 +85,10 @@ int main(int argc, char *argv[])
     const auto exitCode = session.applyCommandLine(argc, argv);
 
     if (exitCode != 0)
+    {
+        get_logger()->error("Parsing comman line arguments returned error {}", exitCode);
         return exitCode;
+    }
 
     if (!serialPortA.empty())
     {
@@ -106,7 +109,24 @@ int main(int argc, char *argv[])
         test::ConfiguredEnvironment.hardwareInfo = "No hardware info provided.";
     }
 
+    // The return code from the Catch2 framework is a bit different then ordinary retur codes.
+    // Source for this information:
+    //     https://github.com/catchorg/Catch2/blob/c12170ff69ddc9a0a25ec2025783b815354c6d26/src/catch2/catch_session.cpp#L258
     const auto ret = session.run();
+
+    switch (ret)
+    {
+        case 1:
+            get_logger()->error("Exceptions starting test framework, session.run() returned {}",
+                                ret);
+            break;
+        default:
+            // This is correct for value of 2 also if no warning is set for no tests found
+            // To do run with warning if there are no tests, speciy '-w NoTests' when running the
+            // tests
+            get_logger()->error("{} tests failed", ret);
+            break;
+    }
 
     spdlog::shutdown();
 

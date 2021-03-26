@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nordic Semiconductor ASA
+ * Copyright (c) 2020 Nordic Semiconductor ASA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -34,72 +34,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/** @file
+ *
+ * @brief Helper for special string conversions.
+ *
+ */
 
-#include "transport.h"
+#pragma once
 
-#include "nrf_error.h"
+#include <algorithm>
+#include <cctype>
+#include <optional>
+#include <string>
 
-#include <cstdint>
-#include <iostream>
-#include <sstream>
-
-using namespace std;
-
-Transport::Transport()           = default;
-Transport::~Transport() noexcept = default;
-
-uint32_t Transport::open(const status_cb_t &status_callback, const data_cb_t &data_callback,
-                         const log_cb_t &log_callback) noexcept
+/**@brief String helper class.
+ *
+ * This is a static helper class for performing special string operations.
+ */
+class StringHelper
 {
-    if (!status_callback || !data_callback || !log_callback)
+  public:
+    static auto toCString(const std::optional<std::string> &cpp_str) noexcept -> const char *
     {
-        return NRF_ERROR_SD_RPC_INVALID_ARGUMENT;
-    }
-
-    upperStatusCallback = status_callback;
-    upperDataCallback   = data_callback;
-    upperLogCallback    = log_callback;
-
-    return NRF_SUCCESS;
-}
-
-void Transport::status(const sd_rpc_app_status_t code, const std::string &message) const noexcept
-{
-    if (upperLogCallback)
-    {
-        try
-        {
-            upperStatusCallback(code, message);
-        }
-        catch (const std::exception &ex)
+        if (cpp_str.has_value())
         {
             try
             {
-                std::cerr << "Exception thrown in status callback, " << ex.what() << '\n';
+                return cpp_str->c_str();
             }
-            catch (const std::exception &)
+            catch (...)
             {
-                std::cerr << "Fatal error creating status callback string" << std::endl;
+                return nullptr;
             }
         }
+        else
+        {
+            return nullptr;
+        }
     }
-    else
-    {
-        std::cerr << "status(" << static_cast<uint32_t>(code) << ") " << message << std::endl;
-    }
-}
 
-void Transport::status(const sd_rpc_app_status_t code, const std::string &message,
-                       const std::exception &ex) const noexcept
-{
-    try
+    static auto toOptional(const char *c_str) noexcept -> std::optional<std::string>
     {
-        std::stringstream status_with_exception;
-        status_with_exception << message << ", " << ex.what();
-        status(code, status_with_exception.str());
+        if (c_str != nullptr)
+        {
+            try
+            {
+                return std::make_optional<std::string>(std::string(c_str));
+            }
+            catch (...)
+            {
+                return std::optional<std::string>{};
+            }
+        }
+
+        return std::optional<std::string>{};
     }
-    catch (const std::exception &)
+
+    static auto subStringAfterWord(const std::string &source, const std::string &word,
+                                   size_t substr_length, std::string &target) -> bool
     {
-        std::cerr << "Fatal error creating status callback string" << std::endl;
+        auto word_i = source.find(word, 0);
+
+        if (word_i == std::string::npos)
+        {
+            return false;
+        }
+
+        target = source.substr(word_i + word.length(), substr_length);
+
+        return true;
     }
-}
+
+    static void toUpper(std::string &thestring)
+    {
+        std::transform(thestring.begin(), thestring.end(), thestring.begin(),
+                       [](unsigned char c) -> unsigned char { return std::toupper(c); });
+    }
+};

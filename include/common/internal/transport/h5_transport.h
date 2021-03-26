@@ -35,8 +35,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef H5_TRANSPORT_H
-#define H5_TRANSPORT_H
+#pragma once
 
 #include "transport.h"
 #include "uart_transport.h"
@@ -49,11 +48,12 @@
 
 #include "h5.h"
 #include "h5_transport_exit_criterias.h"
+
 #include <map>
 #include <stdint.h>
 #include <thread>
 
-typedef enum {
+enum class h5_state : uint8_t {
     STATE_START,
     STATE_RESET,
     STATE_UNINITIALIZED,
@@ -63,7 +63,7 @@ typedef enum {
     STATE_CLOSED,
     STATE_NO_RESPONSE,
     STATE_UNKNOWN
-} h5_state_t;
+};
 
 constexpr uint8_t SyncFirstByte           = 0x01;
 constexpr uint8_t SyncSecondByte          = 0x7E;
@@ -75,7 +75,7 @@ constexpr uint8_t SyncConfigRspFirstByte  = 0x04;
 constexpr uint8_t SyncConfigRspSecondByte = 0x7B;
 constexpr uint8_t SyncConfigField         = 0x11;
 
-using state_action_t = std::function<h5_state_t()>;
+using state_action_t = std::function<h5_state()>;
 using payload_t      = std::vector<uint8_t>;
 
 class H5Transport : public Transport
@@ -90,7 +90,7 @@ class H5Transport : public Transport
     uint32_t close() noexcept override;
     uint32_t send(const std::vector<uint8_t> &data) noexcept override;
 
-    h5_state_t state() const;
+    h5_state state() const;
 
     static bool isSyncPacket(const payload_t &packet, const uint8_t offset = 0);
     static bool isSyncResponsePacket(const payload_t &packet, const uint8_t offset = 0);
@@ -100,8 +100,8 @@ class H5Transport : public Transport
     static bool checkPattern(const payload_t &packet, const uint8_t offset,
                              const payload_t &pattern);
     static payload_t getPktPattern(const control_pkt_type);
-    static std::string stateToString(const h5_state_t state) noexcept;
-    static std::string pktTypeToString(const h5_pkt_type_t pktType);
+    static std::string stateToString(const h5_state state) noexcept;
+    static std::string pktTypeToString(const h5_pkt_type pktType);
 
   private:
     void dataHandler(const uint8_t *data, const size_t length) noexcept;
@@ -149,43 +149,41 @@ class H5Transport : public Transport
     std::atomic<uint32_t> errorPacketCount;
 
     void logPacket(const bool outgoing, const payload_t &packet);
-    void logStateTransition(const h5_state_t from, const h5_state_t to) const;
+    void logStateTransition(const h5_state from, const h5_state to) const;
     static std::string asHex(const payload_t &packet);
     static std::string hciPacketLinkControlToString(const payload_t &payload);
     std::string h5PktToString(const bool out, const payload_t &h5Packet) const;
 
     // State machine related
-    h5_state_t currentState;
+    h5_state currentState;
     std::thread stateMachineThread;
 
     bool stateMachineReady;
 
-    std::map<h5_state_t, state_action_t> stateActions;
+    std::map<h5_state, state_action_t> stateActions;
     void setupStateMachine();
     void startStateMachine();
     void stopStateMachine();
 
-    std::map<h5_state_t, std::shared_ptr<ExitCriterias>> exitCriterias;
+    std::map<h5_state, std::shared_ptr<ExitCriterias>> exitCriterias;
 
     void stateMachineWorker() noexcept;
 
     // Mutex that allows threads to wait for a given state in the state machine
     std::mutex currentStateMutex;
-    bool waitForState(h5_state_t state, std::chrono::milliseconds timeout);
+    bool waitForState(h5_state state, std::chrono::milliseconds timeout);
     std::condition_variable currentStateChange;
 
     std::recursive_mutex isOpenMutex;
     bool isOpen;
 
     // Actions associated with each state
-    h5_state_t stateActionStart();
-    h5_state_t stateActionReset();
-    h5_state_t stateActionUninitialized();
-    h5_state_t stateActionInitialized();
-    h5_state_t stateActionActive();
-    h5_state_t stateActionFailed();
-    h5_state_t stateActionClosed();
-    h5_state_t stateActionNoResponse();
+    h5_state stateActionStart();
+    h5_state stateActionReset();
+    h5_state stateActionUninitialized();
+    h5_state stateActionInitialized();
+    h5_state stateActionActive();
+    h5_state stateActionFailed();
+    h5_state stateActionClosed();
+    h5_state stateActionNoResponse();
 };
-
-#endif // H5_TRANSPORT_H

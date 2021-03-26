@@ -35,9 +35,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ADAPTER_INTERNAL_H__
-#define ADAPTER_INTERNAL_H__
+#pragma once
 
+#include "log_message.h"
 #include "sd_rpc_types.h"
 #include "serialization_transport.h"
 
@@ -61,7 +61,7 @@ class AdapterInternal
 
     void statusHandler(const sd_rpc_app_status_t code, const std::string &error);
     void eventHandler(ble_evt_t *event);
-    void logHandler(const sd_rpc_log_severity_t severity, const std::string &log_message);
+    void logHandler(const LogMessage &logMessage);
 
     SerializationTransport *transport;
 
@@ -78,5 +78,3 @@ class AdapterInternal
     bool isOpen;
     std::mutex publicMethodMutex;
 };
-
-#endif // ADAPTER_INTERNAL_H__

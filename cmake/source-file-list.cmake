@@ -13,6 +13,7 @@ set(LIB_BASE_CPP_SRC_FILES
     src/common/app_ble_gap.cpp
     src/common/ble_common.cpp
     src/common/sd_rpc_impl.cpp
+    src/common/log_helper.cpp
 )
 
 set(LIB_TRANSPORT_CPP_SRC_FILES 

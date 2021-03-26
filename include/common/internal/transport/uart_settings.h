@@ -35,8 +35,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UART_SETTINGS_H
-#define UART_SETTINGS_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -133,5 +132,3 @@ class UartSettings
     UartStopBits stopBits;
     UartDataBits dataBits;
 };
-
-#endif // UART_SETTINGS_H

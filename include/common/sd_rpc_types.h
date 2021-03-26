@@ -118,11 +118,24 @@ typedef enum {
 #define NRF_ERROR_SD_RPC_SERIAL_PORT_ALREADY_CLOSED (NRF_ERROR_SD_RPC_BASE_NUM + 63)
 #define NRF_ERROR_SD_RPC_SERIAL_PORT_INTERNAL_ERROR (NRF_ERROR_SD_RPC_BASE_NUM + 64)
 
+
+typedef struct
+{
+    sd_rpc_log_severity_t severity;
+    const char* message;
+} sd_rpc_log_t;
+
+typedef struct 
+{
+    sd_rpc_app_status_t code;
+    const char *message;
+} sd_rpc_status_t;
+
 /**@brief Function pointer type for event callbacks. */
-typedef void (*sd_rpc_status_handler_t)(adapter_t *adapter, sd_rpc_app_status_t code, const char *message, const void *user_data);
-typedef void (*sd_rpc_evt_handler_t)(adapter_t *adapter, ble_evt_t *p_ble_evt, const void *user_data);
-typedef void (*sd_rpc_log_handler_t)(adapter_t *adapter, sd_rpc_log_severity_t severity,
-                                     const char *log_message, const void *user_data);
+typedef void (*sd_rpc_status_handler_t)(adapter_t *adapter, const sd_rpc_app_status_t code, const char *message, const void *user_data);
+typedef void (*sd_rpc_log_handler_t)(adapter_t *adapter, const sd_rpc_log_t *p_log, const void *user_data);
+
+typedef void (*sd_rpc_evt_handler_t)(adapter_t *adapter, const ble_evt_t *p_ble_evt, const void *user_data);
 
 #ifdef __cplusplus
 }

@@ -39,6 +39,7 @@
 #define TRANSPORT_H
 
 #include "sd_rpc_types.h"
+#include "log_message.h"
 
 #include <cstdint>
 #include <exception>
@@ -48,8 +49,7 @@
 
 typedef std::function<void(const sd_rpc_app_status_t code, const std::string &message)> status_cb_t;
 typedef std::function<void(const uint8_t *data, const size_t length)> data_cb_t;
-typedef std::function<void(const sd_rpc_log_severity_t severity, const std::string &message)>
-    log_cb_t;
+typedef std::function<void(const LogMessage &logMessage)> log_cb_t;
 
 class Transport
 {
@@ -60,10 +60,6 @@ class Transport
     virtual uint32_t close() noexcept = 0;
 
     virtual uint32_t send(const std::vector<uint8_t> &data) noexcept = 0;
-
-    void log(const sd_rpc_log_severity_t severity, const std::string &message) const noexcept;
-    void log(const sd_rpc_log_severity_t severity, const std::string &message,
-             const std::exception &ex) const noexcept;
 
     void status(const sd_rpc_app_status_t code, const std::string &message) const noexcept;
     void status(const sd_rpc_app_status_t code, const std::string &message,

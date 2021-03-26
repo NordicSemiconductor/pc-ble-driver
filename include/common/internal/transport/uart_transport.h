@@ -35,8 +35,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UART_TRANSPORT_H
-#define UART_TRANSPORT_H
+#pragma once
 
 #include "transport.h"
 #include "uart_settings.h"
@@ -84,5 +83,3 @@ class UartTransport : public Transport
     struct impl;
     std::unique_ptr<impl> pimpl;
 };
-
-#endif // UART_TRANSPORT_H

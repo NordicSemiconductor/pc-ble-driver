@@ -190,10 +190,9 @@ class AdapterWrapper
     static void statusHandler(adapter_t *adapter, sd_rpc_app_status_t code, const char *message,
                               const void *user_data);
 
-    static void eventHandler(adapter_t *adapter, ble_evt_t *p_ble_evt, const void *user_data);
+    static void eventHandler(adapter_t *adapter, const ble_evt_t *p_ble_evt, const void *user_data);
 
-    static void logHandler(adapter_t *adapter, sd_rpc_log_severity_t severity,
-                           const char *log_message, const void *user_data);
+    static void logHandler(adapter_t *adapter, const sd_rpc_log_t *p_log, const void *user_data);
 };
 
 } //  namespace testutil
