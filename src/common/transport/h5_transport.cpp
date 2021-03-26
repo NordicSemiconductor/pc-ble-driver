@@ -39,8 +39,8 @@
 
 #include <fmt/format.h>
 
-const uint8_t PACKET_RETRANSMISSIONS =
-    6; // Number of times to send reliable packets before giving in
+// Number of times to send reliable packets before giving in
+constexpr uint8_t PACKET_RETRANSMISSIONS = 6;
 
 // Other constants
 
@@ -1030,12 +1030,11 @@ std::string H5Transport::hciPacketLinkControlToString(const h5_payload_t &payloa
     std::stringstream retval;
 
     const auto configToString = [](uint8_t config) {
-        std::stringstream info;
-        info << " sliding-window-size:" << (config & 0x07);
-        info << " out-of-frame:" << ((config & 0x08) ? "1" : "0");
-        info << " data-integrity-check-type:" << ((config & 0x0f) ? "1" : "0");
-        info << " version-number:" << ((config & 0x0e) >> 5) << " ";
-        return info.str();
+        return fmt::format(" sliding-window: {} out-of-frame:{} data-integrity-check-type:{} "
+                           "version-number:{} ",
+                           config & 0x07, (config & 0x08) ? "1" : "0", (config & 0x0f) ? "1" : "0",
+                           (config & 0x0e) >> 5)
+            .c_str();
     };
 
     if (payload.size() >= 2)
@@ -1111,22 +1110,24 @@ std::string H5Transport::h5PktToString(const bool out, const h5_payload_t &h5Pac
     }
 
     std::stringstream retval;
-    retval << count.str() << " [" << asHex(payload) << "] "
-           << "type:" << std::setw(20) << pktTypeToString(decodedPacketType)
-           << " reliable:" << std::setw(3) << (decodedReliablePacket ? "yes" : "no")
-           << " seq#:" << std::hex << +seq_num << " ack#:" << std::hex << +decodedAckNum
-           << " payload_length:" << +payload_length << " data_integrity:" << data_integrity;
+
+    retval << fmt::format(
+                  "{} [{}] type:{:>20} reliable:{:>3} seq#:{:04x} ack#:{:04x} payload_length:{} "
+                  "data_integrity:{}",
+                  count.str(), payload, decodedPacketType, decodedReliablePacket ? "yes" : "no",
+                  seq_num, decodedAckNum, payload_length, data_integrity)
+                  .c_str();
 
     if (data_integrity)
     {
-        retval << " header_checksum:" << std::hex << +header_checksum;
+        retval << fmt::format(" header_checksum:{:04x}", header_checksum).c_str();
     }
 
-    retval << " err_code:0x" << std::hex << err_code;
+    retval << fmt::format(" err_code:{:#04x}", err_code);
 
     if (decodedPacketType == h5_pkt_type::LINK_CONTROL_PACKET)
     {
-        retval << " " << hciPacketLinkControlToString(payload);
+        retval << " " << H5Transport::hciPacketLinkControlToString(payload);
     }
 
     return retval.str();
@@ -1143,7 +1144,7 @@ void H5Transport::logPacket(const bool outgoing, const h5_payload_t &packet)
         ++incomingPacketCount;
     }
 
-    const std::string logLine = h5PktToString(outgoing, packet);
+    const std::string logLine = H5Transport::h5PktToString(outgoing, packet);
     getLogger()->debug(logLine);
 }
 
