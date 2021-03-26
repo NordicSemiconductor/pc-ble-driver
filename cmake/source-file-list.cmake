@@ -14,6 +14,7 @@ set(LIB_BASE_CPP_SRC_FILES
     src/common/ble_common.cpp
     src/common/sd_rpc_impl.cpp
     src/common/log_helper.cpp
+    src/common/event_handler.cpp
 )
 
 set(LIB_TRANSPORT_CPP_SRC_FILES 
