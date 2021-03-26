@@ -1,45 +1,9 @@
-/*
- * Copyright (c) 2016 Nordic Semiconductor ASA
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- *   1. Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- *   2. Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- *   3. Neither the name of Nordic Semiconductor ASA nor the names of other
- *   contributors to this software may be used to endorse or promote products
- *   derived from this software without specific prior written permission.
- *
- *   4. This software must only be used in or with a processor manufactured by Nordic
- *   Semiconductor ASA, or in or with a processor manufactured by a third party that
- *   is used in combination with a processor manufactured by Nordic Semiconductor.
- *
- *   5. Any software provided in binary or object form under this license must not be
- *   reverse engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include "sd_rpc.h"
 
 #include "adapter_internal.h"
 #include "app_ble_gap.h"
 #include "ble_common.h"
+#include "event_handler.h"
 #include "h5_transport.h"
 #include "log_helper.h"
 #include "logger_sink.h"
@@ -60,7 +24,7 @@ static const std::shared_ptr<::LoggerSink<std::mutex>> *logger_sink;
  * - Keeps the logger sink alive "forever" to prevent static initialization fiasco. Otherwise, the
  *   sink may be working on a log message while being destructed at the same time.
  */
-static void s_initialize_logger_sink()
+static void s_initialize_logger_sink(std::shared_ptr<EventHandler> &event_handler)
 {
     if (logger_sink == nullptr)
     {
@@ -73,6 +37,15 @@ static void s_initialize_logger_sink()
         /* Warning: logger->sinks is not thread safe. */
         logger->sinks().push_back(*logger_sink);
     }
+
+    (*logger_sink)->addEventHandler(event_handler);
+}
+
+static void s_remove_event_handler_from_logger_sink(std::shared_ptr<EventHandler> &event_handler)
+{
+    // NOLINTNEXTLINE
+    assert(logger_sink != nullptr);
+    (*logger_sink)->removeEventHandler(event_handler);
 }
 
 physical_layer_t *const sd_rpc_physical_layer_create_uart(const char *port_name, uint32_t baud_rate,
@@ -139,7 +112,10 @@ adapter_t *const sd_rpc_adapter_create(transport_layer_t *transport_layer)
     const auto adapter        = new AdapterInternal(transportLayer);
     adapterLayer->internal    = static_cast<void *>(adapter);
 
-    s_initialize_logger_sink();
+    // NOLINTNEXTLINE
+    auto ehandler = std::make_shared<EventHandler>();
+    s_initialize_logger_sink(ehandler);
+    ehandler->start();
 
     return adapterLayer;
 }
