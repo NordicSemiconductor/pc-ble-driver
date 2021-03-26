@@ -1,7 +1,6 @@
 include(GNUInstallDirs)
 
 if(MSVC)
-    add_definitions(-DPC_BLE_DRIVER_STATIC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -85,7 +84,7 @@ function(setup_test)
     target_include_directories(${TEST_NAME} SYSTEM PRIVATE util/include)
 
     target_link_libraries(${TEST_NAME} PRIVATE 
-        nrf_ble_driver_sd_api_v${SOFTDEVICE_API_VER}_static
+        nrf_ble_driver_sd_api_v${SOFTDEVICE_API_VER}
         Threads::Threads
         spdlog::spdlog
         Catch2::Catch2

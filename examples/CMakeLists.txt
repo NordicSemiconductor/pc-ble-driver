@@ -1,5 +1,7 @@
 include(GNUInstallDirs)
 
+find_package(Threads REQUIRED)
+
 function(setup_example example_directory)
     set(EXAMPLE_NAME_BASE "${example_directory}")
     file(GLOB EXAMPLE_SOURCE_FILES "${example_directory}/*.c")
@@ -20,14 +22,11 @@ function(setup_example example_directory)
             $<INSTALL_INTERFACE:include/sd_api_v${SD_API_VER}>
         )
 
-        if(WIN32)
-            target_link_libraries(${EXAMPLE_NAME} PRIVATE nrf_ble_driver_sd_api_v${SD_API_VER}_static)
-        elseif(APPLE)
-            target_link_libraries(${EXAMPLE_NAME} PRIVATE nrf_ble_driver_sd_api_v${SD_API_VER}_static)
-        else()
-            # Assume Linux
-            target_link_libraries(${EXAMPLE_NAME} PRIVATE nrf_ble_driver_sd_api_v${SD_API_VER}_static "pthread")
-        endif()
+        target_link_libraries(${EXAMPLE_NAME} 
+            PRIVATE
+                nrf_ble_driver_sd_api_v${SD_API_VER}
+                Threads::Threads
+        )
 
         install(
             TARGETS ${EXAMPLE_NAME}
@@ -45,7 +44,6 @@ link_directories (
 )
 
 if(MSVC)
-    add_definitions(-DPC_BLE_DRIVER_STATIC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 

@@ -70,8 +70,7 @@ foreach(SD_API_VER_NUM ${SD_API_VER_NUMS})
     # Set project and variable names
     set(NRF_BLE_DRIVER_${_SD_API_VER}_PROJECT_NAME "nrf_ble_driver_${_SD_API_VER_L}")
     set(NRF_BLE_DRIVER_${_SD_API_VER}_OBJ_LIB "nrf_ble_driver_obj_${_SD_API_VER_L}")
-    set(NRF_BLE_DRIVER_${_SD_API_VER}_STATIC_LIB "nrf_ble_driver_${_SD_API_VER_L}_static")
-    set(NRF_BLE_DRIVER_${_SD_API_VER}_SHARED_LIB "nrf_ble_driver_${_SD_API_VER_L}_shared")
+    set(NRF_BLE_DRIVER_${_SD_API_VER}_LIB "nrf_ble_driver_${_SD_API_VER_L}")
 endforeach(SD_API_VER_NUM)
 
 set(SD_API_VER_COMPILER_DEF "NRF_SD_BLE_API_VERSION")
