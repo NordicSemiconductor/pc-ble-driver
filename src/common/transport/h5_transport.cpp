@@ -1,40 +1,3 @@
-/*
- * Copyright (c) 2016-2019 Nordic Semiconductor ASA
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- *   1. Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- *   2. Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- *   3. Neither the name of Nordic Semiconductor ASA nor the names of other
- *   contributors to this software may be used to endorse or promote products
- *   derived from this software without specific prior written permission.
- *
- *   4. This software must only be used in or with a processor manufactured by Nordic
- *   Semiconductor ASA, or in or with a processor manufactured by a third party that
- *   is used in combination with a processor manufactured by Nordic Semiconductor.
- *
- *   5. Any software provided in binary or object form under this license must not be
- *   reverse engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 /**
     Three Wire Packet types (From BLUETOOTH SPECIFICATION V4.2 [Vol 4, Part D], 8.X
 
@@ -287,7 +250,7 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data) noexcept
         // escaped
         // + 2 packet encapsuling
 
-        payload_t h5EncodedPacket;
+        h5_payload_t h5EncodedPacket;
 
         {
             std::unique_lock<std::recursive_mutex> seqNumLck(seqNumMutex);
@@ -296,7 +259,7 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data) noexcept
                       h5_pkt_type::VENDOR_SPECIFIC_PACKET);
         }
 
-        payload_t encodedPacket;
+        h5_payload_t encodedPacket;
         slip_encode(h5EncodedPacket, encodedPacket);
 
         auto remainingRetransmissions = PACKET_RETRANSMISSIONS;
@@ -355,14 +318,14 @@ h5_state H5Transport::state() const
 #pragma endregion Public methods
 
 #pragma region Processing incoming data from UART
-void H5Transport::processPacket(const payload_t &packet)
+void H5Transport::processPacket(const h5_payload_t &packet)
 {
     uint8_t decodedSeqNum;
     uint8_t decodedAckNum;
     bool decodedReliablePacket;
     h5_pkt_type decodedPacketType;
 
-    payload_t slipPayload;
+    h5_payload_t slipPayload;
     auto err_code = slip_decode(packet, slipPayload);
 
     auto logger = getLogger();
@@ -372,14 +335,14 @@ void H5Transport::processPacket(const payload_t &packet)
         ++errorPacketCount;
 
         logger->error("slip_decode error, code {:#04x}, H5 error count: {}, raw packet: {}",
-                      err_code, errorPacketCount.load() /*, packet*/, 0);
+                      err_code, errorPacketCount.load(), packet);
 
         return;
     }
 
     logPacket(false, slipPayload);
 
-    payload_t h5Payload;
+    h5_payload_t h5Payload;
 
     err_code = h5_decode(slipPayload, h5Payload, &decodedSeqNum, &decodedAckNum, nullptr, nullptr,
                          nullptr, &decodedReliablePacket, &decodedPacketType);
@@ -559,7 +522,7 @@ void H5Transport::statusHandler(const sd_rpc_app_status_t code, const std::strin
 
 void H5Transport::dataHandler(const uint8_t *data, const size_t length) noexcept
 {
-    payload_t packet;
+    h5_payload_t packet;
 
     try
     {
@@ -1035,7 +998,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type, const uint8_t a
             h5_packet = h5_pkt_type::LINK_CONTROL_PACKET;
     }
 
-    payload_t h5Packet;
+    h5_payload_t h5Packet;
 
     try
     {
@@ -1050,7 +1013,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type, const uint8_t a
         std::terminate();
     }
 
-    payload_t slipPacket;
+    h5_payload_t slipPacket;
     slip_encode(h5Packet, slipPacket);
 
     logPacket(true, h5Packet);
@@ -1062,7 +1025,7 @@ void H5Transport::sendControlPacket(const control_pkt_type type, const uint8_t a
 
 #pragma region Debugging
 
-std::string H5Transport::hciPacketLinkControlToString(const payload_t &payload)
+std::string H5Transport::hciPacketLinkControlToString(const h5_payload_t &payload)
 {
     std::stringstream retval;
 
@@ -1119,9 +1082,9 @@ std::string H5Transport::hciPacketLinkControlToString(const payload_t &payload)
     return retval.str();
 }
 
-std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet) const
+std::string H5Transport::h5PktToString(const bool out, const h5_payload_t &h5Packet) const
 {
-    payload_t payload;
+    h5_payload_t payload;
 
     uint8_t seq_num;
     uint8_t decodedAckNum;
@@ -1169,7 +1132,7 @@ std::string H5Transport::h5PktToString(const bool out, const payload_t &h5Packet
     return retval.str();
 }
 
-void H5Transport::logPacket(const bool outgoing, const payload_t &packet)
+void H5Transport::logPacket(const bool outgoing, const h5_payload_t &packet)
 {
     if (outgoing)
     {
@@ -1192,8 +1155,8 @@ void H5Transport::logStateTransition(h5_state from, h5_state to) const
 #pragma endregion Debugging related methods
 
 #pragma region Test related methods
-bool H5Transport::checkPattern(const payload_t &packet, const uint8_t offset,
-                               const payload_t &pattern)
+bool H5Transport::checkPattern(const h5_payload_t &packet, const uint8_t offset,
+                               const h5_payload_t &pattern)
 {
     if (offset >= packet.size())
         return false;
@@ -1216,7 +1179,7 @@ bool H5Transport::checkPattern(const payload_t &packet, const uint8_t offset,
     return true;
 }
 
-payload_t H5Transport::getPktPattern(const control_pkt_type type)
+h5_payload_t H5Transport::getPktPattern(const control_pkt_type type)
 {
     switch (type)
     {
@@ -1241,28 +1204,29 @@ payload_t H5Transport::getPktPattern(const control_pkt_type type)
     }
 }
 
-bool H5Transport::isSyncPacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncPacket(const h5_payload_t &packet, const uint8_t offset)
 {
-    return checkPattern(packet, offset, payload_t{SyncFirstByte, SyncSecondByte});
+    return checkPattern(packet, offset, h5_payload_t{SyncFirstByte, SyncSecondByte});
 }
 
-bool H5Transport::isSyncResponsePacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncResponsePacket(const h5_payload_t &packet, const uint8_t offset)
 {
-    return checkPattern(packet, offset, payload_t{SyncRspFirstByte, SyncRspSecondByte});
+    return checkPattern(packet, offset, h5_payload_t{SyncRspFirstByte, SyncRspSecondByte});
 }
 
-bool H5Transport::isSyncConfigPacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncConfigPacket(const h5_payload_t &packet, const uint8_t offset)
 {
-    return checkPattern(packet, offset, payload_t{SyncConfigFirstByte, SyncConfigSecondByte});
+    return checkPattern(packet, offset, h5_payload_t{SyncConfigFirstByte, SyncConfigSecondByte});
 }
 
-bool H5Transport::isSyncConfigResponsePacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isSyncConfigResponsePacket(const h5_payload_t &packet, const uint8_t offset)
 {
-    return checkPattern(packet, offset, payload_t{SyncConfigRspFirstByte, SyncConfigRspSecondByte});
+    return checkPattern(packet, offset,
+                        h5_payload_t{SyncConfigRspFirstByte, SyncConfigRspSecondByte});
 }
 
-bool H5Transport::isResetPacket(const payload_t &packet, const uint8_t offset)
+bool H5Transport::isResetPacket(const h5_payload_t &packet, const uint8_t offset)
 {
-    return checkPattern(packet, offset, payload_t{0x05});
+    return checkPattern(packet, offset, h5_payload_t{0x05});
 }
 #pragma endregion Test related methods
