@@ -561,14 +561,14 @@ static uint32_t service_discovery_start()
  *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
-static uint32_t char_discovery_start()
+static uint32_t char_discovery_start(uint16_t start_handle)
 {
     ble_gattc_handle_range_t handle_range;
 
     printf("Discovering characteristics\n");
     fflush(stdout);
 
-    handle_range.start_handle = m_start_handle;
+    handle_range.start_handle = start_handle;
     handle_range.end_handle = m_end_handle;
 	
     return sd_ble_gattc_characteristics_discover(m_adapter, m_connection_handle, &handle_range);
@@ -798,7 +798,7 @@ static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_ga
         service->uuid.uuid, m_start_handle, m_end_handle);
     fflush(stdout);
 
-    char_discovery_start();
+    char_discovery_start(m_start_handle);
 }
 
 /**@brief Function called on BLE_GATTC_EVT_CHAR_DISC_RSP event.
@@ -810,11 +810,13 @@ static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_ga
 static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
     int count = p_ble_gattc_evt->params.char_disc_rsp.count;
+    uint16_t next_handle;
 
     if (p_ble_gattc_evt->gatt_status == BLE_GATT_STATUS_ATTERR_ATTRIBUTE_NOT_FOUND)
     {
         printf("Characteristic discovery complete\n");
         fflush(stdout);
+        descr_discovery_start(m_start_handle);
         return;
     }
     else if (p_ble_gattc_evt->gatt_status != NRF_SUCCESS)
@@ -849,10 +851,12 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
                    p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl);
             fflush(stdout);
         }	
-		
+        	
+        next_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl + 1;
     }
 
-    descr_discovery_start(p_ble_gattc_evt->params.char_disc_rsp.chars[0].handle_decl);
+    char_discovery_start(next_handle);
+    
 }
 
 /**@brief Function called on BLE_GATTC_EVT_DESC_DISC_RSP event.
