@@ -303,18 +303,19 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data) noexcept
 
         while (remainingRetransmissions--)
         {
-            logPacket(true, h5EncodedPacket);
-            const auto err_code = nextTransportLayer->send(lastPacket);
-
-            if (err_code != NRF_SUCCESS)
-                return err_code;
-
             uint8_t seqNumBefore;
 
             {
                 std::unique_lock<std::recursive_mutex> seqNumLck(seqNumMutex);
                 seqNumBefore = seqNum;
             }
+
+
+            logPacket(true, h5EncodedPacket);
+            const auto err_code = nextTransportLayer->send(lastPacket);
+
+            if (err_code != NRF_SUCCESS)
+                return err_code;
 
             // Checking for timeout. Also checking against spurios wakeup by making sure the
             // sequence number has actually increased. If the sequence number has not increased, we
