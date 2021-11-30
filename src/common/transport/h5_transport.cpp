@@ -306,6 +306,9 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data) noexcept
             uint8_t seqNumBefore;
 
             {
+                // seqNumBefore must be assigned a value before calling send() as otherwise the 
+                // seqNum value might already have been increased if context switch happens after
+                // send() and right before assigning the seqNumBefore.
                 std::unique_lock<std::recursive_mutex> seqNumLck(seqNumMutex);
                 seqNumBefore = seqNum;
             }
