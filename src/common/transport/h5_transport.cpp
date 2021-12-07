@@ -303,18 +303,22 @@ uint32_t H5Transport::send(const std::vector<uint8_t> &data) noexcept
 
         while (remainingRetransmissions--)
         {
+            uint8_t seqNumBefore;
+
+            {
+                // seqNumBefore must be assigned a value before calling send() as otherwise the 
+                // seqNum value might already have been increased if context switch happens after
+                // send() and right before assigning the seqNumBefore.
+                std::unique_lock<std::recursive_mutex> seqNumLck(seqNumMutex);
+                seqNumBefore = seqNum;
+            }
+
+
             logPacket(true, h5EncodedPacket);
             const auto err_code = nextTransportLayer->send(lastPacket);
 
             if (err_code != NRF_SUCCESS)
                 return err_code;
-
-            uint8_t seqNumBefore;
-
-            {
-                std::unique_lock<std::recursive_mutex> seqNumLck(seqNumMutex);
-                seqNumBefore = seqNum;
-            }
 
             // Checking for timeout. Also checking against spurios wakeup by making sure the
             // sequence number has actually increased. If the sequence number has not increased, we
