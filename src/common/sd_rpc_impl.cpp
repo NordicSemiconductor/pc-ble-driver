@@ -41,44 +41,11 @@
 #include "app_ble_gap.h"
 #include "ble_common.h"
 #include "h5_transport.h"
-#include "serial_port_enum.h"
 #include "serialization_transport.h"
 #include "uart_settings_boost.h"
 #include "uart_transport.h"
 
 #include <cstdlib>
-
-uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size)
-{
-    if (size == nullptr)
-    {
-        return NRF_ERROR_NULL;
-    }
-
-    const std::list<SerialPortDesc> &descs = EnumSerialPorts();
-
-    if (descs.size() > *size)
-    {
-        return NRF_ERROR_DATA_SIZE;
-    }
-
-    *size = static_cast<uint32_t>(descs.size());
-
-    auto i = 0;
-    for (auto &desc : descs)
-    {
-        strncpy(serial_port_descs[i].port, desc.comName.c_str(), SD_RPC_MAXPATHLEN);
-        strncpy(serial_port_descs[i].manufacturer, desc.manufacturer.c_str(), SD_RPC_MAXPATHLEN);
-        strncpy(serial_port_descs[i].serialNumber, desc.serialNumber.c_str(), SD_RPC_MAXPATHLEN);
-        strncpy(serial_port_descs[i].pnpId, desc.pnpId.c_str(), SD_RPC_MAXPATHLEN);
-        strncpy(serial_port_descs[i].locationId, desc.locationId.c_str(), SD_RPC_MAXPATHLEN);
-        strncpy(serial_port_descs[i].vendorId, desc.vendorId.c_str(), SD_RPC_MAXPATHLEN);
-        strncpy(serial_port_descs[i].productId, desc.productId.c_str(), SD_RPC_MAXPATHLEN);
-        ++i;
-    }
-
-    return NRF_SUCCESS;
-}
 
 physical_layer_t *sd_rpc_physical_layer_create_uart(const char *port_name, uint32_t baud_rate,
                                                     sd_rpc_flow_control_t flow_control,

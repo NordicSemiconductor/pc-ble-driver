@@ -53,19 +53,6 @@
 extern "C" {
 #endif // __cplusplus
 
-/**@brief Enumerate available serial ports.
- *
- * @param[out] serial_port_descs  The array of serial port descriptors to be filled in.
- * @param[in,out]  size The size of the array. The number of ports found is stored here.
- *
- * @retval NRF_SUCCESS  The serial ports were enumerated successfully.
- * @retval NRF_ERROR_NULL size was a null pointer.
- * @retval NRF_ERROR_DATA_SIZE The size of the array was not large enough to keep all descriptors found.
- *                      No descriptors where copied. Call again with an larger array.
- * @retval NRF_ERROR    There was an error enumerating the serial ports.
- */
-SD_RPC_API uint32_t sd_rpc_serial_port_enum(sd_rpc_serial_port_desc_t serial_port_descs[], uint32_t *size);
-
 /**@brief Create a new serial physical layer.
  *
  * @param[in]  port_name  The serial port name.
