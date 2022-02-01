@@ -40,6 +40,7 @@
 #include "nrf_error.h"
 #include "uart_settings_boost.h"
 
+#include <thread>
 #include <deque>
 #include <functional>
 #include <mutex>
