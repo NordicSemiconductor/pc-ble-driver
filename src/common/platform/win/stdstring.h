@@ -3215,7 +3215,7 @@ public:
 		CT* pBuf			= NULL;
 		int nChars			= 1;
 		int nUsed			= 0;
-		size_type nActual	= 0;
+		int nActual			= 0;
 		int nTry			= 0;
 
 		do	
