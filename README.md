@@ -276,6 +276,11 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
 
+5. Install `Ninja`.
+    ```bash
+    $ sudo apt-get install ninja-build
+    ```
+
 The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
 1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
@@ -288,6 +293,7 @@ The following steps are needed only if you want to compile your own `connectivit
     $ pip install nrfutil
 
     # Reboot if installation succeeds but validation fails
+    # If errors persist, try updating pip itself.
     ```
 
 #### Installing dependencies on macOS
