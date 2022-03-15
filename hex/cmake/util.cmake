@@ -12,18 +12,13 @@ endfunction()
 
 function(nrf_configure_sdk_values SDK_VERSION SDK_DIRECTORY)
      # Configure armgcc related files (if armgcc is available)
-    find_program(GCC "arm-none-eabi-gcc")
 
-    if(DEFINED ENV{GNUARMEMB_TOOLCHAIN_PATH} OR GCC)
+    if(DEFINED ENV{GCCARMEMB_TOOLCHAIN_PATH})
         # Get gcc version
-        if(GCC)
-            get_filename_component(GCC_TOOLCHAIN_PATH "${GCC}" DIRECTORY)
-            set(GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}/..")
-        else()
-            set(GCC_TOOLCHAIN_PATH "$ENV{GNUARMEMB_TOOLCHAIN_PATH}")
-            # Environment variables are quoted, remove the quote
-            string(REPLACE "\"" "" GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}")
-        endif()
+        
+        set(GCC_TOOLCHAIN_PATH "$ENV{GCCARMEMB_TOOLCHAIN_PATH}")
+        # Environment variables are quoted, remove the quote
+        string(REPLACE "\"" "" GCC_TOOLCHAIN_PATH "${GCC_TOOLCHAIN_PATH}")
 
         file(TO_CMAKE_PATH "${GCC_TOOLCHAIN_PATH}" GCC_TOOLCHAIN_PATH)
         set(GCC "${GCC_TOOLCHAIN_PATH}/bin/arm-none-eabi-gcc")
