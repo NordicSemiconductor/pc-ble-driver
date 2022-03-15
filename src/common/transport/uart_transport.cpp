@@ -46,6 +46,7 @@
 #include <mutex>
 #include <sstream>
 #include <system_error>
+#include <thread>
 
 #if defined(__APPLE__)
 #include <IOKit/serial/ioss.h>
