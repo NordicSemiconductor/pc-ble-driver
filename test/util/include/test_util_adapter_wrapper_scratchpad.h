@@ -24,8 +24,7 @@ namespace testutil {
 #if NRF_SD_BLE_API < 6
 constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_MAX_SIZE;
 #else
-constexpr size_t ADV_DATA_BUFFER_SIZE =
-    BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED;
+constexpr size_t ADV_DATA_BUFFER_SIZE = BLE_GAP_ADV_SET_DATA_SIZE_EXTENDED_MAX_SUPPORTED;
 #endif
 
 struct AdapterWrapperScratchpad
@@ -61,31 +60,72 @@ struct AdapterWrapperScratchpad
 
     // Handle to Client Characterstic Configuration Descriptor
     // Can be set during discovery of services
-    uint16_t cccd_handle = BLE_GATT_HANDLE_INVALID;
+    uint16_t cccd_handle   = BLE_GATT_HANDLE_INVALID;
+    uint16_t cccd_handle_2 = BLE_GATT_HANDLE_INVALID;
+    uint16_t cccd_handle_3 = BLE_GATT_HANDLE_INVALID;
+    uint16_t cccd_handle_4 = BLE_GATT_HANDLE_INVALID;
 
     // The service used by the test
-    uint16_t service_handle = BLE_GATT_HANDLE_INVALID;
+    uint16_t service_handle   = BLE_GATT_HANDLE_INVALID;
+    uint16_t service_handle_2 = BLE_GATT_HANDLE_INVALID;
+    uint16_t service_handle_3 = BLE_GATT_HANDLE_INVALID;
+    uint16_t service_handle_4 = BLE_GATT_HANDLE_INVALID;
+    uint16_t service_handle_5 = BLE_GATT_HANDLE_INVALID;
+    uint16_t service_handle_6 = BLE_GATT_HANDLE_INVALID;
 
     // The characteristic declaration handle used by the test
-    uint16_t characteristic_decl_handle = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_decl_handle   = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_decl_handle_2 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_decl_handle_3 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_decl_handle_4 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_decl_handle_5 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_decl_handle_6 = BLE_GATT_HANDLE_INVALID;
 
     // The characteristic value handle used by the test
-    uint16_t characteristic_value_handle = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_value_handle   = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_value_handle_2 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_value_handle_3 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_value_handle_4 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_value_handle_5 = BLE_GATT_HANDLE_INVALID;
+    uint16_t characteristic_value_handle_6 = BLE_GATT_HANDLE_INVALID;
 
     // The descriptor used by the test
-    uint16_t descriptor_handle = BLE_GATT_HANDLE_INVALID;
+    uint16_t descriptor_handle   = BLE_GATT_HANDLE_INVALID;
+    uint16_t descriptor_handle_2 = BLE_GATT_HANDLE_INVALID;
+    uint16_t descriptor_handle_3 = BLE_GATT_HANDLE_INVALID;
+    uint16_t descriptor_handle_4 = BLE_GATT_HANDLE_INVALID;
+    uint16_t descriptor_handle_5 = BLE_GATT_HANDLE_INVALID;
+    uint16_t descriptor_handle_6 = BLE_GATT_HANDLE_INVALID;
 
     // Target service UUID to use during testing
     ble_uuid_t target_service;
+    ble_uuid_t target_service_2;
+    ble_uuid_t target_service_3;
+    ble_uuid_t target_service_4;
 
     // Target characteristic UUID to use during testing
     ble_uuid_t target_characteristic;
+    ble_uuid_t target_characteristic_2;
+    ble_uuid_t target_characteristic_3;
+    ble_uuid_t target_characteristic_4;
+    ble_uuid_t target_characteristic_5;
+    ble_uuid_t target_characteristic_6;
 
     // Target descriptor UUID to use during testing
     ble_uuid_t target_descriptor;
+    ble_uuid_t target_descriptor_2;
+    ble_uuid_t target_descriptor_3;
+    ble_uuid_t target_descriptor_4;
+    ble_uuid_t target_descriptor_5;
+    ble_uuid_t target_descriptor_6;
 
     // The GATT server side representation of the characteristic used by the test
     ble_gatts_char_handles_t gatts_characteristic_handle;
+    ble_gatts_char_handles_t gatts_characteristic_handle_2;
+    ble_gatts_char_handles_t gatts_characteristic_handle_3;
+    ble_gatts_char_handles_t gatts_characteristic_handle_4;
+    ble_gatts_char_handles_t gatts_characteristic_handle_5;
+    ble_gatts_char_handles_t gatts_characteristic_handle_6;
 
     bool send_notifications      = false;
     bool advertisement_timed_out = false;
@@ -107,9 +147,10 @@ struct AdapterWrapperScratchpad
     ble_gap_adv_data_t adv_report_data{};                       // Data used for advertising
     ble_data_t adv_report_adv_data{};                           // Advertisement data
     uint8_t adv_report_adv_data_buffer[ADV_DATA_BUFFER_SIZE]{}; // Advertisement data buffer
-    uint8_t adv_report_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{};            // Advertisement data buffer
-    ble_data_t adv_report_scan_rsp_data{};                      // Scan report data
-    ble_gap_adv_properties_t adv_properties{};                  // Properties used for advertising
+    uint8_t
+        adv_report_scan_rsp_data_buffer[SCAN_RSP_DATA_BUFFER_SIZE]{}; // Advertisement data buffer
+    ble_data_t adv_report_scan_rsp_data{};                            // Scan report data
+    ble_gap_adv_properties_t adv_properties{}; // Properties used for advertising
 #endif
 
     ble_gap_adv_params_t adv_params{}; // Parameters used for advertising

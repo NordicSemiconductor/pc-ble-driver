@@ -40,11 +40,13 @@
 #include "nrf_error.h"
 #include "uart_settings_boost.h"
 
+#include <thread>
+#include <deque>
 #include <functional>
 #include <mutex>
 #include <sstream>
 #include <system_error>
-#include <deque>
+#include <thread>
 
 #if defined(__APPLE__)
 #include <IOKit/serial/ioss.h>
@@ -55,12 +57,16 @@
 #include "uart_settings_boost.h"
 #include <asio.hpp>
 
-
 constexpr auto DELAY_BEFORE_READ_WRITE = std::chrono::milliseconds(200);
 
 // On Windows, some users experience a permission denied error
 // if opening a UART port right after close.
 constexpr auto DELAY_BEFORE_OPEN = std::chrono::milliseconds(200);
+
+#if defined(_WIN32)
+// Wait for 20ms for data before returning from a read
+constexpr auto readTotalTimeoutConstant = 20;
+#endif
 
 struct UartTransport::impl : Transport
 {
@@ -281,6 +287,26 @@ struct UartTransport::impl : Transport
                 const auto error = std::error_code(errno, std::system_category());
                 throw std::system_error(error,
                                         "Failed to set baud rate to " + std::to_string(speed));
+            }
+#endif
+
+#if defined(_WIN32)
+            ::COMMTIMEOUTS timeouts;
+
+            // See
+            // https://docs.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-commtimeouts
+            // for documentation of these parameters
+            timeouts.ReadIntervalTimeout        = MAXDWORD;
+            timeouts.ReadTotalTimeoutMultiplier = MAXDWORD;
+            timeouts.ReadTotalTimeoutConstant   = readTotalTimeoutConstant;
+
+            timeouts.WriteTotalTimeoutMultiplier = 0;
+            timeouts.WriteTotalTimeoutConstant   = 0;
+
+            if (!::SetCommTimeouts(serialPort->native_handle(), &timeouts))
+            {
+                const auto error = std::error_code(errno, std::system_category());
+                throw std::system_error(error, "Failed to set communication timeout parameters");
             }
 #endif
 

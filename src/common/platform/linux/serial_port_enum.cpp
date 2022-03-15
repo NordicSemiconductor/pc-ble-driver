@@ -37,18 +37,20 @@
 
 #include <libudev.h>
 
-#include <vector>
-#include <cstring>
 #include <cassert>
+#include <cstring>
+#include <vector>
 
 #include <sys/param.h>
 
 #include "serial_port_enum.h"
 
-const char* SEGGER_VENDOR_ID = "1366";
-const char* NXP_VENDOR_ID = "0d28";
+const char *SEGGER_VENDOR_ID = "1366";
+const char *NXP_VENDOR_ID = "0d28";
+const char *NORDIC_SEMICONDUCTOR_VENDOR_ID = "1915";
+const char *NRF52_CONNECTIVITY_DONGLE_PID = "c00a";
 
-std::string to_str(const char* s)
+std::string to_str(const char *s)
 {
     // NOLINTNEXTLINE(modernize-use-nullptr)
     return (s != NULL) ? std::string(s) : std::string();
@@ -77,27 +79,27 @@ std::list<SerialPortDesc> EnumSerialPorts()
     {
         const char *path = udev_list_entry_get_name(udev_entry);
 
-        udev_tty_dev = udev_device_new_from_syspath(udev_ctx, path);
+        udev_tty_dev        = udev_device_new_from_syspath(udev_ctx, path);
         const char *devname = udev_device_get_devnode(udev_tty_dev);
 
-        udev_usb_dev = udev_device_get_parent_with_subsystem_devtype(
-            udev_tty_dev,
-            "usb",
-            "usb_device"
-        );
+        udev_usb_dev =
+            udev_device_get_parent_with_subsystem_devtype(udev_tty_dev, "usb", "usb_device");
 
         std::string idVendor = to_str(udev_device_get_sysattr_value(udev_usb_dev, "idVendor"));
+        std::string idProduct = to_str(udev_device_get_sysattr_value(udev_usb_dev, "idProduct"));
         std::string manufacturer = to_str(udev_device_get_sysattr_value(udev_usb_dev,"manufacturer"));
 
         if(
-          ((idVendor == SEGGER_VENDOR_ID) || (idVendor == NXP_VENDOR_ID))
-          && ((manufacturer == "SEGGER")
-              || (strncasecmp(manufacturer.c_str(), "arm", 3) == 0)
-              || (strncasecmp(manufacturer.c_str(), "mbed", 4) == 0))
+          (
+            ((idVendor == SEGGER_VENDOR_ID) || (idVendor == NXP_VENDOR_ID))
+            && ((manufacturer == "SEGGER")
+                || (strncasecmp(manufacturer.c_str(), "arm", 3) == 0)
+                || (strncasecmp(manufacturer.c_str(), "mbed", 4) == 0))
+          )
+          || ((idVendor == NORDIC_SEMICONDUCTOR_VENDOR_ID) && (idProduct == NRF52_CONNECTIVITY_DONGLE_PID))
           )
         {
             std::string serialNumber = to_str(udev_device_get_sysattr_value(udev_usb_dev, "serial"));
-            std::string idProduct = to_str(udev_device_get_sysattr_value(udev_usb_dev, "idProduct"));
 
             devices.push_back(SerialPortDesc {
               devname,

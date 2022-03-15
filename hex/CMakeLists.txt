@@ -21,13 +21,13 @@ if(NOT DEFINED CONNECTIVITY_VERSION)
     message(FATAL_ERROR "CONNECTIVITY_VERSION not provided, terminating compilation.")
 endif()
 
-if(NOT DEFINED ENV{GCCARMEMB_TOOLCHAIN_PATH} AND NOT DEFINED GCCARMEMB_TOOLCHAIN_PATH)
-    message(FATAL_ERROR "GNU Tools ARM Embedded environment variable or cmake define GCCARMEMB_TOOLCHAIN_PATH not set. Stopping build.")
+if(NOT DEFINED ENV{GNUARMEMB_TOOLCHAIN_PATH} AND NOT DEFINED GNUARMEMB_TOOLCHAIN_PATH)
+    message(FATAL_ERROR "GNU Tools ARM Embedded environment variable or cmake define GNUARMEMB_TOOLCHAIN_PATH not set. Stopping build.")
 else()
-    if(DEFINED GCCARMEMB_TOOLCHAIN_PATH)
-        set(GCC_TOOLCHAIN_PATH "${GCCARMEMB_TOOLCHAIN_PATH}")
+    if(DEFINED GNUARMEMB_TOOLCHAIN_PATH)
+        set(GCC_TOOLCHAIN_PATH "${GNUARMEMB_TOOLCHAIN_PATH}")
     else()
-        set(GCC_TOOLCHAIN_PATH "$ENV{GCCARMEMB_TOOLCHAIN_PATH}")
+        set(GCC_TOOLCHAIN_PATH "$ENV{GNUARMEMB_TOOLCHAIN_PATH}")
     endif()
 endif()
 
@@ -116,7 +116,7 @@ function(nrf_get_hex_paths SDK_ROOT SDK_VERSION PROJECT_PATH APP_HEX_PATH SOFTDE
 endfunction()
 
 function(nrf_create_connectivity_compile_targets)
-    set(oneValueArgs PROJECT_DIRECTORY SDK_ROOT SDK_VERSION VERSION)
+    set(oneValueArgs PROJECT_DIRECTORY SDK_ROOT SDK_VERSION VERSION CONNECTIVITY_ARTIFACTS)
     cmake_parse_arguments(nrf_create_connectivity_compile_targets "" "${oneValueArgs}" "${multipleValuesArgs}" ${ARGN})
 
     if(NOT DEFINED nrf_create_connectivity_compile_targets_PROJECT_DIRECTORY)
@@ -135,8 +135,12 @@ function(nrf_create_connectivity_compile_targets)
         message(FATAL_ERROR "nrf_create_connectivity_compile_targets requires a SDK_VERSION argument.")
     endif()
 
+    if(NOT DEFINED nrf_create_connectivity_compile_targets_CONNECTIVITY_ARTIFACTS)
+        message(FATAL_ERROR "nrf_create_connectivity_compile_targets requires a CONNECTIVITY_ARTIFACTS argument.")
+    endif()
+
     set(SDK_ROOT "${nrf_create_connectivity_compile_targets_SDK_ROOT}")
-    message(STATUS "SDK_ROOT:" ${SDK_ROOT})
+
     set(SDK_VERSION ${nrf_create_connectivity_compile_targets_SDK_VERSION})
     set(VERSION ${nrf_create_connectivity_compile_targets_VERSION})
 
@@ -144,9 +148,13 @@ function(nrf_create_connectivity_compile_targets)
     #message(STATUS "Searching for projects within project ${PROJECT_FULL_PATH}")
     file(GLOB FOUND_PCA_PATHS "${PROJECT_FULL_PATH}/pca100[1-9][0-9]")
 
+    if(NOT DEFINED _CONNECTIVITY_ARTIFACTS)
+        set(_CONNECTIVITY_ARTIFACTS "")
+    endif()
+
     foreach(PCA_PATH ${FOUND_PCA_PATHS})
         file(GLOB FOUND_PROJECTS "${PCA_PATH}/*_hci")
-        #message(STATUS "Found projects: ${FOUND_PROJECTS}")
+        message(STATUS "Found projects: ${FOUND_PROJECTS}")
 
         foreach(PROJECT ${FOUND_PROJECTS})
             set(PROJECT_NAME)
@@ -173,13 +181,23 @@ function(nrf_create_connectivity_compile_targets)
                     set(SOFTDEVICE_HEX_PATH)
                     set(APP_HEX_PATH)
                     nrf_get_hex_paths("${SDK_ROOT}" "${SDK_VERSION}" "${ARMGCC_PROJECT_DIRECTORY}" APP_HEX_PATH SOFTDEVICE_HEX_PATH)
-                    #message(STATUS "APP_HEX_PATH: ${APP_HEX_PATH} SOFTDEVICE_HEX_PATH: ${SOFTDEVICE_HEX_PATH}")
 
                     set(SD_VERSION)
                     set(SOC_FAMILY)
-                    set(SD_API_VERSION)
                     set(SD_ID)
+
+                    set(SD_API_VERSION)
+                    set(SD_API_VERSION_MAJOR)
+                    set(SD_API_VERSION_MINOR)
+                    set(SD_API_VERSION_PATCH)
+
                     nrf_extract_softdevice_info("${SOFTDEVICE_HEX_PATH}" SD_VERSION SOC_FAMILY SD_API_VERSION SD_ID)
+                    nrf_extract_version_number("${SD_API_VERSION}" SD_API_VERSION_MAJOR SD_API_VERSION_MINOR SD_API_VERSION_PATCH)
+
+                    if(NOT DEFINED _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR})
+                        set(_CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR} "")
+                        list(APPEND _CONNECTIVITY_ARTIFACTS _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR})
+                    endif()
 
                     set(CONNECTIVITY_NAME "connectivity_${VERSION}_${TRANSPORT}")
                     set(TARGET_NAME "${CONNECTIVITY_NAME}_with_${SD_VERSION}_${SD_API_VERSION}")
@@ -194,11 +212,11 @@ function(nrf_create_connectivity_compile_targets)
                         message(STATUS "Running make:${MAKE} in ARMGCC_PROJECT_DIRECTORY:${ARMGCC_PROJECT_DIRECTORY}")
 
                         # Add CFLAGS that specify application version, used by SDFU
-                        set(MAJOR)
-                        set(MINOR)
-                        set(PATCH)
-                        nrf_extract_version_number("${CONNECTIVITY_VERSION}" MAJOR MINOR PATCH)
-                        set(VERSION_CFLAGS "-DAPP_VERSION_MAJOR=${MAJOR} -DAPP_VERSION_MINOR=${MINOR} -DAPP_VERSION_PATCH=${PATCH}")
+                        set(CONNECTIVITY_VERSION_MAJOR)
+                        set(CONNECTIVITY_VERSION_MINOR)
+                        set(CONNECTIVITY_VERSION_PATCH)
+                        nrf_extract_version_number("${CONNECTIVITY_VERSION}" CONNECTIVITY_VERSION_MAJOR CONNECTIVITY_VERSION_MINOR CONNECTIVITY_VERSION_PATCH)
+                        set(VERSION_CFLAGS "-DAPP_VERSION_MAJOR=${CONNECTIVITY_VERSION_MAJOR} -DAPP_VERSION_MINOR=${CONNECTIVITY_VERSION_MINOR} -DAPP_VERSION_PATCH=${CONNECTIVITY_VERSION_PATCH}")
 
                         # Compile project
                         add_custom_command(
@@ -215,11 +233,7 @@ function(nrf_create_connectivity_compile_targets)
                             APPEND COMMAND ${MERGEHEX} -m "${APP_HEX_PATH}" "${SOFTDEVICE_HEX_PATH}" -o "${HEX_MERGED}"
                         )
 
-                        set(MAJOR)
-                        set(MINOR)
-                        set(PATCH)
-                        nrf_extract_version_number("${SD_API_VERSION}" MAJOR MINOR PATCH)
-                        set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sd_api_v${MAJOR}")
+                        set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/sd_api_v${SD_API_VERSION_MAJOR}")
 
                         message(STATUS "Storing files in ${OUTPUT_DIRECTORY}")
 
@@ -237,6 +251,8 @@ function(nrf_create_connectivity_compile_targets)
                             APPEND COMMAND ${CMAKE_COMMAND} -E copy "${HEX_MERGED}" "${OUTPUT_DIRECTORY}"
                         )
 
+                        list(APPEND _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR} "${OUTPUT_DIRECTORY}/${HEX_MERGED}")
+
                         # Create a DFU package if it is a nRF52 device with USB support
                         if(SOC_FAMILY EQUAL 52 AND TRANSPORT STREQUAL "usb")
                             if(PCA_TYPE STREQUAL "pca10056" OR PCA_TYPE STREQUAL "pca10059")
@@ -246,6 +262,8 @@ function(nrf_create_connectivity_compile_targets)
                                     OUTPUT "${COMMAND_NAME}"
                                     APPEND COMMAND ${NRFUTIL} pkg generate "--application" "${APP_HEX_PATH}" "--hw-version" 52 "--sd-req" 0 "--sd-id" ${SD_ID} "--debug-mode" "--softdevice" "${SOFTDEVICE_HEX_PATH}" "${DFU_PKG}"
                                 )
+
+                                list(APPEND _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR} "${OUTPUT_DIRECTORY}/${DFU_PKG}")
 
                                 add_custom_command(
                                     OUTPUT "${COMMAND_NAME}"
@@ -257,6 +275,8 @@ function(nrf_create_connectivity_compile_targets)
                                     OUTPUT "${COMMAND_NAME}"
                                     APPEND COMMAND ${CMAKE_COMMAND} -E copy "${APP_HEX_PATH}" "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}_for_${SD_VERSION}_${SD_API_VERSION}.hex"
                                 )
+
+                                list(APPEND _CONNECTIVITY_ARTIFACTS_SDv${SD_API_VERSION_MAJOR} "${OUTPUT_DIRECTORY}/${CONNECTIVITY_NAME}_for_${SD_VERSION}_${SD_API_VERSION}.hex")
                             endif()
                         endif()
 
@@ -268,40 +288,75 @@ function(nrf_create_connectivity_compile_targets)
         endforeach()
     endforeach()
 
+    set(_RETURN_ARTIFACTS "")
+
+    foreach(conn _CONNECTIVITY_ARTIFACTS)
+        foreach(ver ${_CONNECTIVITY_ARTIFACTS})
+            set(HEX_FILES "")
+
+            foreach(hex ${${ver}})
+                list(APPEND HEX_FILES "|${hex}")
+            endforeach()
+
+            list(APPEND _RETURN_ARTIFACTS "${ver};${HEX_FILES}")
+        endforeach()
+    endforeach()
+
     set(CONNECTIVITY_BUILD_TARGETS ${CONNECTIVITY_BUILD_TARGETS} PARENT_SCOPE)
+    set(${nrf_create_connectivity_compile_targets_CONNECTIVITY_ARTIFACTS} ${_RETURN_ARTIFACTS} PARENT_SCOPE)
 endfunction(nrf_create_connectivity_compile_targets)
 
-set(SDK_PATH )
-set(CONNECTIVITY_BUILD_TARGETS "")
 
-nrf_prepare_sdk(
-    SDK_VERSION 11
-    URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip"
-    FILENAME "nRF5_SDK_11.0.0_89a8197.zip"
-    SHA512 4fe84c4080e2eab664672366a5abfcd605777297835b7b864e0f51f376cd946a28178dfda7e6cefdd04b791058038711d78901ec5d260477a68eb5527c3b2c06
-    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK_11.0.0_connectivity.patch"
-)
+function(nrf_create_compile_targets CONNECTIVITY_ARTIFACTS)
+    set(CONNECTIVITY_BUILD_TARGETS "")
 
-nrf_create_connectivity_compile_targets(
-    SDK_VERSION 11
-    SDK_ROOT "${SDK_PATH}"
-    PROJECT_DIRECTORY "examples/ble_central_and_peripheral/ble_connectivity"
-    VERSION "${CONNECTIVITY_VERSION}"
-)
+    set(_CONNECTIVITY_SDK_VERSION_11_ARTIFACTS "")
+    set(_CONNECTIVITY_SDK_VERSION_15_ARTIFACTS "")
 
-nrf_prepare_sdk(
-    SDK_VERSION 15
-    URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.3.0_59ac345.zip"
-    FILENAME "nRF5_SDK_15.3.0_59ac345.zip"
-    SHA512 7cdf1652e828b7c5266c21e1a12e16c90f51213130268e7138950c070c2271d357410a103427e0f67dc56816a8cf6f69df93a6462e2b5e18d6be0a9bb465484f
-    PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK_15.3.0_connectivity.patch"
-)
+    set(SDK_V11_PATH)
+    set(SDK_V15_PATH)
 
-nrf_create_connectivity_compile_targets(
-    SDK_VERSION 15
-    SDK_ROOT "${SDK_PATH}"
-    PROJECT_DIRECTORY "examples/connectivity/ble_connectivity"
-    VERSION "${CONNECTIVITY_VERSION}"
-)
+    nrf_prepare_sdk(
+        SDK_VERSION 11
+        URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/nRF5_SDK_11.0.0_89a8197.zip"
+        FILENAME "nRF5_SDK_11.0.0_89a8197.zip"
+        SHA512 4fe84c4080e2eab664672366a5abfcd605777297835b7b864e0f51f376cd946a28178dfda7e6cefdd04b791058038711d78901ec5d260477a68eb5527c3b2c06
+        PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/hex/nRF5_SDK_11.0.0_connectivity.patch"
+        SDK_PATH SDK_V11_PATH
+    )
 
-add_custom_target("compile_connectivity" DEPENDS ${CONNECTIVITY_BUILD_TARGETS})
+    nrf_create_connectivity_compile_targets(
+        SDK_VERSION 11
+        SDK_ROOT "${SDK_V11_PATH}"
+        PROJECT_DIRECTORY "examples/ble_central_and_peripheral/ble_connectivity"
+        VERSION "${CONNECTIVITY_VERSION}"
+        CONNECTIVITY_ARTIFACTS _CONNECTIVITY_SDK_VERSION_11_ARTIFACTS
+    )
+
+    nrf_prepare_sdk(
+        SDK_VERSION 15
+        URLS "https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/nRF5_SDK_15.3.0_59ac345.zip"
+        FILENAME "nRF5_SDK_15.3.0_59ac345.zip"
+        SHA512 7cdf1652e828b7c5266c21e1a12e16c90f51213130268e7138950c070c2271d357410a103427e0f67dc56816a8cf6f69df93a6462e2b5e18d6be0a9bb465484f
+        PATCH_FILES "${CMAKE_CURRENT_LIST_DIR}/hex/nRF5_SDK_15.3.0_connectivity.patch"
+        SDK_PATH SDK_V15_PATH
+    )
+
+    nrf_create_connectivity_compile_targets(
+        SDK_VERSION 15
+        SDK_ROOT "${SDK_V15_PATH}"
+        PROJECT_DIRECTORY "examples/connectivity/ble_connectivity"
+        VERSION "${CONNECTIVITY_VERSION}"
+        CONNECTIVITY_ARTIFACTS _CONNECTIVITY_SDK_VERSION_15_ARTIFACTS
+    )
+
+    add_custom_target("compile_connectivity" DEPENDS ${CONNECTIVITY_BUILD_TARGETS})
+
+    set(_CONNECTIVITY_ARTIFACTS)
+    list(APPEND _CONNECTIVITY_ARTIFACTS ${_CONNECTIVITY_SDK_VERSION_11_ARTIFACTS})
+    list(APPEND _CONNECTIVITY_ARTIFACTS ${_CONNECTIVITY_SDK_VERSION_15_ARTIFACTS})
+
+    message(STATUS "Connectivity artifacts ${_CONNECTIVITY_ARTIFACTS}")
+
+    set(${CONNECTIVITY_ARTIFACTS} ${_CONNECTIVITY_ARTIFACTS} PARENT_SCOPE)
+endfunction(nrf_create_compile_targets)
