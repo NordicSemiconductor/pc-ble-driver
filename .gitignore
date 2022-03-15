@@ -46,3 +46,6 @@ build*/
 # Non public connectivity hex files
 /hex/**/*0.0.0*.hex
 /hex/**/*0.0.0*.zip
+
+/_build*
+/build*

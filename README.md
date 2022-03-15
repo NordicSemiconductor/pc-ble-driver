@@ -160,7 +160,7 @@ To compile `pc-ble-driver` you will need the following tools:
 * A C/C++ toolchain
 * [Git](https://git-scm.com/) (>=2.19)
 * [CMake](https://cmake.org/) (>=3.11)
-* [vcpkg](https://github.com/NordicPlayground/vcpkg.git)
+* [vcpkg](https://github.com/Microsoft/vcpkg.git)
 
 ##### [Go to compile `pc-ble-driver` from source](#Compiling-pc-ble-driver-from-source)
 
@@ -202,11 +202,11 @@ Follow the steps to install dependencies on a specific platform:
     $ choco install -y cmake
     ```
 
-4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg.git).
+4. Install [vcpkg](https://github.com/Microsoft/vcpkg.git).
     ```bash
-    $ git clone https://github.com/NordicPlayground/vcpkg.git
+    $ git clone https://github.com/Microsoft/vcpkg.git
     $ cd vcpkg
-    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
+    $ git checkout tags/2020.04
     $ .\bootstrap-vcpkg.bat
     ```
 
@@ -225,11 +225,11 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Follow the install instructions.
 
-    Set its installation path as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    Set its installation path as `GNUARMEMB_TOOLCHAIN_PATH` in environment variables.
     For example:
 
     ```bash
-    $ set GCCARMEMB_TOOLCHAIN_PATH=c:\gccarmemb
+    $ set GNUARMEMB_TOOLCHAIN_PATH=c:\gccarmemb
     ```
 
 3. Install `Python` and `pip`, and then install `nrfutil`
@@ -266,28 +266,34 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Install `CMake` from source if the version is lower than required.
 
-4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg/).
+4. Install [vcpkg](https://github.com/Microsoft/vcpkg/).
     ```bash
-    $ git clone https://github.com/NordicPlayground/vcpkg.git
+    $ git clone https://github.com/Microsoft/vcpkg.git
     $ cd vcpkg
-    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
+    $ git checkout tags/2020.04
     $ ./bootstrap-vcpkg.sh
     ```
 
     Then add the vcpkg location to the `PATH` and `VCPKG_ROOT` environment variable.
+
+5. Install `Ninja`.
+    ```bash
+    $ sudo apt-get install ninja-build
+    ```
 
 The following steps are needed only if you want to compile your own `connectivity` HEX files.
 
 1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
-    * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    * Set its location as `GNUARMEMB_TOOLCHAIN_PATH` in environment variables.
 
 2. Install `Python` and `pip`, and then install `nrfutil`.
     ```bash
     $ pip install nrfutil
 
     # Reboot if installation succeeds but validation fails
+    # If errors persist, try updating pip itself.
     ```
 
 #### Installing dependencies on macOS
@@ -307,11 +313,11 @@ The following steps are needed only if you want to compile your own `connectivit
 
     Install `CMake` from source if the version is lower than required.
 
-4. Install [vcpkg](https://github.com/NordicPlayground/vcpkg/).
+4. Install [vcpkg](https://github.com/Microsoft/vcpkg/).
     ```bash
-    $ git clone https://github.com/NordicPlayground/vcpkg/
+    $ git clone https://github.com/Microsoft/vcpkg/
     $ cd vcpkg
-    $ git checkout fix/temporary-fix-spdlog-until-vcpkg-release # Temporary workaround for spdlog issue
+    $ git checkout tags/2020.04
     $ ./bootstrap-vcpkg.sh
     ```
 
@@ -322,7 +328,7 @@ The following steps are needed only if you want to compile your own `connectivit
 1. Install `GNU Embedded Toolchain for Arm` version 7-2018q2.
     * Download from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
     * Extract
-    * Set its location as `GCCARMEMB_TOOLCHAIN_PATH` in environment variables.
+    * Set its location as `GNUARMEMB_TOOLCHAIN_PATH` in environment variables.
 
 2. Install `Python` and `pip`, and then install `nrfutil`
     ```bash
@@ -346,9 +352,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
     # Make sure %VCPKG_ROOT% is set and added to %PATH%
     $ mkdir build && cd build
-    $ vcpkg install asio
-    $ vcpkg install catch2
-    $ vcpkg install --head spdlog
+    $ vcpkg install asio catch2 spdlog
     ```
 
 2. CMake
@@ -379,9 +383,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
     # Make sure $VCPKG_ROOT is set and added to $PATH
     $ mkdir build && cd build
-    $ vcpkg install asio
-    $ vcpkg install catch2
-    $ vcpkg install --head spdlog
+    $ vcpkg install asio catch2 spdlog
     ```
 
 2. CMake
@@ -420,7 +422,7 @@ The following steps are needed only if you want to compile your own `connectivit
 
 Make sure the following environment variables are set:
 * `VCPKG_ROOT`
-* `GCCARMEMB_TOOLCHAIN_PATH`
+* `GNUARMEMB_TOOLCHAIN_PATH`
 
 Make sure the following paths have been added to PATH:
 * `VCPKG_ROOT`
@@ -473,7 +475,6 @@ Follow the steps to install dependencies on a specific platform:
 
 2. CMake
     ```bash
-    $ cd hex
     $ mkdir build && cd build
 
     # Modify -DCONNECTIVITY_VERSION=a.b.c
@@ -528,7 +529,7 @@ Programming the connectivity firmware via serial DFU can be done from command li
 
 Device Firmware Upgrade with [nrfutil](https://infocenter.nordicsemi.com/topic/ug_nrfutil/UG/nrfutil/nrfutil_dfu_serial_usb.html) is normally done in two steps: 1: generating the DFU zip package, and 2: performing the DFU procedure. A DFU zip package has been pre-made and is included in this repository. To run the DFU procedure with nrfutil with the pre-made DFU package:
 
-    nrfutil dfu usb_serial -pkg connectivity_x.x.x_usb_with_s<x>_<a>.<b>.<c>_dfu_pkg.zip -p <serial port>
+    nrfutil dfu usb-serial -pkg connectivity_x.x.x_usb_with_s<x>_<a>.<b>.<c>_dfu_pkg.zip -p <serial port>
 
 ---
 

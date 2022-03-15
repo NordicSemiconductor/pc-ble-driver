@@ -102,8 +102,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
         c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
-                case BLE_GAP_EVT_CONNECTED:
-                {
+                case BLE_GAP_EVT_CONNECTED: {
                     const auto err_code =
                         sd_ble_gap_phy_update(c->unwrap(), gapEvent->conn_handle, &requestedPhys);
 
@@ -154,8 +153,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                         }
                     }
                     return true;
-                case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
-                {
+                case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: {
                     const auto err_code = sd_ble_gap_conn_param_update(
                         c->unwrap(), c->scratchpad.connection_handle,
                         &(gapEvent->params.conn_param_update_request.conn_params));
@@ -168,8 +166,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_PHY_UPDATE:
-                {
+                case BLE_GAP_EVT_PHY_UPDATE: {
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {
@@ -202,8 +199,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
             {
                 case BLE_GAP_EVT_CONNECTED:
                     return true;
-                case BLE_GAP_EVT_DISCONNECTED:
-                {
+                case BLE_GAP_EVT_DISCONNECTED: {
                     // Use scratchpad defaults when advertising
                     get_logger()->debug("{} Starting advertising.", p->role());
                     const auto err_code = p->startAdvertising();
@@ -218,8 +214,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     return true;
                 case BLE_GAP_EVT_TIMEOUT:
                     return true;
-                case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
-                {
+                case BLE_GAP_EVT_PHY_UPDATE_REQUEST: {
                     if (gapEvent->params.phy_update_request.peer_preferred_phys != requestedPhys)
                     {
                         get_logger()->error("{} BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST: update "
@@ -244,8 +239,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(phy_update, [known_issue][PCA10056][PCA10059
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_PHY_UPDATE:
-                {
+                case BLE_GAP_EVT_PHY_UPDATE: {
                     if (gapEvent->params.phy_update.rx_phy != requestedPhys.rx_phys ||
                         gapEvent->params.phy_update.tx_phy != requestedPhys.tx_phys)
                     {

@@ -88,6 +88,9 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         std::vector<uint8_t> advertisingData;
         std::vector<uint8_t> scanResponseData;
 
+        // Keep historical advertising data for comparison when advertising terminates
+        std::vector<std::vector<uint8_t>> historicAdvData;
+
         // Append max number of bytes in advertisement packet with manufacturer specific random
         // data after the peripheral name
         const auto remainingSpace = maxLengthOfAdvData -
@@ -115,8 +118,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         c->setGapEventCallback([&](const uint16_t eventId, const ble_gap_evt_t *gapEvent) -> bool {
             switch (eventId)
             {
-                case BLE_GAP_EVT_ADV_REPORT:
-                {
+                case BLE_GAP_EVT_ADV_REPORT: {
                     const auto advReport = gapEvent->params.adv_report;
 
                     if (testutil::findAdvName(advReport, peripheralAdvName))
@@ -154,12 +156,17 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                                 }
 
                                 // Change advertising data in peripheral
+                                historicAdvData.push_back(scanResponseData);
+
                                 scanResponseData.clear();
                                 testutil::createRandomAdvertisingData(
                                     scanResponseData, peripheralAdvName, randomData);
-                                get_logger()->debug(
-                                    "{} Changing advertisement data in BLE_GAP_EVT_ADV_REPORT",
-                                    c->role());
+
+                                get_logger()->debug("{} Changing advertisement data in "
+                                                    "BLE_GAP_EVT_ADV_REPORT, {} -> {}",
+                                                    c->role(),
+                                                    testutil::asHex(historicAdvData.back()),
+                                                    testutil::asHex(scanResponseData));
 
                                 const auto err_code = p->changeAdvertisingData(
                                     std::vector<uint8_t>(), scanResponseData);
@@ -206,8 +213,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
             {
                 case BLE_GAP_EVT_TIMEOUT:
                     return false;
-                case BLE_GAP_EVT_SCAN_REQ_REPORT:
-                {
+                case BLE_GAP_EVT_SCAN_REQ_REPORT: {
                     const auto scanRequestReport = gapEvent->params.scan_req_report;
                     if (scanRequestReport.adv_handle != p->scratchpad.adv_handle)
                     {
@@ -235,8 +241,7 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
                     }
                 }
                     return true;
-                case BLE_GAP_EVT_ADV_SET_TERMINATED:
-                {
+                case BLE_GAP_EVT_ADV_SET_TERMINATED: {
                     const auto setTerminated = gapEvent->params.adv_set_terminated;
 
                     if (setTerminated.adv_handle != p->scratchpad.adv_handle)
@@ -293,16 +298,29 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
 
                     if (scanResponseData != scan_rsp_data)
                     {
-                        get_logger()->error("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
-                                            "buffers set in sd_ble_gap_adv_set_configure does "
-                                            "not match with advertisement received.",
-                                            p->role());
-                        error = true;
-                        return true;
+                        // Check if the scan response data received is from a previous advertisement
+                        // setup on peripheral
+                        auto result = std::find(std::begin(historicAdvData),
+                                                std::end(historicAdvData), scan_rsp_data);
+                        if (result != std::end(historicAdvData))
+                        {
+                            get_logger()->info("Found received advertisement in previous "
+                                               "advertisement data sent from peripheral.");
+                        }
+                        else
+                        {
+                            get_logger()->error("{} BLE_GAP_EVT_ADV_SET_TERMINATED: Advertisement "
+                                                "buffers set in sd_ble_gap_adv_set_configure does "
+                                                "not match with advertisement received. "
+                                                "Configured: {} Received: {}",
+                                                p->role(), testutil::asHex(scanResponseData),
+                                                testutil::asHex(scan_rsp_data));
+                            error = true;
+                            return true;
+                        }
                     }
 
                     testSuccess = true;
-
                     return true;
                 }
                 default:
@@ -357,11 +375,11 @@ TEST_CASE(CREATE_TEST_NAME_AND_TAGS(
         // Wait for the test to complete
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        REQUIRE(sd_ble_gap_scan_stop(c->unwrap()) == NRF_SUCCESS);
-
         // Advertising shall already be stopped, check that actually is
         REQUIRE(sd_ble_gap_adv_stop(p->unwrap(), p->scratchpad.adv_handle) ==
                 NRF_ERROR_INVALID_STATE);
+
+        REQUIRE(sd_ble_gap_scan_stop(c->unwrap()) == NRF_SUCCESS);
 
         CHECK(error == false);
         CHECK(testSuccess == true);

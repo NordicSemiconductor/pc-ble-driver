@@ -47,8 +47,7 @@
  */
 class UartSettingsBoost : public UartSettings
 {
-public:
-
+  public:
     /*@brief Default contructor. */
     UartSettingsBoost();
 
@@ -69,7 +68,6 @@ public:
 
     /*@brief Returns character size in Boost format. */
     asio::serial_port::character_size getBoostCharacterSize() const;
-
 };
 
-#endif //UART_SETTINGS_BOOST_H
+#endif // UART_SETTINGS_BOOST_H

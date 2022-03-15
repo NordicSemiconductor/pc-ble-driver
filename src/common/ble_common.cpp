@@ -75,7 +75,7 @@ uint32_t encode_decode(adapter_t *adapter, const encode_function_t &encode_funct
 
     // Create rx_buffer
     std::shared_ptr<std::vector<uint8_t>> rx_buffer;
-    
+
     if (decode_function)
     {
         rx_buffer = std::make_shared<std::vector<uint8_t>>(SER_HAL_TRANSPORT_MAX_PKT_SIZE);

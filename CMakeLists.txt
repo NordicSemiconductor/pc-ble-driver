@@ -28,6 +28,7 @@ project(
 )
 
 include(cmake/nrf-ble-driver.cmake)
+include(cmake/source-file-list.cmake)
 
 include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
@@ -35,42 +36,10 @@ if(IS_BIG_ENDIAN)
     message(FATAL_ERROR "Protocol implementation does not support big endian platforms.")
 endif()
 
-# Common source files
-file(GLOB LIB_BASE_C_SRC_FILES "src/common/*.c")
-file(GLOB LIB_BASE_CPP_SRC_FILES "src/common/*.cpp")
-
-file(GLOB LIB_TRANSPORT_C_SRC_FILES "src/common/transport/*.c")
-file(GLOB LIB_TRANSPORT_CPP_SRC_FILES "src/common/transport/*.cpp")
-
-if(WIN32)
-    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/common/platform/win/*.c")
-    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/win/*.cpp")
-elseif(APPLE)
-    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/common/platform/macos_osx/*.c")
-    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/macos_osx/*.cpp")
-else()
-    # Assume Linux
-    file(GLOB LIB_PLATFORM_C_SRC_FILES "src/common/platform/linux/*.c")
-    file(GLOB LIB_PLATFORM_CPP_SRC_FILES "src/common/platform/linux/*.cpp")
-endif()
-
-# SDK source files, different per API version
-
-# Newer codecs from nRF5 SDK are backwards compatible to SoftDevice API v3
-file(GLOB_RECURSE LIB_NEWER_SDK_API_COMMON_C_SRC_FILES "src/sd_api_common/sdk/*.c")
-
-foreach(SD_API_VER ${SD_API_VERS})
-    string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_C_SRC_FILES "src/${SD_API_VER_L}/sdk/*.c")
-    file(GLOB_RECURSE LIB_SDK_${SD_API_VER}_CPP_SRC_FILES "src/${SD_API_VER_L}/*.cpp")
-endforeach(SD_API_VER)
 
 # Set C, CPP and platform source file groups and properties
 foreach(SD_API_VER ${SD_API_VERS})
-    set(LIB_${SD_API_VER}_C_SRC_FILES ${LIB_BASE_C_SRC_FILES}
-                        ${LIB_SDK_${SD_API_VER}_C_SRC_FILES}
-                        ${LIB_TRANSPORT_C_SRC_FILES}
-    )
+    set(LIB_${SD_API_VER}_C_SRC_FILES ${LIB_SDK_${SD_API_VER}_C_SRC_FILES})
 
     if(SD_API_VER STRGREATER "SD_API_V2")
         list(APPEND LIB_${SD_API_VER}_C_SRC_FILES ${LIB_NEWER_SDK_API_COMMON_C_SRC_FILES})
@@ -102,6 +71,12 @@ add_definitions(
 
 if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
+if(COMPILE_CONNECTIVITY)
+    set(SDK_HEX_FILES)
+    add_subdirectory(hex EXCLUDE_FROM_ALL)
+    nrf_create_compile_targets(SDK_HEX_FILES)
 endif()
 
 # Add libraries
@@ -149,27 +124,48 @@ foreach(SD_API_VER ${SD_API_VERS})
     )
 
     string(TOLOWER ${SD_API_VER} SD_API_VER_L)
-    set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(HEX_FILE_GLOB 
-        "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.hex"
-        "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
-    )
-    set(DFU_FILE_GLOB "${CONNECTIVITY_DIRECTORY}/connectivity_${CONNECTIVITY_VERSION}*.zip")
+    if(COMPILE_CONNECTIVITY)
+        set(CONNECTIVITY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/hex/${SD_API_VER_L}")
 
-    set(LICENSE_FILE_GLOB 
-        "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
-        "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
-    )
+        set(SOFTDEVICE_FILE_GLOB
+            "${CONNECTIVITY_DIRECTORY}/*licence-agreement.txt"
+            "${CONNECTIVITY_DIRECTORY}/*license-agreement.txt"
+            "${CONNECTIVITY_DIRECTORY}/*_softdevice.hex"
+        )
 
-    file(GLOB_RECURSE ${SD_API_VER}_HEX_FILES ${HEX_FILE_GLOB})
-    file(GLOB_RECURSE ${SD_API_VER}_DFU_FILES ${DFU_FILE_GLOB})
-    file(GLOB_RECURSE ${SD_API_VER}_LICENSE_FILES ${LICENSE_FILE_GLOB})
+        file(GLOB_RECURSE ${SD_API_VER}_SOFTDEVICE_FILES ${SOFTDEVICE_FILE_GLOB})
 
-    set(${SD_API_VER}_CONNECTIVITY_FILES )
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_HEX_FILES})
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_DFU_FILES})
-    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_LICENSE_FILES})
+        set(${SD_API_VER}_CONNECTIVITY_FILES "")
+        set(CURRENT_SD_FOUND FALSE)
+
+        foreach(ver ${SDK_HEX_FILES})
+            if(ver MATCHES "^_")
+                string(REGEX MATCH "_CONNECTIVITY_ARTIFACTS_SDv([0-9])" SDK_HEX_FILE_SD_VERSION "${ver}")
+
+                if(NOT ${MATCHES})
+                    message(FATAL_ERROR "Was not able to match SD_API version ${ver}")
+                endif()
+
+                set(SD_API_EQUAL "SD_API_V${CMAKE_MATCH_1}")
+
+                if("${SD_API_EQUAL}" STREQUAL "${SD_API_VER}")
+                    set(CURRENT_SD_FOUND TRUE)
+                else()
+                    set(CURRENT_SD_FOUND FALSE)
+                endif()
+            endif()
+
+            if(CURRENT_SD_FOUND)
+                if (ver MATCHES "^\\|")
+                    string(SUBSTRING "${ver}" 1 -1 HEX)
+                    list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${HEX})
+                endif()
+            endif()
+        endforeach()
+
+        list(APPEND ${SD_API_VER}_CONNECTIVITY_FILES ${${SD_API_VER}_SOFTDEVICE_FILES})
+    endif(COMPILE_CONNECTIVITY)
 
     if(WIN32)
         set_target_properties(
@@ -214,7 +210,6 @@ foreach(SD_API_VER ${SD_API_VERS})
             RESOURCE "${${SD_API_VER}_CONNECTIVITY_FILES}"
         )
     endif()
-
 endforeach(SD_API_VER)
 
 # Set common include directories
@@ -297,21 +292,26 @@ endif()
 # Add install target
 include(cmake/install-target.cmake)
 
-if(COMPILE_CONNECTIVITY)
-    add_subdirectory(hex EXCLUDE_FROM_ALL)
-endif()
-
 include (cmake/clang-dev-tools.cmake)
 
 # Create package
 set(ARCH_SUFFIX "unknown")
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-    set(ARCH_SUFFIX "x86_64")
+    if(APPLE)
+        if(${ARCH} STREQUAL not_set OR ${ARCH} STREQUAL x86_64)
+            set(ARCH_SUFFIX "x86_64")
+        elseif(${ARCH} STREQUAL arm64)
+            set(ARCH_SUFFIX "arm64")
+        else()
+            message(FATAL_ERROR "Invalid ARCH_SUFFIX: ARCH=${ARCH}.")
+        endif()
+    else()
+        set(ARCH_SUFFIX "x86_64")
+    endif()
 else()
     set(ARCH_SUFFIX "x86_32")
 endif()
-
 
 if(APPLE)
     set(OS_SUFFIX "macos")
