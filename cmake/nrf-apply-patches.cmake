@@ -1,6 +1,10 @@
 function(nrf_apply_patches)
     cmake_parse_arguments(nrf_apply_patches "QUIET" "SOURCE_PATH" "PATCHES" ${ARGN})
 
+    if(NOT DEFINED nrf_apply_patches_PATCHES)
+        message(FATAL_ERROR "PATCHES argument needs to be specified")
+    endif()
+
     find_program(GIT NAMES git git.cmd)
     set(PATCHNUM 0)
 
@@ -25,6 +29,11 @@ function(nrf_apply_patches)
     endif()
 
     foreach(PATCH ${nrf_apply_patches_PATCHES})
+
+        if(NOT EXISTS "${PATCH}")
+            message(FATAL_ERROR "Provided patch ${PATCH} not found")
+        endif()
+
         message(STATUS "Applying patch ${PATCH}")
 
         execute_process(
