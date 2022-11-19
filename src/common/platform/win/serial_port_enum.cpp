@@ -76,6 +76,9 @@
 #include "serial_port_enum.h"
 
 #define MAX_BUFFER_SIZE 1000
+#define NORDIC_SEMICONDUCTOR_VID "1915"
+#define NORDIC_SEMICONDUCTOR_PID "C00A"
+#define NRF52_DONGLE_VID_PID "VID_1915&PID_C00A"
 
 /*
  * listComPorts.c -- list COM ports
@@ -93,6 +96,45 @@
  * VID 0403 / PID 6001 - Arduino Diecimila
  *
  */
+
+char *GetSerialNumber(char *vidpidstr)
+{
+    char serialNumber[512] = {0};
+
+    DISPATCH_OBJ(wmiSvc);
+    DISPATCH_OBJ(colDevices);
+
+    dhInitialize(TRUE);
+    dhToggleExceptions(FALSE);
+
+    dhGetObject(L"winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2", NULL, &wmiSvc);
+    dhGetValue(L"%o", &colDevices, wmiSvc, L".ExecQuery(%S)",
+               L"Select * From Win32_PnPEntity WHERE Name LIKE '%USB Composite Device%'");
+        
+    FOR_EACH(objDevice, colDevices, NULL)
+    {
+        char *str1 = NULL;
+        
+        dhGetValue(L"%s", &str1, objDevice, L".DeviceID");
+
+        if (str1 != nullptr && strstr(str1, vidpidstr) != nullptr)
+        {
+            strcpy(serialNumber, str1 + strlen(vidpidstr) + 5);
+
+        }
+
+        dhFreeString(str1);
+
+    }
+    NEXT(objDevice);
+    SAFE_RELEASE(colDevices);
+    SAFE_RELEASE(wmiSvc);
+
+    dhUninitialize(TRUE);
+    return serialNumber;
+
+}
+
 std::list<SerialPortDesc> EnumSerialPorts()
 {
     std::list<SerialPortDesc> descs;
@@ -138,6 +180,22 @@ std::list<SerialPortDesc> EnumSerialPorts()
                     resultItem.serialNumber = jlinkId;
                 }
                 descs.push_back(resultItem);
+            }
+            else if (strstr(pnpid, NRF52_DONGLE_VID_PID) != nullptr)
+            {
+                //"USB\\VID_1915&PID_C00A&MI_01\\6&1C397515&0&0001"
+                char *next_token          = NULL;
+                auto comname              = strtok_s(match, "()", &next_token);
+                SerialPortDesc resultItem = {};
+                resultItem.comName        = comname;
+                resultItem.manufacturer   = manu;
+                resultItem.pnpId          = pnpid;
+                resultItem.serialNumber   = GetSerialNumber(NRF52_DONGLE_VID_PID);
+                resultItem.vendorId       = NORDIC_SEMICONDUCTOR_VID;
+                resultItem.productId      = NORDIC_SEMICONDUCTOR_PID;
+                
+                descs.push_back(resultItem);
+
             }
 
             dhFreeString(manu);
