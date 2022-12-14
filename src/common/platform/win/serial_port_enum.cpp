@@ -67,15 +67,28 @@
 #include <list>
 #include <string>
 
-#include "disphelper.h"
+//#include "disphelper.h"
 #include "stdafx.h"
 
-#include "enumser.h"
-#include "jlinkid_reg_lookup.h"
+//#include "enumser.h"
+//#include "jlinkid_reg_lookup.h"
 
 #include "serial_port_enum.h"
 
-#define MAX_BUFFER_SIZE 1000
+#include <Setupapi.h>
+#include <cfgmgr32.h>
+#include <initguid.h>
+#include <objbase.h>
+#include <regex>
+
+#pragma comment(lib, "Setupapi.lib")
+
+
+#define SEGGER_VENDOR_ID "1366"
+#define NXP_VENDOR_ID "0D28"
+#define NORDIC_SEMICONDUCTOR_VENDOR_ID "1915"
+#define NRF52_CONNECTIVITY_DONGLE_PID "C00A"
+
 
 /*
  * listComPorts.c -- list COM ports
@@ -87,71 +100,190 @@
  *
  * Uses DispHealper : http://disphelper.sourceforge.net/
  *
- * Notable VIDs & PIDs combos:
- * VID 0403 - FTDI
+ * **********************************
+ * * * * * Notable VIDs & PIDs combos:
+ * VID 0403 / PID 6001 - FTDI FT232
  *
- * VID 0403 / PID 6001 - Arduino Diecimila
+ * VID 2341 / PID 0043 - Arduino Diecimila
  *
+ * * * * * Enable VIDs & PIDs combos:
+ * VID 1366 / PID 0105 - SEGGER JLink V9
+ * 
+ * VID 0D28 - NXP  
+ * 
+ * VIP 1915 / PID C00A - Nordic nrf52 dongle
  */
+
+
 std::list<SerialPortDesc> EnumSerialPorts()
 {
     std::list<SerialPortDesc> descs;
+    
+    GUID Guids[16]      = {0};
+    GUID PortsGUIDs[8] = {0};
+    GUID ModemsGUIDs[8] = {0};
+    DWORD ports_guids_size, modems_guids_size;
+    BOOL ret =
+        SetupDiClassGuidsFromName("Ports", PortsGUIDs, sizeof(PortsGUIDs), &ports_guids_size);
+    if (ret == FALSE) 
+        return descs;
+    ret = SetupDiClassGuidsFromName("Modem", ModemsGUIDs, sizeof(ModemsGUIDs), &modems_guids_size);
+    if (ret == FALSE)
+        return descs;
 
-    DISPATCH_OBJ(wmiSvc);
-    DISPATCH_OBJ(colDevices);
-
-    dhInitialize(TRUE);
-    dhToggleExceptions(FALSE);
-
-    dhGetObject(L"winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2", nullptr, &wmiSvc);
-    dhGetValue(L"%o", &colDevices, wmiSvc, L".ExecQuery(%S)",
-               L"Select * from Win32_PnPEntity WHERE Name LIKE '%COM%'");
-
-    FOR_EACH(objDevice, colDevices, NULL)
+    for (DWORD i = 0; i < ports_guids_size; i++)
+        Guids[i] = PortsGUIDs[i];
+    for (DWORD i = 0; i < modems_guids_size; i++)
+        Guids[i + ports_guids_size] = ModemsGUIDs[i];
+    
+    for (DWORD i = 0; i < ports_guids_size + modems_guids_size; i++)
     {
-        char *name  = nullptr;
-        char *pnpid = nullptr;
-        char *manu  = nullptr;
-        char *match;
-
-        dhGetValue(L"%s", &name, objDevice, L".Name");
-        dhGetValue(L"%s", &pnpid, objDevice, L".PnPDeviceID");
-
-        if (name != nullptr && ((match = strstr(name, "(COM")) != nullptr))
-        { // look for "(COM23)"
-            // 'Manufacturuer' can be null, so only get it if we need it
-            dhGetValue(L"%s", &manu, objDevice, L".Manufacturer");
-
-            if ((strcmp("SEGGER", manu) == 0) || (_stricmp("arm", manu) == 0) ||
-                (_stricmp("mbed", manu) == 0))
+        SP_DEVINFO_DATA devinfo = {0};
+        devinfo.cbSize          = sizeof(devinfo);
+    
+        HDEVINFO p_hdi = SetupDiGetClassDevs(&Guids[i], NULL, NULL, DIGCF_PRESENT);
+        for (int j = 0; TRUE == SetupDiEnumDeviceInfo(p_hdi, j, &devinfo); j++)
+        {
+            DWORD dwPropertyRegDataType, dwSize;
+            char szData[512] = {0};
+            
+            //read friendlyname
+            BOOL ret         = SetupDiGetDeviceRegistryProperty(p_hdi, &devinfo, SPDRP_FRIENDLYNAME,
+                                                        &dwPropertyRegDataType, (BYTE *)szData,
+                                                        sizeof(szData), &dwSize);
+            if (TRUE == ret && strstr(szData, "(COM") != nullptr)
             {
-                char *next_token          = NULL;
-                auto comname              = strtok_s(match, "()", &next_token);
-                SerialPortDesc resultItem = {};
-                resultItem.comName        = comname;
-                resultItem.manufacturer   = manu;
-                resultItem.pnpId          = pnpid;
-
-                string jlinkId = portNameToJlinkId(string(comname));
-                if (jlinkId != "")
+                SerialPortDesc resultItem = {""};
+                std::string s             = szData;
+                
+                std::regex pattern(".*\\((COM[0-9]+)\\).*");
+                std::smatch match_result;
+                if (regex_match(s, match_result, pattern))
                 {
-                    resultItem.serialNumber = jlinkId;
+                    resultItem.comName = match_result.str(1);
                 }
-                descs.push_back(resultItem);
+                else
+                {
+                   continue;
+                }
+
+                // read manufacturer
+                memset(szData, 0, sizeof(szData));
+                if (TRUE == SetupDiGetDeviceRegistryProperty(p_hdi, &devinfo, SPDRP_MFG,
+                                                             &dwPropertyRegDataType, (BYTE *)szData,
+                                                             sizeof(szData), &dwSize))
+                {
+                    resultItem.manufacturer = szData;
+                }
+
+                // read HardwareID
+                memset(szData, 0, sizeof(szData));
+                if (FALSE ==
+                    SetupDiGetDeviceInstanceId(p_hdi, &devinfo, szData, sizeof(szData), &dwSize))
+                {
+                    memset(szData, 0, sizeof(szData));
+                    if (FALSE == SetupDiGetDeviceRegistryProperty(
+                                     p_hdi, &devinfo, SPDRP_HARDWAREID, &dwPropertyRegDataType,
+                                     (BYTE *)szData, sizeof(szData), &dwSize))
+                    {
+                        memset(szData, 0, sizeof(szData));
+                    }
+                }
+                resultItem.pnpId = szData;
+
+                // get vid, pid, serial number
+                if (strnicmp(szData, "USB", 3) == 0)
+                {
+                    //"USB\\VID_1915&PID_C00A&MI_01\\6&142BFA11&0&0001"
+                    std::string s = szData;
+                    std::regex pattern(".+VID_([0-9a-fA-F]{4})(&PID_([0-9a-fA-F]{4}))?(&MI_(\\d{"
+                                       "2}))?(\\\\(.*))?");
+                    std::smatch match_result;
+                    if (regex_match(s, match_result, pattern))
+                    {
+                        // get vid
+                        resultItem.vendorId = match_result.str(1);
+                        // get pid
+                        resultItem.productId = match_result.str(3);
+                        
+                        // get serial nubmer
+                        if (match_result[7].matched &&
+                            regex_match(match_result.str(7), std::regex("^\\w+$")))
+                        {
+                            resultItem.serialNumber = match_result.str(7);
+                        }
+                        else
+                        { // read parent serial nubmer
+                            memset(szData, 0, sizeof(szData));
+                            DWORD devinst;
+                            CONFIGRET status =
+                                CM_Get_Parent(&devinst, devinfo.DevInst, CM_LOCATE_DEVNODE_NORMAL);
+                            if (status == CR_SUCCESS)
+                            {
+                                status = CM_Get_Device_ID(devinst, szData, sizeof(szData),
+                                                          CM_LOCATE_DEVNODE_NORMAL);
+                                if (status == CR_SUCCESS)
+                                {
+                                    std::string s = szData;
+                                    resultItem.serialNumber =
+                                        s.substr(s.find_last_of("\\") + 1,
+                                                 s.length() - s.find_last_of("\\") - 1);
+                                }
+                            }
+                        }
+                    }
+                    //remove segger serial number zeros
+                    if (resultItem.vendorId == SEGGER_VENDOR_ID &&
+                        resultItem.serialNumber.length() > 0)
+                    {
+                        std::regex pattern("[0]*([1-9][0-9]+)");
+                        std::smatch match_result;
+                        if (regex_match(resultItem.serialNumber, match_result, pattern))
+                        {
+                            resultItem.serialNumber = match_result.str(1);
+                        }
+                    }
+                }
+                else if (strnicmp(szData, "FTDIBUS", 7) == 0)
+                {
+                    //"FTDIBUS\\VID_0403+PID_6001+AB0MH7ATA\\0000"
+                    std::string s = szData;
+                    std::regex pattern(".+VID_([0-9a-fA-F]{4})\\+PID_([0-9a-fA-F]{4})(\\+(\\w+))?(\\\\(.*))?");
+                    std::smatch match_result;
+                    if (regex_match(s, match_result, pattern))
+                    {
+                        // get vid
+                        resultItem.vendorId = match_result.str(1);
+                        // get pid
+                        resultItem.productId = match_result.str(2);
+                        // get serial nubmer
+                        resultItem.serialNumber = match_result.str(4);   
+                    }
+                }
+                //read locationid
+                /*memset(szData, 0, sizeof(szData));
+                if (TRUE == SetupDiGetDeviceRegistryProperty(p_hdi, &devinfo, SPDRP_LOCATION_PATHS,
+                                                             &dwPropertyRegDataType, (BYTE *)szData,
+                                                             sizeof(szData), &dwSize))
+                {
+                    
+                }*/
+
+                if ((resultItem.vendorId == SEGGER_VENDOR_ID ||
+                      resultItem.vendorId == NXP_VENDOR_ID ||
+                     resultItem.vendorId == NORDIC_SEMICONDUCTOR_VENDOR_ID) &&
+                     (resultItem.manufacturer == "SEGGER" ||
+                      strnicmp(resultItem.manufacturer.c_str(), "arm", 3) == 0 ||
+                      strnicmp(resultItem.manufacturer.c_str(), "mbed", 4) == 0 ||
+                     resultItem.productId == NRF52_CONNECTIVITY_DONGLE_PID)
+                    )
+                {
+                    descs.push_back(resultItem);
+                }
             }
-
-            dhFreeString(manu);
         }
-
-        dhFreeString(name);
-        dhFreeString(pnpid);
+        SetupDiDestroyDeviceInfoList(p_hdi);
     }
-    NEXT(objDevice);
-
-    SAFE_RELEASE(colDevices);
-    SAFE_RELEASE(wmiSvc);
-
-    dhUninitialize(TRUE);
 
     return descs;
 }
