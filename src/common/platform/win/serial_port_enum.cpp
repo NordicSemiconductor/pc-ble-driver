@@ -123,7 +123,7 @@ std::list<SerialPortDesc> EnumSerialPorts()
             dhGetValue(L"%s", &manu, objDevice, L".Manufacturer");
 
             if ((strcmp("SEGGER", manu) == 0) || (_stricmp("arm", manu) == 0) ||
-                (_stricmp("mbed", manu) == 0))
+                (_stricmp("mbed", manu) == 0) || (_stricmp("Nordic Semiconductor ASA", manu) == 0 ))
             {
                 char *next_token          = NULL;
                 auto comname              = strtok_s(match, "()", &next_token);
