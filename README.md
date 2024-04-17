@@ -1,3 +1,7 @@
+# [DEPRECATED]
+
+This library is no longer being maintained, and there are no plans for a successor to this library. While it will remain accessible for existing nRF5 SDK users, it will not receive further updates or support. We recommend refraining from initiating new projects with this library, as the firmware (.hex files) available uses outdated SoftDevice binaries.
+
 # pc-ble-driver
 
 `pc-ble-driver` provides C/C++ libraries for Bluetooth Low Energy nRF5 SoftDevice serialization.
