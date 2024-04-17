@@ -1,6 +1,6 @@
 # [DEPRECATED]
 
-This library is no longer being maintained. There is no planned replacement for this library, so the tool will remain here for those who still need it, but the library will see no further support. We advise people to not invest time and resources into building new projects with this.
+This library is no longer being maintained, and there are no plans for a successor to this library. While it will remain accessible for existing nRF5 SDK users, it will not receive further updates or support. We recommend refraining from initiating new projects with this library, as the firmware (.hex files) available uses outdated SoftDevice binaries.
 
 # pc-ble-driver
 
